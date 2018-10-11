@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.00.00"
-//              Datum   07.10.2018
+#define    NET_VERSION "02.00.01"
+//              Datum   11.10.2018
 
 #include "neuron.h"
 #include <math.h>
@@ -52,12 +52,13 @@ class Net
 
         void bias(bool enableBias);
         bool bias();
-        void average(bool enableAverage);
-        bool average();
+        void enableAverage(bool enableAverage);
+        bool enableAverage();
         void biasValue(float value);
         float biasValue();
-        void activationfunction(Activation func);
-        Activation activationfunction();
+        void activationFunction(Activation func);
+        Activation activationFunction();
+        bool    noHiddenLayer();
 
         void randomGenom();
         void genom(std::vector<float> genom);
@@ -85,13 +86,9 @@ class Net
         std::vector<float>  output();
 
         void                run();
+        void                updateNetConfiguration();
 
     private:
-
-        void setupNeurons();
-        void setupInputNeurons();
-        void setupHiddenNeurons();
-        void setupOutputNeurons();
         void setGenomToNeuron();
         void getGenomFromNeuron();
 
@@ -120,6 +117,7 @@ class Net
         bool                                _noHiddenLayer;
 
         bool                                _update;
+        bool                                _updateNetConfiguration;
         std::default_random_engine          _randEngine;
 
         std::vector<std::vector<Neuron> >   _hiddenNeuronList;
@@ -127,6 +125,4 @@ class Net
         std::vector<float>                  _genom;
 
 };
-
-
 #endif // NET_H

@@ -26,7 +26,7 @@ Neuron::Neuron(unsigned int inputs, Activation activationFunction, bool enableAv
 
 void Neuron::inputs(unsigned int inputs)
 {
-    printf("Neuron::inputs(%i)\n",inputs);
+    //printf("Neuron::inputs(%i)\n",inputs);
     if(inputs != 0)
     {
         if(inputs != _inputs)
@@ -83,7 +83,7 @@ void Neuron::randWeight()
     time_t timer;
     time(&timer);
     ti = localtime(&timer);
-    //printf("Time: %ih %imin %is\n",ti->tm_hour,ti->tm_min,ti->tm_sec);
+    ////printf("Time: %ih %imin %is\n",ti->tm_hour,ti->tm_min,ti->tm_sec);
     _randEngine = std::default_random_engine(rand()%100 + ti->tm_hour+ti->tm_min+ti->tm_sec);
     for(unsigned int a=0; a<_inputs; a++)
     {

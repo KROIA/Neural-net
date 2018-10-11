@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.00.00"
-//              Datum   06.10.2018
+#define NEURON_VERSION "02.00.01"
+//              Datum   11.10.2018
 
 #include <vector>
 #include <math.h>
@@ -11,12 +11,12 @@
 #include <time.h>
 
 
-enum Activation{
+enum Activation{        // https://en.wikipedia.org/wiki/Activation_function
     Linear   = 0,       // https://en.wikipedia.org/wiki/Identity_function
     ReLu     = 1,       // https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
     Binary   = 2,       // https://en.wikipedia.org/wiki/Heaviside_step_function
     Gaussian = 3,       // https://en.wikipedia.org/wiki/Gaussian_function
-    Sigmoid  = 4,
+    Sigmoid  = 4,       // https://en.wikipedia.org/wiki/Activation_function
 };
 #define neuron_activationFunctionAmount 5
 
@@ -64,6 +64,13 @@ class Neuron
         static float activation_Binary(float netInput);
         static float activation_Gaussian(float netInput);
         static float activation_Sigmoid(float netInput);
+
+        //first derivative
+        static float deriv_activation_Linear(float netInput);
+        static float deriv_activation_ReLu(float netInput);
+      //  static float deriv_activation_Binary(float netInput);  //Not possible
+        static float deriv_activation_Gaussian(float netInput);
+        static float deriv_activation_Sigmoid(float netInput);
 
         void calc_netInput();
         void calc_output();
