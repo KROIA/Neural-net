@@ -1,6 +1,7 @@
-Neuronal Net basic structure (no learning algorithm for now)
+In a simulation, in a game or for a data analysis?  
+You can do a lot with AI. It all depends on the problem that you want to tackle.  
+You are not an expert but you still want to program something with an AI, then this library is just right for you.
 
-A library which let you make an AI for your project (Robots/Simulatios).  
 In the library, there is no image recognition.  
 You can only feed the network with numbers.  
 ***
