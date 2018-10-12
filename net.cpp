@@ -238,10 +238,12 @@ void                Net::genom(std::vector<float> genom)
 }
 std::vector<float>  Net::genom()
 {
+    getGenomFromNeuron();
     return _genom;
 }
 unsigned int        Net::genomsize()
 {
+    getGenomFromNeuron();
     return _genom.size();
 }
 

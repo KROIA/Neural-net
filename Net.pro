@@ -24,7 +24,8 @@ SOURCES += \
         main.cpp \
     net.cpp \
     neuron.cpp \
-    activation.cpp
+    activation.cpp \
+    backpropnet.cpp
 
 
 # Default rules for deployment.
@@ -34,4 +35,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     net.h \
-    neuron.h
+    neuron.h \
+    backpropnet.h
