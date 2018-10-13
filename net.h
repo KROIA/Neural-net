@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.00.01"
-//              Datum   11.10.2018
+#define    NET_VERSION "02.00.02"
+//              Datum   13.10.2018
 
 #include "neuron.h"
 #include <math.h>
@@ -74,12 +74,12 @@ class Net
         std::vector<float>  hiddenX(unsigned int hiddenX);  // |    Alle in einer Spalte
         std::vector<float>  hiddenY(unsigned int hiddenY);  // --   Alle in einer Reihe
 
-        Neuron              hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY);
+        Neuron              *hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY);
         std::vector<Neuron> hiddenNeuronX(unsigned int hiddenX);    // |    Alle in einer Spalte
         std::vector<Neuron> hiddenNeuronY(unsigned int hiddenY);    // --   Alle in einer Reihe
-        std::vector<std::vector<Neuron> > hiddenNeuron();
-        Neuron              outputNeuron(unsigned int output);
-        std::vector<Neuron> outputNeuron();
+        std::vector<std::vector<Neuron> > *hiddenNeuron();
+        Neuron              *outputNeuron(unsigned int output);
+        std::vector<Neuron> *outputNeuron();
 
 
         float               output(unsigned int output);

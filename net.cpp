@@ -415,7 +415,7 @@ std::vector<float>  Net::hiddenY(unsigned int hiddenY)// --   Alle in einer Reih
     return ret;
 }
 
-Neuron              Net::hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY)
+Neuron              *Net::hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY)
 {
     if(_noHiddenLayer)
     {
@@ -430,7 +430,7 @@ Neuron              Net::hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY
         throw std::runtime_error("Net::hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] ) "+error_paramOutOfRange(0,hiddenY,_hiddenY-1));
     }
     run();
-    return _hiddenNeuronList[hiddenX][hiddenY];
+    return &_hiddenNeuronList[hiddenX][hiddenY];
 }
 std::vector<Neuron> Net::hiddenNeuronX(unsigned int hiddenX) // |    Alle in einer Spalte
 {
@@ -463,27 +463,27 @@ std::vector<Neuron> Net::hiddenNeuronY(unsigned int hiddenY)// --   Alle in eine
     }
     return ret;
 }
-std::vector<std::vector<Neuron> > Net::hiddenNeuron()
+std::vector<std::vector<Neuron> > *Net::hiddenNeuron()
 {
     if(_noHiddenLayer)
     {
         throw std::runtime_error("Net::hiddenNeuron() ERROR: the network has no hidden layer\n");
     }
     run();
-    return _hiddenNeuronList;
+    return &_hiddenNeuronList;
 }
-Neuron              Net::outputNeuron(unsigned int output)
+Neuron              *Net::outputNeuron(unsigned int output)
 {
     if(output > _outputs-1)
     {
         throw std::runtime_error("Net::outputNeuron(unsigned int ["+std::to_string(output)+"] ) "+error_paramOutOfRange(0,output,_outputs-1));
     }
     run();
-    return _outputNeuronList[output];
+    return &_outputNeuronList[output];
 }
-std::vector<Neuron> Net::outputNeuron()
+std::vector<Neuron> *Net::outputNeuron()
 {
-    return _outputNeuronList;
+    return &_outputNeuronList;
 }
 
 
@@ -561,7 +561,7 @@ void                Net::updateNetConfiguration()
     _outputNeuronList = std::vector<Neuron>();
     for(unsigned int y=0; y<_outputs; y++)
     {
-        _outputNeuronList.push_back(Neuron(_hiddenY+(unsigned int)_bias));
+        _outputNeuronList.push_back(Neuron());
         _outputNeuronList[y].inputs(_hiddenY+(unsigned int)_bias);
         _outputNeuronList[y].activationFunction(_activationFunction);
         _outputNeuronList[y].enableAverage(_enableAverage);
@@ -571,7 +571,7 @@ void                Net::updateNetConfiguration()
         _hiddenNeuronList.push_back(std::vector<Neuron>());
         for(unsigned int y=0; y<_hiddenY; y++)
         {
-            _hiddenNeuronList[x].push_back(Neuron(_hiddenY+(unsigned int)_bias));
+            _hiddenNeuronList[x].push_back(Neuron());
             _hiddenNeuronList[x][y].inputs(_hiddenY+(unsigned int)_bias);
             _hiddenNeuronList[x][y].activationFunction(_activationFunction);
             _hiddenNeuronList[x][y].enableAverage(_enableAverage);
@@ -669,7 +669,7 @@ void                Net::getGenomFromNeuron()
         {
             for(unsigned int y=0; y<_hiddenNeuronList[x].size(); y++)
             {
-                for(unsigned int w=0; w<_outputNeuronList[y].inputs(); w++)
+                for(unsigned int w=0; w<_hiddenNeuronList[x][y].inputs(); w++)
                 {
                     try {
                         _genom.push_back(_hiddenNeuronList[x][y].weight(w));
@@ -677,6 +677,7 @@ void                Net::getGenomFromNeuron()
                         std::string error = "Net::getGenomFromNeuron() ERROR: On getting the weight for the hidden neuron X: "+std::to_string(x)+" Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                                     error +="current genomsize: "+std::to_string(_genom.size())+"\n";
                                     error +=e->what();
+                        throw std::runtime_error(error);
                     }
                 }
             }
@@ -687,11 +688,14 @@ void                Net::getGenomFromNeuron()
         for(unsigned int w=0; w<_outputNeuronList[y].inputs(); w++)
         {
             try {
+
                 _genom.push_back(_outputNeuronList[y].weight(w));
+
             } catch (std::runtime_error *e) {
                 std::string error = "Net::getGenomFromNeuron() ERROR: On getting the weight for the output neuron Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                             error +="current genomsize: "+std::to_string(_genom.size())+"\n";
                             error +=e->what();
+                throw std::runtime_error(error);
             }
         }
     }

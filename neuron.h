@@ -56,7 +56,12 @@ class Neuron
 
         void run();
 
-
+        //first derivative
+        static float deriv_activation_Linear(float netInput);
+        static float deriv_activation_ReLu(float netInput);
+      //  static float deriv_activation_Binary(float netInput);  //Not possible
+        static float deriv_activation_Gaussian(float netInput);
+        static float deriv_activation_Sigmoid(float netInput);
 
     private:
         static float activation_Linear(float netInput);
@@ -65,12 +70,7 @@ class Neuron
         static float activation_Gaussian(float netInput);
         static float activation_Sigmoid(float netInput);
 
-        //first derivative
-        static float deriv_activation_Linear(float netInput);
-        static float deriv_activation_ReLu(float netInput);
-      //  static float deriv_activation_Binary(float netInput);  //Not possible
-        static float deriv_activation_Gaussian(float netInput);
-        static float deriv_activation_Sigmoid(float netInput);
+
 
         void calc_netInput();
         void calc_output();
