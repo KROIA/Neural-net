@@ -1,3 +1,9 @@
 
 *.user
 *.db
+*.o
+*.exe
+*.Release
+*.Debug
+DEV/build-Release/Makefile
+*.stash
