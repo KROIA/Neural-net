@@ -93,10 +93,12 @@ class Net
         void getGenomFromNeuron();
 
         //----------ERROR
-        std::string error_paramOutOfRange(unsigned int paramPos,std::string value, std::string max);
-        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value, unsigned int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,int value, int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,float value, float max);
+        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,float value,float min, float max);
+        void        error_general(std::string function, std::runtime_error *e = nullptr);
+        void        error_general(std::string function, std::string cause, std::runtime_error *e = nullptr);
         //---------------
 
         unsigned int _inputs;

@@ -1,8 +1,8 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.00.02"
-//                      Datum   13.10.2018
+#define    BACKPROPNET_VERSION "02.01.00"
+//                      Datum   15.10.2018
 
 #include "net.h"
 
@@ -32,6 +32,17 @@ class BackpropNet : public Net
         void learn();
         void learn(std::vector<float> expected);
     private:
+
+        //----------ERROR
+        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,float value,float min, float max);
+        void        error_general(std::string function, std::runtime_error *e = nullptr);
+        void        error_general(std::string function, std::string cause, std::runtime_error *e = nullptr);
+        //---------------
+
+
         void calc_netError();
         float derivative(float netinput);
         float _netError;
