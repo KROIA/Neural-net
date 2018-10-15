@@ -20,14 +20,15 @@ srcPath = src
 netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
-			   $$inc
+               $$inc
 
 SOURCES += \
     $$srcPath/main.cpp \
     $$netSrcPath/net.cpp \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
-    $$netSrcPath/backpropnet.cpp
+    $$netSrcPath/backpropnet.cpp \
+    $$netSrcPath/geneticnet.cpp
 
 
 # Default rules for deployment.
@@ -38,4 +39,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
-    $$netIncPath/backpropnet.h
+    $$netIncPath/backpropnet.h \
+    $$netIncPath/geneticnet.h
