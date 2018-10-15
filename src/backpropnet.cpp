@@ -5,56 +5,100 @@ BackpropNet::BackpropNet()
 {
     _netError = 0;
     _update = true;
-    mutationFactor(0.1);
+    try {
+        mutationFactor(0.1);
+    } catch (std::runtime_error *e) {
+        error_general("BackpropNet()",e);
+    }
+
 }
 BackpropNet::BackpropNet(unsigned int inputs,
-            unsigned int hiddenX,
-            unsigned int hiddenY,
-            unsigned int outputs)
+                         unsigned int hiddenX,
+                         unsigned int hiddenY,
+                         unsigned int outputs)
     :   Net(inputs,hiddenX,hiddenY,outputs)
 {
     _netError = 0;
     _update = true;
-    mutationFactor(0.1);
+    try {
+        mutationFactor(0.1);
+    } catch (std::runtime_error *e) {
+        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                              "] , unsigned int ["+std::to_string(hiddenX)+
+                              "] , unsigned int ["+std::to_string(hiddenY)+
+                              "] , unsigned int ["+std::to_string(outputs)+"])",e);
+    }
 }
 BackpropNet::BackpropNet(unsigned int inputs,
-            unsigned int hiddenX,
-            unsigned int hiddenY,
-            unsigned int outputs,
-            bool enableBias,
-            bool enableAverage,
-            Activation func)
+                         unsigned int hiddenX,
+                         unsigned int hiddenY,
+                         unsigned int outputs,
+                         bool enableBias,
+                         bool enableAverage,
+                         Activation func)
     :   Net(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
 {
     _netError = 0;
     _update = true;
-    mutationFactor(0.1);
+    try {
+        mutationFactor(0.1);
+    } catch (std::runtime_error *e) {
+        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                              "] , unsigned int ["+std::to_string(hiddenX)+
+                              "] , unsigned int ["+std::to_string(hiddenY)+
+                              "] , unsigned int ["+std::to_string(outputs)+
+                              "] , bool ["+std::to_string(enableBias)+
+                              "] , bool ["+std::to_string(enableAverage)+
+                              "] , Activation ["+std::to_string(func)+"])",e);
+    }
+    if(this->activationFunction() == Activation::Binary)
+    {
+        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                      "] , unsigned int ["+std::to_string(hiddenX)+
+                      "] , unsigned int ["+std::to_string(hiddenY)+
+                      "] , unsigned int ["+std::to_string(outputs)+
+                      "] , bool ["+std::to_string(enableBias)+
+                      "] , bool ["+std::to_string(enableAverage)+
+                      "] , Activation ["+std::to_string(func)+"])","you cant use this activation function: Binary for this learn algorithm");
+    }
 }
 
 float               BackpropNet::netError()
 {
-    calc_netError();
+    try {
+        calc_netError();
+    } catch (std::runtime_error *e) {
+        error_general("netError()",e);
+    }
     return _netError;
 }
 std::vector<float>  BackpropNet::outputError()
 {
-    calc_netError();
+    try {
+        calc_netError();
+    } catch (std::runtime_error *e) {
+        error_general("outputError()",e);
+    }
     return _outputError;
 }
 float               BackpropNet::outputError(unsigned int output)
 {
     if(output >= this->outputNeurons())
     {
-        throw std::runtime_error("BackpropNet::outputError(unsigned int ["+std::to_string(output)+"] ) ERROR: parameter 0 is out of range: "+std::to_string(output)+" maximum is: "+std::to_string(this->outputNeurons()-1)+"\n");
+        error_general("outputError(unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,this->outputNeurons()-1));
     }
-    calc_netError();
+    try {
+        calc_netError();
+    } catch (std::runtime_error *e) {
+        error_general("outputError(unsigned int ["+std::to_string(output)+"] )",e);
+    }
     return _outputError[output];
 }
 void                BackpropNet::mutationFactor(float mutationFactor)
 {
     if(mutationFactor <= 0)
     {
-        throw std::runtime_error("BackpropNet::mutationFactor(float ["+std::to_string(mutationFactor)+"] ) ERROR: parameter 0 is out of range. MutationFactor has to be greather than 0");
+        error_general("mutationFactor(float ["+std::to_string(mutationFactor)+"] )","parameter 0 is out of range. MutationFactor has to be greather than 0");
     }
     _mutationFactor = mutationFactor;
 }
@@ -66,11 +110,15 @@ void                BackpropNet::expected(std::vector<float> expected)
 {
     if(expected.size() != this->outputNeurons())
     {
-        throw std::runtime_error("BackpropNet::expected(std::vector<float>) ERROR: parameter 0 has the wrong size: "+std::to_string(expected.size())+" std::vector.size() should be: "+std::to_string(this->outputNeurons()));
+        error_general("expected(std::vector<float>)","parameter 0 has the wrong size: "+std::to_string(expected.size())+" std::vector.size() should be: "+std::to_string(this->outputNeurons()));
     }
     _update   = true;
     _expected = expected;
-    this->calc_netError();
+    try {
+        calc_netError();
+    } catch (std::runtime_error *e) {
+        error_general("expected(std::vector<float>)",e);
+    }
 }
 
 void                BackpropNet::learn()
@@ -83,17 +131,13 @@ void                BackpropNet::learn()
     }
     if(!this->noHiddenLayer())
     {
-        for(int x=(signed int)this->hiddenNeuronsX()-1; x>=0; x--)
+        for(unsigned int x=this->hiddenNeuronsX(); x>0; x--)
         {
-            #ifdef DEBUG
-            printf("x: %i\n",(unsigned int)x);
-#endif
             for(unsigned int y=0; y<this->hiddenNeuronsY(); y++)
             {
                 float weightError = 0;
-                if(x == this->hiddenNeuronsX()-1)
+                if(x == this->hiddenNeuronsX())
                 {
-                 //   printf("aaaaaaaaa\n");
                     for(unsigned int y2=0; y2<this->outputNeurons(); y2++)
                     {
                         weightError += output_error[y2] * this->outputNeuron(y2)->weight(y);
@@ -101,13 +145,12 @@ void                BackpropNet::learn()
                 }
                 else
                 {
-                //    printf("bbbbbbbbbb\n");
                     for(unsigned int y2=0; y2<this->hiddenNeuronsY(); y2++)
                     {
-                        weightError += hidden_error[x+1][y2] * this->hiddenNeuron(x+1,y2)->weight(y);
+                        weightError += hidden_error[x][y2] * this->hiddenNeuron(x,y2)->weight(y);
                     }
                 }
-                hidden_error[x][y] = derivative(this->hiddenNeuron(x,y)->netInput()) * weightError;
+                hidden_error[x-1][y] = derivative(this->hiddenNeuron(x-1,y)->netInput()) * weightError;
             }
         }
     }
@@ -204,7 +247,7 @@ void                BackpropNet::calc_netError()
 {
     if(_expected.size() == 0)
     {
-        throw std::runtime_error("backpropNet::calc_netError() ERROR: no expected output values defined. first set them by BackpropNet::expected(std::vector<float>)\n");
+        error_general("calc_netError()","no expected output values defined. first set them by BackpropNet::expected(std::vector<float>)");
     }
     _update = true;
     if(_update)
@@ -227,7 +270,7 @@ float               BackpropNet::derivative(float netinput)
     {
         case Activation::Binary:
         {
-            throw std::runtime_error("BackpropNet::derivative(float ["+std::to_string(netinput)+"] ) ERROR: you cant use this activation function: Binary for this learn algorithm\n");
+            error_general("derivative(float ["+std::to_string(netinput)+"] )","you cant use this activation function: Binary for this learn algorithm");
             break;
         }
         case Activation::Gaussian:
@@ -252,4 +295,35 @@ float               BackpropNet::derivative(float netinput)
         }
     }
     return derivative;
+}
+
+
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
+{
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"\tminimum is: "+min+"\tmaximum is: "+max;
+}
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+{
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+}
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+{
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+}
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,float value,float min, float max)
+{
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+}
+void        BackpropNet::error_general(std::string function, std::runtime_error *e)
+{
+    error_general(function,"",e);
+}
+void        BackpropNet::error_general(std::string function, std::string cause, std::runtime_error *e)
+{
+    std::string error = "ERROR: BackpropNet::" + function + "\t" + cause;
+    if(e != nullptr)
+    {
+        error += "\n --> "+std::string(e->what());
+    }
+    throw std::runtime_error(error + "\n");
 }

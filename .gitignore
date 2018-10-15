@@ -8,3 +8,5 @@
 DEV/build-Release/Makefile
 *.stash
 examples/X-OR_Backpropagation/build-Release/Makefile
+DEV/build-Release/score.csv
+DEV/build-Release/genom.csv
