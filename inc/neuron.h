@@ -1,14 +1,15 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.01.00"
-//              Datum   15.10.2018
+#define NEURON_VERSION "02.01.01"
+//              Datum   18.10.2018
 
 #include <vector>
 #include <math.h>
 #include <random>
 #include <iostream>
 #include <time.h>
+#include <QDebug>
 
 #define NEURON_MIN_INPUTS 1
 #define NEURON_MAX_INPUTS 500
@@ -31,6 +32,7 @@ class Neuron
         Neuron(unsigned int inputs);
         Neuron(unsigned int inputs, Activation activationFunction);
         Neuron(unsigned int inputs, Activation activationFunction, bool enableAverage);
+        ~Neuron();
 
         void inputs(unsigned int inputs);
         unsigned int inputs();
@@ -67,6 +69,7 @@ class Neuron
         static float deriv_activation_Sigmoid(float netInput);
 
     private:
+        void init(unsigned int inputs, Activation activationFunction, bool enableAverage);
         static float activation_Linear(float netInput);
         static float activation_ReLu(float netInput);
         static float activation_Binary(float netInput);
@@ -97,11 +100,11 @@ class Neuron
 
         unsigned int                _inputs;
         bool                        _enableAverage;
-        std::default_random_engine 	_randEngine;
+        std::default_random_engine  _randEngine;
         Activation                  _activationFunction;
         bool                        _update;
 
-        struct tm *ti;
+
 
 };
 #endif // NEURON_H

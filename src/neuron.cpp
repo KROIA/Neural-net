@@ -3,42 +3,37 @@
 
 Neuron::Neuron()
 {
-    try {
-        Neuron((unsigned int)NEURON_MIN_INPUTS);
-    } catch (std::runtime_error &e) {
-        error_general("Neuron()",e);
-    }
+    init(1,Activation::Sigmoid,false);
 }
 Neuron::Neuron(unsigned int inputs)
 {
-    try {
-        Neuron(inputs,Sigmoid);
-    } catch (std::runtime_error &e) {
-        error_general("Neuron(unsigned int ["+std::to_string(inputs),e);
-    }
+    init(inputs,Activation::Sigmoid,false);
 }
 Neuron::Neuron(unsigned int inputs, Activation activationFunction)
 {
-    try {
-        Neuron(inputs,activationFunction,false);
-    } catch (std::runtime_error &e) {
-        error_general("Neuron(unsigned int ["+std::to_string(inputs)+
-                         "] , Avtication ["+std::to_string(activationFunction)+"]",e);
-    }
+    init(inputs,activationFunction,false);
 }
 Neuron::Neuron(unsigned int inputs, Activation activationFunction, bool enableAverage)
 {
+    init(inputs,activationFunction,enableAverage);
+}
+void Neuron::init(unsigned int inputs, Activation activationFunction, bool enableAverage)
+{
+    _randEngine = std::default_random_engine(rand()%100 /*+ ti->tm_hour+ti->tm_min+ti->tm_sec*/);
     try {
         this->inputs(inputs);
         this->activationFunction(activationFunction);
         this->enableAverage(enableAverage);
     } catch (std::runtime_error &e) {
-        error_general("Neuron(unsigned int ["+std::to_string(inputs)+"] , Activation ["+std::to_string(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
+        error_general("init(unsigned int ["+std::to_string(inputs)+"] , Activation ["+std::to_string(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
     }
-    randWeight();
     _update = true;
 }
-
+Neuron::~Neuron()
+{
+   _weightList.clear();
+   _inputList.clear();
+}
 void Neuron::inputs(unsigned int inputs)
 {
     if(inputs < NEURON_MIN_INPUTS || inputs > NEURON_MAX_INPUTS)
@@ -88,13 +83,9 @@ bool Neuron::enableAverage()
 
 void Neuron::randWeight()
 {
-    time_t timer;
-    time(&timer);
-    ti = localtime(&timer);
-    _randEngine = std::default_random_engine(rand()%100 + ti->tm_hour+ti->tm_min+ti->tm_sec);
     for(unsigned int a=0; a<_inputs; a++)
     {
-         this->weight(a,(float)(_randEngine()%2000)/1000 - (float)1 );
+         this->weight(a,(float)(_randEngine() %2000)/1000 - (float)1 );
     }
 }
 void Neuron::weight(unsigned int pos, float weight)

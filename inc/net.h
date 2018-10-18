@@ -1,14 +1,15 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.00.02"
-//              Datum   13.10.2018
+#define    NET_VERSION "02.00.03"
+//              Datum   18.10.2018
 
 #include "neuron.h"
 #include <math.h>
 #include <random>
 #include <iostream>
 #include <time.h>
+#include <QDebug>
 
 #define NET_MIN_INPUTNEURONS 1
 #define NET_MIN_HIDDENNEURONS_X 0
@@ -75,11 +76,11 @@ class Net
         std::vector<float>  hiddenY(unsigned int hiddenY);  // --   Alle in einer Reihe
 
         Neuron              *hiddenNeuron(unsigned int hiddenX, unsigned int hiddenY);
-        std::vector<Neuron> hiddenNeuronX(unsigned int hiddenX);    // |    Alle in einer Spalte
-        std::vector<Neuron> hiddenNeuronY(unsigned int hiddenY);    // --   Alle in einer Reihe
-        std::vector<std::vector<Neuron> > *hiddenNeuron();
+        std::vector<Neuron*> hiddenNeuronX(unsigned int hiddenX);    // |    Alle in einer Spalte
+        std::vector<Neuron*> hiddenNeuronY(unsigned int hiddenY);    // --   Alle in einer Reihe
+        std::vector<std::vector<Neuron*> > *hiddenNeuron();
         Neuron              *outputNeuron(unsigned int output);
-        std::vector<Neuron> *outputNeuron();
+        std::vector<Neuron*> *outputNeuron();
 
 
         float               output(unsigned int output);
@@ -89,6 +90,14 @@ class Net
         void                updateNetConfiguration();
 
     private:
+        void init(unsigned int inputs,
+                  unsigned int hiddenX,
+                  unsigned int hiddenY,
+                  unsigned int outputs,
+                  bool enableBias,
+                  bool enableAverage,
+                  Activation func);
+
         void setGenomToNeuron();
         void getGenomFromNeuron();
 
@@ -123,8 +132,8 @@ class Net
         bool                                _updateNetConfiguration;
         std::default_random_engine          _randEngine;
 
-        std::vector<std::vector<Neuron> >   _hiddenNeuronList;
-        std::vector<Neuron>                 _outputNeuronList;
+        std::vector<std::vector<Neuron*> >  _hiddenNeuronList;
+        std::vector<Neuron*>                _outputNeuronList;
         std::vector<float>                  _genom;
 
 };

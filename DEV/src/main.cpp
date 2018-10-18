@@ -1,37 +1,46 @@
 #include <QCoreApplication>
-#include <backpropnet.h>
 #include <iostream>
 #include <windows.h>
+#include <geneticnet.h>
 
 using namespace std;
 
-vector<vector<float>    >trainingsSet;  //Trainings input vector
-vector<vector<float>    >outputSet;     //Trainings expected output vector
 
 
 FILE *genomlogFile;
 FILE *logfile;
-void printNet(Net net);
-void setupTrainingSet();
-void netFinished(BackpropNet net);
+void printNet(Net* net);
+//void netFinished(BackpropNet net);
 void cmdXY(int x, int y);
-void logGenom(vector<float> genom);
+void logGenom(vector<float> genom,string name);
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
 
 
-    setupTrainingSet(); //Setting the trainingset for the X-OR problem
-    printf("setup\n");
-    unsigned int inputNeurons = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
-    unsigned int hiddenNeuronX= 2;
-    unsigned int hiddenNeuronY= 3;
-    unsigned int outputNeuron = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
+
+
+    unsigned int animals = 100;
+    unsigned int inputNeurons = 4;
+    unsigned int hiddenNeuronX= 1;
+    unsigned int hiddenNeuronY= 4;
+    unsigned int outputNeuron = 1;
     bool bias = false;
     bool enableAverage = false;
+    vector<float> scoreList(animals,0);
 
-    BackpropNet net(inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+
+
+    printf("setup Net()\n");
+    GeneticNet net(animals,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+    qDebug() << "inputs: "<<net.inputNeurons();
+    qDebug() << "hiddenX: "<<net.hiddenNeuronsX();
+    qDebug() << "hiddenY: "<<net.hiddenNeuronsY();
+    qDebug() << "outputs: "<<net.outputNeurons();
+    net.mutationFactor(1);
+    net.mutationChangeWeight(0.01);
+
 
     genomlogFile = fopen("genom.csv","w");
     for(unsigned int a=0; a<net.genomsize(); a++)
@@ -43,121 +52,161 @@ int main(int argc, char *argv[])
     logfile = fopen("score.csv","w");
     fclose(logfile);
 
-    vector<float> genom;
-    vector<float> output;
+    vector<vector<float>    > inpuList(animals,vector<float>(inputNeurons,0));
+    vector<vector<float>    > genom;
+    vector<vector<float>    > output;
     printf("net done, press enter\n");
     getchar();
     unsigned int counter =0;
     unsigned int saveCounter = 0;
     unsigned int saves = 0;
-    float averageError = 0;
+    float averageScore = 0;
 
 
     system("cls");
     unsigned long learningSteps = 0;
+    logGenom(net.genom(0),"gen0.csv");
+    logGenom(net.genom(1),"gen1.csv");
     while(true)
     {
         cmdXY(0,0);  // Sets the cursor pos of the console
 
+        for(unsigned int a=0; a<animals; a++)
+        {
+            scoreList[a] = 0;
+        }
+        for(unsigned int x=0; x<10; x++)
+        {
+            for(unsigned int a=0; a<animals; a++)
+            {
 
-        net.input(trainingsSet[counter]);       // Sets the input of the net with the trainingset [counter]
-        output = net.output();                  // Calculates the output vector and returns it
-        net.expected(outputSet[counter]);       // Tells the net the right results
+                for(unsigned int b=0; b<inputNeurons; b++)
+                {
+                    inpuList[a][b] = (float)(rand()%100)/100;
+                }
+            }
 
-        averageError += abs(net.netError());    //The net calculates the error of netprediction and expected output
-                                                //Saving only the positive value of the error to stop the training later when the error is low enough
+            net.input(inpuList);       // Sets the input of the net with the trainingset [counter]
+            net.run();
+            output = net.output();                  // Calculates the output vector and returns it
+
+
+
+
+            averageScore = 0;
+            for(unsigned int a=0; a<animals; a++)
+            {
+                float tmp = 0;
+                for(unsigned int b=0; b<inputNeurons; b++)
+                {
+                    tmp += inpuList[a][b];
+                }
+                tmp /= inputNeurons;
+                scoreList[a] += 10*(1-abs(tmp - output[a][0]));
+            }
+        }
+        for(unsigned int a=0; a<animals; a++)
+        {
+            scoreList[a] /= 10;
+            averageScore+=scoreList[a];
+        }
+        averageScore /= animals;
+
+        net.score(scoreList);
         net.learn();                            //Improve the net
-        learningSteps++;                        //Adding one training cycle
-
-
-        counter++;                              //counts to the next trainingset
+        genom = net.genom();
 
         saveCounter++;
-
-        if(counter >= trainingsSet.size())
-        {
-            counter = 0;
-            averageError /= trainingsSet.size(); //takes the average error of the whole training set
-            if(saveCounter > saves)
-            {
-                saveCounter = 0;
-                saves+=10; //spam the console in the beginning and later no more
-                printf("error: %.5f\n",averageError);   //Prints the error
-                printf("steps: %i\n",learningSteps);    //Prints the learn cyles
-
-                logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
-                fprintf(logfile,"%.5f;\n",averageError);    //
-                fclose(logfile);                            //
+        learningSteps++;
 
 
-                logGenom(net.genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
-            }
-            if(averageError < 0.005 || learningSteps > 1000000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
-            {
-                netFinished(net);
-            }
-            averageError = 0;
 
-        }
-    }
+       if(saveCounter > 10)
+       {
+           saveCounter = 0;
+           printNet(net[0]);
+           //saves+=10; //spam the console in the beginning and later no more
+           printf("averScore: %.5f\n",averageScore);   //Prints the error
+           printf("score[0]: %.5f\n",scoreList[0]);    //Prints the learn cyles
+           printf("steps: %i\n",learningSteps);    //Prints the learn cyles
+
+
+           logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
+           fprintf(logfile,"%.5f;\n",averageScore);    //
+           fclose(logfile);                            //
+
+
+                                 //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
+           getchar();
+       }
+
+
+       for(unsigned int a=1; a<animals; a++)
+       {
+           for(unsigned int b=0; b<net.genomsize(); b++)
+           {
+            genom[0][b] += genom[a][b];
+           }
+       }
+       for(unsigned int b=0; b<net.genomsize(); b++)
+       {
+           genom[0][b] /= animals;
+       }
+       logGenom(net.genom(0),"gen0.csv");
+       logGenom(genom[0],"genAver.csv");
+
+   }
     return a.exec();
 }
-void printNet(Net net)
+void printNet(Net *net)
 {
     printf("=================================================================================\n");
     printf("Input neurons:\n");
     printf("------------------\n");
-    for(unsigned int y=0; y<net.hiddenNeuronsY(); y++)
+    for(unsigned int y=0; y<net->hiddenNeuronsY(); y++)
     {
             printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int i=0; i<net.hiddenNeuron(0,y)->inputs(); i++)
+        for(unsigned int i=0; i<net->hiddenNeuron(0,y)->inputs(); i++)
         {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.hiddenNeuron(0,y)->input(i),net.hiddenNeuron(0,y)->weight(i));
+            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->hiddenNeuron(0,y)->input(i),net->hiddenNeuron(0,y)->weight(i));
         }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.hiddenNeuron(0,y)->output());
+            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->hiddenNeuron(0,y)->output());
             printf("---------------------------------------------------------------------------------\n");
     }
     printf("=================================================================================\n");
     printf("Hidden neurons:\n");
     printf("------------------\n");
-    for(unsigned int x=1; x<net.hiddenNeuronsX(); x++)
+    for(unsigned int x=1; x<net->hiddenNeuronsX(); x++)
     {
-        for(unsigned int y=0; y<net.hiddenNeuronsY(); y++)
+        for(unsigned int y=0; y<net->hiddenNeuronsY(); y++)
         {
                 printf("\tneuron x: %i y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",x,y);
-            for(unsigned int b=0; b<net.hiddenNeuron(x,y)->inputs(); b++)
+            for(unsigned int b=0; b<net->hiddenNeuron(x,y)->inputs(); b++)
             {
-                printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.hiddenNeuron(x,y)->input(b),net.hiddenNeuron(x,y)->weight(b));
+                printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->hiddenNeuron(x,y)->input(b),net->hiddenNeuron(x,y)->weight(b));
             }
-                printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.hiddenNeuron(x,y)->output());
+                printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->hiddenNeuron(x,y)->output());
                 printf("---------------------------------------------------------------------------------\n");
         }
     }
     printf("=================================================================================\n");
     printf("Output neurons:\n");
     printf("------------------\n");
-    for(unsigned int y=0; y<net.outputNeurons(); y++)
+    for(unsigned int y=0; y<net->outputNeurons(); y++)
     {
         printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int b=0; b<net.outputNeuron(y)->inputs(); b++)
+        for(unsigned int b=0; b<net->outputNeuron(y)->inputs(); b++)
         {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.outputNeuron(y)->input(b),net.outputNeuron(y)->weight(b));
+            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->outputNeuron(y)->input(b),net->outputNeuron(y)->weight(b));
         }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.outputNeuron(y)->output());
+            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->outputNeuron(y)->output());
             printf("---------------------------------------------------------------------------------\n");
     }
     printf("=================================================================================\n");
 
 }
-void setupTrainingSet()
-{
-    //              INPUT VALUES             EXPECTED OUTPUT
-    trainingsSet.push_back({0,0});   outputSet.push_back({0});
-    trainingsSet.push_back({0,1});   outputSet.push_back({1});
-    trainingsSet.push_back({1,0});   outputSet.push_back({1});
-    trainingsSet.push_back({1,1});   outputSet.push_back({0});
-}
-void netFinished(BackpropNet net)
+
+/*void netFinished(GeneticNet net)
 {
     vector<float> genom;
     vector<float> output;
@@ -205,16 +254,16 @@ void netFinished(BackpropNet net)
             getchar();
         }
     }
-}
+}*/
 void cmdXY(int x,int y)
 {
     HANDLE hConsole_c = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {(short)x, (short)y};
     SetConsoleCursorPosition(hConsole_c,pos);
 }
-void logGenom(vector<float> genom)
+void logGenom(vector<float> genom,string name)
 {
-    genomlogFile = fopen("genom.csv","a");
+    genomlogFile = fopen(name.c_str(),"a");
     for(unsigned int a=0; a<genom.size(); a++)
     {
         fprintf(genomlogFile,"%.5f;",genom[a]);
