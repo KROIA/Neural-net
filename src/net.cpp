@@ -5,7 +5,7 @@ Net::Net()
 {
     try {
         Net(2,1,2,1);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Net()",e);
     }
 }
@@ -17,7 +17,7 @@ Net::Net(unsigned int inputs,
 {
     try {
         Net(inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Net(unsigned int ["+std::to_string(inputs)+
                        "] , unsigned int ["+std::to_string(hiddenX)+
                        "] , unsigned int ["+std::to_string(hiddenY)+
@@ -50,7 +50,7 @@ Net::Net(unsigned int inputs,
         this->inputNeurons(inputs);
         this->bias(enableBias);
         this->enableAverage(enableAverage);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Net(unsigned int ["+std::to_string(inputs)+
                       "] , unsigned int ["+std::to_string(hiddenX)+
                       "] , unsigned int ["+std::to_string(hiddenY)+
@@ -86,7 +86,7 @@ void                Net::inputNeurons(unsigned int inputs)
         _inputs = inputs;
         try {
             updateNetConfiguration();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("inputNeurons(unsigned int ["+std::to_string(inputs)+"] )",e);
         }
     }
@@ -108,7 +108,7 @@ void                Net::hiddenNeuronsX(unsigned int hiddenX)
         _hiddenX = hiddenX;
         try {
             updateNetConfiguration();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("hiddenNeuronsX(unsigned int ["+std::to_string(hiddenX)+")] ",e);
         }
     }
@@ -130,7 +130,7 @@ void                Net::hiddenNeuronsY(unsigned int hiddenY)
         _hiddenY = hiddenY;
         try {
             updateNetConfiguration();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("hiddenNeuronsY(unsigned int ["+std::to_string(hiddenY)+"] )",e);
         }
     }
@@ -151,7 +151,7 @@ void                Net::outputNeurons(unsigned int outputs)
         _outputs = outputs;
         try {
             updateNetConfiguration();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("outputNeurons(unsigned int ["+std::to_string(outputs)+"] )",e);
         }
     }
@@ -170,7 +170,7 @@ void                Net::bias(bool enableBias)
         _bias   = enableBias;
         try {
             updateNetConfiguration();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("bias(bool ["+std::to_string(enableBias)+"] )",e);
         }
     }
@@ -277,7 +277,7 @@ std::vector<float>  Net::genom()
 {
     try {
         getGenomFromNeuron();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("genom()",e);
     }
     return _genom;
@@ -286,7 +286,7 @@ unsigned int        Net::genomsize()
 {
     try {
         getGenomFromNeuron();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("genomsize()",e);
     }
     return _genom.size();
@@ -305,7 +305,7 @@ void                Net::input(unsigned int input, float signal)
         {
             try {
                 _outputNeuronList[y].input(input,signal);
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(signal)+"] )","",e);
             }
         }
@@ -317,7 +317,7 @@ void                Net::input(unsigned int input, float signal)
 
             try {
                 _hiddenNeuronList[0][y].input(input,signal);
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(signal)+"] )","",e);
             }
         }
@@ -334,7 +334,7 @@ float               Net::input(unsigned int input)
     {
         try {
             inp = _outputNeuronList[0].input(input);
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("input(unsigned int ["+std::to_string(input)+"] )","output neuron: 0 input: "+std::to_string(input),e);
         }
     }
@@ -342,7 +342,7 @@ float               Net::input(unsigned int input)
     {
         try {
             inp = _hiddenNeuronList[0][0].input(input);
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("input(unsigned int ["+std::to_string(input)+"] )","hidden neuron X: 0 hidden neuron Y: 0",e);
         }
     }
@@ -365,7 +365,7 @@ void                Net::input(std::vector<float> inputList)
         {
             try {
                 _outputNeuronList[y].input(inputList);
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 error_general("input(std::vector<float>)","output neuron Y: ["+std::to_string(y)+"]",e);
             }
         }
@@ -376,7 +376,7 @@ void                Net::input(std::vector<float> inputList)
         {
             try {
                 _hiddenNeuronList[0][y].input(inputList);
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 error_general("input(std::vector<float>)","hidden neuron X: [0] hidden neuron Y: ["+std::to_string(y)+"]",e);
             }
         }
@@ -627,7 +627,7 @@ void                Net::updateNetConfiguration()
     _updateNetConfiguration = false;
     try {
         randomGenom();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("updateNetConfiguration()",e);
     }
 }
@@ -670,7 +670,7 @@ void                Net::setGenomToNeuron()
                     try {
                         _hiddenNeuronList[x][y].weight(w,_genom[weightPos]);
                         weightPos++;
-                    } catch (std::runtime_error *e) {
+                    } catch (std::runtime_error &e) {
                         std::string error = "On setting the weight for the hidden neuron X: "+std::to_string(x)+" Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                                     error +="with the value: "+std::to_string(_genom[weightPos]) + " from the genom on the arrayPos: "+std::to_string(weightPos);
                         error_general("setGenomToNeuron()",error,e);
@@ -686,7 +686,7 @@ void                Net::setGenomToNeuron()
             try {
                 _outputNeuronList[y].weight(w,_genom[weightPos]);
                 weightPos++;
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 std::string error = "On setting the weight for the output neuron Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                             error +="with the value: "+std::to_string(_genom[weightPos]) + " from the genom on the arrayPos: "+std::to_string(weightPos);
                 error_general("setGenomToNeuron()",error,e);
@@ -707,7 +707,7 @@ void                Net::getGenomFromNeuron()
                 {
                     try {
                         _genom.push_back(_hiddenNeuronList[x][y].weight(w));
-                    } catch (std::runtime_error *e) {
+                    } catch (std::runtime_error &e) {
                         std::string error = "On getting the weight for the hidden neuron X: "+std::to_string(x)+" Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                                     error +="current genomsize: "+std::to_string(_genom.size());
                         error_general("getGenomFromNeuron()",error,e);
@@ -724,7 +724,7 @@ void                Net::getGenomFromNeuron()
 
                 _genom.push_back(_outputNeuronList[y].weight(w));
 
-            } catch (std::runtime_error *e) {
+            } catch (std::runtime_error &e) {
                 std::string error = "On getting the weight for the output neuron Y: "+std::to_string(y)+" weight: "+std::to_string(w) + " ";
                             error +="current genomsize: "+std::to_string(_genom.size());
                 error_general("getGenomFromNeuron()",error,e);
@@ -739,7 +739,7 @@ void                Net::getGenomFromNeuron()
 
 std::string Net::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
-    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"\tminimum is: "+min+"\tmaximum is: "+max;
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
 std::string Net::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
@@ -753,16 +753,17 @@ std::string Net::error_paramOutOfRange(unsigned int paramPos,float value,float m
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-void        Net::error_general(std::string function, std::runtime_error *e)
+void        Net::error_general(std::string function, std::string cause)
+{
+    throw std::runtime_error("ERROR: Net::" + function + "     " + cause);
+}
+void        Net::error_general(std::string function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        Net::error_general(std::string function, std::string cause, std::runtime_error *e)
+void        Net::error_general(std::string function, std::string cause, std::runtime_error &e)
 {
-    std::string error = "ERROR: Net::" + function + "\t" + cause;
-    if(e != nullptr)
-    {
-        error += "\n --> "+std::string(e->what());
-    }
-    throw std::runtime_error(error + "\n");
+    std::string error = "ERROR: Net::" + function + "     " + cause;
+    error += "     --> "+std::string(e.what());
+    throw std::runtime_error(error);
 }
