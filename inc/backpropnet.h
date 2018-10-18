@@ -38,8 +38,9 @@ class BackpropNet : public Net
         std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
         std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
         std::string error_paramOutOfRange(unsigned int paramPos,float value,float min, float max);
-        void        error_general(std::string function, std::runtime_error *e = nullptr);
-        void        error_general(std::string function, std::string cause, std::runtime_error *e = nullptr);
+        void        error_general(std::string function, std::string cause);
+        void        error_general(std::string function, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause, std::runtime_error &e);
         //---------------
 
 

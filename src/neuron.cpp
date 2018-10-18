@@ -5,7 +5,7 @@ Neuron::Neuron()
 {
     try {
         Neuron((unsigned int)NEURON_MIN_INPUTS);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Neuron()",e);
     }
 }
@@ -13,7 +13,7 @@ Neuron::Neuron(unsigned int inputs)
 {
     try {
         Neuron(inputs,Sigmoid);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Neuron(unsigned int ["+std::to_string(inputs),e);
     }
 }
@@ -21,7 +21,7 @@ Neuron::Neuron(unsigned int inputs, Activation activationFunction)
 {
     try {
         Neuron(inputs,activationFunction,false);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Neuron(unsigned int ["+std::to_string(inputs)+
                          "] , Avtication ["+std::to_string(activationFunction)+"]",e);
     }
@@ -32,7 +32,7 @@ Neuron::Neuron(unsigned int inputs, Activation activationFunction, bool enableAv
         this->inputs(inputs);
         this->activationFunction(activationFunction);
         this->enableAverage(enableAverage);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("Neuron(unsigned int ["+std::to_string(inputs)+"] , Activation ["+std::to_string(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
     }
     randWeight();
@@ -164,7 +164,7 @@ float Neuron::netInput()
 {
     try {
         run();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("netInput()",e);
     }
     return _netInput;
@@ -173,7 +173,7 @@ float Neuron::output()
 {
     try {
         run();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("output()",e);
     }
     return _output;
@@ -185,7 +185,7 @@ void Neuron::run()
         calc_netInput();
         try {
             calc_output();
-        } catch (std::runtime_error *e) {
+        } catch (std::runtime_error &e) {
             error_general("run()",e);
         }
         _update = false;
@@ -244,7 +244,7 @@ void Neuron::calc_output()
 
 std::string Neuron::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
-    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"\tminimum is: "+min+"\tmaximum is: "+max;
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
 std::string Neuron::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
@@ -258,16 +258,17 @@ std::string Neuron::error_paramOutOfRange(unsigned int paramPos,float value,floa
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-void        Neuron::error_general(std::string function, std::runtime_error *e)
+void        Neuron::error_general(std::string function, std::string cause)
+{
+    throw std::runtime_error("ERROR: Neuron::" + function + "     " + cause);
+}
+void        Neuron::error_general(std::string function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        Neuron::error_general(std::string function, std::string cause, std::runtime_error *e)
+void        Neuron::error_general(std::string function, std::string cause, std::runtime_error &e)
 {
-    std::string error = "ERROR: Neuron::" + function + "\t" + cause;
-    if(e != nullptr)
-    {
-        error += "\n --> "+std::string(e->what());
-    }
-    throw std::runtime_error(error + "\n");
+    std::string error = "ERROR: Neuron::" + function + "     " + cause;
+    error += "     --> "+std::string(e.what());
+    throw std::runtime_error(error);
 }

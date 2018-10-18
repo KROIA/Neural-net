@@ -7,7 +7,7 @@ BackpropNet::BackpropNet()
     _update = true;
     try {
         mutationFactor(0.1);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("BackpropNet()",e);
     }
 
@@ -22,7 +22,7 @@ BackpropNet::BackpropNet(unsigned int inputs,
     _update = true;
     try {
         mutationFactor(0.1);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
                               "] , unsigned int ["+std::to_string(hiddenX)+
                               "] , unsigned int ["+std::to_string(hiddenY)+
@@ -42,7 +42,7 @@ BackpropNet::BackpropNet(unsigned int inputs,
     _update = true;
     try {
         mutationFactor(0.1);
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
                               "] , unsigned int ["+std::to_string(hiddenX)+
                               "] , unsigned int ["+std::to_string(hiddenY)+
@@ -67,7 +67,7 @@ float               BackpropNet::netError()
 {
     try {
         calc_netError();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("netError()",e);
     }
     return _netError;
@@ -76,7 +76,7 @@ std::vector<float>  BackpropNet::outputError()
 {
     try {
         calc_netError();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("outputError()",e);
     }
     return _outputError;
@@ -89,7 +89,7 @@ float               BackpropNet::outputError(unsigned int output)
     }
     try {
         calc_netError();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("outputError(unsigned int ["+std::to_string(output)+"] )",e);
     }
     return _outputError[output];
@@ -116,7 +116,7 @@ void                BackpropNet::expected(std::vector<float> expected)
     _expected = expected;
     try {
         calc_netError();
-    } catch (std::runtime_error *e) {
+    } catch (std::runtime_error &e) {
         error_general("expected(std::vector<float>)",e);
     }
 }
@@ -300,7 +300,7 @@ float               BackpropNet::derivative(float netinput)
 
 std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
-    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"\tminimum is: "+min+"\tmaximum is: "+max;
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
 std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
@@ -314,16 +314,17 @@ std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,float value
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-void        BackpropNet::error_general(std::string function, std::runtime_error *e)
+void        BackpropNet::error_general(std::string function, std::string cause)
+{
+    throw std::runtime_error("ERROR: BackpropNet::" + function + "     " + cause);
+}
+void        BackpropNet::error_general(std::string function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        BackpropNet::error_general(std::string function, std::string cause, std::runtime_error *e)
+void        BackpropNet::error_general(std::string function, std::string cause, std::runtime_error &e)
 {
-    std::string error = "ERROR: BackpropNet::" + function + "\t" + cause;
-    if(e != nullptr)
-    {
-        error += "\n --> "+std::string(e->what());
-    }
-    throw std::runtime_error(error + "\n");
+    std::string error = "ERROR: BackpropNet::" + function + "     " + cause;
+    error += "      --> "+std::string(e.what());
+    throw std::runtime_error(error);
 }
