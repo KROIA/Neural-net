@@ -28,7 +28,8 @@ SOURCES += \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/backpropnet.cpp \
-    $$netSrcPath/geneticnet.cpp
+    $$netSrcPath/geneticnet.cpp \
+    ../src/savenet.cpp
 
 
 # Default rules for deployment.
@@ -40,4 +41,5 @@ HEADERS += \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
     $$netIncPath/backpropnet.h \
-    $$netIncPath/geneticnet.h
+    $$netIncPath/geneticnet.h \
+    ../inc/savenet.h

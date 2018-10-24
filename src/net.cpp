@@ -685,6 +685,7 @@ void                Net::setGenomToNeuron()
                     error+= "\tHiddenNeurons X:\t"+std::to_string(_hiddenX)+"\n";
                     error+= "\tHiddenNeurons Y:\t"+std::to_string(_hiddenY)+"\n";
                     error+= "\tOutputNeurons Y:\t"+std::to_string(_outputs);
+                    error+= "\tBias"+ std::to_string(_bias);
         error_general("setGenomToNeuron()",error);
     }
     unsigned int weightPos = 0;
