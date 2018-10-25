@@ -12,6 +12,7 @@
 class GeneticNet
 {
     public:
+        GeneticNet();
         GeneticNet(unsigned int animals);
         GeneticNet(unsigned int animals,
                    unsigned int inputs,
@@ -26,7 +27,16 @@ class GeneticNet
                    bool enableBias,
                    bool enableAverage,
                    Activation func);
+        ~GeneticNet();
 
+        void                    set(unsigned int animals,
+                                    unsigned int inputs,
+                                    unsigned int hiddenX,
+                                    unsigned int hiddenY,
+                                    unsigned int outputs,
+                                    bool enableBias,
+                                    bool enableAverage,
+                                    Activation func);
 
         void                    animals(unsigned int animals);
         unsigned int            animals();

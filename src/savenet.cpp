@@ -5,6 +5,7 @@ SaveNet::SaveNet()
 {
     filename("netFile");
     fileEnding("net");
+    _saves = 0;
 }
 SaveNet::~SaveNet()
 {
@@ -29,11 +30,23 @@ std::string     SaveNet::fileEnding()
 }
 std::string     SaveNet::netConfiguration()
 {
+   /* _netConfiguration = "";
+
+    _netConfiguration += "I"+std::to_string(_inputs);
+    _netConfiguration += "HX"+std::to_string(_hiddenX);
+    _netConfiguration += "HY"+std::to_string(_hiddenY);
+    _netConfiguration += "O"+std::to_string(_outputs);
+
+    _netConfiguration += "B"+std::to_string(_bias);
+    */
+
     return _netConfiguration;
 }
 void            SaveNet::inputNeurons(unsigned int inputs)
 {
     _inputs  = inputs;
+    _check_inputs = true;
+    clearGenomList();
 }
 unsigned int    SaveNet::inputNeurons()
 {
@@ -42,6 +55,8 @@ unsigned int    SaveNet::inputNeurons()
 void            SaveNet::hiddenNeuronsX(unsigned int hiddenX)
 {
     _hiddenX = hiddenX;
+    _check_hiddenX = true;
+    clearGenomList();
 }
 unsigned int    SaveNet::hiddenNeuronsX()
 {
@@ -50,14 +65,18 @@ unsigned int    SaveNet::hiddenNeuronsX()
 void            SaveNet::hiddenNeuronsY(unsigned int hiddenY)
 {
     _hiddenY = hiddenY;
+    _check_hiddenY = true;
+    clearGenomList();
 }
 unsigned int    SaveNet::hiddenNeuronsY()
 {
     return _hiddenY;
 }
-void            SaveNet::outptNeurons(unsigned int outputs)
+void            SaveNet::outputNeurons(unsigned int outputs)
 {
     _outputs = outputs;
+    _check_outputs = true;
+    clearGenomList();
 }
 unsigned int    SaveNet::outputNeurons()
 {
@@ -66,6 +85,8 @@ unsigned int    SaveNet::outputNeurons()
 void            SaveNet::bias(bool bias)
 {
     _bias = bias;
+    _check_bias = true;
+    clearGenomList();
 }
 bool            SaveNet::bias()
 {
@@ -74,6 +95,8 @@ bool            SaveNet::bias()
 void            SaveNet::biasValue(float value)
 {
     _biasValue = value;
+    _check_biasValue = true;
+    clearGenomList();
 }
 float           SaveNet::biasValue()
 {
@@ -82,6 +105,8 @@ float           SaveNet::biasValue()
 void            SaveNet::enableAverage(bool average)
 {
     _average = average;
+    _check_average = true;
+    clearGenomList();
 }
 bool            SaveNet::enableAverage()
 {
@@ -90,6 +115,8 @@ bool            SaveNet::enableAverage()
 void            SaveNet::activationFunction(Activation func)
 {
     _activationFuncton = func;
+    _check_activationFunction = true;
+    clearGenomList();
 }
 Activation      SaveNet::activationFunction()
 {
@@ -145,7 +172,122 @@ void            SaveNet::getExtraParam(std::vector<std::string> &name,std::vecto
 
 void SaveNet::loadFile()
 {
+    {
+        if(_filename == "")
+        {
+            error_general("loadFile()","no filename declared");
+        }
+        _file = fopen((_filename+"."+_fileEnding).c_str(),"r");
+        if(!_file)
+        {
+            error_general("loadFile()","can't open file: \""+_filename+"."+_fileEnding+"\"");
+        }
+    }
+    this->clear();
+    std::vector<std::string> fileBuffer;
+    std::string tmpBuffer = "";
+    unsigned int tmpAnimals = 0;
+    while(tmpBuffer.find("[GENLIST]") == -1)
+    {
+        char list[255];
+        fgets(list,255,_file);
+        tmpBuffer = list;
+        fileBuffer.push_back(list);
+       // qDebug() << QString::fromStdString(tmpBuffer);
+    }
+    for(unsigned int a=0; a<fileBuffer.size(); a++)
+    {
+      //  qDebug() << QString::fromStdString(fileBuffer[a]);
+        if(fileBuffer[a].find("SAVES") == 0)
+        {
+            _saves = atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+        }
+        if(fileBuffer[a].find("ANIMALS") == 0)
+        {
+            tmpAnimals = atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+        }
+        if(fileBuffer[a].find("__INPUTNEURONS") == 0)
+        {
+            inputNeurons(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__HIDDENNEURONSX") == 0)
+        {
+            hiddenNeuronsX(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__HIDDENNEURONSY") == 0)
+        {
+            hiddenNeuronsY(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__OUTPUTNEURONS") == 0)
+        {
+            outputNeurons(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__BIAS") == 0)
+        {
+            bias(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__AVERAGE") == 0)
+        {
+            enableAverage(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__BIASVALUE") == 0)
+        {
+            biasValue(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("__ACTIVATIONFUNCTION") == 0)
+        {
+            activationFunction((Activation)atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+    }
+    this->genomsize();
+    qDebug() << "inp:\t"<<_inputs;
+    qDebug() << "hidX:\t"<<_hiddenX;
+    qDebug() << "hidY:\t"<<_hiddenY;
+    qDebug() << "out:\t"<<_outputs;
+    qDebug() << "bias:\t"<<_bias;
+    qDebug() << "aver:\t"<<_average;
+    qDebug() << "biasVal:\t"<<_biasValue;
+    qDebug() << "act:\t"<<_activationFuncton;
+    qDebug() << "genSi:\t"<<_genomsize;
 
+
+    for(unsigned int y=0; y<tmpAnimals; y++)
+    {
+        std::vector<float>  addGen;
+
+        char  val[255];
+        std::string val2;
+        fscanf(_file,"%s",val);
+        val2 = val;
+        if(val2.find("[G]") == -1)
+        {
+          //  qDebug() << "ERROR";
+        }
+        for(unsigned int x=0; x<_genomsize; x++)
+        {
+
+            fscanf(_file,"%s",val);
+            val2 = val;
+           // qDebug() << QString::fromStdString(val2);
+            if(val2.find("[G]") != -1 || feof(_file))
+            {
+            //     qDebug() << "break-----------------------";
+                break;
+            }
+
+            addGen.push_back(stof(val2));
+           // qDebug() << "size: "<< addGen.size();
+
+        }
+      //  qDebug() << "size: "<< addGen.size();
+       // try {
+            this->addGenom(addGen);
+       // } catch (std::runtime_error &e) {
+       //     qDebug() << e.what();
+       // }
+
+    }
+    fclose(_file);
 }
 void SaveNet::loadFile(std::string filename)
 {
@@ -154,6 +296,56 @@ void SaveNet::loadFile(std::string filename)
 }
 void SaveNet::saveFile()
 {
+    {
+        if(_filename == "")
+        {
+            error_general("saveFile()","no filename declared");
+        }
+        checkParam();
+        if(_genomList.size() == 0)
+        {
+            error_general("saveFile()","no genome defined");
+        }
+        _file = fopen((_filename+"."+_fileEnding).c_str(),"w");
+        if(!_file)
+        {
+            error_general("saveFile()","can't create file: \""+_filename+"."+_fileEnding+"\"");
+        }
+    }
+    time_t timer;
+    time(&timer);
+    struct tm *ti = localtime(&timer);
+
+    _saves++;
+    //--------------------SAVE INFO---------------------
+    fprintf(_file,"SAVENET_VERSION: %s\t",SAVENET_VERSION);
+    fprintf(_file,"DATE: %i.%i.%i\tTIME: %i:%i:%i\n",ti->tm_mday,ti->tm_mon,ti->tm_year+1900,ti->tm_hour,ti->tm_min,ti->tm_sec);
+    fprintf(_file,"SAVES: %i\n",this->_saves);
+    fprintf(_file,"ANIMALS: %i\n\n",this->animals());
+    //--------------------SAVE NET CONFIG---------------------
+    fprintf(_file,"__INPUTNEURONS %i\n",this->_inputs);
+    fprintf(_file,"__HIDDENNEURONSX %i\n",this->_hiddenX);
+    fprintf(_file,"__HIDDENNEURONSY %i\n",this->_hiddenY);
+    fprintf(_file,"__OUTPUTNEURONS %i\n",this->_outputs);
+    fprintf(_file,"__BIAS %i\n",(unsigned int)this->_bias);
+    fprintf(_file,"__AVERAGE %i\n",(unsigned int)this->_average);
+    fprintf(_file,"__BIASVALUE %.8f\n",this->_biasValue);
+    fprintf(_file,"__ACTIVATIONFUNCTION %i\n",(unsigned int)this->_activationFuncton);
+    //--------------------------------------------------------
+    fprintf(_file,"\n");
+    fprintf(_file,"[GENLIST]\n");
+
+    for(unsigned int y=0; y<_genomList.size(); y++)
+    {
+        fprintf(_file,"[G] ");
+        for(unsigned int x=0; x<_genomList[y].size(); x++)
+        {
+            fprintf(_file,"%.8f ",_genomList[y][x]);
+        }
+        fprintf(_file,"\n");
+    }
+
+    fclose(_file);
 
 }
 void SaveNet::saveFile(std::string filename)
@@ -161,16 +353,49 @@ void SaveNet::saveFile(std::string filename)
     this->filename(filename);
     saveFile();
 }
-
+void SaveNet::setGenom(std::vector<float>   genom)
+{
+    checkParam();
+    this->clearGenomList();
+    this->addGenom(genom);
+}
+void SaveNet::setGenom(unsigned int index,std::vector<float>   genom)
+{
+    if(_genomList.size() == 0)
+    {
+        error_general("setGenom(unsigned int ["+std::to_string(index)+"] , std::vector<float> )","no genome defined");
+    }
+    if(index >= _genomList.size())
+    {
+        error_general("setGenom(unsigned int ["+std::to_string(index)+"] , std::vector<float> )",error_paramOutOfRange((unsigned int)0,index,(unsigned int)0,_genomList.size()-1));
+    }
+    if(genom.size() != genomsize())
+    {
+        error_general("setGenom(unsigned int ["+std::to_string(index)+"] , std::vector<float> )",error_paramOutOfRange((unsigned int)1,genom.size(),_genomsize,_genomsize));
+    }
+    _genomList[index] = genom;
+}
+void SaveNet::setGenom(std::vector<std::vector<float>   > genomList)
+{
+    qDebug() << "size: "<< genomList.size();
+    if(genomList.size() == 0)
+    {
+        error_general("setGenom(std::vector<float> )","no genomes in parameter 0");
+    }
+    clearGenomList();
+    try {
+        addGenom(genomList);
+    } catch (std::runtime_error &e) {
+        error_general("setGenom(std::vector<float> )","addGenom(genomList)",e);
+    }
+}
 void SaveNet::addGenom(std::vector<float>   genom)
 {
-    unsigned int genomsize = (_inputs + (unsigned int)_bias) +
-                             ((_hiddenY + (unsigned int)_bias)*_hiddenX) +
-                             (_outputs + (unsigned int)_bias);
-    if(genomsize != genom.size())
+    checkParam();
+    if(this->genomsize() != genom.size())
     {
         std::string error = "geonomsize is wrong\n";
-                    error+= "genomsize is: "+std::to_string(genom.size()) + " but the Net has only place for an amount of: "+ std::to_string((unsigned int)genomsize) + " weights.\n";
+                    error+= "genomsize is: "+std::to_string(genom.size()) + " but the Net has only place for an amount of: "+ std::to_string(_genomsize) + " weights.\n";
                     error+= "Check your net configuration:\n";
                     error+= "\tInput Neurons Y:\t"+std::to_string(_inputs)+"\n";
                     error+= "\tHiddenNeurons X:\t"+std::to_string(_hiddenX)+"\n";
@@ -194,14 +419,106 @@ void SaveNet::addGenom(std::vector<std::vector<float>   > genomList)
 }
 std::vector<float>  SaveNet::genom(unsigned int index)
 {
-
+    if(index >= _genomList.size())
+    {
+        if(_genomList.size() == 0)
+        {
+            error_general("genom(unsigned int ["+std::to_string(index)+"])","no genom in buffer");
+        }
+        error_general("genom(unsigned int ["+std::to_string(index)+"])",error_paramOutOfRange((unsigned int)0,index,(unsigned int)0,_genomList.size()-1));
+    }
+    return _genomList[index];
 }
 std::vector<std::vector<float>  > SaveNet::genom()
 {
-
+    return _genomList;
 }
-
-
+unsigned int SaveNet::animals()
+{
+    return _genomList.size();
+}
+void SaveNet::clear()
+{
+    set(0,0,0,0,false,false,Activation::Binary,0);
+    _check_inputs               = false;
+    _check_hiddenX              = false;
+    _check_hiddenY              = false;
+    _check_outputs              = false;
+    _check_bias                 = false;
+    _check_biasValue            = false;
+    _check_average              = false;
+    _check_activationFunction   = false;
+    clearGenomList();
+}
+void SaveNet::set(unsigned int inputs,
+         unsigned int hiddenX,
+         unsigned int hiddenY,
+         unsigned int outputs,
+         bool         bias,
+         bool         average,
+         Activation   activationFunction,
+         float        biasValue)
+{
+    this->inputNeurons(inputs);
+    this->hiddenNeuronsX(hiddenX);
+    this->hiddenNeuronsY(hiddenY);
+    this->outputNeurons(outputs);
+    this->bias(bias);
+    this->enableAverage(average);
+    this->biasValue(biasValue);
+    this->activationFunction(activationFunction);
+}
+void SaveNet::checkParam()
+{
+    if(!_check_inputs)
+    {
+        error_general("checkParam()","Param \"inputNeurons\" is not defined");
+    }
+    if(!_check_hiddenX)
+    {
+        error_general("checkParam()","Param \"hiddenNeuronsX\" is not defined");
+    }
+    if(!_check_hiddenY)
+    {
+        error_general("checkParam()","Param \"hiddenNeuronsY\" is not defined");
+    }
+    if(!_check_outputs)
+    {
+        error_general("checkParam()","Param \"outputNeurons\" is not defined");
+    }
+    if(!_check_bias)
+    {
+        error_general("checkParam()","Param \"bias\" is not defined");
+    }
+    if(!_check_biasValue)
+    {
+        error_general("checkParam()","Param \"biasValue\" is not defined");
+    }
+    if(!_check_average)
+    {
+        error_general("checkParam()","Param \"enableAverage\" is not defined");
+    }
+    if(!_check_activationFunction)
+    {
+        error_general("checkParam()","Param \"activationFunction\" is not defined");
+    }
+}
+unsigned int SaveNet::genomsize()
+{
+    if(_hiddenX == 0 || _hiddenY == 0)
+    {
+        _genomsize = (_inputs+(unsigned int)_bias) * _outputs;
+    }
+    else
+    {
+        _genomsize = (_inputs+(unsigned int)_bias) * _hiddenY + (_hiddenY+(unsigned int)_bias) * _hiddenY * (_hiddenX-1) + (_hiddenY+(unsigned int)_bias) * _outputs;
+    }
+    return _genomsize;
+}
+void SaveNet::clearGenomList()
+{
+    _genomList = std::vector<std::vector<float> >();
+}
 //----------ERROR
 
 std::string SaveNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)

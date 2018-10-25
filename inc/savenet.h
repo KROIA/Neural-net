@@ -1,7 +1,11 @@
 #ifndef SAVENET_H
 #define SAVENET_H
+//              Autor   Alex Krieg
+#define SAVENET_VERSION "00.00.00"
+//              Datum   25.10.2018
 
 #include <net.h>
+#include <time.h>
 
 class SaveNet
 {
@@ -20,7 +24,7 @@ class SaveNet
         unsigned int hiddenNeuronsX();
         void hiddenNeuronsY(unsigned int hiddenY);
         unsigned int hiddenNeuronsY();
-        void outptNeurons(unsigned int outputs);
+        void outputNeurons(unsigned int outputs);
         unsigned int outputNeurons();
         void bias(bool bias);
         bool bias();
@@ -41,15 +45,31 @@ class SaveNet
         void saveFile();
         void saveFile(std::string filename);
 
+        void setGenom(std::vector<float>   genom);
+        void setGenom(unsigned int index,std::vector<float>   genom);
+        void setGenom(std::vector<std::vector<float>   > genomList);
         void addGenom(std::vector<float>   genom);
         void addGenom(std::vector<std::vector<float>   > genomList);
-        std::vector<float>  genom(unsigned int index = 0);
+        std::vector<float>  genom(unsigned int index);
         std::vector<std::vector<float>  > genom();
+        unsigned int animals();
 
+        void clear();
+        void set(unsigned int inputs,
+                 unsigned int hiddenX,
+                 unsigned int hiddenY,
+                 unsigned int outputs,
+                 bool         bias,
+                 bool         average,
+                 Activation   activationFunction,
+                 float        biasValue);
         //void net(Net *net);
 
+        void clearGenomList();
 
     private:
+        void checkParam();
+        unsigned int genomsize();
 
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
@@ -66,6 +86,8 @@ class SaveNet
         std::string _filename;
         std::string _fileEnding;
         std::string _netConfiguration;
+        unsigned int _saves;
+        FILE *_file;
 
         unsigned int _inputs;
         unsigned int _hiddenX;
@@ -79,7 +101,18 @@ class SaveNet
         std::vector<float>       _extraParamValue;
 
         std::vector<std::vector<float>  >_genomList;
-       // std::vector<std::vector<Net>    >_netList;
+        unsigned int _genomsize;
+        // std::vector<std::vector<Net>    >_netList;
+
+        bool        _check_inputs;
+        bool        _check_hiddenX;
+        bool        _check_hiddenY;
+        bool        _check_outputs;
+        bool        _check_bias;
+        bool        _check_biasValue;
+        bool        _check_average;
+        bool        _check_activationFunction;
+
 
 };
 #endif // SAVENET_H

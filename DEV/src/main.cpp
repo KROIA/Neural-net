@@ -2,6 +2,7 @@
 #include <iostream>
 #include <windows.h>
 #include <geneticnet.h>
+#include <savenet.h>
 
 using namespace std;
 
@@ -20,26 +21,55 @@ int main(int argc, char *argv[])
 
 
 
+    unsigned int animals = 300;
 
-    unsigned int animals = 100;
+
+    SaveNet saveNet;
+    saveNet.filename("newFile");
+    saveNet.fileEnding("txt");
+
+
+    printf("setup Net()\n");
+    GeneticNet net;
+    try {
+        saveNet.loadFile();
+        animals = saveNet.animals();
+    } catch (std::runtime_error &e) {
+        qDebug() << e.what();
+        saveNet.set(4,1,4,1,true,false,Activation::Sigmoid,1);
+
+    }
+
+    net.set(animals,saveNet.inputNeurons(),saveNet.hiddenNeuronsX(),saveNet.hiddenNeuronsY(),saveNet.outputNeurons(),
+            saveNet.bias(),saveNet.enableAverage(),saveNet.activationFunction());
+    if(saveNet.animals() != 0)
+    {
+        net.genom(saveNet.genom());
+    }
+    //animals = saveNet.animals();
     unsigned int inputNeurons = 4;
     unsigned int hiddenNeuronX= 1;
     unsigned int hiddenNeuronY= 4;
     unsigned int outputNeuron = 1;
-    bool bias = false;
+    bool bias = true;
     bool enableAverage = false;
     vector<float> scoreList(animals,0);
-
-
-
-    printf("setup Net()\n");
-    GeneticNet net(animals,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+    //GeneticNet net(animals,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+    //GeneticNet net(saveNet.animals(),saveNet.inputNeurons(),saveNet.hiddenNeuronsX(),saveNet.hiddenNeuronsY(),saveNet.outputNeurons(),saveNet.bias(),saveNet.enableAverage(),saveNet.activationFunction()); //Makes the Net object
     qDebug() << "inputs: "<<net.inputNeurons();
     qDebug() << "hiddenX: "<<net.hiddenNeuronsX();
     qDebug() << "hiddenY: "<<net.hiddenNeuronsY();
     qDebug() << "outputs: "<<net.outputNeurons();
-    net.mutationFactor(1);
+    qDebug() << "animals: "<<net.animals();
+    net.mutationFactor(0.5);
     net.mutationChangeWeight(0.01);
+
+   // saveNet.set(net.inputNeurons(),net.hiddenNeuronsX(),net.hiddenNeuronsY(),net.outputNeurons(),
+   //             net.bias(),net.enableAverage(),net.activationFunction(),net.biasValue());
+    //saveNet.addGenom(net.genom());
+    //saveNet.saveFile();
+   // saveNet.loadFile();
+   // saveNet.saveFile("newFile");
 
 
     genomlogFile = fopen("genom.csv","w");
@@ -49,13 +79,15 @@ int main(int argc, char *argv[])
     }
     fprintf(genomlogFile,"\n");
     fclose(genomlogFile);
-    logfile = fopen("score.csv","w");
-    fclose(logfile);
+//    logfile = fopen("score.csv","w");
+//    fclose(logfile);
 
     vector<vector<float>    > inpuList(animals,vector<float>(inputNeurons,0));
     vector<vector<float>    > genom;
     vector<vector<float>    > output;
     printf("net done, press enter\n");
+    saveNet.setGenom(net.genom());
+    saveNet.saveFile();
     getchar();
     unsigned int counter =0;
     unsigned int saveCounter = 0;
@@ -102,7 +134,7 @@ int main(int argc, char *argv[])
                     tmp += inpuList[a][b];
                 }
                 tmp /= inputNeurons;
-                scoreList[a] += 10*(1-abs(tmp - output[a][0]));
+                scoreList[a] += 10*(2-abs(tmp - output[a][0]));
             }
         }
         for(unsigned int a=0; a<animals; a++)
@@ -121,7 +153,7 @@ int main(int argc, char *argv[])
 
 
 
-       if(saveCounter > 10)
+       if(saveCounter > 5)
        {
            saveCounter = 0;
            printNet(net[0]);
@@ -137,11 +169,13 @@ int main(int argc, char *argv[])
 
 
                                  //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
+           saveNet.setGenom(net.genom());
+           saveNet.saveFile();
            getchar();
        }
 
 
-       for(unsigned int a=1; a<animals; a++)
+      /* for(unsigned int a=1; a<animals; a++)
        {
            for(unsigned int b=0; b<net.genomsize(); b++)
            {
@@ -154,7 +188,7 @@ int main(int argc, char *argv[])
        }
        logGenom(net.genom(0),"gen0.csv");
        logGenom(genom[0],"genAver.csv");
-
+        */
    }
     return a.exec();
 }

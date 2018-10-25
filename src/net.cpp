@@ -71,7 +71,7 @@ Net::~Net()
             try {
                 delete _hiddenNeuronList[a-1][b-1];
             } catch (std::exception &e) {
-                qDebug() << "errror: "<<e.what();
+                qDebug() << "error: "<<e.what();
             }
         }
     }
@@ -80,7 +80,7 @@ Net::~Net()
         try {
             delete _outputNeuronList[b-1];
         } catch (std::exception &e) {
-            qDebug() << "errror: "<<e.what();
+            qDebug() << "error: "<<e.what();
         }
     }
     _hiddenNeuronList.clear();
