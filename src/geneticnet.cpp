@@ -1,9 +1,13 @@
 #include <geneticnet.h>
 
 
+GeneticNet::GeneticNet()
+{
+    this->init(GENETICNET_MIN_ANIMALS,NET_MIN_INPUTNEURONS,NET_MIN_HIDDENNEURONS_X,NET_MIN_HIDDENNEURONS_Y,NET_MIN_OUTPUTNEURONS,true,false,Activation::Sigmoid);
+}
 GeneticNet::GeneticNet(unsigned int animals)
 {
-    this->init(animals,1,1,1,1,true,false,Activation::Sigmoid);
+    this->init(animals,NET_MIN_INPUTNEURONS,NET_MIN_HIDDENNEURONS_X,NET_MIN_HIDDENNEURONS_Y,NET_MIN_OUTPUTNEURONS,true,false,Activation::Sigmoid);
 }
 GeneticNet::GeneticNet(unsigned int animals,
                        unsigned int inputs,
@@ -24,6 +28,39 @@ GeneticNet::GeneticNet(unsigned int animals,
 {
     this->init(animals,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
+GeneticNet::~GeneticNet()
+{
+    for(unsigned int b=_netList.size(); b>0; b--)
+    {
+        try {
+            delete _netList[b-1];
+        } catch (std::exception &e) {
+            qDebug() << "error: "<<e.what();
+        }
+    }
+    _scoreList.clear();
+}
+void                    GeneticNet::set(unsigned int animals,
+                            unsigned int inputs,
+                            unsigned int hiddenX,
+                            unsigned int hiddenY,
+                            unsigned int outputs,
+                            bool enableBias,
+                            bool enableAverage,
+                            Activation func)
+{
+    this->animals(animals);
+    this->inputNeurons(inputs);
+    this->hiddenNeuronsX(hiddenX);
+    this->hiddenNeuronsY(hiddenY);
+    this->outputNeurons(outputs);
+    this->bias(enableBias);
+    this->enableAverage(enableAverage);
+    this->activationFunction(func);
+    this->mutationChangeWeight(0.01);
+    this->mutationFactor(0.01);
+
+}
 void                    GeneticNet::init(unsigned int animals,
                                          unsigned int inputs,
                                          unsigned int hiddenX,
@@ -35,16 +72,9 @@ void                    GeneticNet::init(unsigned int animals,
 {
     _randEngine = std::default_random_engine(rand()%100);
     _animals = 0;
-    this->animals(animals);
-    this->inputNeurons(inputs);
-    this->hiddenNeuronsX(hiddenX);
-    this->hiddenNeuronsY(hiddenY);
-    this->outputNeurons(outputs);
-    this->bias(enableBias);
-    this->enableAverage(enableAverage);
-    this->activationFunction(func);
-    this->mutationChangeWeight(0.01);
-    this->mutationFactor(0.01);
+    _netList = std::vector<Net * >();
+    _scoreList = std::vector<float>();
+    this->set(animals,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
 
 void                    GeneticNet::animals(unsigned int animals)
@@ -59,7 +89,7 @@ void                    GeneticNet::animals(unsigned int animals)
     }
     if(animals > _animals)
     {
-        for(unsigned int a=0; a<animals - _animals; a++)
+       for(unsigned int a=0; a<animals - _animals; a++)
         {
             _netList.push_back(new Net());
             _scoreList.push_back(0);
@@ -361,7 +391,7 @@ void                    GeneticNet::input(std::vector<std::vector<float>    > in
 {
     if(input.size() != _animals)
     {
-        error_general("input(std::vector<std::vector<float> >)","std::vecto<>.size() == "+std::to_string(input.size()) +" "+ error_paramOutOfRange((unsigned int)0,input.size(),_animals,_animals));
+        error_general("input(std::vector<std::vector<float> >)","std::vector<>.size() == "+std::to_string(input.size()) +" "+ error_paramOutOfRange((unsigned int)0,input.size(),_animals,_animals));
     }
     _update = true;
     for(unsigned int a=0; a<_animals; a++)
@@ -658,6 +688,7 @@ void                    GeneticNet::score(std::vector<float>   scoreList)
 {
     if(scoreList.size() != _scoreList.size())
     {
+        qDebug() << "scoreList.size() "<<_scoreList.size();
         error_general("score(std::vector<float>)","std::vector<float>.size() == "+std::to_string(scoreList.size())+"  "+error_paramOutOfRange(0,scoreList.size(),_animals,_animals));
     }
     _scoreList = scoreList;

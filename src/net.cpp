@@ -71,7 +71,7 @@ Net::~Net()
             try {
                 delete _hiddenNeuronList[a-1][b-1];
             } catch (std::exception &e) {
-                qDebug() << "errror: "<<e.what();
+                qDebug() << "error: "<<e.what();
             }
         }
     }
@@ -80,7 +80,7 @@ Net::~Net()
         try {
             delete _outputNeuronList[b-1];
         } catch (std::exception &e) {
-            qDebug() << "errror: "<<e.what();
+            qDebug() << "error: "<<e.what();
         }
     }
     _hiddenNeuronList.clear();
@@ -685,6 +685,7 @@ void                Net::setGenomToNeuron()
                     error+= "\tHiddenNeurons X:\t"+std::to_string(_hiddenX)+"\n";
                     error+= "\tHiddenNeurons Y:\t"+std::to_string(_hiddenY)+"\n";
                     error+= "\tOutputNeurons Y:\t"+std::to_string(_outputs);
+                    error+= "\tBias"+ std::to_string(_bias);
         error_general("setGenomToNeuron()",error);
     }
     unsigned int weightPos = 0;
