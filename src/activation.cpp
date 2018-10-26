@@ -41,11 +41,11 @@ float Neuron::activation_Binary(float netInput)
 
 float Neuron::activation_Gaussian(float netInput)
 {
-    return (float)exp(-(pow((double)netInput,2)) * 4);
+    return 2*(float)exp(-(pow((double)netInput,2)) * 4)-1;
 }
 float Neuron::deriv_activation_Gaussian(float netInput)
 {
-    return (float)-2 * netInput * activation_Gaussian(netInput);
+    return netInput * (1+activation_Gaussian(netInput))/-0.43;
 }
 
 

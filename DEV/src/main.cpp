@@ -19,42 +19,22 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
 
-
+    printf("setup Net()\n");
 
     unsigned int animals = 300;
-
-
-    SaveNet saveNet;
-    saveNet.filename("newFile");
-    saveNet.fileEnding("txt");
-
-
-    printf("setup Net()\n");
-    GeneticNet net;
-    try {
-        saveNet.loadFile();
-        animals = saveNet.animals();
-    } catch (std::runtime_error &e) {
-        qDebug() << e.what();
-        saveNet.set(4,1,4,1,true,false,Activation::Sigmoid,1);
-
-    }
-
-    net.set(animals,saveNet.inputNeurons(),saveNet.hiddenNeuronsX(),saveNet.hiddenNeuronsY(),saveNet.outputNeurons(),
-            saveNet.bias(),saveNet.enableAverage(),saveNet.activationFunction());
-    if(saveNet.animals() != 0)
-    {
-        net.genom(saveNet.genom());
-    }
-    //animals = saveNet.animals();
     unsigned int inputNeurons = 4;
     unsigned int hiddenNeuronX= 1;
     unsigned int hiddenNeuronY= 4;
     unsigned int outputNeuron = 1;
     bool bias = true;
     bool enableAverage = false;
-    vector<float> scoreList(animals,0);
-    //GeneticNet net(animals,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+
+
+    GeneticNet net(animals,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+    net.netFileName("netFile");
+    net.loadFromNetFile();
+
+
     //GeneticNet net(saveNet.animals(),saveNet.inputNeurons(),saveNet.hiddenNeuronsX(),saveNet.hiddenNeuronsY(),saveNet.outputNeurons(),saveNet.bias(),saveNet.enableAverage(),saveNet.activationFunction()); //Makes the Net object
     qDebug() << "inputs: "<<net.inputNeurons();
     qDebug() << "hiddenX: "<<net.hiddenNeuronsX();
@@ -86,24 +66,12 @@ int main(int argc, char *argv[])
     vector<vector<float>    > genom;
     vector<vector<float>    > output;
     printf("net done, press enter\n");
-    saveNet.setGenom(net.genom());
-    saveNet.saveFile();
-    vector<string> paramName;
-    vector<float>  paramValue;
-    saveNet.getExtraParam(paramName,paramValue);
-    for(unsigned int a=0; a<paramName.size(); a++)
-    {
-        qDebug() << "[P] " << QString::fromStdString(paramName[a]) << "\t"<< paramValue[a];
-    }
     getchar();
-
-    saveNet.setExtraParam("param1",2.5);
-    saveNet.setExtraParam("param2",2.6);
-    saveNet.setExtraParam("param3",1.7);
     unsigned int counter =0;
     unsigned int saveCounter = 0;
     unsigned int saves = 0;
     float averageScore = 0;
+    vector<float> scoreList(animals,0);
 
 
     system("cls");
@@ -180,8 +148,7 @@ int main(int argc, char *argv[])
 
 
                                  //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
-           saveNet.setGenom(net.genom());
-           saveNet.saveFile();
+           net.saveToNetFile();
            getchar();
        }
 

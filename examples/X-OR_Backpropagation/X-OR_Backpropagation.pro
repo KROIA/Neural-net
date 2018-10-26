@@ -27,7 +27,8 @@ SOURCES += \
     $$netSrcPath/net.cpp \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
-    $$netSrcPath/backpropnet.cpp
+    $$netSrcPath/backpropnet.cpp \
+    $$netSrcPath/savenet.cpp
 
 
 # Default rules for deployment.

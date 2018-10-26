@@ -1,11 +1,13 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.01.00"
-//                      Datum   15.10.2018
+#define    BACKPROPNET_VERSION "02.02.00"
+//                      Datum   27.10.2018
 
 #include "net.h"
+#include "savenet.h"
 
+#include <QDebug>
 
 class BackpropNet : public Net
 {
@@ -22,6 +24,28 @@ class BackpropNet : public Net
                     bool enableBias,
                     bool enableAverage,
                     Activation func);
+
+        void        set(unsigned int inputs,
+                        unsigned int hiddenX,
+                        unsigned int hiddenY,
+                        unsigned int outputs,
+                        bool enableBias,
+                        bool enableAverage,
+                        Activation func);
+
+        void        netFileName(std::string filename);
+        std::string netFileName();
+        void        netFileEnding(std::string fileEnding);
+        std::string netFileEnding();
+        void        loadFromNetFile();
+        void        loadFromNetFile(std::string filename);
+        void        loadFromNetFile(std::string filename,std::string fileEnding);
+        void        saveToNetFile();
+        void        saveToNetFile(std::string filename);
+        void        saveToNetFile(std::string filename,std::string fileEnding);
+
+
+
         float               netError();
         std::vector<float>  outputError();
         float               outputError(unsigned int output);
@@ -32,7 +56,7 @@ class BackpropNet : public Net
         void learn();
         void learn(std::vector<float> expected);
     private:
-
+        void init();
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
         std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
@@ -51,5 +75,7 @@ class BackpropNet : public Net
         bool  _update;
         std::vector<float> _outputError;
         std::vector<float> _expected;
+
+        SaveNet _saveNet;
 };
 #endif // BACKPROPNET_H

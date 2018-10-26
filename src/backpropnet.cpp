@@ -3,8 +3,7 @@
 BackpropNet::BackpropNet()
     :   Net()
 {
-    _netError = 0;
-    _update = true;
+    this->init();
     try {
         mutationFactor(0.1);
     } catch (std::runtime_error &e) {
@@ -18,8 +17,7 @@ BackpropNet::BackpropNet(unsigned int inputs,
                          unsigned int outputs)
     :   Net(inputs,hiddenX,hiddenY,outputs)
 {
-    _netError = 0;
-    _update = true;
+    this->init();
     try {
         mutationFactor(0.1);
     } catch (std::runtime_error &e) {
@@ -38,8 +36,7 @@ BackpropNet::BackpropNet(unsigned int inputs,
                          Activation func)
     :   Net(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
 {
-    _netError = 0;
-    _update = true;
+    this->init();
     try {
         mutationFactor(0.1);
     } catch (std::runtime_error &e) {
@@ -62,6 +59,99 @@ BackpropNet::BackpropNet(unsigned int inputs,
                       "] , Activation ["+std::to_string(func)+"])","you cant use this activation function: Binary for this learn algorithm");
     }
 }
+void        BackpropNet::init()
+{
+    _netError = 0;
+    _update = true;
+    this->netFileName("netFile");
+    this->netFileEnding("bnet");
+}
+void        BackpropNet::set(unsigned int inputs,
+                             unsigned int hiddenX,
+                             unsigned int hiddenY,
+                             unsigned int outputs,
+                             bool enableBias,
+                             bool enableAverage,
+                             Activation func)
+{
+    this->inputNeurons(inputs);
+    this->hiddenNeuronsX(hiddenX);
+    this->hiddenNeuronsY(hiddenY);
+    this->outputNeurons(outputs);
+    this->bias(enableBias);
+    this->enableAverage(enableAverage);
+    this->activationFunction(func);
+}
+void                    BackpropNet::netFileName(std::string filename)
+{
+    _saveNet.filename(filename);
+}
+std::string             BackpropNet::netFileName()
+{
+    return _saveNet.filename();
+}
+void                    BackpropNet::netFileEnding(std::string fileEnding)
+{
+    _saveNet.fileEnding(fileEnding);
+}
+std::string             BackpropNet::netFileEnding()
+{
+    return _saveNet.fileEnding();
+}
+void                    BackpropNet::loadFromNetFile()
+{
+    unsigned int genomSelection = 0;
+    try {
+        _saveNet.loadFile();
+    } catch (std::runtime_error &e) {
+        qDebug() << "BackpropNet::loadFromNetFile() Warning: "<< e.what();
+        return;
+    }
+    try {
+        this->set(_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
+                  _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
+        this->biasValue(_saveNet.biasValue());
+        this->genom(_saveNet.genom(genomSelection));
+    } catch (std::runtime_error &e) {
+        error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
+                      "unable to apply the settings. Maybe the file is damaged.",e);
+    }
+}
+void                    BackpropNet::loadFromNetFile(std::string filename)
+{
+    this->netFileName(filename);
+    this->loadFromNetFile();
+}
+void                    BackpropNet::loadFromNetFile(std::string filename,std::string fileEnding)
+{
+    this->netFileName(filename);
+    this->netFileEnding(fileEnding);
+    this->loadFromNetFile();
+}
+void                    BackpropNet::saveToNetFile()
+{
+    try {
+        _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
+                     this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
+        _saveNet.setGenom(this->genom());
+        _saveNet.saveFile();
+    } catch (std::runtime_error &e) {
+        error_general("saveToNetFile()",e);
+    }
+}
+void                    BackpropNet::saveToNetFile(std::string filename)
+{
+    this->netFileName(filename);
+    this->saveToNetFile();
+}
+void                    BackpropNet::saveToNetFile(std::string filename,std::string fileEnding)
+{
+    this->netFileName(filename);
+    this->netFileEnding(fileEnding);
+    this->saveToNetFile();
+}
+
+
 
 float               BackpropNet::netError()
 {
