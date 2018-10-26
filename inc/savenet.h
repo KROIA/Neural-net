@@ -1,8 +1,8 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "00.00.00"
-//              Datum   25.10.2018
+#define SAVENET_VERSION "00.01.00"
+//              Datum   26.10.2018
 
 #include <net.h>
 #include <time.h>
@@ -17,7 +17,6 @@ class SaveNet
         std::string filename();
         void fileEnding(std::string fileEnding);
         std::string fileEnding();
-        std::string netConfiguration();
         void inputNeurons(unsigned int inputs);
         unsigned int inputNeurons();
         void hiddenNeuronsX(unsigned int hiddenX);
@@ -34,9 +33,9 @@ class SaveNet
         bool enableAverage();
         void activationFunction(Activation func);
         Activation activationFunction();
-        void addExtraParam(std::string name,float value);
+        void setExtraParam(std::string name,float value);
         void getExtraParam(std::string name, float &value);
-        void addExtraParam(std::vector<std::string> name,std::vector<float> value);
+        void setExtraParam(std::vector<std::string> name,std::vector<float> value);
         void getExtraParam(std::vector<std::string> &name,std::vector<float> &value);
 
 
@@ -66,6 +65,7 @@ class SaveNet
         //void net(Net *net);
 
         void clearGenomList();
+        void clearExternParam();
 
     private:
         void checkParam();
@@ -81,11 +81,8 @@ class SaveNet
         void        error_general(std::string function, std::string cause, std::runtime_error &e);
         //---------------
 
-        bool        _update;
-
         std::string _filename;
         std::string _fileEnding;
-        std::string _netConfiguration;
         unsigned int _saves;
         FILE *_file;
 
@@ -112,7 +109,5 @@ class SaveNet
         bool        _check_biasValue;
         bool        _check_average;
         bool        _check_activationFunction;
-
-
 };
 #endif // SAVENET_H

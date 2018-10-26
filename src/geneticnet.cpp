@@ -89,8 +89,7 @@ void                    GeneticNet::animals(unsigned int animals)
     }
     if(animals > _animals)
     {
-        qDebug() << "animals -animals: "<<animals << " - " << _animals <<" = " <<animals - _animals;
-        for(unsigned int a=0; a<animals - _animals; a++)
+       for(unsigned int a=0; a<animals - _animals; a++)
         {
             _netList.push_back(new Net());
             _scoreList.push_back(0);
@@ -107,7 +106,6 @@ void                    GeneticNet::animals(unsigned int animals)
         }
     }
     _animals = animals;
-    qDebug() << "animals: "<<_animals;
     _update  = true;
 }
 unsigned int            GeneticNet::animals()

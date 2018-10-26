@@ -28,20 +28,6 @@ std::string     SaveNet::fileEnding()
 {
     return _fileEnding;
 }
-std::string     SaveNet::netConfiguration()
-{
-   /* _netConfiguration = "";
-
-    _netConfiguration += "I"+std::to_string(_inputs);
-    _netConfiguration += "HX"+std::to_string(_hiddenX);
-    _netConfiguration += "HY"+std::to_string(_hiddenY);
-    _netConfiguration += "O"+std::to_string(_outputs);
-
-    _netConfiguration += "B"+std::to_string(_bias);
-    */
-
-    return _netConfiguration;
-}
 void            SaveNet::inputNeurons(unsigned int inputs)
 {
     _inputs  = inputs;
@@ -122,13 +108,12 @@ Activation      SaveNet::activationFunction()
 {
     return _activationFuncton;
 }
-void            SaveNet::addExtraParam(std::string name,float value)
+void            SaveNet::setExtraParam(std::string name,float value)
 {
     for(unsigned int a=0; a<_extraParamName.size(); a++)
     {
         if(_extraParamName[a] == name)
         {
-            //error_general("addExtraParam(std::string ["+name+"] , float ["+std::to_string(value)+"] )","Multiple parameter: "+name);
             _extraParamValue[a] = value;
             return;
         }
@@ -148,18 +133,18 @@ void            SaveNet::getExtraParam(std::string name, float &value)
     }
     error_general("getExternParam(std::string ["+name+"] , float & ["+std::to_string(value)+"] )","Unknown parameter: "+name);
 }
-void            SaveNet::addExtraParam(std::vector<std::string> name,std::vector<float> value)
+void            SaveNet::setExtraParam(std::vector<std::string> name,std::vector<float> value)
 {
     if(name.size() != value.size())
     {
-        error_general("addExternParam(std::vector<std::string> , std::vector<float> )","Vectorsize is not the same");
+        error_general("setExtraParam(std::vector<std::string> , std::vector<float> )","Vectorsize is not the same");
     }
     for(unsigned int a=0; a<name.size(); a++)
     {
         try {
-            addExtraParam(name[a],value[a]);
+            setExtraParam(name[a],value[a]);
         } catch (std::runtime_error &e) {
-            error_general("addExternParam(std::vector<std::string> , std::vector<float> )","addExtraParam("+name[a]+","+std::to_string(value[a])+")",e);
+            error_general("setExtraParam(std::vector<std::string> , std::vector<float> )","addExtraParam("+name[a]+","+std::to_string(value[a])+")",e);
         }
     }
 }
@@ -172,16 +157,14 @@ void            SaveNet::getExtraParam(std::vector<std::string> &name,std::vecto
 
 void SaveNet::loadFile()
 {
+    if(_filename == "")
     {
-        if(_filename == "")
-        {
-            error_general("loadFile()","no filename declared");
-        }
-        _file = fopen((_filename+"."+_fileEnding).c_str(),"r");
-        if(!_file)
-        {
-            error_general("loadFile()","can't open file: \""+_filename+"."+_fileEnding+"\"");
-        }
+        error_general("loadFile()","no filename declared");
+    }
+    _file = fopen((_filename+"."+_fileEnding).c_str(),"r");
+    if(!_file)
+    {
+        error_general("loadFile()","can't open file: \""+_filename+"."+_fileEnding+"\"");
     }
     this->clear();
     std::vector<std::string> fileBuffer;
@@ -193,63 +176,59 @@ void SaveNet::loadFile()
         fgets(list,255,_file);
         tmpBuffer = list;
         fileBuffer.push_back(list);
-       // qDebug() << QString::fromStdString(tmpBuffer);
     }
     for(unsigned int a=0; a<fileBuffer.size(); a++)
     {
-      //  qDebug() << QString::fromStdString(fileBuffer[a]);
         if(fileBuffer[a].find("SAVES") == 0)
         {
-            _saves = atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+            _saves = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
         }
         if(fileBuffer[a].find("ANIMALS") == 0)
         {
-            tmpAnimals = atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+            tmpAnimals = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
         }
         if(fileBuffer[a].find("__INPUTNEURONS") == 0)
         {
-            inputNeurons(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            inputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__HIDDENNEURONSX") == 0)
         {
-            hiddenNeuronsX(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            hiddenNeuronsX(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__HIDDENNEURONSY") == 0)
         {
-            hiddenNeuronsY(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            hiddenNeuronsY(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__OUTPUTNEURONS") == 0)
         {
-            outputNeurons(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            outputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__BIAS") == 0)
         {
-            bias(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            bias(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__AVERAGE") == 0)
         {
-            enableAverage(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            enableAverage(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__BIASVALUE") == 0)
         {
-            biasValue(atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            biasValue(std::stof(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("__ACTIVATIONFUNCTION") == 0)
         {
-            activationFunction((Activation)atoi(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            activationFunction((Activation)std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+        }
+        if(fileBuffer[a].find("[P] ") == 0)
+        {
+            fileBuffer[a] = fileBuffer[a].substr(4);
+            std::string name = fileBuffer[a].substr(0,fileBuffer[a].find(" "));
+            fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find(" ")+1);
+            float value = std::stof(fileBuffer[a].substr(0,fileBuffer[a].find("\n")).c_str());
+            setExtraParam(name,value);
         }
     }
     this->genomsize();
-    qDebug() << "inp:\t"<<_inputs;
-    qDebug() << "hidX:\t"<<_hiddenX;
-    qDebug() << "hidY:\t"<<_hiddenY;
-    qDebug() << "out:\t"<<_outputs;
-    qDebug() << "bias:\t"<<_bias;
-    qDebug() << "aver:\t"<<_average;
-    qDebug() << "biasVal:\t"<<_biasValue;
-    qDebug() << "act:\t"<<_activationFuncton;
-    qDebug() << "genSi:\t"<<_genomsize;
-
 
     for(unsigned int y=0; y<tmpAnimals; y++)
     {
@@ -265,27 +244,15 @@ void SaveNet::loadFile()
         }
         for(unsigned int x=0; x<_genomsize; x++)
         {
-
             fscanf(_file,"%s",val);
             val2 = val;
-           // qDebug() << QString::fromStdString(val2);
             if(val2.find("[G]") != -1 || feof(_file))
             {
-            //     qDebug() << "break-----------------------";
                 break;
             }
-
             addGen.push_back(stof(val2));
-           // qDebug() << "size: "<< addGen.size();
-
         }
-      //  qDebug() << "size: "<< addGen.size();
-       // try {
-            this->addGenom(addGen);
-       // } catch (std::runtime_error &e) {
-       //     qDebug() << e.what();
-       // }
-
+        this->addGenom(addGen);
     }
     fclose(_file);
 }
@@ -296,22 +263,21 @@ void SaveNet::loadFile(std::string filename)
 }
 void SaveNet::saveFile()
 {
+    if(_filename == "")
     {
-        if(_filename == "")
-        {
-            error_general("saveFile()","no filename declared");
-        }
-        checkParam();
-        if(_genomList.size() == 0)
-        {
-            error_general("saveFile()","no genome defined");
-        }
-        _file = fopen((_filename+"."+_fileEnding).c_str(),"w");
-        if(!_file)
-        {
-            error_general("saveFile()","can't create file: \""+_filename+"."+_fileEnding+"\"");
-        }
+        error_general("saveFile()","no filename declared");
     }
+    checkParam();
+    if(_genomList.size() == 0)
+    {
+        error_general("saveFile()","no genome defined");
+    }
+    _file = fopen((_filename+"."+_fileEnding).c_str(),"w");
+    if(!_file)
+    {
+        error_general("saveFile()","can't create file: \""+_filename+"."+_fileEnding+"\"");
+    }
+
     time_t timer;
     time(&timer);
     struct tm *ti = localtime(&timer);
@@ -332,6 +298,13 @@ void SaveNet::saveFile()
     fprintf(_file,"__BIASVALUE %.8f\n",this->_biasValue);
     fprintf(_file,"__ACTIVATIONFUNCTION %i\n",(unsigned int)this->_activationFuncton);
     //--------------------------------------------------------
+    fprintf(_file,"\n");
+    fprintf(_file,"[PARAM]\n");
+    for(unsigned int a=0; a<_extraParamName.size(); a++)
+    {
+        fprintf(_file,"[P] %s %f\n",_extraParamName[a].c_str(),_extraParamValue[a]);
+    }
+
     fprintf(_file,"\n");
     fprintf(_file,"[GENLIST]\n");
 
@@ -449,6 +422,7 @@ void SaveNet::clear()
     _check_average              = false;
     _check_activationFunction   = false;
     clearGenomList();
+    clearExternParam();
 }
 void SaveNet::set(unsigned int inputs,
          unsigned int hiddenX,
@@ -518,6 +492,11 @@ unsigned int SaveNet::genomsize()
 void SaveNet::clearGenomList()
 {
     _genomList = std::vector<std::vector<float> >();
+}
+void SaveNet::clearExternParam()
+{
+    _extraParamName = std::vector<std::string> ();
+    _extraParamValue = std::vector<float> ();
 }
 //----------ERROR
 

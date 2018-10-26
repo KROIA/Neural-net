@@ -88,7 +88,18 @@ int main(int argc, char *argv[])
     printf("net done, press enter\n");
     saveNet.setGenom(net.genom());
     saveNet.saveFile();
+    vector<string> paramName;
+    vector<float>  paramValue;
+    saveNet.getExtraParam(paramName,paramValue);
+    for(unsigned int a=0; a<paramName.size(); a++)
+    {
+        qDebug() << "[P] " << QString::fromStdString(paramName[a]) << "\t"<< paramValue[a];
+    }
     getchar();
+
+    saveNet.setExtraParam("param1",2.5);
+    saveNet.setExtraParam("param2",2.6);
+    saveNet.setExtraParam("param3",1.7);
     unsigned int counter =0;
     unsigned int saveCounter = 0;
     unsigned int saves = 0;
