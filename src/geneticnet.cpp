@@ -57,10 +57,79 @@ void                    GeneticNet::set(unsigned int animals,
     this->bias(enableBias);
     this->enableAverage(enableAverage);
     this->activationFunction(func);
-    this->mutationChangeWeight(0.01);
-    this->mutationFactor(0.01);
+
 
 }
+
+void                    GeneticNet::netFileName(std::string filename)
+{
+    _saveNet.filename(filename);
+}
+std::string             GeneticNet::netFileName()
+{
+    return _saveNet.filename();
+}
+void                    GeneticNet::netFileEnding(std::string fileEnding)
+{
+    _saveNet.fileEnding(fileEnding);
+}
+std::string             GeneticNet::netFileEnding()
+{
+    return _saveNet.fileEnding();
+}
+void                    GeneticNet::loadFromNetFile()
+{
+    try {
+        _saveNet.loadFile();
+    } catch (std::runtime_error &e) {
+        qDebug() << "Warning: "<< e.what();
+        return;
+    }
+    try {
+        this->set(_saveNet.animals(),_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
+                  _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
+        this->biasValue(_saveNet.biasValue());
+        this->genom(_saveNet.genom());
+    } catch (std::runtime_error &e) {
+        error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
+                      "unable to apply the settings. Maybe the file is damaged.",e);
+    }
+}
+void                    GeneticNet::loadFromNetFile(std::string filename)
+{
+    this->netFileName(filename);
+    this->loadFromNetFile();
+}
+void                    GeneticNet::loadFromNetFile(std::string filename,std::string fileEnding)
+{
+    this->netFileName(filename);
+    this->netFileEnding(fileEnding);
+    this->loadFromNetFile();
+}
+void                    GeneticNet::saveToNetFile()
+{
+    try {
+        _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
+                     this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
+        _saveNet.setGenom(this->genom());
+        _saveNet.saveFile();
+    } catch (std::runtime_error &e) {
+        error_general("saveToNetFile()",e);
+    }
+}
+void                    GeneticNet::saveToNetFile(std::string filename)
+{
+    this->netFileName(filename);
+    this->saveToNetFile();
+}
+void                    GeneticNet::saveToNetFile(std::string filename,std::string fileEnding)
+{
+    this->netFileName(filename);
+    this->netFileEnding(fileEnding);
+    this->saveToNetFile();
+}
+
+
 void                    GeneticNet::init(unsigned int animals,
                                          unsigned int inputs,
                                          unsigned int hiddenX,
@@ -74,6 +143,10 @@ void                    GeneticNet::init(unsigned int animals,
     _animals = 0;
     _netList = std::vector<Net * >();
     _scoreList = std::vector<float>();
+    this->mutationChangeWeight((float)0.01);
+    this->mutationFactor((float)0.01);
+    this->netFileName("netFile");
+    this->netFileEnding("gnet");
     this->set(animals,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
 
@@ -653,7 +726,7 @@ Net                    *GeneticNet::operator[](unsigned int animal)
 
 void                    GeneticNet::mutationFactor(float factor)
 {
-    if(factor < 0)
+    if(factor <= __FLOATINPOINT_TOLERANCE)
     {
         error_general("mutationFactor(float ["+std::to_string(factor)+"] )","mutationFactor must be greater than 0");
     }
@@ -661,7 +734,7 @@ void                    GeneticNet::mutationFactor(float factor)
 }
 void                    GeneticNet::mutationChangeWeight(float weight)
 {
-    if(weight < 0)
+    if(weight <= __FLOATINPOINT_TOLERANCE)
     {
         error_general("mutationChangeWeight(float ["+std::to_string(weight)+"] )","mutationChangeWeight must be greater than 0");
     }
@@ -801,7 +874,7 @@ void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,s
 }
 void                    GeneticNet::learn_mutate(std::vector<float> &genom)
 {
-    if(_mutationFactor == 0 || _mutationChangeWeight == 0)
+    if(_mutationFactor <= __FLOATINPOINT_TOLERANCE || _mutationChangeWeight <= __FLOATINPOINT_TOLERANCE)
         return;
     for(unsigned int a=0; a<genomsize(); a++)
     {

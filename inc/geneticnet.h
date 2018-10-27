@@ -1,13 +1,16 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.01.00"
-//                      Datum   18.10.2018
+#define    BACKPROPNET_VERSION "02.02.00"
+//                      Datum   27.10.2018
 
 #include "net.h"
+#include "savenet.h"
+
 #include <QDebug>
+
 #define GENETICNET_MIN_ANIMALS 2
-#define GENETICNET_MAX_ANIMALS 500
+#define GENETICNET_MAX_ANIMALS 1000
 
 class GeneticNet
 {
@@ -37,6 +40,17 @@ class GeneticNet
                                     bool enableBias,
                                     bool enableAverage,
                                     Activation func);
+
+        void                    netFileName(std::string filename);
+        std::string             netFileName();
+        void                    netFileEnding(std::string fileEnding);
+        std::string             netFileEnding();
+        void                    loadFromNetFile();
+        void                    loadFromNetFile(std::string filename);
+        void                    loadFromNetFile(std::string filename,std::string fileEnding);
+        void                    saveToNetFile();
+        void                    saveToNetFile(std::string filename);
+        void                    saveToNetFile(std::string filename,std::string fileEnding);
 
         void                    animals(unsigned int animals);
         unsigned int            animals();
@@ -148,6 +162,6 @@ class GeneticNet
 
         std::default_random_engine          _randEngine;
 
-
+        SaveNet _saveNet;
 };
 #endif // GENETICNET_H

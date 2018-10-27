@@ -11,9 +11,9 @@ vector<vector<float>    >outputSet;     //Trainings expected output vector
 
 FILE *genomlogFile;
 FILE *logfile;
-void printNet(Net net);
+void printNet(Net &net);
 void setupTrainingSet();
-void netFinished(BackpropNet net);
+void netFinished(BackpropNet &net);
 void cmdXY(int x, int y);
 void logGenom(vector<float> genom);
 int main(int argc, char *argv[])
@@ -25,24 +25,28 @@ int main(int argc, char *argv[])
     setupTrainingSet(); //Setting the trainingset for the X-OR problem
     printf("setup\n");
     unsigned int inputNeurons = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
-    unsigned int hiddenNeuronX= 2;
-    unsigned int hiddenNeuronY= 3;
+    unsigned int hiddenNeuronX= 1;
+    unsigned int hiddenNeuronY= 4;
     unsigned int outputNeuron = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
-    bool bias = false;
+    bool bias = true;
     bool enableAverage = false;
 
     BackpropNet net(inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
+    net.loadFromNetFile();
+    net.mutationFactor(0.005);
 
-    genomlogFile = fopen("genom.csv","w");
-    for(unsigned int a=0; a<net.genomsize(); a++)
+    genomlogFile = fopen("genom.csv","r");
+    if(!genomlogFile)
     {
-        fprintf(genomlogFile,"w%i;",a+1);
+        fclose(genomlogFile);
+        genomlogFile = fopen("genom.csv","w");
+        for(unsigned int a=0; a<net.genomsize(); a++)
+        {
+            fprintf(genomlogFile,"w%i;",a+1);
+        }
+        fprintf(genomlogFile,"\n");
+        fclose(genomlogFile);
     }
-    fprintf(genomlogFile,"\n");
-    fclose(genomlogFile);
-    logfile = fopen("score.csv","w");
-    fclose(logfile);
-
     vector<float> genom;
     vector<float> output;
     printf("net done, press enter\n");
@@ -51,6 +55,7 @@ int main(int argc, char *argv[])
     unsigned int saveCounter = 0;
     unsigned int saves = 0;
     float averageError = 0;
+
 
 
     system("cls");
@@ -81,7 +86,7 @@ int main(int argc, char *argv[])
             if(saveCounter > saves)
             {
                 saveCounter = 0;
-                saves+=10; //spam the console in the beginning and later no more
+                saves+=100; //spam the console in the beginning and later no more
                 printf("error: %.5f\n",averageError);   //Prints the error
                 printf("steps: %i\n",learningSteps);    //Prints the learn cyles
 
@@ -89,6 +94,7 @@ int main(int argc, char *argv[])
                 fprintf(logfile,"%.5f;\n",averageError);    //
                 fclose(logfile);                            //
 
+                net.saveToNetFile();                        //Save the genom
 
                 logGenom(net.genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
             }
@@ -102,7 +108,7 @@ int main(int argc, char *argv[])
     }
     return a.exec();
 }
-void printNet(Net net)
+void printNet(Net &net)
 {
     printf("=================================================================================\n");
     printf("Input neurons:\n");
@@ -157,7 +163,7 @@ void setupTrainingSet()
     trainingsSet.push_back({1,0});   outputSet.push_back({1});
     trainingsSet.push_back({1,1});   outputSet.push_back({0});
 }
-void netFinished(BackpropNet net)
+void netFinished(BackpropNet &net)
 {
     vector<float> genom;
     vector<float> output;

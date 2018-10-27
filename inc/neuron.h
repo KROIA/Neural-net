@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.01.01"
-//              Datum   18.10.2018
+#define NEURON_VERSION "02.02.00"
+//              Datum   27.10.2018
 
 #include <vector>
 #include <math.h>
@@ -13,6 +13,7 @@
 
 #define NEURON_MIN_INPUTS 1
 #define NEURON_MAX_INPUTS 500
+#define __FLOATINPOINT_TOLERANCE 0.0000001
 
 
 enum Activation{        // https://en.wikipedia.org/wiki/Activation_function

@@ -181,43 +181,43 @@ void SaveNet::loadFile()
     {
         if(fileBuffer[a].find("SAVES") == 0)
         {
-            _saves = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+            _saves = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str());
         }
         if(fileBuffer[a].find("ANIMALS") == 0)
         {
-            tmpAnimals = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str());
+            tmpAnimals = std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str());
         }
-        if(fileBuffer[a].find("__INPUTNEURONS") == 0)
+        if(fileBuffer[a].find("__INPUTNEURONS ") == 0)
         {
-            inputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            inputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__HIDDENNEURONSX") == 0)
+        if(fileBuffer[a].find("__HIDDENNEURONSX ") == 0)
         {
-            hiddenNeuronsX(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            hiddenNeuronsX(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__HIDDENNEURONSY") == 0)
+        if(fileBuffer[a].find("__HIDDENNEURONSY ") == 0)
         {
-            hiddenNeuronsY(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            hiddenNeuronsY(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__OUTPUTNEURONS") == 0)
+        if(fileBuffer[a].find("__OUTPUTNEURONS ") == 0)
         {
-            outputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            outputNeurons(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__BIAS") == 0)
+        if(fileBuffer[a].find("__BIAS ") == 0)
         {
-            bias(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            bias(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__AVERAGE") == 0)
+        if(fileBuffer[a].find("__AVERAGE ") == 0)
         {
-            enableAverage(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            enableAverage(std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__BIASVALUE") == 0)
+        if(fileBuffer[a].find("__BIASVALUE ") == 0)
         {
-            biasValue(std::stof(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            biasValue(std::stof(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
-        if(fileBuffer[a].find("__ACTIVATIONFUNCTION") == 0)
+        if(fileBuffer[a].find("__ACTIVATIONFUNCTION ") == 0)
         {
-            activationFunction((Activation)std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" "),fileBuffer[a].find("\n")).c_str()));
+            activationFunction((Activation)std::stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")).c_str()));
         }
         if(fileBuffer[a].find("[P] ") == 0)
         {
@@ -367,7 +367,7 @@ void SaveNet::addGenom(std::vector<float>   genom)
     checkParam();
     if(this->genomsize() != genom.size())
     {
-        std::string error = "geonomsize is wrong\n";
+        std::string error = "genomsize is wrong\n";
                     error+= "genomsize is: "+std::to_string(genom.size()) + " but the Net has only place for an amount of: "+ std::to_string(_genomsize) + " weights.\n";
                     error+= "Check your net configuration:\n";
                     error+= "\tInput Neurons Y:\t"+std::to_string(_inputs)+"\n";
