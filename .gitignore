@@ -15,3 +15,4 @@ DEV/build-Release/genom.csv
 *.csv
 *.gnet
 *.bnet
+examples/Genetic_ausweichen/build-Debug/animal.txt

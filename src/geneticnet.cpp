@@ -747,6 +747,10 @@ void                    GeneticNet::score(unsigned int animal, float score)
     {
         error_general("score(unsigned int ["+std::to_string(animal)+"] , float ["+std::to_string(score)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
+    if(score <= 0)
+    {
+        score = 1;
+    }
     _scoreList[animal] = score;
 }
 float                   GeneticNet::score(unsigned int animal)
@@ -761,10 +765,13 @@ void                    GeneticNet::score(std::vector<float>   scoreList)
 {
     if(scoreList.size() != _scoreList.size())
     {
-        qDebug() << "scoreList.size() "<<_scoreList.size();
+        qDebug() << "scoreList.size() "<<scoreList.size();
         error_general("score(std::vector<float>)","std::vector<float>.size() == "+std::to_string(scoreList.size())+"  "+error_paramOutOfRange(0,scoreList.size(),_animals,_animals));
     }
-    _scoreList = scoreList;
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        score(a,scoreList[a]);
+    }
 }
 std::vector<float>      GeneticNet::score()
 {
@@ -795,7 +802,7 @@ void                    GeneticNet::learn()
     scoreOffset         = -scoreOffset;
     for(unsigned int a=0; a<_animals; a++)
     {
-        gesScore       += scoreOffset + _scoreList[a];
+        gesScore       += scoreOffset + _scoreList[a]+0.1;
         _scoreList[a]  += scoreOffset+0.1;
     }
     for(unsigned int a=0; a<_animals; a+=2)
@@ -828,6 +835,7 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
         if(beginScore <= random && _scoreList[a] + beginScore > random)
         {
             selection1 = a;
+            break;
         }
         else
         {
@@ -842,11 +850,12 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
         {
             if(a == selection1)
             {
-                a++;
+                continue;
             }
             if(beginScore <= random && _scoreList[a] + beginScore > random)
             {
                 selection2 = a;
+                break;
             }
             else
             {

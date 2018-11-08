@@ -350,7 +350,6 @@ void SaveNet::setGenom(unsigned int index,std::vector<float>   genom)
 }
 void SaveNet::setGenom(std::vector<std::vector<float>   > genomList)
 {
-    qDebug() << "size: "<< genomList.size();
     if(genomList.size() == 0)
     {
         error_general("setGenom(std::vector<float> )","no genomes in parameter 0");
