@@ -3,6 +3,7 @@
 
 Net::Net()
 {
+  //  printf("Net::Net() : 1 \n");
     init(2,1,2,1,true,false,Activation::Sigmoid);
 }
 
@@ -11,6 +12,7 @@ Net::Net(unsigned int inputs,
          unsigned int hiddenY,
          unsigned int outputs)
 {
+ //   printf("Net::Net() : 2 \n");
     init(inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
 }
 
@@ -22,6 +24,7 @@ Net::Net(unsigned int inputs,
          bool enableAverage,
          Activation func)
 {
+ //   printf("Net::Net() : 3 \n");
     init(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
 void Net::init(unsigned int inputs,
@@ -32,6 +35,7 @@ void Net::init(unsigned int inputs,
           bool enableAverage,
           Activation func)
 {
+   // printf("init()\n");
     _randEngine = std::default_random_engine(rand()%100 /*+ ti->tm_hour+ti->tm_min+ti->tm_sec*/);
     _updateNetConfiguration = true;
     _activationFunction = Activation::Sigmoid;
@@ -99,6 +103,7 @@ void                Net::inputNeurons(unsigned int inputs)
     }
     if(inputs != _inputs)
     {
+      //  printf("inputNeurons(%i)\n",inputs);
         _update = true;
         _updateNetConfiguration = true;
         _inputs = inputs;
@@ -121,6 +126,7 @@ void                Net::hiddenNeuronsX(unsigned int hiddenX)
     }
     if(hiddenX != _hiddenX)
     {
+       // printf("hiddenNeuronsX(%i)\n",hiddenX);
         _update  = true;
         _updateNetConfiguration = true;
         _hiddenX = hiddenX;
@@ -143,6 +149,7 @@ void                Net::hiddenNeuronsY(unsigned int hiddenY)
     }
     if(hiddenY != _hiddenY)
     {
+       // printf("hiddenNeuronsY(%i)\n",hiddenY);
         _update  = true;
         _updateNetConfiguration = true;
         _hiddenY = hiddenY;
@@ -165,6 +172,7 @@ void                Net::outputNeurons(unsigned int outputs)
     }
     if(outputs != _outputs)
     {
+       // printf("outputNeurons(%i)\n",outputs);
         _update  = true;
         _outputs = outputs;
         try {
@@ -269,7 +277,10 @@ void                Net::randomGenom()
     }
     else
     {
+    //    printf("randomGenom() \n");
+
         genomsize = (_inputs+(unsigned int)_bias) * _hiddenY + (_hiddenY+(unsigned int)_bias) * _hiddenY * (_hiddenX-1) + (_hiddenY+(unsigned int)_bias) * _outputs;
+  //      printf("genomsize: %i = (%i + %i) * %i + (%i + %i) * %i * (%i - 1) + (%i + %i) * %i\n",genomsize,_inputs,_bias,_hiddenY,_hiddenY,_bias,_hiddenY,_hiddenX,_hiddenY,_bias,_outputs);
     }
     if(genomsize == 0)
     {

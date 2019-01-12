@@ -154,7 +154,7 @@ vector<vector<float>	>					thread_controls;
 vector<int>									thread_outputs;
 vector<vector<vector<unsigned int>	>	> 	thread_map;
 vector<vector<vector<unsigned int>	>	> 	thread_lastMap;
-vector<GeneticNet*>							thread_net;
+vector<Net*>                                thread_net;
 vector<int>									thread_obsticleAmount;
 vector<default_random_engine> 				thread_randEngine;
 vector<int>									thread_direction_Config;
@@ -331,12 +331,12 @@ void draw(){
 	DE_COORD.Y = 0;
 	system("cls");
 	SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),DE_COORD);
-	printf("+-----------------------------NETWORK----VERSION: %.2f -----------------+\n",VERSION);
+    printf("+------NETWORK---------------------------VERSION: %.2f ----GENETICNET_VERSION: %s -------------+\n",VERSION,GENETICNET_VERSION);
 	printf("       Inputs:       %i\t         FileIntervall:     %i\n",inputs,pauseIntervallFile);
 	printf("       Hidden X:     %i\t         Animals:           %i\n",hiddenX,animals);
 	printf("       Hidden Y:     %i\t         MutationRate:      %.4f\n",hiddenY,mutation);
 	printf("       Outputs:      %i\t  \n",outputs);
-	printf("+-----------------------------------------------------------------------+");
+    printf("+----------------------------------------------------------------------------------------------------+");
 	DE_COORD.Y = 6;
 	#ifdef DE
 	SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),DE_COORD);
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
 	{
 		geneticSize = inputs * hiddenX + hiddenX*hiddenX * (hiddenY-1) + hiddenX*outputs; //Alle Gewichtungen hintereinander
 	}*/
-    calcNet = new GeneticNet(animals,inputs,hiddenY,hiddenX,outputs,bias,enableAverage,Activation::Sigmoid);
+    calcNet = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,bias,enableAverage,Activation::Sigmoid);
     calcNet->mutationFactor(mutation);
     calcNet->mutationChangeWeight(mutationChangeFactor);
 	printf("calcNet setup done\n");
@@ -403,7 +403,14 @@ int main(int argc, char *argv[])
     }*/
 	printf("saveData done\n");
     geneticSize = calcNet->genomsize();
-	printf("getGenomSize done\n");
+    printf("getGenomSize: %i\n",geneticSize);
+
+    printf("inputs: %i\n",calcNet->inputNeurons());
+    printf("hiddenX: %i\n",calcNet->hiddenNeuronsX());
+    printf("hiddenY: %i\n",calcNet->hiddenNeuronsY());
+    printf("outputs: %i\n",calcNet->outputNeurons());
+    printf("bias: %i\n",calcNet->bias());
+
 //	calcNet->setMutationValue(mutationChangeFactor);
 	printf("setMutationValue done\n");
 	//loopsPerAnimal = loopsPerAnimalConfig;
@@ -513,8 +520,8 @@ thread_skip		           =vector<int>									(animals,0);                       
 //dbgSteuerung			   =vector<vector<int>	>						(animals,vector<int>(0));
 	for(a = 0;a<animals; a++)
 	{		
-        thread_net.push_back(new GeneticNet(2,inputs,hiddenY,hiddenX,outputs,bias,enableAverage,Activation::Sigmoid));
-        thread_net[a]->mutationFactor(mutationChangeFactor);
+        thread_net.push_back(new Net(inputs,hiddenX,hiddenY,outputs,bias,enableAverage,Activation::Sigmoid));
+       // thread_net[a]->mutationFactor(mutationChangeFactor);
 		thread_Timer.push_back(new Timer());
 		thread_randEngine.push_back(default_random_engine(rand()%500));
 
@@ -539,21 +546,22 @@ thread_skip		           =vector<int>									(animals,0);                       
 	//Sleep(1000);
 	//------------------------------------------------------------------
 	
-	
+    printf("0 thread_genetic.size() = %i\n",thread_genetic[0].size());
+    getchar();
 	draw();
-	
+
 	while(exitProg == 0)
 	{
 		if(TestMode >= 1)
 		{
 			draw();
-			thread_net[testModeAnimal]->genom(0,thread_genetic[testModeAnimal]);
+
+            thread_net[testModeAnimal]->genom(thread_genetic[testModeAnimal]);
 			//printf("TestMode %i\n",testModeAnimal);
 			startNet(testModeAnimal);
-			if(TestMode >= 1)
-			{
-				handleKeyBoeard(1);	
-			}
+
+            handleKeyBoeard(1);
+
 			testModeAnimal++;
 			if(testModeAnimal == animals)
 			{
@@ -570,7 +578,8 @@ thread_skip		           =vector<int>									(animals,0);                       
 			
 				for(xs = 0; xs < animals; xs++)
 				{
-					thread_net[xs]->genom(0,thread_genetic[xs]);
+                    //printf("1 thread_genetic.size() = %i\n",thread_genetic[xs].size());
+                    thread_net[xs]->genom(thread_genetic[xs]);
 					
 					if(doMultithreading)
 					{
@@ -766,13 +775,13 @@ void HandleNet(int animal)
 			drawNet(thread_mapSize[animal]+15,20,animal);
 		}
 		//printf("thread_net %i\n",animal);
-        thread_net[animal]->input(0,thread_animalMapView[animal]);
+        thread_net[animal]->input(thread_animalMapView[animal]);
 		thread_net[animal]->run();
 		
 		//printf("getOutput %i\n",animal);
 		//for( local_a = 0; local_a < thread_outputs[animal]; local_a++)
 		{
-            thread_controls[animal] = thread_net[animal]->output(0);
+            thread_controls[animal] = thread_net[animal]->output();
 		}
 		//printf("Control %i\n",animal);
 		Control(thread_controls[animal][0],thread_controls[animal][1],thread_controls[animal][2],thread_controls[animal][3],thread_mapSize[animal]+15,(thread_inputs[animal]/10)+29,animal);
@@ -1559,6 +1568,7 @@ void readConfg()
 			
 		}
 	}
+    printf("ENDOFFILE\n");
 	fclose(config);
 }
 void saveBest()
@@ -1602,7 +1612,7 @@ void saveBest()
 		lastBestFitness = rank[animals-1];
 		
 				
-		
+    //    printf("2 thread_genetic.size() = %i\n",thread_genetic[animals-1].size());
 		bestGen = calcNet->genom(sort[animals-1]);
 		updateBestGen = 1;
 	}

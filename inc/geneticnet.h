@@ -1,7 +1,7 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.02.00"
+#define    GENETICNET_VERSION "02.02.00"
 //                      Datum   27.10.2018
 
 #include "net.h"

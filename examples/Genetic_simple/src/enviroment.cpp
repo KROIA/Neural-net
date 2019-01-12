@@ -21,7 +21,7 @@ Enviroment::Enviroment()
     _maxTicks            = 10000;
     _netSaveInterval     = 1;
     _cycles              = 3;
-//#define drawMap
+#define drawMap
 
     _enviromentSize = Coord({_enviromentSize.x+_boundrySize*2,_enviromentSize.y+_boundrySize*2});
     _map = vector<vector<int>   >(_enviromentSize.x,vector<int>(_enviromentSize.y,NOTHING));

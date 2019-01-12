@@ -152,6 +152,7 @@ void                    GeneticNet::init(unsigned int animals,
 
 void                    GeneticNet::animals(unsigned int animals)
 {
+   // printf("GeneticNet::animals(%i)\n",animals);
     if(animals < GENETICNET_MIN_ANIMALS || animals > GENETICNET_MAX_ANIMALS)
     {
         error_general("animals(unsigned int ["+std::to_string(animals)+"] )","Parameter 0 is out of range. Min: "+ std::to_string(GENETICNET_MIN_ANIMALS)+" Max: "+std::to_string(GENETICNET_MAX_ANIMALS));
@@ -189,6 +190,7 @@ void                    GeneticNet::inputNeurons(unsigned int inputs)
 {
     if(inputs != _netList[0]->inputNeurons())
     {
+    //    printf("inputNeurons(%i)\n",inputs);
         for(unsigned int a=0; a<_animals; a++)
         {
             try {
