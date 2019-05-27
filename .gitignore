@@ -16,3 +16,9 @@ DEV/build-Release/genom.csv
 *.gnet
 *.bnet
 examples/Genetic_ausweichen/build-Debug/animal.txt
+*.dll
+examples/Genetic_simple/build-Release/Makefile
+examples/Genetic_ausweichen/build-Release/Makefile
+examples/Genetic_ausweichen/build-Release/gen.txt
+examples/Genetic_ausweichen/build-Release/best.txt
+*.8-pre1
