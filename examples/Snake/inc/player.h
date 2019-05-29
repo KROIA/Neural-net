@@ -29,12 +29,15 @@ class Player : public QObject
         void playerIndex(unsigned int index);
         unsigned int playerIndex();
 
+        void mapSize(QSize mapSize);
+        QSize mapsize();
+
         void sollSize(int size);
         int sollSize();
         unsigned int size();
         void addSize(int increment = 1);
-        void food(unsigned int food);
-        unsigned int food();
+        void food(long int food);
+        long int food();
         void addFood(int increment = 1);
 
         void pos(vector<QPoint> pos);
@@ -53,7 +56,7 @@ class Player : public QObject
 
         void kill();
         void revive();
-        bool liveStatus();
+        bool isAlive();
 
         unsigned int steps();
 
@@ -71,8 +74,9 @@ class Player : public QObject
         QColor _standardBodyColor;
 
         int _size;
-        unsigned int _food;
+        long _food;
         unsigned int _steps;
+        unsigned int _maxSteps;
 
 
         QSize _mapSize;

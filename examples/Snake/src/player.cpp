@@ -7,7 +7,8 @@ Player::Player(unsigned int player,QSize mapSize)
     _mapSize = mapSize;
     playerIndex(player);
     _presetSize = 5;
-    _foodPerTile = 100;
+    _foodPerTile = 20;
+    _maxSteps = 1000;
     _presetFood = _presetSize * _foodPerTile;
     standardColor(QColor(0,200,0));
 
@@ -26,7 +27,14 @@ unsigned int Player::playerIndex()
 {
     return _playerIndex;
 }
-
+void Player::mapSize(QSize mapSize)
+{
+    _mapSize = mapSize;
+}
+QSize Player::mapsize()
+{
+    return _mapSize;
+}
 
 void Player::sollSize(int size)
 {
@@ -47,11 +55,11 @@ void Player::addSize(int increment)
 {
     sollSize(sollSize() + increment);
 }
-void Player::food(unsigned int food)
+void Player::food(long int food)
 {
     _food = food;
 }
-unsigned int Player::food()
+long int Player::food()
 {
     return _food;
 }
@@ -156,6 +164,8 @@ void Player::update()
     }
    // qDebug() << "ges food: " << food();
     int tmpFood = food();
+    if(tmpFood < 0)
+        tmpFood = 0;
     for(int a=0; a<size(); a++)
     {
         float colorFactor;
@@ -183,7 +193,7 @@ void Player::update()
     }
 
     addFood(-1);
-    if(food() == 0)
+    if(food() <= 0)
     {
         qDebug() << "starved: "<< _playerIndex;
         emit starved(_playerIndex);
@@ -194,6 +204,10 @@ void Player::update()
     }
     checkForSelfCollision();
     _steps++;
+    if(_steps >= _maxSteps)
+    {
+        kill();
+    }
     //---------------
 }
 
@@ -260,9 +274,9 @@ void Player::revive()
     qDebug() << "food: " << food() << " " << _presetFood;
     _steps = 0;
 
-    _direction = Direction::_right;
+    _direction = rand()%4;
     _playerPos = vector<QPoint>(sollSize());
-    _playerPos[0] = QPoint(5+rand() %(_mapSize.width()/2),1+rand()%(_mapSize.height()-1));
+    _playerPos[0] = QPoint(5+rand() %(_mapSize.width()-10),5+rand()%(_mapSize.height()-10));
 
     _playerColor = vector<QColor>(sollSize());
     _playerColor[0] = _standardBodyColor;
@@ -274,9 +288,9 @@ void Player::revive()
         _playerColor[a] = _standardBodyColor;
     }
 }
-bool Player::liveStatus()
+bool Player::isAlive()
 {
-    return _death;
+    return !_death;
 }
 unsigned int Player::steps()
 {

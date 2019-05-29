@@ -13,15 +13,15 @@ void Food::respawn()
 {
     _eaten = false;
     _liveCounter = 80 + rand() % 100;
-    pos(QPoint(rand()%(_mapSize.width()-1),rand()%(_mapSize.height()-1)));
+    pos(QPoint(1+rand()%(_mapSize.width()-2),1+rand()%(_mapSize.height()-2)));
 
     int foodamount = 50 + rand() % 50;
-    if(rand()%3 == 1)
+    if(rand()%10 == 1)
     {
         foodamount = -foodamount;
     }
 
-    amount((float)foodamount * 1.f);
+    amount((float)foodamount * 0.5f);
 }
 
 void Food::pos(QPoint pos)
@@ -68,7 +68,7 @@ QColor Food::color()
 {
     return _color;
 }
-bool Food::liveStatus()
+bool Food::isAlive()
 {
     return _eaten;
 }

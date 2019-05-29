@@ -51,17 +51,19 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    src/enviroment.cpp \
     C:\Users\AlexKrieg\Documents\QT\lib\Geometry\geometry.cpp \
     src/player.cpp \
-    src/food.cpp
+    src/food.cpp \
+    src/maptile.cpp \
+    src/environment.cpp
 
 HEADERS += \
         $$incPath/snake.h \
-    inc/enviroment.h \
     C:\Users\AlexKrieg\Documents\QT\lib\Geometry\geometry.h \
     inc/player.h \
-    inc/food.h
+    inc/food.h \
+    inc/maptile.h \
+    inc/environment.h
 
 FORMS += \
         snake.ui

@@ -26,7 +26,7 @@ class Food : public QObject
 
         QColor color();
 
-        bool liveStatus();
+        bool isAlive();
         void update();
 
     signals:

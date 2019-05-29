@@ -827,6 +827,7 @@ void                    GeneticNet::learn()
 }
 void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2)
 {
+    //qDebug() << "learn_selectAnimal";
     float random;
     float beginScore;
 
@@ -845,6 +846,7 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
         }
     }
     unsigned int counter = 0;
+
     do{
         random = (float)(_randEngine() % (unsigned int)((gesScore - _scoreList[selection1]) * 100))/100;
         beginScore = 0;
@@ -871,9 +873,11 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
         counter++;
 
     }while(selection1 == selection2);
+    //qDebug() << "learn_selectAnimal___";
 }
 void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,std::vector<float> oldGen2,std::vector<float> &newGen1,std::vector<float> &newGen2)
 {
+    //qDebug() << "learn_crossover";
     unsigned int random =  1 + _randEngine() % (genomsize() - 2);
     newGen1 = oldGen1;
     newGen2 = oldGen2;
@@ -882,9 +886,12 @@ void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,s
         newGen1[a] = oldGen2[a];
         newGen2[a] = oldGen1[a];
     }
+    //qDebug() << "learn_crossover___";
 }
 void                    GeneticNet::learn_mutate(std::vector<float> &genom)
 {
+    //SLOW CODE
+    //qDebug() << "learn_mutate";
     if(_mutationFactor <= __FLOATINPOINT_TOLERANCE || _mutationChangeWeight <= __FLOATINPOINT_TOLERANCE)
         return;
     for(unsigned int a=0; a<genomsize(); a++)
@@ -898,6 +905,7 @@ void                    GeneticNet::learn_mutate(std::vector<float> &genom)
             genom[a] += _mutationChangeWeight * ran;
         }
     }
+    //qDebug() << "learn_mutate___";
 }
 //----------ERROR
 
