@@ -57,7 +57,7 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    $$geometryPath\geometry.cpp \
+    $$geometryPath/geometry.cpp \
     $$srcPath/player.cpp \
     $$srcPath/food.cpp \
     $$srcPath/maptile.cpp \
@@ -65,7 +65,7 @@ SOURCES += \
 
 HEADERS += \
     $$incPath/snake.h \
-    $$geometryPathgeometry.h \
+    $$geometryPath/geometry.h \
     $$incPath/player.h \
     $$incPath/food.h \
     $$incPath/maptile.h \
