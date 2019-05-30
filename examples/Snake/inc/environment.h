@@ -61,9 +61,13 @@ class Environment : public QObject
         void controlSnakeDeath(unsigned int player,bool death = true);
 
         Player *player(unsigned int player = 0);
+        unsigned int playerAmount();
         vector<vector<float>    >AI_mapData(unsigned int player, vector<QPoint>   fieldOfView);
+        vector<vector<float>    >AI_mapData_simple(unsigned int player);
         vector<QPoint> rotate_90(vector<QPoint> data,QPoint rotPoint, int amount = 1);
 
+    signals:
+        void playerKill(unsigned int,unsigned int);
 
     public slots:
         void snakeCollision(unsigned int player,vector<QPoint> pos);

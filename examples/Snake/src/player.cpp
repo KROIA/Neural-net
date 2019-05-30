@@ -8,9 +8,10 @@ Player::Player(unsigned int player,QSize mapSize)
     playerIndex(player);
     _presetSize = 5;
     _foodPerTile = 20;
-    _maxSteps = 1000;
+    _maxSteps = 5000;
     _presetFood = _presetSize * _foodPerTile;
     standardColor(QColor(0,200,0));
+    globalView(false);
 
     _death = true;
     revive();
@@ -210,21 +211,35 @@ void Player::update()
     }
     //---------------
 }
-
-void Player::direction(int dir)
+void Player::globalView(bool globalView)
 {
-#ifdef GLOBAL_VIEW
-    _direction = dir;
-#else
-    _direction = (_direction + dir)%4;
-#endif
-
-
-
+    _glovalView = globalView;
 }
-int Player::direction()
+bool Player::globalView()
 {
-    return _direction;
+    return _glovalView;
+}
+void Player::direction(Direction dir)
+{
+    if(_glovalView){
+        if(_direction == dir)
+            return;
+        if((_direction+dir)%2 == 0)// check if direction is opposite
+            return;
+
+        addFood(-2);
+        _direction = dir;
+    }
+    else {
+        if(dir == Direction::_up)
+            return;
+        addFood(-2);
+        _direction = (_direction + dir)%4;
+    }
+}
+Direction Player::direction()
+{
+    return (Direction)_direction;
 }
 void Player::checkForSelfCollision()
 {
@@ -271,7 +286,7 @@ void Player::revive()
 
     sollSize(_presetSize);
     food(_presetFood);
-    qDebug() << "food: " << food() << " " << _presetFood;
+    //qDebug() << "food: " << food() << " " << _presetFood;
     _steps = 0;
 
     _direction = rand()%4;

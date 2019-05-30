@@ -7,8 +7,6 @@
 #include <QKeyEvent>
 #include <geneticnet.h>
 
-
-
 namespace Ui {
     class Snake;
 }
@@ -33,15 +31,16 @@ class Snake : public QMainWindow
         void timerEvent2();
     private slots:
         void paintEvent(QPaintEvent *e);
+        void closeEvent(QCloseEvent *event);
 
 
         void on_pause_pushButton_clicked();
-
         void on_saveStats_pushbutton_clicked();
-
         void on_kill_pushButton_clicked();
-
         void on_toggleDisplay_pushbutton_clicked();
+        void on_versusBot_pushButton_clicked();
+
+        void onSnakeKilled(unsigned int killer,unsigned int victim);
 
     private:
         Ui::Snake *ui;
@@ -62,7 +61,20 @@ class Snake : public QMainWindow
         vector<float> _foodScore;
         vector<float> _stepScore;
 
+        vector<float> _averageScoreList_smoth;
+        vector<float> _maxScoreList_smoth;
+        vector<float> _minScoreList_smoth;
+        vector<float> _foodScore_smoth;
+        vector<float> _stepScore_smoth;
+
+        vector<float> _averageScoreList_smoth_tmp;
+        vector<float> _maxScoreList_smoth_tmp;
+        vector<float> _minScoreList_smoth_tmp;
+        vector<float> _foodScore_smoth_tmp;
+        vector<float> _stepScore_smoth_tmp;
+
         unsigned int generation;
+        float _averageScore_smoth;
 
         bool _pause;
 
@@ -71,7 +83,24 @@ class Snake : public QMainWindow
         bool _enableDisplay;
         float _calculationPerSecond;
         unsigned int _calculationCounter;
+        unsigned int _saveCounter;
 
+//#ifdef TESTMODE
+        bool _versusBot;
+        Environment *_versusEnvironment;
+
+        float        _botScore;
+        unsigned int _botFood;
+        unsigned int _botSteps;
+        unsigned int _botDeaths;
+        unsigned int _botKills;
+
+        float        _playerScore;
+        unsigned int _playerFood;
+        unsigned int _playerSteps;
+        unsigned int _playerDeaths;
+        unsigned int _playerKills;
+//#endif
 
 };
 

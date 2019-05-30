@@ -51,8 +51,10 @@ class Player : public QObject
 
         void update();
 
-        void direction(int dir);
-        int direction();
+        void globalView(bool globalView);
+        bool globalView();
+        void direction(Direction dir);
+        Direction direction();
 
         void kill();
         void revive();
@@ -88,6 +90,9 @@ class Player : public QObject
         int _direction;
         bool _death;
         unsigned int _playerIndex;
+        bool _glovalView;
+
+
 
 };
 #endif // PLAYER_H

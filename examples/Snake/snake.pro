@@ -23,24 +23,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
+DLL_buildPath = bin/build-Release/release
 
+#-------------------------------------------------------
+#---This Project needs external code--------------------
+# Qect.dll : https://github.com/KROIA/Rect
+# geometry : https://github.com/KROIA/Geometry
 
+#change your PC-username
+username     = AlexKrieg
+QT_work_dir  = C:/Users/$$username/Documents/QT
+geometryPath = $$QT_work_dir/lib/Geometry
+rectPath     = $$QT_work_dir/DLL/Rect
+
+LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
 
 incPath = inc
 srcPath = src
-
-incPath1 = C:\Users\AlexKrieg\Documents\QT\DLL\
-
-buildPath = build-Release\release
-
-LIBS+=$$incPath1/Rect/$$buildPath/Rect.dll \
 
 netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
                $$incPath \
-               $$incPath1/Rect/Rect \
-               C:\Users\AlexKrieg\Documents\QT\lib\Geometry \
+               $$rectPath \
+               $$geometryPath \
 
 
 SOURCES += \
@@ -51,19 +57,19 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    C:\Users\AlexKrieg\Documents\QT\lib\Geometry\geometry.cpp \
-    src/player.cpp \
-    src/food.cpp \
-    src/maptile.cpp \
-    src/environment.cpp
+    $$geometryPath\geometry.cpp \
+    $$srcPath/player.cpp \
+    $$srcPath/food.cpp \
+    $$srcPath/maptile.cpp \
+    $$srcPath/environment.cpp
 
 HEADERS += \
-        $$incPath/snake.h \
-    C:\Users\AlexKrieg\Documents\QT\lib\Geometry\geometry.h \
-    inc/player.h \
-    inc/food.h \
-    inc/maptile.h \
-    inc/environment.h
+    $$incPath/snake.h \
+    $$geometryPathgeometry.h \
+    $$incPath/player.h \
+    $$incPath/food.h \
+    $$incPath/maptile.h \
+    $$incPath/environment.h
 
 FORMS += \
         snake.ui

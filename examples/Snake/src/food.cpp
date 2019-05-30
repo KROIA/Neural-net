@@ -51,11 +51,11 @@ void Food::amount(int amount)
     _amount = amount;
     if(_amount < 0)
     {
-        _color = QColor((255*(-_amount))/100,0,0);
+        _color = QColor((150+(-_amount)),0,0);
     }
     else
     {
-        _color = QColor(0,(255*(_amount))/100,0);
+        _color = QColor(0,(150+(_amount)),0);
     }
 
 }

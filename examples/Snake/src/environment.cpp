@@ -22,10 +22,11 @@ Environment::Environment(QPainter *p,unsigned int player)
     for(unsigned int a=0; a<_playerAmount; a++)
     {
         _player.push_back(new Player(_player.size(),mapsize()));
+        _player[_player.size()-1]->standardColor(QColor(0,55+rand()%200,55+rand()%200));
         connect(_player[a],SIGNAL(collision(unsigned int,vector<QPoint>)),this,SLOT(snakeCollision(unsigned int,vector<QPoint>)));
         connect(_player[a],SIGNAL(starved(unsigned int)),this,SLOT(snakeStarved(unsigned int)));
     }
-    _foodAmount = 10;
+    foodAmount(10);
 
 
     mapInit();
@@ -86,7 +87,7 @@ unsigned int Environment::scale()
 }
 void Environment::foodAmount(unsigned int amount)
 {
-    _foodAmount = amount;
+    _foodAmount = (amount * _mapsize.height() * _mapsize.width())/1000;
 }
 unsigned int Environment::foodAmount()
 {
@@ -95,6 +96,7 @@ unsigned int Environment::foodAmount()
 
 void Environment::mapInit()
 {
+    foodAmount(foodAmount());
     _map.clear();
     _viewMap = vector<vector<int>   >(mapsize().width(),vector<int>(mapsize().height()));
 
@@ -151,8 +153,8 @@ void Environment::setSnakeOnMap(unsigned int player)
                 return;
             }
             _viewMap[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()] = MapData::snake;
-            _map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->frameSize(5);
-            _map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->frameColor(_player[player]->color(a));
+            //_map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->frameSize(5);
+            //_map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->frameColor(_player[player]->color(a));
             _map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->frame(false);
             _map[_player[player]->pos()[a].x()][_player[player]->pos()[a].y()]->color(_player[player]->color(a));
 
@@ -180,15 +182,18 @@ void Environment::drawMap()
 
 void Environment::update()
 {
-    if(_food.size() != _foodAmount)
+    for(int a=0; a<30; a++)
     {
-        if(_food.size() > _foodAmount)
+        if(_food.size() != _foodAmount)
         {
-            _food.pop_back();
-        }
-        if(_food.size() < _foodAmount)
-        {
-            _food.push_back(new Food(_mapsize));
+            if(_food.size() > _foodAmount)
+            {
+                _food.pop_back();
+            }
+            if(_food.size() < _foodAmount)
+            {
+                _food.push_back(new Food(_mapsize));
+            }
         }
     }
     for(unsigned int c=0; c<_player.size(); c++)
@@ -224,15 +229,18 @@ void Environment::update()
                         if(_player[c]->size() > _player[a]->size())
                         {
                             controlSnakeDeath(a,true);
+                            emit playerKill(c,a);
                         }
                         else {
                             controlSnakeDeath(c,true);
+                            emit playerKill(a,c);
                         }
                     }else
                     {
                         //reward for player a
-                        _player[a] ->addFood(_player[c]->food()/2);
+                 //       _player[a] ->addFood(_player[c]->food()/2);
                         controlSnakeDeath(c,true);
+                        emit playerKill(a,c);
                     }
                 }
             }
@@ -333,7 +341,7 @@ void Environment::controlSnakeAddFood(unsigned int player,int increment)
 {
     if(_player.size() <= player)
         player = 0;
-    qDebug() << "Added food: "<< increment;
+    //qDebug() << "Added food: "<< increment;
     _player[player]->addFood(increment);
 }
 void Environment::controlSnakeDeath(unsigned int player,bool death)
@@ -366,13 +374,20 @@ Player *Environment::player(unsigned int player)
         player = 0;
     return _player[player];
 }
+unsigned int Environment::playerAmount()
+{
+    return _player.size();
+}
 vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoint>   fieldOfView)
 {
+
     vector<int>   rawData;
     vector<vector<float>    >outputData(3,vector<float>());
     //vector<QPoint> coordView;
     if(fieldOfView.size() == 0 || player >= _player.size())
         return outputData;
+
+
     geometry::Angle rotAnge = 0;
     switch(_player[player]->direction()){
         case Direction::_up:
@@ -504,27 +519,29 @@ vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoi
             }
         }
     }
-   //qDebug() << "AI_mapData: "<<outputData;
-   //qDebug() << "AI_mapData";
-    c = 0;
-    /*for(unsigned int a=0; a<sqrt(rawData.size()); a++)
+
+    /*if(player == 0)
     {
-        QString raw = "";
-        QString food = "";
-        QString snake = "";
-        QString obsticle = "";
-        for(unsigned int b=0; b<sqrt(rawData.size()); b++)
+       qDebug() << "AI_mapData: "<<outputData;
+       //qDebug() << "AI_mapData";
+        c = 0;
+        for(unsigned int a=0; a<sqrt(rawData.size()); a++)
         {
-            raw+=QString::number(rawData[c]);
-            food+=QString::number(outputData[food_layer][c]);
-            snake+=QString::number((int)outputData[snake_layer][c]);
-            obsticle+=QString::number((int)outputData[obsticle_layer][c]);
-            c++;
+            QString raw = "";
+            QString food = "";
+            QString snake = "";
+            QString obsticle = "";
+            for(unsigned int b=0; b<sqrt(rawData.size()); b++)
+            {
+                raw+=QString::number(rawData[c]);
+                food+=QString::number(outputData[food_layer][c]);
+                snake+=QString::number((int)outputData[snake_layer][c]);
+                obsticle+=QString::number((int)outputData[obsticle_layer][c]);
+                c++;
+            }
+            qDebug() << raw << "  |  " << food << "  |  " << snake << "  |  " << obsticle;
         }
-        qDebug() << raw << "  |  " << food << "  |  " << snake << "  |  " << obsticle;
     }*/
-
-
     return outputData;
 
     /*for(unsigned int x=0; x<fieldOfView.size(); x++)
@@ -536,6 +553,108 @@ vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoi
             tmpLine.push_back(QPoint(pointOfView.x()fieldOfView[x].,pointOfView.y()));
         }
     }*/
+}
+vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
+{
+    vector<vector<float>    > outputData(3,vector<float>());
+    int viewLength = 5;
+    float value = 0;
+    vector<QPoint> viewDirection;
+    viewDirection.push_back(QPoint(-1,0));
+    viewDirection.push_back(QPoint(0,-1));
+    viewDirection.push_back(QPoint(1,0));
+
+    geometry::Angle rotAnge = 0;
+    switch(_player[player]->direction()){
+        case Direction::_up:
+        {
+            rotAnge = 0;
+            viewDirection = rotate_90(viewDirection,QPoint(0,0),4);
+            break;
+        }
+        case Direction::_left:
+        {
+            rotAnge = 270;
+            viewDirection = rotate_90(viewDirection,QPoint(0,0),3);
+            break;
+        }
+        case Direction::_down:
+        {
+            rotAnge = 180;
+            viewDirection = rotate_90(viewDirection,QPoint(0,0),2);
+
+            break;
+        }
+        case Direction::_right:
+        {
+            rotAnge = 90;
+            viewDirection = rotate_90(viewDirection,QPoint(0,0),1);
+            break;
+        }
+    }
+
+    if(_player.size() <= player)
+        return outputData;
+
+    for(int x=0; x<viewDirection.size(); x++)
+    {
+        outputData[food_layer].push_back(0);
+        outputData[snake_layer].push_back(0);
+        outputData[obsticle_layer].push_back(0);
+        //for(int a=-1; a>viewDirection[0].x()*viewLength; a--)
+        for(int a=1; a<viewLength; a++)
+        {
+            QPoint pos = QPoint(_player[player]->pos(0).x()+a*viewDirection[x].x(),_player[player]->pos(0).y()+a*viewDirection[x].y());
+            if(pos.x() >= _viewMap.size() || pos.x() < 0)
+            {
+                continue;
+            }else if(pos.y() >= _viewMap[pos.x()].size() || pos.y() < 0)
+            {
+                continue;
+            }
+
+            switch(_viewMap[pos.x()][pos.y()])
+            {
+                case MapData::food:
+                {
+                    for(unsigned int b=0; b<_food.size(); b++)
+                    {
+                        if(_food[b]->pos().x() == pos.x() && _food[b]->pos().y() == pos.y())
+                        {
+                            //outputData[food_layer][outputData[food_layer].size()-1] = (float)_food[b]->amount()/100;
+                            outputData[food_layer][outputData[food_layer].size()-1] = 1;
+                        }
+                    }
+                    break;
+                }
+                case MapData::snake:
+                {
+                    outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((float)viewLength-(float)a)/(float)viewLength; //bad snake
+                    for(unsigned int b=0; b<_player[player]->size(); b++)
+                    {
+                       // qDebug() << "b: " << b << "pos: "<<_player[player]->pos(b) << " | " << pos;
+                        if(_player[player]->pos(b).x() == pos.x() && _player[player]->pos(b).y() == pos.y())
+                        {
+                            outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((float)viewLength-(float)a)/(float)viewLength; //good snake
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case MapData::obsticle:
+                {
+                    outputData[obsticle_layer][outputData[obsticle_layer].size()-1] = 1.f * ((float)viewLength-(float)a)/(float)viewLength;
+                    break;
+                }
+            }
+        }
+    }
+    /*if(player == 0)
+    {
+        qDebug() << outputData;
+    }*/
+    return outputData;
+
 }
 vector<QPoint> Environment::rotate_90(vector<QPoint> data,QPoint rotPoint, int amount)
 {
