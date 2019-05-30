@@ -17,8 +17,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 incPath = inc
 srcPath = src
 
-netIncPath = ../../inc
-netSrcPath = ../../src
+netIncPath = ../inc
+netSrcPath = ../src
 INCLUDEPATH += $$netIncPath \
                $$inc
 
@@ -29,7 +29,7 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/geneticnet.cpp \
-    ../src/savenet.cpp
+    $$netSrcPath/savenet.cpp
 
 
 # Default rules for deployment.
@@ -42,4 +42,4 @@ HEADERS += \
     $$netIncPath/neuron.h \
     $$netIncPath/backpropnet.h \
     $$netIncPath/geneticnet.h \
-    ../inc/savenet.h
+    $$netIncPath/savenet.h

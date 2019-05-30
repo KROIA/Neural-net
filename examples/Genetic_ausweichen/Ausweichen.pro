@@ -21,7 +21,6 @@ netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
                $$incPath \
-			   C:\Users\AlexKrieg\Documents\C++\libraries\Timer
 
 SOURCES += \
     $$srcPath/main.cpp \
@@ -30,7 +29,7 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    C:\Users\AlexKrieg\Documents\C++\libraries\Timer\timer.cpp \
+    $$srcPath/timer.cpp \
 
 
 # Default rules for deployment.
@@ -39,4 +38,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    inc/enviroment.h
+    $$incPath/enviroment.h
+    $$incPath/timer.h
