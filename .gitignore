@@ -21,5 +21,6 @@ examples/Genetic_simple/build-Release/Makefile
 examples/Genetic_ausweichen/build-Release/Makefile
 examples/Genetic_ausweichen/build-Release/gen.txt
 examples/Genetic_ausweichen/build-Release/best.txt
+examples/Snake/bin
 examples/Snake/Tests
 *.8-pre1
