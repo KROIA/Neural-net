@@ -7,6 +7,7 @@
 #include <vector>
 #include "geometry.h"
 #include <QTimer>
+#include <QLabel>
 
 #include "player.h"
 #include "food.h"
@@ -31,7 +32,7 @@ class Environment : public QObject
 {
         Q_OBJECT
     public:
-        Environment(QPainter *p,unsigned int player);
+        Environment(QWidget *parent,QPainter *p,unsigned int player);
         ~Environment();
 
         void mapsize(QSize size);
@@ -49,9 +50,11 @@ class Environment : public QObject
         unsigned int foodAmount();
 
         void mapInit();
+        void placeObsticle();
 
         void setSnakeOnMap(unsigned int player);
         void drawMap();
+
 
         void update();
 
@@ -66,15 +69,22 @@ class Environment : public QObject
         vector<vector<float>    >AI_mapData_simple(unsigned int player);
         vector<QPoint> rotate_90(vector<QPoint> data,QPoint rotPoint, int amount = 1);
 
+        void showInfoText(bool enable);
+        bool showInfoText();
+        void drawEnable(bool enable);
+        bool drawEnable();
     signals:
         void playerKill(unsigned int,unsigned int);
 
     public slots:
         void snakeCollision(unsigned int player,vector<QPoint> pos);
         void snakeStarved(unsigned int player);
+        void obsticleReplace();
 
     private:
         QPainter   *_painter;
+        QWidget    *_parent;
+
 
         QSize _mapsize;
         unsigned int _tileSize;
@@ -85,6 +95,7 @@ class Environment : public QObject
 
 
         vector<vector<Rect*> > _map;
+        vector<vector<QLabel*> > _labelMap;
         vector<vector<int>  >  _viewMap;
         vector<Player*> _player;
         vector<Food*> _food;
@@ -96,6 +107,9 @@ class Environment : public QObject
         QColor _environmentColor;
         QColor _snakeColor;
         QColor _obsticleColor;
+        bool   _showInfoText;
+        bool   _drawEnable;
+
        // int test = 0;
 };
 

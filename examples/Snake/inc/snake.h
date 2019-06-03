@@ -42,6 +42,10 @@ class Snake : public QMainWindow
 
         void onSnakeKilled(unsigned int killer,unsigned int victim);
 
+
+
+        void on_mapinfo_checkbox_stateChanged(int arg1);
+
     private:
         Ui::Snake *ui;
         Environment *_environment;
@@ -100,6 +104,10 @@ class Snake : public QMainWindow
         unsigned int _playerSteps;
         unsigned int _playerDeaths;
         unsigned int _playerKills;
+
+        bool _playerKeyInputDisabler;
+
+
 //#endif
 
 };

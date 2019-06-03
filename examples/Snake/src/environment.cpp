@@ -1,8 +1,9 @@
 #include "environment.h"
 
 
-Environment::Environment(QPainter *p,unsigned int player)
+Environment::Environment(QWidget *parent,QPainter *p,unsigned int player)
 {
+    _parent = parent;
     _painter = p;
     _playerAmount = player;
 
@@ -18,6 +19,7 @@ Environment::Environment(QPainter *p,unsigned int player)
 
 
 
+
     //_player = new Player(mapsize());
     for(unsigned int a=0; a<_playerAmount; a++)
     {
@@ -27,6 +29,10 @@ Environment::Environment(QPainter *p,unsigned int player)
         connect(_player[a],SIGNAL(starved(unsigned int)),this,SLOT(snakeStarved(unsigned int)));
     }
     foodAmount(10);
+    showInfoText(false);
+    drawEnable(true);
+
+
 
 
     mapInit();
@@ -98,15 +104,24 @@ void Environment::mapInit()
 {
     foodAmount(foodAmount());
     _map.clear();
+    _labelMap.clear();
     _viewMap = vector<vector<int>   >(mapsize().width(),vector<int>(mapsize().height()));
 
 
     for(unsigned int x=0; x<mapsize().width(); x++)
     {
-        vector<Rect*> tmpVec;
+        vector<Rect*> tmpMapVec;
+        vector<QLabel*> tmpLabelVec;
         for(unsigned int y=0; y<mapsize().height(); y++)
         {
             Rect *tmpRect = new Rect(_painter);
+            QLabel *tmpLabel = new QLabel(_parent);
+            QFont textFont;
+            textFont.setPointSize(mapsize().height()/2);
+            tmpLabel->setFont(textFont);
+            tmpLabel->setGeometry(drawPos().x()+(tileSize()+_tileSpace)*x-tileSize()/2,drawPos().y()+(tileSize()+_tileSpace)*y-tileSize()/2,tileSize(),tileSize());
+            tmpLabel->hide();
+            tmpLabel->setText("");
 
             tmpRect->begin(QPoint(0,0));
             tmpRect->end(QPoint(tileSize(),tileSize()));
@@ -118,14 +133,92 @@ void Environment::mapInit()
             tmpRect->frameColor(_environmentColor);
             tmpRect->color(_environmentColor);
 
-            tmpVec.push_back(tmpRect);
+            tmpMapVec.push_back(tmpRect);
+            tmpLabelVec.push_back(tmpLabel);
         }
-        _map.push_back(tmpVec);
+        _map.push_back(tmpMapVec);
+        _labelMap.push_back(tmpLabelVec);
     }
     for(unsigned int a=0; a<_player.size(); a++)
     {
         _player[a]->kill();
         _player[a]->revive();
+    }
+    placeObsticle();
+
+}
+void Environment::placeObsticle()
+{
+    // -1 because of the ever existing boarder
+    for(unsigned int x=1; x<_mapsize.width()-1; x++)
+    {
+        for(unsigned int y=1; y<_mapsize.height()-1; y++)
+        {
+            if(_viewMap[x][y] == MapData::obsticle)
+            {
+                _viewMap[x][y] = MapData::nothing;
+            }
+        }
+    }
+    unsigned int wallAmount = mapsize().width()*mapsize().height()/100;
+   // qDebug() << "wallamount: "<< wallAmount;
+    for(unsigned int walls = 0; walls < wallAmount; walls++)
+    {
+
+        int randDirection = rand() % 4;
+        int randWallSize  = rand() % 5;
+        QPoint randPos    = QPoint(1+rand() % (mapsize().width()-2),1+rand() % (mapsize().height()-2));
+
+    //    qDebug() << "randDirection: "<< randDirection;
+    //    qDebug() << "randWallSize: "<< randWallSize;
+    //    qDebug() << "randPos: "<< randPos;
+        QPoint obsticlePos(-1,-1);
+        for(int wallTile=0; wallTile<randWallSize; wallTile++)
+        {
+            switch(randDirection)
+            {
+                case 0:
+                {
+                    if(randPos.y()-wallTile < 0)
+                        break;
+                    obsticlePos = QPoint(randPos.x(),randPos.y()-wallTile);
+                    //_viewMap[randPos.x()][] = MapData::obsticle;
+                    break;
+                }
+                case 1:
+                {
+                    if(randPos.x()+wallTile >= _viewMap.size())
+                        break;
+                    obsticlePos = QPoint(randPos.x()+wallTile,randPos.y());
+                   // _viewMap[randPos.x()+wallTile][randPos.y()] = MapData::obsticle;
+                    break;
+                }
+                case 2:
+                {
+                    if(randPos.y()+wallTile >= _viewMap[randPos.x()].size())
+                        break;
+                    obsticlePos = QPoint(randPos.x(),randPos.y()+wallTile);
+                   // _viewMap[randPos.x()][randPos.y()+wallTile] = MapData::obsticle;
+                    break;
+                }
+                case 3:
+                {
+                    if(randPos.x()-wallTile < 0)
+                        break;
+                    obsticlePos = QPoint(randPos.x()-wallTile,randPos.y());
+                  //  _viewMap[randPos.x()-wallTile][randPos.y()] = MapData::obsticle;
+                    break;
+                }
+            }
+            if(obsticlePos.x() != -1 && obsticlePos.y() != -1)
+            {
+               // if(_viewMap[obsticlePos.x()][obsticlePos.y()] == MapData::nothing)
+                {
+                 //   qDebug()<< "set: "<<obsticlePos;
+                    _viewMap[obsticlePos.x()][obsticlePos.y()] = MapData::obsticle;
+                }
+            }
+        }
     }
 }
 void Environment::setSnakeOnMap(unsigned int player)
@@ -164,7 +257,8 @@ void Environment::setSnakeOnMap(unsigned int player)
 }
 void Environment::drawMap()
 {
-
+    if(!_drawEnable)
+        return;
 
     //qDebug() << "------------------------------------";
     for(unsigned int y=0; y<mapsize().height(); y++)
@@ -182,6 +276,7 @@ void Environment::drawMap()
 
 void Environment::update()
 {
+
     for(int a=0; a<30; a++)
     {
         if(_food.size() != _foodAmount)
@@ -207,7 +302,7 @@ void Environment::update()
                 if(snakePos[a].x() == _food[b]->pos().x() &&
                    snakePos[a].y() == _food[b]->pos().y())
                 {
-                    qDebug() << "Food eaten. Amount: " << _food[b]->amount();
+                //    qDebug() << "Food eaten. Amount: " << _food[b]->amount();
                     _player[c]->addFood(_food[b]->amount());
                     _food[b]->eaten();
                     _food[b]->respawn();
@@ -223,7 +318,7 @@ void Environment::update()
                 if(_player[c]->pos(0).x() == _player[a]->pos(b).x() &&
                    _player[c]->pos(0).y() == _player[a]->pos(b).y())
                 {
-                    qDebug() << "Collision between snakes: " << c << " : " << a;
+                 //   qDebug() << "Collision between snakes: " << c << " : " << a;
                     if(b == 0)
                     {
                         if(_player[c]->size() > _player[a]->size())
@@ -238,7 +333,10 @@ void Environment::update()
                     }else
                     {
                         //reward for player a
-                 //       _player[a] ->addFood(_player[c]->food()/2);
+                        if(_player[a]->killreward())
+                        {
+                            _player[a] ->addFood(_player[c]->food()/2);
+                        }
                         controlSnakeDeath(c,true);
                         emit playerKill(a,c);
                     }
@@ -260,10 +358,24 @@ void Environment::update()
     {
         for(unsigned int x=0; x<mapsize().width(); x++)
         {
-            _viewMap[x][y] = MapData::nothing;
-            _map[x][y]->frame(false);
-            _map[x][y]->color(_environmentColor);
-            _map[x][y]->end(QPoint(tileSize(),tileSize()));
+            if(_viewMap[x][y] != MapData::obsticle)
+            {
+                _viewMap[x][y] = MapData::nothing;
+                if(_drawEnable)
+                {
+                    _map[x][y]->frame(false);
+                    _map[x][y]->color(_environmentColor);
+                    _map[x][y]->end(QPoint(tileSize(),tileSize()));
+                }
+                _labelMap[x][y]->hide();
+            }
+            else
+            {
+                if(_drawEnable)
+                {
+                    _map[x][y]->color(_obsticleColor);
+                }
+            }
 
         }
     }
@@ -271,15 +383,21 @@ void Environment::update()
     {
         _viewMap[0][a] = MapData::obsticle;
         _viewMap[_viewMap.size()-1][a] = MapData::obsticle;
-        _map[0][a]->color(_obsticleColor);
-        _map[_viewMap.size()-1][a]->color(_obsticleColor);
+        if(_drawEnable)
+        {
+            _map[0][a]->color(_obsticleColor);
+            _map[_viewMap.size()-1][a]->color(_obsticleColor);
+        }
     }
     for(unsigned int a=0; a<mapsize().width(); a++)
     {
         _viewMap[a][0] = MapData::obsticle;
         _viewMap[a][_viewMap[a].size()-1] = MapData::obsticle;
-        _map[a][0]->color(_obsticleColor);
-        _map[a][_viewMap[a].size()-1]->color(_obsticleColor);
+        if(_drawEnable)
+        {
+            _map[a][0]->color(_obsticleColor);
+            _map[a][_viewMap[a].size()-1]->color(_obsticleColor);
+        }
     }
 
     for(unsigned int a=0; a<_food.size(); a++)
@@ -295,13 +413,20 @@ void Environment::update()
         }else
         {
             _viewMap[_food[a]->pos().x()][_food[a]->pos().y()] = MapData::food;
-            _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameSize(2);
-            _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameColor(QColor((_food[a]->color().red()*80)/100,(_food[a]->color().green()*80)/100,(_food[a]->color().blue()*80)/100));
-            _map[_food[a]->pos().x()][_food[a]->pos().y()]->frame(true);
-            _map[_food[a]->pos().x()][_food[a]->pos().y()]->color(_food[a]->color());
+            if(_drawEnable)
+            {
+                _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameSize(2);
+                _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameColor(QColor((_food[a]->color().red()*80)/100,(_food[a]->color().green()*80)/100,(_food[a]->color().blue()*80)/100));
+                _map[_food[a]->pos().x()][_food[a]->pos().y()]->frame(true);
+                _map[_food[a]->pos().x()][_food[a]->pos().y()]->color(_food[a]->color());
 
-            _map[_food[a]->pos().x()][_food[a]->pos().y()]->end(QPoint(tileSize()*0.8,tileSize()*0.8));
-
+                _map[_food[a]->pos().x()][_food[a]->pos().y()]->end(QPoint(tileSize()*0.8,tileSize()*0.8));
+                if(_showInfoText)
+                {
+                    _labelMap[_food[a]->pos().x()][_food[a]->pos().y()]->setText(QString::number(_food[a]->amount()));
+                    _labelMap[_food[a]->pos().x()][_food[a]->pos().y()]->show();
+                }
+            }
         }
     }
     //-----------Set Snake
@@ -365,9 +490,15 @@ void Environment::snakeStarved(unsigned int player)
 {
     if(_player.size() <= player)
         player = 0;
-    qDebug() << "<<<starved: ";
+   // qDebug() << "<<<starved: ";
     controlSnakeDeath(player,true);
 }
+void Environment::obsticleReplace()
+{
+
+    placeObsticle();
+}
+
 Player *Environment::player(unsigned int player)
 {
     if(_player.size() <= player)
@@ -564,6 +695,9 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
     viewDirection.push_back(QPoint(0,-1));
     viewDirection.push_back(QPoint(1,0));
 
+    viewDirection.push_back(QPoint(-1,-1));
+    viewDirection.push_back(QPoint(1,-1));
+
     geometry::Angle rotAnge = 0;
     switch(_player[player]->direction()){
         case Direction::_up:
@@ -611,7 +745,11 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
             }else if(pos.y() >= _viewMap[pos.x()].size() || pos.y() < 0)
             {
                 continue;
+            }else if(_viewMap[pos.x()][pos.y()] == MapData::nothing)
+            {
+                continue;
             }
+
 
             switch(_viewMap[pos.x()][pos.y()])
             {
@@ -621,8 +759,8 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                     {
                         if(_food[b]->pos().x() == pos.x() && _food[b]->pos().y() == pos.y())
                         {
-                            //outputData[food_layer][outputData[food_layer].size()-1] = (float)_food[b]->amount()/100;
-                            outputData[food_layer][outputData[food_layer].size()-1] = 1;
+                            outputData[food_layer][outputData[food_layer].size()-1] = (float)_food[b]->amount()/100;
+                            //outputData[food_layer][outputData[food_layer].size()-1] = 1;
                         }
                     }
                     break;
@@ -647,9 +785,11 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                     break;
                 }
             }
+            a = viewLength;
+
         }
     }
-    /*if(player == 0)
+   /* if(player == 0)
     {
         qDebug() << outputData;
     }*/
@@ -673,4 +813,30 @@ vector<QPoint> Environment::rotate_90(vector<QPoint> data,QPoint rotPoint, int a
         }
     }
     return data;
+}
+void Environment::showInfoText(bool enable)
+{
+    _showInfoText = enable;
+    if(!_showInfoText)
+    {
+        for(unsigned int x=0; x<_labelMap.size(); x++)
+        {
+            for(unsigned int y=0; y<_labelMap[x].size(); y++)
+            {
+                _labelMap[x][y]->hide();
+            }
+        }
+    }
+}
+bool Environment::showInfoText()
+{
+    return _showInfoText;
+}
+void Environment::drawEnable(bool enable)
+{
+    _drawEnable = enable;
+}
+bool Environment::drawEnable()
+{
+    return _drawEnable;
 }

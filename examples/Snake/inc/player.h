@@ -62,6 +62,10 @@ class Player : public QObject
 
         unsigned int steps();
 
+        void killreward(bool enable);
+        bool killreward();
+
+
     signals:
         void collision(unsigned int player,vector<QPoint>);
         void starved(unsigned int player);
@@ -91,6 +95,7 @@ class Player : public QObject
         bool _death;
         unsigned int _playerIndex;
         bool _glovalView;
+        bool _killreward;
 
 
 

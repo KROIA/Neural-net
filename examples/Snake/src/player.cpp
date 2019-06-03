@@ -12,6 +12,7 @@ Player::Player(unsigned int player,QSize mapSize)
     _presetFood = _presetSize * _foodPerTile;
     standardColor(QColor(0,200,0));
     globalView(false);
+    killreward(false);
 
     _death = true;
     revive();
@@ -196,7 +197,7 @@ void Player::update()
     addFood(-1);
     if(food() <= 0)
     {
-        qDebug() << "starved: "<< _playerIndex;
+     //   qDebug() << "starved: "<< _playerIndex;
         emit starved(_playerIndex);
     }
     if(food() / _foodPerTile > size()-1)
@@ -255,24 +256,25 @@ void Player::checkForSelfCollision()
             if(_playerPos[a].x() == _playerPos[b].x() &&
                _playerPos[a].y() == _playerPos[b].y())
             {
-                qDebug() << "collision: "<< _playerPos[a];
+              //  qDebug() << "collision: "<< _playerPos[a];
                 collisionPos.push_back(_playerPos[a]);
             }
         }
     }
     if(collisionPos.size() != 0)
     {
-        qDebug() << "collision: "<< _playerIndex;
+       // qDebug() << "collision: "<< _playerIndex;
         emit collision(_playerIndex,collisionPos);
     }
 }
 void Player::kill()
 {
-    qDebug() << "Killed Player";
-    qDebug() << "Stats:";
-    qDebug() << "Steps: " << steps();
-    qDebug() << "Food: " << food();
-    qDebug() << "Size: " << size();
+    /*
+        qDebug() << "Killed Player: " << _playerIndex;
+        qDebug() << "  Steps: " << steps();
+        qDebug() << "  Food: " << food();
+        qDebug() << "  Size: " << size();
+    */
     _death = true;
     _playerPos.clear();
     _playerColor.clear();
@@ -310,4 +312,13 @@ bool Player::isAlive()
 unsigned int Player::steps()
 {
     return _steps;
+}
+
+void Player::killreward(bool enable)
+{
+    _killreward = enable;
+}
+bool Player::killreward()
+{
+    return _killreward;
 }

@@ -10,8 +10,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.00.01";
-    QString datum   = "29.05.2019";
+    QString version = "00.00.02";
+    QString datum   = "03.06.2019";
 
 
     QString infoLabelText  = "Snake AI © by Alex Krieg\n";
@@ -23,13 +23,14 @@ Snake::Snake(QWidget *parent) :
 
     _statsFilename = "stats.csv";
 
+
     setupFieldOfView();
     //----------------NEURAL NET------------------
 
     unsigned int animals = 100;
-    unsigned int inputs = /*_fieldOfView.size()*/3 * 3 ; //3 Sensor Layer (food,snake,obsticle)
-    unsigned int hiddenX = 2;
-    unsigned int hiddenY = 16;
+    unsigned int inputs = /*_fieldOfView.size()*/3 * (3 + 2); //3 Sensor Layer (food,snake,obsticle)
+    unsigned int hiddenX = 1;
+    unsigned int hiddenY = 20;
     unsigned int outputs = 2;                       // left | right
 
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs);
@@ -37,9 +38,10 @@ Snake::Snake(QWidget *parent) :
     net->loadFromNetFile("snake","net");
     net->mutationFactor(0.05);
     net->mutationChangeWeight(0.1);
+
     generation = 0;
 
-    qDebug() << "fieldOfView";
+  /*  qDebug() << "fieldOfView";
     int c = 0;
     for(unsigned int a=0; a<sqrt(_fieldOfView.size()); a++)
     {
@@ -50,12 +52,12 @@ Snake::Snake(QWidget *parent) :
             c++;
         }
         qDebug() << txt;
-    }
+    }*/
 
 
     _painter = new QPainter(this);
 //#ifdef TESTMODE
-    _versusEnvironment = new Environment(_painter,2);
+    _versusEnvironment = new Environment(this,_painter,2);
     _versusEnvironment->mapsize(QSize(30,30));
     _versusEnvironment->tileSize(10);
     _versusEnvironment->tileSpace(2);
@@ -81,7 +83,7 @@ Snake::Snake(QWidget *parent) :
     _playerDeaths = 0;
     _playerKills = 0;
 //#else
-    _environment = new Environment(_painter,net->animals());
+    _environment = new Environment(this,_painter,net->animals());
     _environment->mapsize(QSize(100,100));
     _environment->tileSize(3);
     _environment->tileSpace(1);
@@ -89,6 +91,15 @@ Snake::Snake(QWidget *parent) :
     _environment->drawPos(QPoint(200,10));
 //#endif
 
+    bool enableKillreward = true;
+    for(unsigned int a=0; a<_environment->player()->size(); a++)
+    {
+        _environment->player(a)->killreward(enableKillreward);
+    }
+    for(unsigned int a=0; a<_versusEnvironment->player()->size(); a++)
+    {
+        _versusEnvironment->player(a)->killreward(enableKillreward);
+    }
 
 
     _environment->mapInit();
@@ -108,6 +119,7 @@ Snake::Snake(QWidget *parent) :
     _updateTimer2->start(3000);
     _calculationPerSecond   = 0;
     _calculationCounter     = 0;
+    _playerKeyInputDisabler = false;
 
 
 }
@@ -121,6 +133,7 @@ void Snake::paintEvent(QPaintEvent *e)
 {
     if(!_enableDisplay)
         return;
+
     _painter->begin(this);
     _painter->setRenderHint(QPainter::Antialiasing);
     _painter->setRenderHints(QPainter::RenderHints(0x04),true);
@@ -173,8 +186,10 @@ void Snake::timerEvent()
     ui->steps_label->setText(QString::number(generation));
     this->update();
     handleNet();
-
-
+    if(_versusBot)
+    {
+        _playerKeyInputDisabler = false;
+    }
 }
 void Snake::timerEvent2()
 {
@@ -194,6 +209,7 @@ void Snake::handleNet()
 //#ifdef TESTMODE
     if(_versusBot)
     {
+        _versusEnvironment->AI_mapData_simple(0);
         vector<vector<float>    > netInput = _versusEnvironment->AI_mapData_simple(1);
         unsigned int inputIndex = 0;
         for(unsigned int b=0; b<netInput.size(); b++)
@@ -293,6 +309,10 @@ void Snake::handleNet()
     if(_versusBot)
     {
    // #ifdef TESTMODE
+        if(!_versusEnvironment->player(0)->isAlive() && !_versusEnvironment->player(1)->isAlive())
+        {
+            _versusEnvironment->obsticleReplace();
+        }
         if(!_versusEnvironment->player(0)->isAlive())
         {
             _playerFood += _versusEnvironment->player(0)->food();
@@ -328,6 +348,7 @@ void Snake::handleNet()
         if(deathCounter == net->animals())
         {
             qDebug() << "all death";
+
             _snakeScore.clear();
             float averageScore = 0;
             float maxScore = 0;
@@ -402,10 +423,12 @@ void Snake::handleNet()
             generation++;
             _calculationCounter++;
 
+
             for(unsigned int animal=0; animal<net->animals(); animal++)
             {
                 _environment->player(animal)->revive();
             }
+            _environment->obsticleReplace();
             _saveCounter++;
             if(_saveCounter > 20)
             {
@@ -420,6 +443,10 @@ void Snake::handleNet()
 
 void Snake::keyPressEvent(QKeyEvent *e)
 {
+    if(!_versusBot || _playerKeyInputDisabler)
+    {
+        return;
+    }
     switch(char(e->key()))
     {
         //CONTROL 1
@@ -427,21 +454,25 @@ void Snake::keyPressEvent(QKeyEvent *e)
         {
             //_selfControl = !_selfControl;
             _versusEnvironment->controlSnakeDirection(0,Direction::_up);
+            _playerKeyInputDisabler = true;
             break;
         }
         case 'A'://left
         {
             _versusEnvironment->controlSnakeDirection(0,Direction::_left);
+            _playerKeyInputDisabler = true;
             break;
         }
         case 'S'://down
         {
             _versusEnvironment->controlSnakeDirection(0,Direction::_down);
+            _playerKeyInputDisabler = true;
             break;
         }
         case 'D'://right
         {
             _versusEnvironment->controlSnakeDirection(0,Direction::_right);
+            _playerKeyInputDisabler = true;
             break;
         }
         //CONTOL 2
@@ -557,6 +588,24 @@ void Snake::on_kill_pushButton_clicked()
 void Snake::on_toggleDisplay_pushbutton_clicked()
 {
     _enableDisplay = !_enableDisplay;
+    _environment->drawEnable(_enableDisplay);
+    _versusEnvironment->drawEnable(_enableDisplay);
+    if(!_enableDisplay)
+    {
+        _versusEnvironment->showInfoText(false);
+        _environment->showInfoText(false);
+        return;
+    }
+    if(_versusBot)
+    {
+        _environment->showInfoText(false);
+        _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
+    }
+    else
+    {
+        _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
+        _versusEnvironment->showInfoText(false);
+    }
 }
 void Snake::on_versusBot_pushButton_clicked()
 {
@@ -564,6 +613,17 @@ void Snake::on_versusBot_pushButton_clicked()
 
     _versusEnvironment->controlSnakeDeath(0,true);
     _versusEnvironment->controlSnakeDeath(1,true);
+
+    if(_versusBot && _enableDisplay)
+    {
+        _environment->showInfoText(false);
+        _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
+    }
+    else
+    {
+        _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
+        _versusEnvironment->showInfoText(false);
+    }
 
     _botScore = 0;
     _botFood = 0;
@@ -577,9 +637,17 @@ void Snake::on_versusBot_pushButton_clicked()
     _playerDeaths = 0;
     _playerKills = 0;
 }
+void Snake::on_mapinfo_checkbox_stateChanged(int arg1)
+{
+    if(!_enableDisplay)
+        return;
+    _versusEnvironment->showInfoText((bool)arg1);
+    _environment->showInfoText((bool)arg1);
+}
+
 void Snake::onSnakeKilled(unsigned int killer,unsigned int victim)
 {
-    qDebug() << "snake killed someone: "<<killer<<" : "<<victim;
+  //  qDebug() << "snake killed someone: "<<killer<<" : "<<victim;
     if(_versusBot)
     {
         if(killer == 0){
@@ -588,20 +656,20 @@ void Snake::onSnakeKilled(unsigned int killer,unsigned int victim)
             _botKills++;
         }
     }
-    qDebug() << "botkills: "<<_botKills << " Playerkills: "<<_playerKills;
+  //  qDebug() << "botkills: "<<_botKills << " Playerkills: "<<_playerKills;
 }
 
 void Snake::setupFieldOfView()
 {
 
-        for(int y=-5; y<=5; y++)
+   /*     for(int y=-5; y<=5; y++)
         {
             for(int x=-5; x<=5; x++)
             {
                 _fieldOfView.push_back(QPoint(x,y));
             }
         }
-
+*/
    /* for(int a=-5; a<=5; a++)
     {
         _fieldOfView.push_back(QPoint(a,0));
@@ -636,6 +704,8 @@ void Snake::closeEvent(QCloseEvent *event)
   //event->ignore();
 
 }
+
+
 
 
 
