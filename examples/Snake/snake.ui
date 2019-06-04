@@ -137,7 +137,7 @@
    <widget class="QSlider" name="speed_slider">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>290</y>
       <width>22</width>
       <height>160</height>
@@ -162,7 +162,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>450</y>
       <width>31</width>
       <height>20</height>
@@ -175,7 +175,7 @@
    <widget class="QSlider" name="food_slider">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>60</x>
       <y>290</y>
       <width>22</width>
       <height>160</height>
@@ -200,7 +200,7 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>60</x>
       <y>450</y>
       <width>31</width>
       <height>20</height>
@@ -565,6 +565,137 @@
     </property>
     <property name="text">
      <string>Mapinfo</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>670</y>
+      <width>141</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QRadioButton" name="geneticTraining_radioButton">
+       <property name="text">
+        <string>geneticTraining</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="versusAI_radioButton">
+       <property name="text">
+        <string>versus AI</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="backpropTraining_radioButton">
+       <property name="text">
+        <string>backprop training</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="backpropTraining_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>750</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>training</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="selectedSnake_slider">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>290</y>
+      <width>22</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>450</y>
+      <width>31</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Snake</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>750</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>maxErr</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="maxError_slider">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>639</y>
+      <width>22</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>1000</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1000</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
     </property>
    </widget>
   </widget>

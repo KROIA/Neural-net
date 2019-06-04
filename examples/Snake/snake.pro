@@ -56,6 +56,7 @@ SOURCES += \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
+    $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
     $$geometryPath/geometry.cpp \
     $$srcPath/player.cpp \

@@ -13,6 +13,7 @@ Player::Player(unsigned int player,QSize mapSize)
     standardColor(QColor(0,200,0));
     globalView(false);
     killreward(false);
+    resetDeathCount();
 
     _death = true;
     revive();
@@ -275,9 +276,21 @@ void Player::kill()
         qDebug() << "  Food: " << food();
         qDebug() << "  Size: " << size();
     */
+    if(_death)
+        return;
+
     _death = true;
     _playerPos.clear();
     _playerColor.clear();
+    if(steps() == 0)
+    {
+        return;
+    }
+    _deathCount++;
+
+    _scoreList.push_back(Score());
+    _scoreList[_scoreList.size()-1].food = food();
+    _scoreList[_scoreList.size()-1].steps = steps();
 }
 void Player::revive()
 {
@@ -321,4 +334,48 @@ void Player::killreward(bool enable)
 bool Player::killreward()
 {
     return _killreward;
+}
+unsigned int Player::deathCount()
+{
+    return _deathCount;
+}
+void Player::resetDeathCount()
+{
+    _deathCount = 0;
+}
+vector<struct Score> Player::score()
+{
+    return _scoreList;
+}
+void Player::resetScore()
+{
+    _scoreList.clear();
+}
+struct Score Player::averageScore()
+{
+    Score tmpScore;
+    tmpScore.food = 0;
+    tmpScore.steps = 0;
+    if(_scoreList.size() == 0)
+        return tmpScore;
+    for(unsigned int a=0; a<_scoreList.size(); a++)
+    {
+        tmpScore.food += _scoreList[a].food / _scoreList.size();
+        tmpScore.steps += _scoreList[a].steps / _scoreList.size();
+    }
+    return tmpScore;
+}
+struct Score Player::addedUpScore()
+{
+    Score tmpScore;
+    tmpScore.food = 0;
+    tmpScore.steps = 0;
+    if(_scoreList.size() == 0)
+        return tmpScore;
+    for(unsigned int a=0; a<_scoreList.size(); a++)
+    {
+        tmpScore.food += _scoreList[a].food;
+        tmpScore.steps += _scoreList[a].steps;
+    }
+    return tmpScore;
 }

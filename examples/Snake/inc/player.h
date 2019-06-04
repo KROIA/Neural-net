@@ -19,6 +19,11 @@ enum Direction
     _down = 2,
     _right = 3
 };
+struct Score
+{
+        float food;
+        unsigned int steps;
+};
 
 class Player : public QObject
 {
@@ -64,6 +69,12 @@ class Player : public QObject
 
         void killreward(bool enable);
         bool killreward();
+        unsigned int deathCount();
+        void resetDeathCount();
+        vector<struct Score> score();
+        struct Score averageScore();
+        struct Score addedUpScore();
+        void resetScore();
 
 
     signals:
@@ -96,8 +107,9 @@ class Player : public QObject
         unsigned int _playerIndex;
         bool _glovalView;
         bool _killreward;
+        unsigned int _deathCount;
 
-
+        vector<struct Score>_scoreList;
 
 };
 #endif // PLAYER_H

@@ -5,7 +5,15 @@
 #include "environment.h"
 #include <QTimer>
 #include <QKeyEvent>
+
 #include <geneticnet.h>
+#include <backpropnet.h>
+
+enum Modus{
+    geneticTraining = 0,
+    versusAI = 1,
+    backpropTraining = 2
+};
 
 namespace Ui {
     class Snake;
@@ -21,7 +29,12 @@ class Snake : public QMainWindow
 
         void handleNet();
         void setupFieldOfView();
-
+        void saveBackpropTrainingsData();
+        void loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs);
+        void modeReset();
+        Direction getDirectionFromData(vector<float> inputs);
+        void logGenom(vector<float> genom);
+        float getScore(Player *player);
     protected:
         void keyPressEvent(QKeyEvent *e);
         void keyReleaseEvent(QKeyEvent *e);
@@ -45,6 +58,13 @@ class Snake : public QMainWindow
 
 
         void on_mapinfo_checkbox_stateChanged(int arg1);
+        void on_geneticTraining_radioButton_clicked(bool checked);
+        void on_versusAI_radioButton_clicked(bool checked);
+        void on_backpropTraining_radioButton_clicked(bool checked);
+
+        void on_backpropTraining_pushButton_clicked();
+
+        void on_selectedSnake_slider_valueChanged(int value);
 
     private:
         Ui::Snake *ui;
@@ -90,8 +110,17 @@ class Snake : public QMainWindow
         unsigned int _saveCounter;
 
 //#ifdef TESTMODE
-        bool _versusBot;
+        int _modus;
+        unsigned int _selectedSnake;
+        unsigned int _respawnAmount;
+
         Environment *_versusEnvironment;
+
+        Environment *_backpropTrainingEnvironment;
+        BackpropNet *_backpropNet;
+        vector<vector<float>    >_backpropTrainingInputs;
+        vector<vector<float>    >_backpropTrainingOutputs;
+        string       _backprobTrainingsDataFileName;
 
         float        _botScore;
         unsigned int _botFood;
