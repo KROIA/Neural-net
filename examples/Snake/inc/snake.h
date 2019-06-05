@@ -30,11 +30,13 @@ class Snake : public QMainWindow
         void handleNet();
         void setupFieldOfView();
         void saveBackpropTrainingsData();
+        void saveVersusData();
         void loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs);
         void modeReset();
         Direction getDirectionFromData(vector<float> inputs);
         void logGenom(vector<float> genom);
         float getScore(Player *player);
+        float getScore(Score score);
     protected:
         void keyPressEvent(QKeyEvent *e);
         void keyReleaseEvent(QKeyEvent *e);
@@ -115,6 +117,17 @@ class Snake : public QMainWindow
         unsigned int _respawnAmount;
 
         Environment *_versusEnvironment;
+        vector<struct Score> _versusBotScore;
+        vector<struct Score> _versusBotAverageScore;
+        vector<struct Score> _versusBotAverageScore_tmpBuffer;
+        vector<struct Score> _versusBotAbsolutAverageScore;
+        vector<struct Score> _versusPlayerScore;
+        vector<struct Score> _versusPlayerAverageScore;
+        vector<struct Score> _versusPlayerAverageScore_tmpBuffer;
+        vector<struct Score> _versusPlayerAbsolutAverageScore;
+        string _versusSaveFileName;
+        unsigned int _versusSaveScoreInterval;
+        unsigned int _versusSaveScoreCount;
 
         Environment *_backpropTrainingEnvironment;
         BackpropNet *_backpropNet;

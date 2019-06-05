@@ -10,8 +10,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.00.03";
-    QString datum   = "04.06.2019";
+    QString version = "00.00.04";
+    QString datum   = "05.06.2019";
 
 
     QString infoLabelText  = "Snake AI © by Alex Krieg\n";
@@ -28,6 +28,8 @@ Snake::Snake(QWidget *parent) :
 
     bool enableKillreward = false;
     _respawnAmount        = 3;
+    _versusSaveFileName   = "versusSave.csv";
+    _versusSaveScoreInterval = 2;
     //----------------NEURAL NET------------------
 
     unsigned int animals = 100;
@@ -96,6 +98,9 @@ Snake::Snake(QWidget *parent) :
     _playerSteps = 0;
     _playerDeaths = 0;
     _playerKills = 0;
+
+
+    _versusSaveScoreCount = 0;
 //#else
     _environment = new Environment(this,_painter,net->animals());
     _environment->mapsize(QSize(100,100));
@@ -200,7 +205,7 @@ void Snake::timerEvent()
         {
             _versusEnvironment->update();
 
-            ui->playerFood_label->setText(QString::number(_playerFood+_versusEnvironment->player(0)->food()));
+         /*   ui->playerFood_label->setText(QString::number(_playerFood+_versusEnvironment->player(0)->food()));
             ui->playerSteps_label->setText(QString::number(_playerSteps+_versusEnvironment->player(0)->steps()));
             ui->playerDeaths_label->setText(QString::number(_playerDeaths));
             ui->playerKills_label->setText(QString::number(_playerKills));
@@ -210,7 +215,18 @@ void Snake::timerEvent()
             ui->botSteps_label->setText(QString::number(_botSteps+_versusEnvironment->player(1)->steps()));
             ui->botDeaths_label->setText(QString::number(_botDeaths));
             ui->botKills_label->setText(QString::number(_botKills));
-            ui->botScore_label->setText(QString::number(_botScore));
+            ui->botScore_label->setText(QString::number(_botScore));*/
+            ui->playerFood_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().food));
+            ui->playerSteps_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().steps));
+            ui->playerDeaths_label->setText(QString::number(_versusEnvironment->player(0)->deathCount()));
+            ui->playerKills_label->setText(QString::number(_playerKills));
+            ui->playerScore_label->setText(QString::number(getScore(_versusEnvironment->player(0))));
+
+            ui->botFood_label->setText(QString::number(_versusEnvironment->player(1)->averageScore().food));
+            ui->botSteps_label->setText(QString::number(_versusEnvironment->player(1)->averageScore().steps));
+            ui->botDeaths_label->setText(QString::number(_versusEnvironment->player(1)->deathCount()));
+            ui->botKills_label->setText(QString::number(_botKills));
+            ui->botScore_label->setText(QString::number(getScore(_versusEnvironment->player(1))));
             break;
         }
         case Modus::backpropTraining:
@@ -267,9 +283,6 @@ void Snake::handleNet()
 {
     //qDebug() << "handle Net";
     unsigned int deathCounter = 0;
-
-    float scoreFoodFactor = 0.2f;
-    float scoreStepFactor = 0.1f;
 
     switch(_modus)
     {
@@ -434,6 +447,7 @@ void Snake::handleNet()
         }
         case Modus::versusAI:
         {
+
             _versusEnvironment->AI_mapData_simple(0);
             vector<vector<float>    > netInput = _versusEnvironment->AI_mapData_simple(1);
             unsigned int inputIndex = 0;
@@ -471,33 +485,37 @@ void Snake::handleNet()
             {
                 _versusEnvironment->obsticleReplace();
             }
-            if(!_versusEnvironment->player(0)->isAlive())
+            if(!_versusEnvironment->player(0)->isAlive())// player
             {
-                _playerFood += _versusEnvironment->player(0)->food();
-                _playerSteps += _versusEnvironment->player(0)->steps();
-                _playerFood/=2;
-                _playerSteps/=2;
-                _playerDeaths++;
-
-                _playerScore += _playerFood * scoreFoodFactor + _playerSteps * scoreStepFactor;
-                _playerScore/=2;
-
-
                 _versusEnvironment->player(0)->revive();
             }
             if(!_versusEnvironment->player(1)->isAlive())// bot
             {
-                _botFood += _versusEnvironment->player(0)->food();
-                _botSteps += _versusEnvironment->player(0)->steps();
-                _botFood/=2;
-                _botSteps/=2;
-                _botDeaths++;
-
-                _botScore += _playerFood * scoreFoodFactor + _playerSteps * scoreStepFactor;
-                _botScore/=2;
-
-
                 _versusEnvironment->player(1)->revive();
+            }
+            _versusSaveScoreCount++;
+            if(_versusSaveScoreCount % _versusSaveScoreInterval == 0)
+            {
+                unsigned int averageSize = 10;
+                _versusPlayerScore.push_back(_versusEnvironment->player(0)->currentScore());
+                _versusPlayerAbsolutAverageScore.push_back(_versusEnvironment->player(0)->averageScore(_versusPlayerScore));
+                _versusPlayerAverageScore_tmpBuffer.push_back(_versusPlayerScore[_versusPlayerScore.size()-1]);
+                if(_versusPlayerAverageScore_tmpBuffer.size() > averageSize)
+                {
+                    _versusPlayerAverageScore_tmpBuffer.erase(_versusPlayerAverageScore_tmpBuffer.begin());
+                }
+                _versusPlayerAverageScore.push_back(_versusEnvironment->player(0)->averageScore(_versusPlayerAverageScore_tmpBuffer));
+
+                _versusBotScore.push_back(_versusEnvironment->player(1)->currentScore());
+                _versusBotAbsolutAverageScore.push_back(_versusEnvironment->player(1)->averageScore(_versusBotScore));
+                _versusBotAverageScore_tmpBuffer.push_back(_versusBotScore[_versusBotScore.size()-1]);
+                if(_versusBotAverageScore_tmpBuffer.size() > averageSize)
+                {
+                    _versusBotAverageScore_tmpBuffer.erase(_versusBotAverageScore_tmpBuffer.begin());
+                }
+                _versusBotAverageScore.push_back(_versusEnvironment->player(1)->averageScore(_versusBotAverageScore_tmpBuffer));
+                qDebug() << "player: F: "<<_versusPlayerScore[_versusPlayerScore.size()-1].food << " S: "<<_versusPlayerScore[_versusPlayerScore.size()-1].steps << " A: " <<_versusPlayerAverageScore[_versusPlayerAverageScore.size()-1].food << " : " <<_versusPlayerAverageScore[_versusPlayerAverageScore.size()-1].steps;
+                qDebug() << "Bot   : F: "<<_versusBotScore[_versusBotScore.size()-1].food << " S: "<<_versusBotScore[_versusBotScore.size()-1].steps<< " A: " <<_versusBotAverageScore[_versusBotAverageScore.size()-1].food << " : " <<_versusBotAverageScore[_versusBotAverageScore.size()-1].steps;
             }
             break;
         }
@@ -547,13 +565,14 @@ void Snake::handleNet()
             {
                 _backpropTrainingEnvironment->obsticleReplace();
 
-                _playerFood += _backpropTrainingEnvironment->player(0)->food();
-                _playerSteps += _backpropTrainingEnvironment->player(0)->steps();
+                struct Score playerScore = _backpropTrainingEnvironment->player(0)->averageScore();
+                _playerFood += playerScore.food;
+                _playerSteps += playerScore.steps;
                 _playerFood/=2;
                 _playerSteps/=2;
                 _playerDeaths++;
 
-                _playerScore += _playerFood * scoreFoodFactor + _playerSteps * scoreStepFactor;
+                _playerScore += getScore(_backpropTrainingEnvironment->player(0));
                 _playerScore/=2;
 
 
@@ -597,6 +616,27 @@ void Snake::saveBackpropTrainingsData()
     }
     _backpropTrainingInputs.clear();
     _backpropTrainingOutputs.clear();
+}
+void Snake::saveVersusData()
+{
+    if(_versusPlayerScore.size() != _versusBotScore.size() || _versusBotScore.size() == 0 || _versusPlayerScore.size() == 0)
+        return;
+    FILE *_versusSaveFile = fopen(_versusSaveFileName.c_str(),"w");
+    if(_versusSaveFile)
+    {
+        fprintf(_versusSaveFile,"PlayerFood;PlayerSteps;PlayerScore;PlayerAverageScore;PlayerAbsolutAverageScore;;BotFood;BotSteps;BotScore;BotAverageScore;BotAbsolutAverageScore;\n");
+        for(unsigned int a=0; a<_versusPlayerScore.size(); a++)
+        {
+            fprintf(_versusSaveFile,"%.3f;%u;%.3f;%.3f;%.3f;;%.3f;%u;%.3f;%.3f;%.3f;\n",_versusPlayerScore[a].food,_versusPlayerScore[a].steps,getScore(_versusPlayerScore[a]),getScore(_versusPlayerAverageScore[a]),getScore(_versusPlayerAbsolutAverageScore[a]),_versusBotScore[a].food,_versusBotScore[a].steps,getScore(_versusBotScore[a]),getScore(_versusBotAverageScore[a]),getScore(_versusBotAbsolutAverageScore[a]));
+        }
+        _versusPlayerScore.clear();
+        _versusPlayerAverageScore.clear();
+        _versusPlayerAbsolutAverageScore.clear();
+        _versusBotScore.clear();
+        _versusBotAverageScore.clear();
+        _versusBotAbsolutAverageScore.clear();
+        fclose(_versusSaveFile);
+    }
 }
 void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs)
 {
@@ -657,10 +697,13 @@ float Snake::getScore(Player *player)
 {
     if(player == nullptr)
         return 0.f;
+    return getScore(player->averageScore());
+}
+float Snake::getScore(Score score)
+{
     float scoreFoodFactor = 0.2f;
     float scoreStepFactor = 0.1f;
-    struct Score playerScore = player->averageScore();
-    return playerScore.food * scoreFoodFactor + playerScore.food * scoreStepFactor;
+    return score.food * scoreFoodFactor + score.food * scoreStepFactor;
 }
 
 void Snake::keyPressEvent(QKeyEvent *e)
@@ -841,6 +884,7 @@ void Snake::on_pause_pushButton_clicked()
 void Snake::on_saveStats_pushbutton_clicked()
 {
     qDebug() << "save";
+    saveVersusData();
     net->saveToNetFile();
     bool fileExists = false;
     FILE *statsFile = fopen(_statsFilename.c_str(),"r");
@@ -872,6 +916,7 @@ void Snake::on_saveStats_pushbutton_clicked()
     _minScoreList_smoth.clear();
     _maxScoreList_smoth.clear();
     _averageScoreList_smoth.clear();
+    qDebug() << "save done";
 }
 void Snake::on_kill_pushButton_clicked()
 {
@@ -993,6 +1038,8 @@ void Snake::on_versusAI_radioButton_clicked(bool checked)
     _versusEnvironment->controlSnakeDeath(0,true);
     _versusEnvironment->controlSnakeDeath(1,true);
 
+
+
     modeReset();
     _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
 }
@@ -1089,9 +1136,16 @@ void Snake::modeReset()
     _playerDeaths = 0;
     _playerKills = 0;
 
+    _versusSaveScoreCount = 0;
+
     _environment->showInfoText(false);
     _versusEnvironment->showInfoText(false);
     _backpropTrainingEnvironment->showInfoText(false);
+
+    _versusEnvironment->player(0)->resetScore();
+    _versusEnvironment->player(0)->resetDeathCount();
+    _versusEnvironment->player(1)->resetScore();
+    _versusEnvironment->player(1)->resetDeathCount();
 }
 
 void Snake::onSnakeKilled(unsigned int killer,unsigned int victim)

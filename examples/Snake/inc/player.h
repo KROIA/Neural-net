@@ -72,7 +72,12 @@ class Player : public QObject
         unsigned int deathCount();
         void resetDeathCount();
         vector<struct Score> score();
+        struct Score score(unsigned int index);
+        struct Score lastScore();
+        struct Score currentScore();
         struct Score averageScore();
+        struct Score averageScore(vector<Score> scoreList);
+        struct Score averageScoreOverTheLast(unsigned int lastAmount);
         struct Score addedUpScore();
         void resetScore();
 

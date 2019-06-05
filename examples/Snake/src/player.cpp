@@ -288,9 +288,7 @@ void Player::kill()
     }
     _deathCount++;
 
-    _scoreList.push_back(Score());
-    _scoreList[_scoreList.size()-1].food = food();
-    _scoreList[_scoreList.size()-1].steps = steps();
+    _scoreList.push_back(currentScore());
 }
 void Player::revive()
 {
@@ -347,6 +345,53 @@ vector<struct Score> Player::score()
 {
     return _scoreList;
 }
+struct Score Player::score(unsigned int index)
+{
+    struct Score ret;
+    ret.food = 0;
+    ret.steps = 0;
+    if(_scoreList.size() <= index)
+        return ret;
+
+    ret = _scoreList[index];
+    return ret;
+}
+struct Score Player::lastScore()
+{
+    struct Score ret;
+    ret.food = 0;
+    ret.steps = 0;
+    if(_scoreList.size() == 0)
+        return ret;
+
+    return score(_scoreList.size()-1);
+}
+struct Score Player::currentScore()
+{
+    Score currentScore;
+    currentScore.food = food();
+    currentScore.steps = steps();
+    return currentScore;
+}
+struct Score Player::averageScoreOverTheLast(unsigned int lastAmount)
+{
+    Score retScore;
+    retScore.food = 0;
+    retScore.steps = 0;
+    if(_scoreList.size() < lastAmount || lastAmount == 0)
+    {
+        lastAmount = _scoreList.size();
+        if(lastAmount == 0)
+            return retScore;
+    }
+    for(unsigned int a=0; a<lastAmount; a++)
+    {
+        retScore.food += _scoreList[_scoreList.size() -1 -a].food / lastAmount;
+        retScore.steps += _scoreList[_scoreList.size() -1 -a].steps / lastAmount;
+    }
+    return retScore;
+}
+
 void Player::resetScore()
 {
     _scoreList.clear();
@@ -365,6 +410,21 @@ struct Score Player::averageScore()
     }
     return tmpScore;
 }
+struct Score Player::averageScore(vector<Score> scoreList)
+{
+    Score averageScore;
+    averageScore.food = 0;
+    averageScore.steps = 0;
+    if(scoreList.size() == 0)
+        return averageScore;
+    for(unsigned int a=0; a<scoreList.size(); a++)
+    {
+        averageScore.food += scoreList[a].food / scoreList.size();
+        averageScore.steps += scoreList[a].steps / scoreList.size();
+    }
+    return averageScore;
+}
+
 struct Score Player::addedUpScore()
 {
     Score tmpScore;
