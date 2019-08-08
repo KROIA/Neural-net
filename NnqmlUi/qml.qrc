@@ -1,7 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
-        <file>qml/Neuron.qml</file>
         <file>qml/Layer.qml</file>
+        <file>qml/Net.qml</file>
+        <file>qml/Neuron.qml</file>
+        <file>qml/MainInfo.qml</file>
+        <file>qml/SideBar.qml</file>
+        <file>qml/TopBar.qml</file>
+        <file>qml/CreatNewNet.qml</file>
     </qresource>
 </RCC>

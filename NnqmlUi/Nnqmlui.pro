@@ -11,10 +11,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+netIncPath = ../inc
+netSrcPath = ../src
+
+INCLUDEPATH += $$netIncPath \
+               $$inc
 
 SOURCES += \
         main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    $$netSrcPath/net.cpp \
+    $$netSrcPath/neuron.cpp \
+    $$netSrcPath/activation.cpp \
+    $$netSrcPath/backpropnet.cpp \
+    $$netSrcPath/geneticnet.cpp \
+    $$netSrcPath/savenet.cpp \
+    thread.cpp
 
 RESOURCES += qml.qrc
 
@@ -34,7 +46,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES += \
         qml/main.qml \
     qml/Neuron.qml \
-    qml/Layer.qml
+    qml/Layer.qml \
+    qml/Net.qml \
+    qml/MainInfo.qml \
+    qml/SideBar.qml \
+    qml/TopBar.qml \
+    qml/CreatNewNet.qml
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    $$netIncPath/net.h \
+    $$netIncPath/neuron.h \
+    $$netIncPath/backpropnet.h \
+    $$netIncPath/geneticnet.h \
+    $$netIncPath/savenet.h \
+    thread.h

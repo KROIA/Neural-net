@@ -23,3 +23,12 @@ examples/Snake/bin
 examples/Snake/Tests
 *.8-pre1
 *.8-pre1
+NnqmlUi/Release/release/moc_mainwindow.cpp
+NnqmlUi/Release/Makefile
+NnqmlUi/Release/release/qml_Layer_qml.cpp
+NnqmlUi/Release/release/qml_Net_qml.cpp
+NnqmlUi/Release/release/qml_Neuron_qml.cpp
+NnqmlUi/Release/release/qmlcache_loader.cpp
+NnqmlUi/Release/release/qml_main_qml.cpp
+NnqmlUi/Release/release/moc_predefs.h
+*.cpp
