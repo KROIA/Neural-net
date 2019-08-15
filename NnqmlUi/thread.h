@@ -6,7 +6,7 @@
 #include <backpropnet.h>
 #include <QCoreApplication>
 #include <iostream>
-
+#include <daten.h>
 using namespace std;
 
 class netThread : public QThread
@@ -33,9 +33,8 @@ public:
     void setupNet();
     bool bias();
     void bias(bool i);
-    vector<vector<float>    >trainingsSet;
-    vector<vector<float>    >outputSet;
     BackpropNet *net;
+    Daten daten;
 signals:
     void netTrained();
 public slots:
@@ -61,8 +60,6 @@ private:
     unsigned int saves;
     float _averageError;
     unsigned long _learningSteps;
-
-    void setupTrainingSet();
     void logGenom(vector<float> genom);
 };
 

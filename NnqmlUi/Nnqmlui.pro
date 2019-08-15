@@ -1,4 +1,4 @@
-QT += qml quick
+QT += charts qml quick
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -26,7 +26,9 @@ SOURCES += \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    thread.cpp
+    thread.cpp \
+    daten.cpp \
+    datenset.cpp
 
 RESOURCES += qml.qrc
 
@@ -60,4 +62,6 @@ HEADERS += \
     $$netIncPath/backpropnet.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
-    thread.h
+    thread.h \
+    daten.h \
+    datenset.h

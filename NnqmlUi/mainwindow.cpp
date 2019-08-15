@@ -150,9 +150,9 @@ void Mainwindow::creatNew(float maxError, int maxSteps){
 }
 vector<qreal> Mainwindow::trainingSet()const{
     vector<qreal> test;
-    if(m_trainingSetId<int(workThread->trainingsSet.size())){
-    for (int i=0;i<int(workThread->trainingsSet[0].size());++i) {
-        test.push_back(qreal(workThread->trainingsSet[unsigned (long( long(m_trainingSetId)))][unsigned (long( long(i)))]));
+    if(m_trainingSetId<int(workThread->daten.trainingInput.daten().size())){
+    for (unsigned int i=0;i<workThread->daten.trainingInput.daten(0).size();++i) {
+        test.push_back(qreal(workThread->daten.trainingInput.daten(unsigned(m_trainingSetId),i)));
     }
     }
     return test;
@@ -160,29 +160,21 @@ vector<qreal> Mainwindow::trainingSet()const{
 
 void Mainwindow::setTrainingSetId(const int &i){
     m_trainingSetId=i;
-   //qDebug()<<i;
 }
 
 vector<qreal> Mainwindow::outputSet()const{
     vector<qreal> test;
-    if(m_trainingSetId<int(workThread->outputSet.size())){
-    for (int i=0;i<int(workThread->outputSet[0].size());++i) {
-        test.push_back(qreal(workThread->outputSet[unsigned (long( long(m_trainingSetId)))][unsigned (long( long(i)))]));
+    if(m_trainingSetId<int(workThread->daten.trainingOutput.daten().size())){
+    for (unsigned i=0;i<workThread->daten.trainingOutput.daten(0).size();++i) {
+        test.push_back(qreal(workThread->daten.trainingOutput.daten(unsigned(m_trainingSetId),i)));
     }
     }
 
     return test;
 }
 void Mainwindow::setOutputSet(const vector<qreal> &set){
-    qDebug()<<"set output set:"<<set[m_trainingSetId];
-    for (int i=0;i<int(set.size());++i) {
-        workThread->outputSet[m_trainingSetId][0]=float(set[m_trainingSetId]);
-}
-    //qDebug()<<
+    workThread->daten.trainingOutput.daten(set,unsigned(m_trainingSetId));
 }
 void Mainwindow::setTrainingSet(const vector<qreal> &set){
-    for (int i=0;i<int(set.size());++i) {
-        qDebug()<<"set training set:"<<float(set[i]);
-        workThread->trainingsSet[m_trainingSetId][i]=float(set[i]);
-    }
+    workThread->daten.trainingInput.daten(set);
 }

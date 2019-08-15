@@ -3,9 +3,6 @@
 netThread::netThread(QObject *parent):
     QThread(parent)
 {
-
-    setupTrainingSet();
-
     _hiddenNeuronX= 1;
     _hiddenNeuronY= 4;
 
@@ -21,19 +18,20 @@ netThread::netThread(QObject *parent):
 
 void netThread::run(){
     while(finished==false){
-    net->input(trainingsSet[_counter]);//counter]);       // Sets the input of the net with the trainingset [counter]
+    //qDebug()<<daten.trainingInput.daten(_counter)[0]<<""<<daten.trainingInput.daten(_counter)[1];
+    net->input(daten.trainingInput.daten(_counter));//counter]);       // Sets the input of the net with the trainingset [counter]
     outputVector = net->output();                  // Calculates the output vector and returns it
-    net->expected(outputSet[_counter]);//counter]);
+    net->expected(daten.trainingOutput.daten(_counter));//counter]);
     _averageError += abs(net->netError());    //The net calculates the error of netprediction and expected output                                   //Saving only the positive value of the error to stop the training later when the error is low enough
     net->learn();                            //Improve the net
-    _learningSteps++;                        //Adding one training cycle
+    _learningSteps++;
+    //qDebug()<<_counter<<": "<<daten.trainingInput.daten(_counter);//Adding one training cycle
     _counter++;                              //counts to the next trainingset
     saveCounter++;
-    if(_counter >= trainingsSet.size())
+    if(_counter >= daten.trainingInput.daten().size())
     {
-
         _counter = 0;
-        _averageError /= trainingsSet.size(); //takes the average error of the whole training set
+        _averageError /= daten.trainingInput.daten().size(); //takes the average error of the whole training set
         if(saveCounter > saves)
         {
             saveCounter = 0;
@@ -48,10 +46,8 @@ void netThread::run(){
         }
 
     }
-    //qDebug()<<"training"<<_learningSteps;
     if(_averageError < _maxError || _learningSteps > _maxSteps)//Learn until the error is below 0.005 or learning cycles are more then 1000000
     {
-        //qDebug()<<"finished"<<_averageError;
         finished=true;
         net->saveToNetFile();
         break;
@@ -61,15 +57,6 @@ void netThread::run(){
     if(this->stop) break;
     mutex.unlock();
     }
-}
-
-void netThread::setupTrainingSet()
-{
-    //              INPUT VALUES             EXPECTED OUTPUT
-    trainingsSet.push_back({0,0});   outputSet.push_back({0});
-    trainingsSet.push_back({0,1});   outputSet.push_back({1});
-    trainingsSet.push_back({1,0});   outputSet.push_back({1});
-    trainingsSet.push_back({1,1});   outputSet.push_back({0});
 }
 void netThread::logGenom(vector<float> genom)
 {
@@ -97,7 +84,6 @@ float netThread::averageError(){
     return _averageError;
 }
 unsigned long netThread::learningSteps(){
-    //qDebug()<<"learningSteps:"<<_learningSteps;
     return _learningSteps;
 }
 bool netThread::bias(){
@@ -115,9 +101,9 @@ void netThread::setupNet(){
     system("cls");
     _learningSteps = 0;
     finished=false;
-    _inputNeurons = unsigned(trainingsSet[0].size());
-    _outputNeuron = unsigned(outputSet[0].size());
-    qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
+    _inputNeurons = unsigned(daten.trainingInput.daten(_counter).size());
+    _outputNeuron = unsigned(daten.trainingOutput.daten(_counter).size());
+    //qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
     net= new BackpropNet(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Activation::Sigmoid);
     net->mutationFactor(float(0.005));
 
