@@ -988,36 +988,6 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
         }
     }
 }
-void Snake::on_versusBot_pushButton_clicked()
-{
-    /*
-
-    _versusEnvironment->controlSnakeDeath(0,true);
-    _versusEnvironment->controlSnakeDeath(1,true);
-
-    if(_versusBot && _enableDisplay)
-    {
-        _environment->showInfoText(false);
-        _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
-    }
-    else
-    {
-        _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
-        _versusEnvironment->showInfoText(false);
-    }
-
-    _botScore = 0;
-    _botFood = 0;
-    _botSteps = 0;
-    _botDeaths = 0;
-    _botKills = 0;
-
-    _playerScore = 0;
-    _playerFood = 0;
-    _playerSteps = 0;
-    _playerDeaths = 0;
-    _playerKills = 0;*/
-}
 void Snake::on_mapinfo_checkbox_stateChanged(int arg1)
 {
     if(!_enableDisplay)
