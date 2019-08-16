@@ -3,7 +3,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.13
-import QtQml 2.13
+import QtQml 2.12
 Dialog {
     id:newNet
     width: 500
@@ -81,17 +81,18 @@ Dialog {
             text: "Bios"
             checked: true
         }
-        SpinBox{
+        /*SpinBox{
             id: bios
             minimumValue: 0
             decimals: 0
+
             enabled: if(biosCheckbox.checked==true){
                          return true
                      }
                      else{
                          return false
                      }
-        }
+        }*/
     }
     Row{
 

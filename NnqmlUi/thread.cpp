@@ -105,7 +105,7 @@ void netThread::setupNet(){
     _outputNeuron = unsigned(daten.trainingOutput.daten(_counter).size());
     //qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
     net= new BackpropNet(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Activation::Sigmoid);
-    net->mutationFactor(float(0.005));
+    net->mutationFactor(float(0.0005));
 
 }
 void netThread::inputNeurons(unsigned int i){

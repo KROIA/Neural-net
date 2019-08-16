@@ -32,3 +32,4 @@ NnqmlUi/Release/release/qmlcache_loader.cpp
 NnqmlUi/Release/release/qml_main_qml.cpp
 NnqmlUi/Release/release/moc_predefs.h
 *.cpp
+*.autosave
