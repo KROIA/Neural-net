@@ -19,6 +19,7 @@ Neuron::Neuron(unsigned int inputs, Activation activationFunction, bool enableAv
 }
 void Neuron::init(unsigned int inputs, Activation activationFunction, bool enableAverage)
 {
+    _inputs = 0;
     _randEngine = std::default_random_engine(rand()%100 /*+ ti->tm_hour+ti->tm_min+ti->tm_sec*/);
     try {
         this->inputs(inputs);
@@ -33,6 +34,12 @@ Neuron::~Neuron()
 {
    _weightList.clear();
    _inputList.clear();
+   for(unsigned int a=0; a<_ptr_inputList.size(); a++)
+   {
+      if(_ptr_inputList[a] != nullptr)
+        delete _ptr_inputList[a];
+   }
+   _ptr_inputList.clear();
 }
 void Neuron::inputs(unsigned int inputs)
 {
@@ -42,7 +49,21 @@ void Neuron::inputs(unsigned int inputs)
     }
     if(inputs != _inputs)
     {
-        _inputs     = inputs;
+        try {
+            while(inputs > _inputs)
+            {
+                _ptr_inputList.push_back(new float(0));
+                _inputs++;
+            }
+            while(inputs < _inputs)
+            {
+                _inputs--;
+                delete _ptr_inputList[_inputs];
+                _ptr_inputList.erase(_ptr_inputList.end()-1);
+            }
+        } catch (std::exception &e) {
+            error_general("inputs("+std::to_string(inputs)+")",e.what());
+        }
         _weightList = std::vector<float> (_inputs,0);
         _inputList  = std::vector<float> (_inputs,0);
         randWeight();
@@ -137,6 +158,18 @@ void Neuron::input(std::vector<float> inputList)
     _inputList  = inputList;
     _update     = true;
 }
+void Neuron::connectInput(unsigned int input, float *ptr)
+{
+    if(input >= _inputs)
+    {
+        error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1));
+    }
+    if(&ptr == nullptr)
+    {
+        error_general("Neuron::connectInput("+std::to_string(input)+",float &ptr)","ptr == nullptr");
+    }
+    _ptr_inputList[input] = ptr;
+}
 
 float Neuron::input(unsigned int pos)
 {
@@ -144,11 +177,18 @@ float Neuron::input(unsigned int pos)
     {
         error_general("weight(unsigned int ["+std::to_string(pos)+"] )",error_paramOutOfRange((unsigned int)0,pos,(unsigned int)0,_inputs-1));
     }
-    return _inputList[pos];
+    return *_ptr_inputList[pos];
 }
 std::vector<float> Neuron::input()
 {
-    return _inputList;
+    //return _inputList;
+    //bastel
+    std::vector<float> retVal(_inputs,0);
+    for(unsigned int a=0; a<_inputs; a++)
+    {
+        retVal[a] = *_ptr_inputList[a];
+    }
+    return retVal;
 }
 
 float Neuron::netInput()
@@ -169,6 +209,10 @@ float Neuron::output()
     }
     return _output;
 }
+float *Neuron::ptr_output()
+{
+    return &_output;
+}
 void Neuron::run()
 {
     if(_update == true)
@@ -188,7 +232,8 @@ void Neuron::calc_netInput()
     _netInput = 0;
     for(unsigned int a=0; a<_inputs; a++)
     {
-        _netInput += _inputList[a] * _weightList[a];
+        //_netInput += _inputList[a] * _weightList[a];
+        _netInput += *_ptr_inputList[a] * _weightList[a];
     }
     if(_enableAverage == true)
     {

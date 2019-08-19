@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.00.03"
-//              Datum   18.10.2018
+#define    NET_VERSION "02.01.00"
+//              Datum   19.08.2019
 
 #include "neuron.h"
 #include <math.h>
@@ -88,6 +88,10 @@ class Net
 
         void                run();
         void                updateNetConfiguration();
+        /*  Needed after every change in the Net-structure like
+         *  inputNeurons()
+         *  sins V02.01.00
+         */
 
     private:
         void init(unsigned int inputs,
@@ -119,11 +123,13 @@ class Net
         bool         _enableAverage;
         Activation   _activationFunction;
         float        _biasValue;
+        float*       _ptr_biasValue;
 
 
         std::vector<float> _weightList;
 
-        std::vector<float>                  _inputSignalList;     // Input of Net
+        std::vector<float*>                 _ptr_inputSignalList;     // Input of Net
+        std::vector<float>                  _inputSignalList;
         std::vector< std::vector<float> >   _hiddenSignalList;    // Output of hidden neuron x y
         std::vector<float>                  _outputSignalList;    // Output of output neuron
         bool                                _noHiddenLayer;

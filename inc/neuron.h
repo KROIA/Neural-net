@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.02.00"
-//              Datum   27.10.2018
+#define NEURON_VERSION "02.02.01"
+//              Datum   19.08.2019
 
 #include <vector>
 #include <math.h>
@@ -38,6 +38,7 @@ class Neuron
         void inputs(unsigned int inputs);
         unsigned int inputs();
 
+
         void activationFunction(Activation activationFunction);
         Activation activationFunction();
 
@@ -53,12 +54,18 @@ class Neuron
 
         void input(unsigned int pos, float input);
         void input(std::vector<float> inputList);
+        void connectInput(unsigned int input, float *ptr);
+        /*  Connect a output(reference) from an other Neuron or a dummy float* for the first Input.
+         *  This lets the Neuron communicate between without copys of the output-values
+         *  sins V02.02.01
+         */
 
         float input(unsigned int pos);
         std::vector<float> input();
 
         float netInput();
         float output();
+        float *ptr_output();
 
         void run();
 
@@ -95,6 +102,7 @@ class Neuron
 
 
         std::vector<float>          _weightList;
+        std::vector<float*>         _ptr_inputList;
         std::vector<float>          _inputList;
         float                       _netInput;
         float                       _output;

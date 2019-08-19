@@ -1,8 +1,8 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.02.00"
-//                      Datum   27.10.2018
+#define    GENETICNET_VERSION "02.03.00"
+//                      Datum   19.08.2019
 
 #include "net.h"
 #include "savenet.h"
@@ -124,6 +124,12 @@ class GeneticNet
 
         void                learn(std::vector<float>   scoreList);
         void                learn();
+
+        void                updateNetConfiguration();
+        /*  Needed after every change in the Net-structure like
+         *  inputNeurons()
+         *  sins V02.03.00
+         */
     private:
 
         void                    init(unsigned int animals,

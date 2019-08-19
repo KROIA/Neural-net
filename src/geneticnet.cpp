@@ -89,6 +89,7 @@ void                    GeneticNet::loadFromNetFile()
         this->set(_saveNet.animals(),_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
                   _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
         this->biasValue(_saveNet.biasValue());
+        this->updateNetConfiguration();
         this->genom(_saveNet.genom());
     } catch (std::runtime_error &e) {
         error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
@@ -141,6 +142,7 @@ void                    GeneticNet::init(unsigned int animals,
 {
     _randEngine = std::default_random_engine(rand()%100);
     _animals = 0;
+    _currentAnimal = 0;
     _netList = std::vector<Net * >();
     _scoreList = std::vector<float>();
     this->mutationChangeWeight((float)0.01);
@@ -152,7 +154,6 @@ void                    GeneticNet::init(unsigned int animals,
 
 void                    GeneticNet::animals(unsigned int animals)
 {
-   // printf("GeneticNet::animals(%i)\n",animals);
     if(animals < GENETICNET_MIN_ANIMALS || animals > GENETICNET_MAX_ANIMALS)
     {
         error_general("animals(unsigned int ["+std::to_string(animals)+"] )","Parameter 0 is out of range. Min: "+ std::to_string(GENETICNET_MIN_ANIMALS)+" Max: "+std::to_string(GENETICNET_MAX_ANIMALS));
@@ -190,7 +191,6 @@ void                    GeneticNet::inputNeurons(unsigned int inputs)
 {
     if(inputs != _netList[0]->inputNeurons())
     {
-    //    printf("inputNeurons(%i)\n",inputs);
         for(unsigned int a=0; a<_animals; a++)
         {
             try {
@@ -825,9 +825,17 @@ void                    GeneticNet::learn()
     }
     this->genom(newGenom);
 }
+
+void                    GeneticNet::updateNetConfiguration()
+{
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        _netList[a]->updateNetConfiguration();
+    }
+}
+
 void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2)
 {
-    //qDebug() << "learn_selectAnimal";
     float random;
     float beginScore;
 
@@ -873,11 +881,9 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
         counter++;
 
     }while(selection1 == selection2);
-    //qDebug() << "learn_selectAnimal___";
 }
 void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,std::vector<float> oldGen2,std::vector<float> &newGen1,std::vector<float> &newGen2)
 {
-    //qDebug() << "learn_crossover";
     unsigned int random =  1 + _randEngine() % (genomsize() - 2);
     newGen1 = oldGen1;
     newGen2 = oldGen2;
@@ -886,12 +892,9 @@ void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,s
         newGen1[a] = oldGen2[a];
         newGen2[a] = oldGen1[a];
     }
-    //qDebug() << "learn_crossover___";
 }
 void                    GeneticNet::learn_mutate(std::vector<float> &genom)
 {
-    //SLOW CODE
-    //qDebug() << "learn_mutate";
     if(_mutationFactor <= __FLOATINPOINT_TOLERANCE || _mutationChangeWeight <= __FLOATINPOINT_TOLERANCE)
         return;
     for(unsigned int a=0; a<genomsize(); a++)
@@ -905,7 +908,6 @@ void                    GeneticNet::learn_mutate(std::vector<float> &genom)
             genom[a] += _mutationChangeWeight * ran;
         }
     }
-    //qDebug() << "learn_mutate___";
 }
 //----------ERROR
 

@@ -3,7 +3,6 @@
 
 Net::Net()
 {
-  //  printf("Net::Net() : 1 \n");
     init(2,1,2,1,true,false,Activation::Sigmoid);
 }
 
@@ -12,7 +11,6 @@ Net::Net(unsigned int inputs,
          unsigned int hiddenY,
          unsigned int outputs)
 {
- //   printf("Net::Net() : 2 \n");
     init(inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
 }
 
@@ -24,7 +22,6 @@ Net::Net(unsigned int inputs,
          bool enableAverage,
          Activation func)
 {
- //   printf("Net::Net() : 3 \n");
     init(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
 void Net::init(unsigned int inputs,
@@ -35,7 +32,6 @@ void Net::init(unsigned int inputs,
           bool enableAverage,
           Activation func)
 {
-   // printf("init()\n");
     _randEngine = std::default_random_engine(rand()%100 /*+ ti->tm_hour+ti->tm_min+ti->tm_sec*/);
     _updateNetConfiguration = true;
     _activationFunction = Activation::Sigmoid;
@@ -45,8 +41,8 @@ void Net::init(unsigned int inputs,
     _outputs = NET_MIN_OUTPUTNEURONS;
     _bias = true;
     _enableAverage = false;
+    _ptr_biasValue = new float(0);
     try {
-        updateNetConfiguration();
         this->outputNeurons(outputs);
         this->hiddenNeuronsY(hiddenY);
         this->hiddenNeuronsX(hiddenX);
@@ -63,7 +59,7 @@ void Net::init(unsigned int inputs,
                       "] , bool ["+std::to_string(enableAverage)+
                       "] , Activation ["+std::to_string(func)+"])",e);
     }
-
+    updateNetConfiguration();
     biasValue(1.0);
 }
 Net::~Net()
@@ -75,7 +71,7 @@ Net::~Net()
             try {
                 delete _hiddenNeuronList[a-1][b-1];
             } catch (std::exception &e) {
-                qDebug() << "error: "<<e.what();
+                error_general("~Net()",e.what());
             }
         }
     }
@@ -84,15 +80,26 @@ Net::~Net()
         try {
             delete _outputNeuronList[b-1];
         } catch (std::exception &e) {
-            qDebug() << "error: "<<e.what();
+            error_general("~Net()",e.what());
+        }
+    }
+    for(unsigned int input = 0; input < _inputs; input++)
+    {
+        try {
+            delete _ptr_inputSignalList[input];
+        } catch (std::exception &e) {
+            error_general("~Net()",e.what());
         }
     }
     _hiddenNeuronList.clear();
     _outputNeuronList.clear();
     _inputSignalList.clear();
+    _ptr_inputSignalList.clear();
     _hiddenSignalList.clear();
     _outputSignalList.clear();
     _genom.clear();
+
+    delete _ptr_biasValue;
 }
 
 void                Net::inputNeurons(unsigned int inputs)
@@ -103,15 +110,9 @@ void                Net::inputNeurons(unsigned int inputs)
     }
     if(inputs != _inputs)
     {
-      //  printf("inputNeurons(%i)\n",inputs);
         _update = true;
         _updateNetConfiguration = true;
         _inputs = inputs;
-        try {
-            updateNetConfiguration();
-        } catch (std::runtime_error &e) {
-            error_general("inputNeurons(unsigned int ["+std::to_string(inputs)+"] )",e);
-        }
     }
 }
 unsigned int        Net::inputNeurons()
@@ -126,15 +127,9 @@ void                Net::hiddenNeuronsX(unsigned int hiddenX)
     }
     if(hiddenX != _hiddenX)
     {
-       // printf("hiddenNeuronsX(%i)\n",hiddenX);
         _update  = true;
         _updateNetConfiguration = true;
         _hiddenX = hiddenX;
-        try {
-            updateNetConfiguration();
-        } catch (std::runtime_error &e) {
-            error_general("hiddenNeuronsX(unsigned int ["+std::to_string(hiddenX)+")] ",e);
-        }
     }
 }
 unsigned int        Net::hiddenNeuronsX()
@@ -149,15 +144,9 @@ void                Net::hiddenNeuronsY(unsigned int hiddenY)
     }
     if(hiddenY != _hiddenY)
     {
-       // printf("hiddenNeuronsY(%i)\n",hiddenY);
         _update  = true;
         _updateNetConfiguration = true;
         _hiddenY = hiddenY;
-        try {
-            updateNetConfiguration();
-        } catch (std::runtime_error &e) {
-            error_general("hiddenNeuronsY(unsigned int ["+std::to_string(hiddenY)+"] )",e);
-        }
     }
 }
 unsigned int        Net::hiddenNeuronsY()
@@ -172,14 +161,9 @@ void                Net::outputNeurons(unsigned int outputs)
     }
     if(outputs != _outputs)
     {
-       // printf("outputNeurons(%i)\n",outputs);
         _update  = true;
+        _updateNetConfiguration = true;
         _outputs = outputs;
-        try {
-            updateNetConfiguration();
-        } catch (std::runtime_error &e) {
-            error_general("outputNeurons(unsigned int ["+std::to_string(outputs)+"] )",e);
-        }
     }
 }
 unsigned int        Net::outputNeurons()
@@ -194,11 +178,6 @@ void                Net::bias(bool enableBias)
         _update = true;
         _updateNetConfiguration = true;
         _bias   = enableBias;
-        try {
-            updateNetConfiguration();
-        } catch (std::runtime_error &e) {
-            error_general("bias(bool ["+std::to_string(enableBias)+"] )",e);
-        }
     }
 }
 bool                Net::bias()
@@ -210,21 +189,8 @@ void                Net::enableAverage(bool enableAverage)
     if(enableAverage != _enableAverage)
     {
         _update         = true;
+        _updateNetConfiguration = true;
         _enableAverage  = enableAverage;
-        if(!_noHiddenLayer)
-        {
-            for(unsigned int x=0; x<_hiddenX; x++)
-            {
-                for(unsigned int y=0; y<_hiddenY; y++)
-                {
-                    _hiddenNeuronList[x][y]->enableAverage(_enableAverage);
-                }
-            }
-        }
-        for(unsigned int a=0; a<_outputs; a++)
-        {
-            _outputNeuronList[a]->enableAverage(_enableAverage);
-        }
     }
 }
 bool                Net::enableAverage()
@@ -233,8 +199,9 @@ bool                Net::enableAverage()
 }
 void                Net::biasValue(float value)
 {
-    _update     = true;
-    _biasValue  = value;
+    _update             = true;
+    _biasValue          = value;
+    *_ptr_biasValue     = _biasValue;
 }
 float               Net::biasValue()
 {
@@ -244,20 +211,6 @@ void                Net::activationFunction(Activation func)
 {
     _activationFunction = func;
     _update             = true;
-    if(!_noHiddenLayer)
-    {
-        for(unsigned int x=0; x<_hiddenX; x++)
-        {
-            for(unsigned int y=0; y<_hiddenY; y++)
-            {
-                _hiddenNeuronList[x][y]->activationFunction(_activationFunction);
-            }
-        }
-    }
-    for(unsigned int a=0; a<_outputs; a++)
-    {
-        _outputNeuronList[a]->activationFunction(_activationFunction);
-    }
 }
 Activation          Net::activationFunction()
 {
@@ -277,10 +230,7 @@ void                Net::randomGenom()
     }
     else
     {
-    //    printf("randomGenom() \n");
-
         genomsize = (_inputs+(unsigned int)_bias) * _hiddenY + (_hiddenY+(unsigned int)_bias) * _hiddenY * (_hiddenX-1) + (_hiddenY+(unsigned int)_bias) * _outputs;
-  //      printf("genomsize: %i = (%i + %i) * %i + (%i + %i) * %i * (%i - 1) + (%i + %i) * %i\n",genomsize,_inputs,_bias,_hiddenY,_hiddenY,_bias,_hiddenY,_hiddenX,_hiddenY,_bias,_outputs);
     }
     if(genomsize == 0)
     {
@@ -333,6 +283,7 @@ void                Net::input(unsigned int input, float signal)
         for(unsigned int y=0; y<_outputNeuronList.size(); y++)
         {
             try {
+                *_ptr_inputSignalList[input] = signal;
                 _outputNeuronList[y]->input(input,signal);
             } catch (std::runtime_error &e) {
                 error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(signal)+"] )","",e);
@@ -345,6 +296,7 @@ void                Net::input(unsigned int input, float signal)
         {
 
             try {
+                *_ptr_inputSignalList[input] = signal;
                 _hiddenNeuronList[0][y]->input(input,signal);
             } catch (std::runtime_error &e) {
                 error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(signal)+"] )","",e);
@@ -384,43 +336,20 @@ void                Net::input(std::vector<float> inputList)
         error_general("input(std::vector<float>)","parameter 0 , size of the array is wrong: ["+std::to_string(inputList.size()) + "] correct size is: ["+std::to_string(_inputs)+"]");
     }
     _update = true;
-    if(_bias)
+    for(unsigned int a=0; a<_inputs; a++)
     {
-        inputList.push_back(_biasValue);
-    }
-    if(_noHiddenLayer)
-    {
-        for(unsigned int y=0; y<_outputNeuronList.size(); y++)
-        {
-            try {
-                _outputNeuronList[y]->input(inputList);
-            } catch (std::runtime_error &e) {
-                error_general("input(std::vector<float>)","output neuron Y: ["+std::to_string(y)+"]",e);
-            }
-        }
-    }
-    else
-    {
-        for(unsigned int y=0; y<_hiddenNeuronList[0].size(); y++)
-        {
-            try {
-                _hiddenNeuronList[0][y]->input(inputList);
-            } catch (std::runtime_error &e) {
-                error_general("input(std::vector<float>)","hidden neuron X: [0] hidden neuron Y: ["+std::to_string(y)+"]",e);
-            }
-        }
+        *_ptr_inputSignalList[a] = inputList[a];
     }
 }
 std::vector<float>  Net::input()
 {
-    if(_noHiddenLayer)
+    //bastel
+    std::vector<float>  retVal(_inputs,0);
+    for(unsigned int a=0; a<_inputs; a++)
     {
-        return _outputNeuronList[0]->input();
+        retVal[a] = *_ptr_inputSignalList[a];
     }
-    else
-    {
-        return _hiddenNeuronList[0][0]->input();
-    }
+    return retVal;
 }
 
 float               Net::hidden(unsigned int hiddenX, unsigned int hiddenY)
@@ -610,6 +539,9 @@ void                Net::run()
 }
 void                Net::updateNetConfiguration()
 {
+    if(!_updateNetConfiguration)
+        return;
+
     _update = true;
     if(_hiddenX == 0 || _hiddenY == 0)
     {
@@ -664,6 +596,75 @@ void                Net::updateNetConfiguration()
             _hiddenNeuronList[0][y]->inputs(_inputs+(unsigned int)_bias);
         }
     }
+    unsigned int abc = _ptr_inputSignalList.size();
+    for(unsigned int a=0; a<abc; a++)
+    {
+        if(_ptr_inputSignalList[a] != nullptr)
+            delete _ptr_inputSignalList[a];     // causes Problem:  HEAP[snake.exe]:
+                                                //                  Invalid address specified to RtlFreeHeap( 188E0000, 1A0511A0 )
+    }
+    _ptr_inputSignalList.clear();
+    for(unsigned int a=0; a<_inputs; a++)
+    {
+        _ptr_inputSignalList.push_back(new float(0));
+    }
+
+    //- Connect the inputs
+    if(_noHiddenLayer)
+    {
+        for(unsigned int outputNeuron=0; outputNeuron<_outputs; outputNeuron++)
+        {
+            for(unsigned int input=0; input<_inputs-(unsigned int)_bias; input++)
+            {
+                _outputNeuronList[outputNeuron]->connectInput(input,_ptr_inputSignalList[input]);
+            }
+            if(_bias)
+            {
+                _outputNeuronList[outputNeuron]->connectInput(_inputs-1,_ptr_biasValue);
+            }
+        }
+    }
+    else
+    {
+        for(unsigned int hiddenNeuronY=0; hiddenNeuronY<_hiddenY; hiddenNeuronY++)
+        {
+            for(unsigned int input=0; input<_inputs-(unsigned int)_bias; input++)
+            {
+                _hiddenNeuronList[0][hiddenNeuronY]->connectInput(input,_ptr_inputSignalList[input]);
+            }
+            if(_bias)
+            {
+                _hiddenNeuronList[0][hiddenNeuronY]->connectInput(_inputs-1,_ptr_biasValue);
+            }
+        }
+        for(unsigned int hiddenNeuronX=1; hiddenNeuronX<_hiddenX; hiddenNeuronX++)
+        {
+            for(unsigned int hiddenNeuronY=0; hiddenNeuronY<_hiddenY; hiddenNeuronY++)
+            {
+                for(unsigned int input=0; input<_hiddenY-(unsigned int)_bias; input++)
+                {
+                    _hiddenNeuronList[hiddenNeuronX][hiddenNeuronY]->connectInput(input,_hiddenNeuronList[hiddenNeuronX-1][input]->ptr_output());
+                }
+                if(_bias)
+                {
+                    _hiddenNeuronList[hiddenNeuronX][hiddenNeuronY]->connectInput(_inputs-1,_ptr_biasValue);
+                }
+            }
+        }
+        for(unsigned int outputNeuron=0; outputNeuron<_outputs; outputNeuron++)
+        {
+            for(unsigned int input=0; input<_hiddenY-(unsigned int)_bias; input++)
+            {
+                _outputNeuronList[outputNeuron]->connectInput(input,_hiddenNeuronList[_hiddenX-1][input]->ptr_output());
+            }
+            if(_bias)
+            {
+                _outputNeuronList[outputNeuron]->connectInput(_inputs-1,_ptr_biasValue);
+            }
+        }
+    }
+    //- connecting done
+
     _updateNetConfiguration = false;
     try {
         randomGenom();

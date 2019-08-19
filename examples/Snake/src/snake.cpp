@@ -37,7 +37,6 @@ Snake::Snake(QWidget *parent) :
     unsigned int hiddenX = 1;
     unsigned int hiddenY = 20;
     unsigned int outputs = 2;                       // left | right
-
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs);
     net->bias(true);
     net->loadFromNetFile("snake","net");
@@ -56,6 +55,8 @@ Snake::Snake(QWidget *parent) :
     ui->selectedSnake_slider->setRange(0,net->animals()-1);
     _selectedSnake = ui->selectedSnake_slider->value();
 
+    net->updateNetConfiguration();
+    _backpropNet->updateNetConfiguration();
     generation = 0;
 
   /*  qDebug() << "fieldOfView";
