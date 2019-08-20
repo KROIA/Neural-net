@@ -37,6 +37,7 @@ class Neuron
 
         void inputs(unsigned int inputs);
         unsigned int inputs();
+        void deleteInput(unsigned int input);
 
 
         void activationFunction(Activation activationFunction);
@@ -46,6 +47,7 @@ class Neuron
         bool enableAverage();
 
         void randWeight();
+        void randWeight(unsigned int input);
         void weight(unsigned int pos, float weight);
         void weight(std::vector<float>  weightList);
 
@@ -54,6 +56,8 @@ class Neuron
 
         void input(unsigned int pos, float input);
         void input(std::vector<float> inputList);
+        void disconnect(unsigned int input);
+        void connectInput(float *ptr);
         void connectInput(unsigned int input, float *ptr);
         /*  Connect a output(reference) from an other Neuron or a dummy float* for the first Input.
          *  This lets the Neuron communicate between without copys of the output-values
@@ -103,7 +107,8 @@ class Neuron
 
         std::vector<float>          _weightList;
         std::vector<float*>         _ptr_inputList;
-        std::vector<float>          _inputList;
+        std::vector<bool>           _inputConnectionList;
+        //std::vector<float>          _inputList;
         float                       _netInput;
         float                       _output;
 

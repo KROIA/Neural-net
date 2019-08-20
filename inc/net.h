@@ -126,12 +126,10 @@ class Net
         float*       _ptr_biasValue;
 
 
-        std::vector<float> _weightList;
 
-        std::vector<float*>                 _ptr_inputSignalList;     // Input of Net
+      //  std::vector<float*>                 _ptr_inputSignalList;     // Input of Net
         std::vector<float>                  _inputSignalList;
-        std::vector< std::vector<float> >   _hiddenSignalList;    // Output of hidden neuron x y
-        std::vector<float>                  _outputSignalList;    // Output of output neuron
+        //std::vector< std::vector<float> >   _hiddenSignalList;    // Output of hidden neuron x y
         bool                                _noHiddenLayer;
 
         bool                                _update;
