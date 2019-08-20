@@ -35,11 +35,13 @@ public:
     void bias(bool i);
     BackpropNet *net;
     Daten daten;
+    vector<qreal> errorChart();
 signals:
     void netTrained();
 public slots:
 
 private:
+    vector<qreal> _errorChart;
     unsigned int _animals;
     unsigned int _inputNeurons;
     unsigned int _hiddenNeuronX;

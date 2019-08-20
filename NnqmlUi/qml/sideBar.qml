@@ -13,7 +13,7 @@ Rectangle{
         Text {
             id:error
             width: 150
-            text: "Error "+Math.round(ui.averageError*10000)/100+"%"
+            text: "Error "+Math.round(ui.averageError*10000)/10000
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 18

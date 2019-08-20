@@ -8,5 +8,6 @@
         <file>qml/SideBar.qml</file>
         <file>qml/TopBar.qml</file>
         <file>qml/CreatNewNet.qml</file>
+        <file>qml/ErrorChart.qml</file>
     </qresource>
 </RCC>

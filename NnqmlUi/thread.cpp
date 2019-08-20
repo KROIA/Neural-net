@@ -35,14 +35,15 @@ void netThread::run(){
         if(saveCounter > saves)
         {
             saveCounter = 0;
+
             saves+=100; //spam the console in the beginning and later no more
-            printf("error: %.5f\n",double(_averageError));   //Prints the error
-            printf("steps: %i\n",_learningSteps);    //Prints the learn cyles
+            //printf("error: %.5f\n",double(_averageError));   //Prints the error
+            //printf("steps: %i\n",_learningSteps);    //Prints the learn cyles
             logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
             fprintf(logfile,"%.5f;\n",double(_averageError));    //
             fclose(logfile);                            //
-            net->saveToNetFile();                        //Save the genom
-            logGenom(net->genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
+            net->saveToNetFile();//Save the genom
+            logGenom(net->genom());//Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
         }
 
     }
@@ -100,6 +101,7 @@ void netThread::setupNet(){
     _averageError = 0;
     system("cls");
     _learningSteps = 0;
+    _errorChart.clear();
     finished=false;
     _inputNeurons = unsigned(daten.trainingInput.daten(_counter).size());
     _outputNeuron = unsigned(daten.trainingOutput.daten(_counter).size());
@@ -107,6 +109,9 @@ void netThread::setupNet(){
     net= new BackpropNet(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Activation::Sigmoid);
     net->mutationFactor(float(0.0005));
 
+}
+vector<qreal> netThread::errorChart(){
+    return _errorChart;
 }
 void netThread::inputNeurons(unsigned int i){
     _inputNeurons=i;

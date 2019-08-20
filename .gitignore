@@ -13,6 +13,7 @@ DEV/bin
 *.gnet
 *.bnet
 *.dll
+*qml.cpp
 examples/X-OR_Backpropagation/bin
 examples/X-OR_Backpropagation/Tests
 examples/Genetic_simple/bin
@@ -25,11 +26,9 @@ examples/Snake/Tests
 *.8-pre1
 NnqmlUi/Release/release/moc_mainwindow.cpp
 NnqmlUi/Release/Makefile
-NnqmlUi/Release/release/qml_Layer_qml.cpp
-NnqmlUi/Release/release/qml_Net_qml.cpp
-NnqmlUi/Release/release/qml_Neuron_qml.cpp
-NnqmlUi/Release/release/qmlcache_loader.cpp
-NnqmlUi/Release/release/qml_main_qml.cpp
-NnqmlUi/Release/release/moc_predefs.h
-*.cpp
 *.autosave
+NnqmlUi/Releas/Makefile
+NnqmlUi/Releas/release/moc_predefs.h
+NnqmlUi/Releas/release/moc_mainwindow.cpp
+NnqmlUi/Releas/release/moc_thread.cpp
+NnqmlUi/Releas/release/qmlcache_loader.cpp

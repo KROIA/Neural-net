@@ -8,7 +8,15 @@ Mainwindow::Mainwindow(QObject *parent) :
     workThread->net->saveToNetFile("Test");
     uiUpdateTimer = new QTimer(this);
     connect(uiUpdateTimer, SIGNAL(timeout()),this,SLOT(uiUpdate()));
+    //m_errorChart.clear();
+
+    m_errorChart.push_back(qreal(workThread->averageError()));
+    m_errorChart.push_back(qreal(workThread->averageError())+1);
+    m_errorChart.push_back(qreal(workThread->averageError())+2);
+    m_errorChart.push_back(qreal(workThread->averageError())+3);
+    m_errorChart.push_back(qreal(workThread->averageError())+2);
     uiUpdate();
+    db.saveBackpropNet(workThread->net);
     emit hiddenXChanged();
     emit hiddenYChanged();
     emit biasChanged();
@@ -108,6 +116,7 @@ void Mainwindow::stop(){
 
 void Mainwindow::uiUpdate(){
     net=workThread->net;
+    m_errorChart.push_back(qreal(workThread->averageError()));
     emit neuronValueChanged();
     emit learningStepsChanged();
     emit averageErrorChanged();
@@ -115,6 +124,7 @@ void Mainwindow::uiUpdate(){
     emit biasChanged();
     emit trainingSetChanged();
     emit outputSetChanged();
+    emit errorChartChanged();
 }
 
 int Mainwindow::learningSteps()const{
@@ -138,6 +148,7 @@ void Mainwindow::creatNew(float maxError, int maxSteps){
   workThread->maxSteps(unsigned (long(maxSteps)));
   m_LayerId=0;
   m_NeuronId=0;
+  m_errorChart.clear();
   reset();
   emit trainingSetChanged();
   emit outputSetChanged();
@@ -177,4 +188,8 @@ void Mainwindow::setOutputSet(const vector<qreal> &set){
 }
 void Mainwindow::setTrainingSet(const vector<qreal> &set){
     workThread->daten.trainingInput.daten(set);
+}
+vector<qreal> Mainwindow::errorChart() const{
+    qDebug()<<m_errorChart.size();
+    return m_errorChart;
 }

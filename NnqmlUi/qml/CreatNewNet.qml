@@ -66,6 +66,7 @@ Dialog {
             minimumValue: 0
             decimals: 4
             suffix: "%"
+            value: 5
         }
         Text {
             text:   "MaxSteps"

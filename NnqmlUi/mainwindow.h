@@ -8,6 +8,7 @@
 #include <iostream>
 #include <QColor>
 #include "thread.h"
+#include <netdatabase.h>
 #include <QTimer>
 using namespace std;
 
@@ -33,6 +34,7 @@ class Mainwindow: public QObject
     Q_PROPERTY(std::vector<qreal> trainingSet READ trainingSet WRITE setTrainingSet NOTIFY trainingSetChanged)
     Q_PROPERTY(int trainingSetId WRITE setTrainingSetId)
     Q_PROPERTY(std::vector<qreal> outputSet READ outputSet WRITE setOutputSet NOTIFY outputSetChanged)
+    Q_PROPERTY(std::vector<qreal> errorChart READ errorChart NOTIFY errorChartChanged)
 public:
     explicit Mainwindow(QObject *parent = nullptr);
     ~Mainwindow();
@@ -60,6 +62,7 @@ public:
     float averageError() const;
     vector<qreal> trainingSet()const;
     vector<qreal> outputSet()const;
+    vector<qreal> errorChart()const;
     void setOutputSet(const vector<qreal> &set);
     void setTrainingSet(const vector<qreal> &set);
     void setLayerId(const int &id);
@@ -78,6 +81,7 @@ signals:
     void trainingSetChanged();
     void maxLearningStepsChanged();
     void outputSetChanged();
+    void errorChartChanged();
 public slots:
     void start();
     void stop();
@@ -86,6 +90,7 @@ public slots:
     void creatNew(float maxError, int maxSteps);
 private:
     BackpropNet *net;
+    NetDataBase db;
     int m_NeuronId;
     float m_NeuronValue;
     int m_ConnectionId;
@@ -93,6 +98,7 @@ private:
     int m_LayerId;
     int m_trainingSetId;
     int m_outputSetId;
+    vector<qreal> m_errorChart;
 };
 
 #endif // MAINWINDOW_H

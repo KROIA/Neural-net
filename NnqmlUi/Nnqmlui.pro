@@ -1,4 +1,4 @@
-QT += charts qml quick
+QT += charts qml quick sql
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -26,6 +26,7 @@ SOURCES += \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
+    netdatabase.cpp \
     thread.cpp \
     daten.cpp \
     datenset.cpp
@@ -46,7 +47,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target qml
 
 DISTFILES += \
-        qml/main.qml \
+    qml/ErrorChart.qml \
+    qml/main.qml \
     qml/Neuron.qml \
     qml/Layer.qml \
     qml/Net.qml \
@@ -62,6 +64,7 @@ HEADERS += \
     $$netIncPath/backpropnet.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
+    netdatabase.h \
     thread.h \
     daten.h \
     datenset.h

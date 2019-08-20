@@ -1,8 +1,14 @@
 import QtQuick.Controls 2.0
 import QtQuick 2.12
+import QtQuick.Controls 1.4
+ScrollView{
+    anchors.fill:parent
 
-Rectangle {
-    id: net
+    Rectangle{
+        id: net
+        x:50
+        y:50
+
     width: (ui.hiddenX+2)*distanceX
     height: (ui.hiddenY+2)*distanceY
     property int diameter: 100*ui.zoom
@@ -57,4 +63,5 @@ Rectangle {
                    }
         }
     }
+}
 }
