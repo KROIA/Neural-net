@@ -1,7 +1,7 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.03.00"
+#define    GENETICNET_VERSION "02.03.01"
 //                      Datum   19.08.2019
 
 #include "net.h"
@@ -79,6 +79,7 @@ class GeneticNet
         std::vector<float>      genom(unsigned int animal);
         std::vector<std::vector<float>  >genom();
         unsigned int            genomsize();
+        void                    genomFromNetFile();
 
         void                    input(unsigned int animal, unsigned int input, float signal);
         float                   input(unsigned int animal, unsigned int input);
@@ -130,6 +131,8 @@ class GeneticNet
          *  inputNeurons()
          *  sins V02.03.00
          */
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
+
     private:
 
         void                    init(unsigned int animals,

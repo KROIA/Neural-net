@@ -374,7 +374,8 @@ void SaveNet::addGenom(std::vector<float>   genom)
                     error+= "\tHiddenNeurons Y:\t"+std::to_string(_hiddenY)+"\n";
                     error+= "\tOutputNeurons Y:\t"+std::to_string(_outputs)+"\n";
                     error+= "\tBias"+ std::to_string(_bias);
-        error_general("addGenom(std::vector<float>)",error);
+        //error_general("addGenom(std::vector<float>)",error);
+        qDebug() << "WARNING: "<< QString::fromStdString(error);        //only to test the aditional connections
     }
     _genomList.push_back(genom);
 }

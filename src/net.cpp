@@ -247,7 +247,9 @@ void                Net::genom(std::vector<float> genom)
 {
     if(genom.size() != _genom.size())
     {
-        error_general("genom(std::vector<float>)","parameter 0 has the wrong array size: "+std::to_string(genom.size())+" array size should by "+std::to_string(_genom.size()));
+        //error_general("genom(std::vector<float>)","parameter 0 has the wrong array size: "+std::to_string(genom.size())+" array size should by "+std::to_string(_genom.size()));
+        qDebug() << "WARNING: "<< "genom(std::vector<float>) parameter 0 has the wrong array size: " << genom.size() << " array size should by "<<_genom.size();        //only to test the aditional connections
+
     }
     _genom = genom;
     setGenomToNeuron();
@@ -684,6 +686,74 @@ void                Net::updateNetConfiguration()
     } catch (std::runtime_error &e) {
         error_general("updateNetConfiguration()",e);
     }
+}
+void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron)
+{
+    unsigned int maxNeuronID = hiddenNeuronsX() * hiddenNeuronsY() + outputNeurons()  -1;
+
+    qDebug() << "connecting Neuron: "<<fromNeuron << " to: "<<toNeuron;
+    qDebug() << "maxNeuronID: "<<maxNeuronID;
+    if(fromNeuron > maxNeuronID)
+    {
+        error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",error_paramOutOfRange(0,std::to_string(fromNeuron),std::to_string(0),std::to_string(maxNeuronID)));
+    }
+    if(toNeuron > maxNeuronID)
+    {
+        error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",error_paramOutOfRange(1,std::to_string(toNeuron),std::to_string(0),std::to_string(maxNeuronID)));
+    }
+    // dummy code
+    try
+    {
+        if(fromNeuron >= hiddenNeuronsX() * hiddenNeuronsY())  //is fromNeuron a outputNeuron?
+        {
+            if(toNeuron >= hiddenNeuronsX() * hiddenNeuronsY()) //is toNeuron a outputNeuron?
+            {
+                unsigned int fromNeuronIndex  = fromNeuron - hiddenNeuronsX() * hiddenNeuronsY();
+                unsigned int toNeuronIndex    = toNeuron   - hiddenNeuronsX() * hiddenNeuronsY();
+                _outputNeuronList[toNeuronIndex]->connectInput(_outputNeuronList[fromNeuronIndex]->ptr_output());
+                qDebug() << "outputNeuron: "<< fromNeuronIndex << " is connected to outputNeuron: " <<toNeuronIndex;
+            }
+            else //toNeuron is a hiddenNeuron
+            {
+                if(hiddenNeuronsX() == 0 || hiddenNeuronsY() == 0)
+                {
+                    error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])","Division by zero!");
+                }
+                unsigned int fromNeuronIndex  = fromNeuron - hiddenNeuronsX() * hiddenNeuronsY();
+                unsigned int toNeuronIndexY   = toNeuron / hiddenNeuronsX();
+                unsigned int toNeuronIndexX   = toNeuron % hiddenNeuronsX();
+                _hiddenNeuronList[toNeuronIndexX][toNeuronIndexY]->connectInput(_outputNeuronList[fromNeuronIndex]->ptr_output());
+                qDebug() << "outputNeuron: "<< fromNeuronIndex << " is connected to hiddenNeuron: X" <<toNeuronIndexX << " Y"<<toNeuronIndexY;
+            }
+        }
+        else //fromNeuron is a hiddenNeuron
+        {
+            if(toNeuron >= inputNeurons() + hiddenNeuronsX() * hiddenNeuronsY()) //is toNeuron a outputNeuron?
+            {
+                if(hiddenNeuronsX() == 0 || hiddenNeuronsY() == 0)
+                {
+                    error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])","Division by zero!");
+                }
+                unsigned int fromNeuronIndexY = fromNeuron / hiddenNeuronsX();
+                unsigned int fromNeuronIndexX = fromNeuron % hiddenNeuronsX();
+                unsigned int toNeuronIndex    = toNeuron   - hiddenNeuronsX() * hiddenNeuronsY();
+                _outputNeuronList[toNeuronIndex]->connectInput(_hiddenNeuronList[fromNeuronIndexX][fromNeuronIndexY]->ptr_output());
+                qDebug() << "hiddenNeuron: X"<< fromNeuronIndexX << " Y" << fromNeuronIndexY << " is connected to outputNeuron: " <<toNeuronIndex;
+            }
+            else //toNeuron is a hiddenNeuron
+            {
+                unsigned int toNeuronIndexY   = toNeuron / hiddenNeuronsX();
+                unsigned int toNeuronIndexX   = toNeuron % hiddenNeuronsX();
+                unsigned int fromNeuronIndexY = fromNeuron / hiddenNeuronsX();
+                unsigned int fromNeuronIndexX = fromNeuron % hiddenNeuronsX();
+                _hiddenNeuronList[toNeuronIndexX][toNeuronIndexY]->connectInput(_hiddenNeuronList[fromNeuronIndexX][fromNeuronIndexY]->ptr_output());
+                qDebug() << "hiddenNeuron: X"<< fromNeuronIndexX << " Y" << fromNeuronIndexY << " is connected to outputNeuron:  X" <<toNeuronIndexX << " Y"<<toNeuronIndexY;
+            }
+        }
+    } catch (std::runtime_error &e) {
+        error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
+    }
+    qDebug() << "finish connecting";
 }
 
 void                Net::setGenomToNeuron()

@@ -90,7 +90,9 @@ void                    GeneticNet::loadFromNetFile()
                   _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
         this->biasValue(_saveNet.biasValue());
         this->updateNetConfiguration();
-        this->genom(_saveNet.genom());
+ //       this->genom(_saveNet.genom());
+        qDebug() << "only backloop test";
+
     } catch (std::runtime_error &e) {
         error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
                       "unable to apply the settings. Maybe the file is damaged.",e);
@@ -410,6 +412,10 @@ std::vector<std::vector<float>  >GeneticNet::genom()
 unsigned int            GeneticNet::genomsize()
 {
     return _netList[0]->genomsize();
+}
+void                    GeneticNet::genomFromNetFile()
+{
+    this->genom(_saveNet.genom());
 }
 
 void                    GeneticNet::input(unsigned int animal, unsigned int input, float signal)
@@ -828,9 +834,26 @@ void                    GeneticNet::learn()
 
 void                    GeneticNet::updateNetConfiguration()
 {
-    for(unsigned int a=0; a<_animals; a++)
+    try
     {
-        _netList[a]->updateNetConfiguration();
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            _netList[a]->updateNetConfiguration();
+        }
+    } catch (std::runtime_error &e) {
+        error_general("updateNetConfiguration()",e);
+    }
+}
+void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron)
+{
+    try
+    {
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            _netList[a]->connectNeuronViaID(fromNeuron,toNeuron);
+        }
+    } catch (std::runtime_error &e) {
+        error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
     }
 }
 

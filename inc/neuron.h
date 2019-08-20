@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.02.01"
-//              Datum   19.08.2019
+#define NEURON_VERSION "02.02.02"
+//              Datum   20.08.2019
 
 #include <vector>
 #include <math.h>

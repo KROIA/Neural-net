@@ -1,7 +1,7 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.01.00"
+#define    NET_VERSION "02.01.01"
 //              Datum   19.08.2019
 
 #include "neuron.h"
@@ -92,6 +92,7 @@ class Net
          *  inputNeurons()
          *  sins V02.01.00
          */
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
 
     private:
         void init(unsigned int inputs,

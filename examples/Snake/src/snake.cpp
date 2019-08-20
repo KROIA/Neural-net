@@ -57,6 +57,21 @@ Snake::Snake(QWidget *parent) :
 
     net->updateNetConfiguration();
     _backpropNet->updateNetConfiguration();
+
+    //-------additional connections
+    net->connectNeuronViaID(0,0);
+    net->connectNeuronViaID(20,1);
+    net->connectNeuronViaID(21,2);
+    net->connectNeuronViaID(0,19);
+    net->connectNeuronViaID(19,0);
+
+    try {
+        net->genomFromNetFile();
+    } catch (std::runtime_error &e) {
+        qDebug() << "net->genomFromNetFile() "<<e.what();
+    }
+
+    //-----------------------------
     generation = 0;
 
   /*  qDebug() << "fieldOfView";

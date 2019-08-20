@@ -62,7 +62,7 @@ void Neuron::inputs(unsigned int inputs)
                 _ptr_inputList.reserve(inputs);
             }
             catch (std::exception &e) {
-                error_general("inputs("+std::to_string(inputs)+")",e.what());
+                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
             }
         }
         while(inputs > _inputs)
@@ -74,9 +74,9 @@ void Neuron::inputs(unsigned int inputs)
                 _inputs++;
                 randWeight(_inputs-1);
             } catch (std::exception &e) {
-                error_general("inputs("+std::to_string(inputs)+")",e.what());
+                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
             }catch (...) {
-                error_general("inputs("+std::to_string(inputs)+")","unnkown");
+                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])","unnkown");
             }
         }
         while(inputs < _inputs)
@@ -84,9 +84,9 @@ void Neuron::inputs(unsigned int inputs)
             try{
                 deleteInput(_inputs-1);
             } catch (std::exception &e) {
-                error_general("inputs("+std::to_string(inputs)+")",e.what());
+                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
             }catch (...) {
-                error_general("inputs("+std::to_string(inputs)+")","unnkown");
+                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])","unnkown");
             }
         }
         _update     = true;
@@ -100,7 +100,7 @@ void Neuron::deleteInput(unsigned int input)
 {
     if(input >= _inputs)
     {
-        error_general("deleteInput("+std::to_string(input)+")",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
+        error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
     }
 
     try{
@@ -111,7 +111,7 @@ void Neuron::deleteInput(unsigned int input)
         _weightList.erase(_weightList.begin()+input);
         _inputs--;
     } catch (std::exception &e) {
-        error_general("deleteInput("+std::to_string(input)+")",e.what());
+        error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",e.what());
     }
 }
 
@@ -208,7 +208,7 @@ void Neuron::disconnect(unsigned int input)
 {
     if(input >= _inputs)
     {
-        error_general("disconnect("+std::to_string(input)+")",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
+        error_general("disconnect(unsigned int ["+std::to_string(input)+"])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
     }
     deleteInput(input);
 }
@@ -235,11 +235,11 @@ void Neuron::connectInput(unsigned int input, float *ptr)
 {
     if(input >= _inputs)
     {
-        error_general("connectInput("+std::to_string(input)+",float &ptr)",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
+        error_general("connectInput(unsigned int ["+std::to_string(input)+"],float &ptr)",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
     }
     if(&ptr == nullptr)
     {
-        error_general("connectInput("+std::to_string(input)+",float &ptr)","ptr == nullptr");
+        error_general("connectInput(unsigned int ["+std::to_string(input)+"],float &ptr)","ptr == nullptr");
     }
     _inputConnectionList[input] = true;
     _ptr_inputList[input] = ptr;
