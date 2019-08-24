@@ -16,7 +16,7 @@
 #define __FLOATINPOINT_TOLERANCE 0.0000001
 
 
-enum Activation{        // https://en.wikipedia.org/wiki/Activation_function
+enum Activation {        // https://en.wikipedia.org/wiki/Activation_function
     Linear   = 0,       // https://en.wikipedia.org/wiki/Identity_function
     ReLu     = 1,       // https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
     Binary   = 2,       // https://en.wikipedia.org/wiki/Heaviside_step_function

@@ -17,6 +17,16 @@ Mainwindow::Mainwindow(QObject *parent) :
     m_errorChart.push_back(qreal(workThread->averageError())+2);
     uiUpdate();
     db.saveBackpropNet(workThread->net);
+    BackpropNet *testnet;
+    testnet = new BackpropNet();
+    BackpropNet *testnet1;
+    testnet1 = new BackpropNet();
+    testnet=testnet1;
+    db.saveBackpropNet(testnet);
+    db.loadBackPropNet(testnet);
+    if(testnet==testnet1){
+        qDebug()<<"same same";
+    }
     emit hiddenXChanged();
     emit hiddenYChanged();
     emit biasChanged();
