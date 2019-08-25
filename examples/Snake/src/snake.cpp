@@ -43,7 +43,8 @@ Snake::Snake(QWidget *parent) :
     net->mutationFactor(0.05);
     net->mutationChangeWeight(0.1);
 
-    _backpropNet = new BackpropNet(net->inputNeurons(),
+    _backpropNet = new BackpropNet(0,
+                                   net->inputNeurons(),
                                    net->hiddenNeuronsX(),
                                    net->hiddenNeuronsY(),
                                    net->outputNeurons(),
@@ -56,20 +57,21 @@ Snake::Snake(QWidget *parent) :
     _selectedSnake = ui->selectedSnake_slider->value();
 
     net->updateNetConfiguration();
+    net->saveToNetFile();
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
-    net->connectNeuronViaID(0,0);
+   /* net->connectNeuronViaID(0,0);
     net->connectNeuronViaID(20,1);
     net->connectNeuronViaID(21,2);
     net->connectNeuronViaID(0,19);
-    net->connectNeuronViaID(19,0);
+    net->connectNeuronViaID(19,0);*/
 
-    try {
+    /*try {
         net->genomFromNetFile();
     } catch (std::runtime_error &e) {
         qDebug() << "net->genomFromNetFile() "<<e.what();
-    }
+    }*/
 
     //-----------------------------
     generation = 0;
@@ -900,8 +902,13 @@ void Snake::on_pause_pushButton_clicked()
 void Snake::on_saveStats_pushbutton_clicked()
 {
     qDebug() << "save";
-    saveVersusData();
-    net->saveToNetFile();
+    try{
+        saveVersusData();
+        net->saveToNetFile();
+    }catch(std::runtime_error &e)
+    {
+        qDebug() << "error: "<< e.what();
+    }
     bool fileExists = false;
     FILE *statsFile = fopen(_statsFilename.c_str(),"r");
     if(statsFile)

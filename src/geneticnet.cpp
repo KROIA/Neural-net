@@ -89,6 +89,9 @@ void                    GeneticNet::loadFromNetFile()
         this->set(_saveNet.animals(),_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
                   _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
         this->biasValue(_saveNet.biasValue());
+        this->costumNeurons(_saveNet.costumConnections());
+        this->connectionList(_saveNet.connectionList());
+        this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
         this->updateNetConfiguration();
  //       this->genom(_saveNet.genom());
         qDebug() << "only backloop test";
@@ -114,7 +117,11 @@ void                    GeneticNet::saveToNetFile()
     try {
         _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
                      this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
-        _saveNet.setGenom(this->genom());
+        //_saveNet.setGenom(this->genom());
+        for(unsigned int net = 0; net<_netList.size(); net++)
+        {
+            _saveNet.neuronsOfNet(_netList[net]->ID(),_netList[net]->allNeurons());
+        }
         _saveNet.saveFile();
     } catch (std::runtime_error &e) {
         error_general("saveToNetFile()",e);
@@ -166,9 +173,11 @@ void                    GeneticNet::animals(unsigned int animals)
     }
     if(animals > _animals)
     {
+       _netList.reserve(animals);
        for(unsigned int a=0; a<animals - _animals; a++)
         {
-            _netList.push_back(new Net());
+            _netList.push_back(new Net(a));
+            _netList[_netList.size()-1]->ID(_netList.size()-1);
             _scoreList.push_back(0);
         }
 
@@ -264,6 +273,35 @@ void                    GeneticNet::outputNeurons(unsigned int outputs)
 unsigned int            GeneticNet::outputNeurons()
 {
     return _netList[0]->outputNeurons();
+}
+void                    GeneticNet::costumNeurons(unsigned int costum)
+{
+    if(costum != _netList[0]->costumNeurons())
+    {
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            try {
+                _netList[a]->costumNeurons(costum);
+            } catch (std::runtime_error &e) {
+                error_general("costumNeurons(unsigned int ["+std::to_string(costum)+"] )","_netList["+std::to_string(a)+"].outputNeurons("+std::to_string(costum)+")",e);
+            }
+        }
+    }
+}
+unsigned int            GeneticNet::costumNeurons()
+{
+    return _netList[0]->costumNeurons();
+}
+void                    GeneticNet::neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
+{
+   for(unsigned int a=0; a<_animals; a++)
+   {
+       try {
+           _netList[a]->neurons(neurons,hiddenNeurons,outputNeurons,costumNeurons);
+       } catch (std::runtime_error &e) {
+           error_general("neurons(unsigned int ["+std::to_string(neurons)+"],unsigned int ["+std::to_string(hiddenNeurons)+"],unsigned int ["+std::to_string(outputNeurons)+"],unsigned int ["+std::to_string(costumNeurons)+"],","animal: "+std::to_string(a),e);
+       }
+   }
 }
 
 void                    GeneticNet::bias(bool enableBias)
@@ -521,7 +559,7 @@ std::vector<float>      GeneticNet::hidden(unsigned int hiddenX, unsigned int hi
     }
     return ret;
 }
-std::vector<float>      GeneticNet::hiddenX(unsigned int animal, unsigned int hiddenX) // |    Alle in einer Spalte
+/*std::vector<float>      GeneticNet::hiddenX(unsigned int animal, unsigned int hiddenX) // |    Alle in einer Spalte
 {
     if(animal > _animals-1)
     {
@@ -533,8 +571,8 @@ std::vector<float>      GeneticNet::hiddenX(unsigned int animal, unsigned int hi
     } catch (std::runtime_error &e) {
         error_general("hiddenX(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] )","return _netList["+std::to_string(animal)+"]->hiddenX("+std::to_string(hiddenX)+")",e);
     }
-}
-std::vector<std::vector<float>  >GeneticNet::hiddenX(unsigned int hiddenX)
+}*/
+/*std::vector<std::vector<float>  >GeneticNet::hiddenX(unsigned int hiddenX)
 {
     this->run();
     std::vector<std::vector<float>  > hidX(_animals);
@@ -547,8 +585,8 @@ std::vector<std::vector<float>  >GeneticNet::hiddenX(unsigned int hiddenX)
         }
     }
     return hidX;
-}
-std::vector<float>      GeneticNet::hiddenY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
+}*/
+/*std::vector<float>      GeneticNet::hiddenY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
 {
     if(animal > _animals-1)
     {
@@ -560,8 +598,8 @@ std::vector<float>      GeneticNet::hiddenY(unsigned int animal, unsigned int hi
     } catch (std::runtime_error &e) {
         error_general("hiddenY(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenY("+std::to_string(hiddenY)+")",e);
     }
-}
-std::vector<std::vector<float>  >GeneticNet::hiddenY(unsigned int hiddenY)
+}*/
+/*std::vector<std::vector<float>  >GeneticNet::hiddenY(unsigned int hiddenY)
 {
     this->run();
     std::vector<std::vector<float>  > hidY(_animals);
@@ -574,9 +612,9 @@ std::vector<std::vector<float>  >GeneticNet::hiddenY(unsigned int hiddenY)
         }
     }
     return hidY;
-}
+}*/
 
-Neuron                 *GeneticNet::hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY)
+/*Neuron                 *GeneticNet::hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY)
 {
     if(animal > _animals-1)
     {
@@ -588,8 +626,8 @@ Neuron                 *GeneticNet::hiddenNeuron(unsigned int animal, unsigned i
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuron(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] , unsinged int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuron("+std::to_string(hiddenX)+","+std::to_string(hiddenY)+")",e);
     }
-}
-std::vector<Neuron*>    GeneticNet::hiddenNeuronX(unsigned int animal, unsigned int hiddenX)// |    Alle in einer Spalte
+}*/
+/*std::vector<Neuron*>    GeneticNet::hiddenNeuronX(unsigned int animal, unsigned int hiddenX)// |    Alle in einer Spalte
 {
     if(animal > _animals-1)
     {
@@ -601,8 +639,8 @@ std::vector<Neuron*>    GeneticNet::hiddenNeuronX(unsigned int animal, unsigned 
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuronX(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuronX("+std::to_string(hiddenX)+");",e);
     }
-}
-std::vector<Neuron*>    GeneticNet::hiddenNeuronY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
+}*/
+/*std::vector<Neuron*>    GeneticNet::hiddenNeuronY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
 {
     if(animal > _animals-1)
     {
@@ -614,8 +652,8 @@ std::vector<Neuron*>    GeneticNet::hiddenNeuronY(unsigned int animal, unsigned 
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuronY(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuronY("+std::to_string(hiddenY)+")",e);
     }
-}
-std::vector<std::vector<Neuron*> > *GeneticNet::hiddenNeuron(unsigned int animal)
+}*/
+/*std::vector<std::vector<Neuron*> > *GeneticNet::hiddenNeuron(unsigned int animal)
 {
     if(animal > _animals-1)
     {
@@ -623,7 +661,7 @@ std::vector<std::vector<Neuron*> > *GeneticNet::hiddenNeuron(unsigned int animal
     }
     this->run();
     return _netList[animal]->hiddenNeuron();
-}
+}*/
 Neuron                 *GeneticNet::outputNeuron(unsigned int animal, unsigned int output)
 {
     if(animal > _animals-1)
@@ -819,12 +857,12 @@ void                    GeneticNet::learn()
 
         if(a+1 == _animals)
         {
-            learn_crossover(_netList[selection1]->genom(),_netList[selection2]->genom(),newGenom[a],newGenom[a-1]);
+            learn_crossover(selection1,selection2,newGenom[a],newGenom[a-1]);
             learn_mutate(newGenom[a-1]);
         }
         else
         {
-            learn_crossover(_netList[selection1]->genom(),_netList[selection2]->genom(),newGenom[a],newGenom[a+1]);
+            learn_crossover(selection1,selection2,newGenom[a],newGenom[a+1]);
             learn_mutate(newGenom[a+1]);
         }
         learn_mutate(newGenom[a]);
@@ -854,6 +892,22 @@ void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,u
         }
     } catch (std::runtime_error &e) {
         error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
+    }
+}
+void                    GeneticNet::connectionList(std::vector<std::vector<Connection> >connections)
+{
+    if(connections.size() != _animals)
+    {
+        error_general("connectionList(std::vector<std::vector<Connection> >connections)","size of connections: "+std::to_string(connections.size())+" ist not the same as _animals: "+std::to_string(_animals));
+    }
+    try
+    {
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            _netList[a]->connectionList(connections[a]);
+        }
+    } catch (std::runtime_error &e) {
+        error_general("connectionList(std::vector<std::vector<Connection> >connections)",e);
     }
 }
 
@@ -905,15 +959,20 @@ void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned i
 
     }while(selection1 == selection2);
 }
-void                    GeneticNet::learn_crossover(std::vector<float> oldGen1,std::vector<float> oldGen2,std::vector<float> &newGen1,std::vector<float> &newGen2)
+void                    GeneticNet::learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<float> &newGen1,std::vector<float> &newGen2)
 {
+    //_netList[selection1]->ptr_genom(),_netList[selection2]->ptr_genom()
     unsigned int random =  1 + _randEngine() % (genomsize() - 2);
-    newGen1 = oldGen1;
-    newGen2 = oldGen2;
+
     for(unsigned int a=0; a<random; a++)
     {
-        newGen1[a] = oldGen2[a];
-        newGen2[a] = oldGen1[a];
+        newGen1[a] = *(*_netList[selection2]->ptr_genom())[a];
+        newGen2[a] = *(*_netList[selection1]->ptr_genom())[a];
+    }
+    for(unsigned int a=random; a<genomsize(); a++)
+    {
+        newGen1[a] = *(*_netList[selection1]->ptr_genom())[a];
+        newGen2[a] = *(*_netList[selection2]->ptr_genom())[a];
     }
 }
 void                    GeneticNet::learn_mutate(std::vector<float> &genom)

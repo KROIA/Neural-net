@@ -1,8 +1,8 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.03.01"
-//                      Datum   19.08.2019
+#define    GENETICNET_VERSION "02.05.00"
+//                      Datum  26.08.2019
 
 #include "net.h"
 #include "savenet.h"
@@ -62,6 +62,10 @@ class GeneticNet
         unsigned int            hiddenNeuronsY();
         void                    outputNeurons(unsigned int outputs);
         unsigned int            outputNeurons();
+        void                    costumNeurons(unsigned int costum);
+        unsigned int            costumNeurons();
+        void                    neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
+
 
         void                    bias(bool enableBias);
         bool                    bias();
@@ -132,7 +136,7 @@ class GeneticNet
          *  sins V02.03.00
          */
         void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
-
+        void                connectionList(std::vector<std::vector<Connection> >connections);
     private:
 
         void                    init(unsigned int animals,
@@ -145,7 +149,7 @@ class GeneticNet
                                      Activation func);
 
         void learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2);
-        void learn_crossover(std::vector<float> oldGen1,std::vector<float> oldGen2,std::vector<float> &newGen1,std::vector<float> &newGen2);
+        void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<float> &newGen1,std::vector<float> &newGen2);
         void learn_mutate(std::vector<float> &genom);
 
         //----------ERROR
