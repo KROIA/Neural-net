@@ -47,7 +47,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target qml
 
 DISTFILES += \
+    qml/Connection.qml \
     qml/ErrorChart.qml \
+    qml/NetInCircel.qml \
     qml/main.qml \
     qml/Neuron.qml \
     qml/Layer.qml \

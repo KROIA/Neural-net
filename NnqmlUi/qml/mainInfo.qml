@@ -4,9 +4,12 @@ import QtQuick.Controls 1.4
 import QtCharts 2.3
 Rectangle{
     id:mainInfo
+    NetInCircel{
+    zoom:ui.zoom
+    }
 
     property bool sourceLoaded: false
-    ListView {
+    /*ListView {
         id: root
         focus: true
         anchors.fill: parent
@@ -30,5 +33,5 @@ Rectangle{
 
             onLoaded: sourceLoaded = true
         }
-    }
+    }*/
 }

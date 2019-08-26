@@ -21,12 +21,6 @@ Mainwindow::Mainwindow(QObject *parent) :
     testnet = new BackpropNet();
     BackpropNet *testnet1;
     testnet1 = new BackpropNet();
-    testnet=testnet1;
-    db.saveBackpropNet(testnet);
-    db.loadBackPropNet(testnet);
-    if(testnet==testnet1){
-        qDebug()<<"same same";
-    }
     emit hiddenXChanged();
     emit hiddenYChanged();
     emit biasChanged();
