@@ -1,8 +1,8 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.02.00"
-//                      Datum   27.10.2018
+#define    BACKPROPNET_VERSION "02.03.00"
+//                      Datum   26.08.2019
 
 #include "net.h"
 #include "savenet.h"
@@ -12,12 +12,14 @@
 class BackpropNet : public Net
 {
     public:
-        BackpropNet();
-        BackpropNet(unsigned int inputs,
+        BackpropNet(unsigned int ID = 0);
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
                     unsigned int hiddenX,
                     unsigned int hiddenY,
                     unsigned int outputs);
-        BackpropNet(unsigned int inputs,
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
                     unsigned int hiddenX,
                     unsigned int hiddenY,
                     unsigned int outputs,
@@ -32,6 +34,7 @@ class BackpropNet : public Net
                         bool enableBias,
                         bool enableAverage,
                         Activation func);
+
 
         void        netFileName(std::string filename);
         std::string netFileName();

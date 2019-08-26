@@ -53,7 +53,6 @@ class Snake : public QMainWindow
         void on_saveStats_pushbutton_clicked();
         void on_kill_pushButton_clicked();
         void on_toggleDisplay_pushbutton_clicked();
-        void on_versusBot_pushButton_clicked();
 
         void onSnakeKilled(unsigned int killer,unsigned int victim);
 

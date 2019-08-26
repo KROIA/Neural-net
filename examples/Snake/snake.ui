@@ -144,7 +144,7 @@
      </rect>
     </property>
     <property name="minimum">
-     <number>50</number>
+     <number>350</number>
     </property>
     <property name="maximum">
      <number>500</number>
@@ -500,19 +500,6 @@
     </property>
     <property name="text">
      <string>steps</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="versusBot_pushButton">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>510</y>
-      <width>121</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>versus bot</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">

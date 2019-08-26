@@ -1,6 +1,6 @@
 #include "backpropnet.h"
 
-BackpropNet::BackpropNet()
+BackpropNet::BackpropNet(unsigned int ID)
     :   Net()
 {
     this->init();
@@ -11,11 +11,12 @@ BackpropNet::BackpropNet()
     }
 
 }
-BackpropNet::BackpropNet(unsigned int inputs,
+BackpropNet::BackpropNet(unsigned int ID,
+                         unsigned int inputs,
                          unsigned int hiddenX,
                          unsigned int hiddenY,
                          unsigned int outputs)
-    :   Net(inputs,hiddenX,hiddenY,outputs)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs)
 {
     this->init();
     try {
@@ -27,14 +28,15 @@ BackpropNet::BackpropNet(unsigned int inputs,
                               "] , unsigned int ["+std::to_string(outputs)+"])",e);
     }
 }
-BackpropNet::BackpropNet(unsigned int inputs,
+BackpropNet::BackpropNet(unsigned int ID,
+                         unsigned int inputs,
                          unsigned int hiddenX,
                          unsigned int hiddenY,
                          unsigned int outputs,
                          bool enableBias,
                          bool enableAverage,
                          Activation func)
-    :   Net(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
 {
     this->init();
     try {
@@ -133,7 +135,8 @@ void                    BackpropNet::saveToNetFile()
     try {
         _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
                      this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
-        _saveNet.setGenom(this->genom());
+        //_saveNet.setGenom(this->genom());
+        _saveNet.neuronsOfNet(this->ID(),this->allNeurons());
         _saveNet.saveFile();
     } catch (std::runtime_error &e) {
         error_general("saveToNetFile()",e);
