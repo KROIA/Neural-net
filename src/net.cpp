@@ -48,6 +48,7 @@ void Net::init(unsigned int inputs,
     _outputNeurons = _outputs;
     _costumNeurons = 0;
     _connections = 0;
+    costumConnections(0);
     _bias = true;
     _enableAverage = false;
    // this->ID(rand() % 30000);
@@ -202,6 +203,14 @@ unsigned int        Net::costumNeurons()
 unsigned int        Net::connections()
 {
     return _connections;
+}
+unsigned int        Net::costumConnections()
+{
+    return _costumConnections;
+}
+void                Net::costumConnections(unsigned int connections)
+{
+    _costumConnections = connections;
 }
 void                Net::neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
 {
@@ -567,7 +576,49 @@ void                Net::run()
 {
     for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
     {
-        _allNeuronList[neuron]->run();
+        _allNeuronList[neuron]->needsUpdate();
+    }
+    bool allUpdated = false;
+    while(!allUpdated)
+    {
+        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
+        {
+            /*if(_allNeuronList[neuron]->ID().TYPE == NeuronType::costum)
+            {*/
+                bool readyToCalcCostumNeuron = true;
+                if(!_allNeuronList[neuron]->isUpdated())
+                {
+                    for(unsigned int input=0; input<_allNeuronList[neuron]->inputs(); input++)
+                    {
+                        if((_allNeuronList[neuron]->inputID(input).TYPE == NeuronType::costum ||
+                            _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::hidden ||
+                            _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::output) &&
+                            (!_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated() &&
+                            !(_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE == _allNeuronList[neuron]->inputID(input).TYPE &&    //if it is a looped back neuron
+                              _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID   == _allNeuronList[neuron]->inputID(input).ID)))       //
+                        {
+                            readyToCalcCostumNeuron = false;
+                           // allUpdated = false;
+                        }
+                    }
+                    if(readyToCalcCostumNeuron)
+                    {
+                        _allNeuronList[neuron]->run();
+                    }
+                }
+            /*}else
+            {
+                _allNeuronList[neuron]->run();
+            }*/
+        }
+        allUpdated = true;
+        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
+        {
+            if(!_allNeuronList[neuron]->isUpdated())
+            {
+                allUpdated = false;
+            }
+        }
     }
     /*if(_update)
     {
@@ -916,7 +967,22 @@ void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
     // dummy code
     try
     {
-        if(fromNeuron >= hiddenNeuronsX() * hiddenNeuronsY())  //is fromNeuron a outputNeuron?
+        if(_allNeuronList[toNeuron]->connectInput(_allNeuronList[fromNeuron]))
+        {
+            _connections++;
+            _costumConnections++;
+            _ptr_genom.clear();
+            for(unsigned int ID=0; ID<_neurons; ID++)
+            {
+                for(unsigned int weight=0; weight<_allNeuronList[ID]->inputs(); weight++)
+                {
+                    _ptr_genom.push_back(_allNeuronList[ID]->ptr_weight(weight));
+                }
+            }
+        }
+        //_ptr_genom.push_back(_allNeuronList[toNeuron]->ptr_weight(_allNeuronList[fromNeuron]->ID()));
+
+        /*if(fromNeuron >= hiddenNeuronsX() * hiddenNeuronsY())  //is fromNeuron a outputNeuron?
         {
             if(toNeuron >= hiddenNeuronsX() * hiddenNeuronsY()) //is toNeuron a outputNeuron?
             {
@@ -961,7 +1027,7 @@ void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
            //     _hiddenNeuronList[toNeuronIndexX][toNeuronIndexY]->connectInput(_hiddenNeuronList[fromNeuronIndexX][fromNeuronIndexY]->ptr_output());
                 qDebug() << "hiddenNeuron: X"<< fromNeuronIndexX << " Y" << fromNeuronIndexY << " is connected to outputNeuron:  X" <<toNeuronIndexX << " Y"<<toNeuronIndexY;
             }
-        }
+        }*/
     } catch (std::runtime_error &e) {
         error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
     }
@@ -970,6 +1036,10 @@ void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
 void                Net::connectionList(std::vector<Connection> connections)
 {
     _connectionList = connections;
+}
+std::vector<Connection> *Net::connectionList()
+{
+    return &_connectionList;
 }
 /*void                Net::setGenomToNeuron()
 {

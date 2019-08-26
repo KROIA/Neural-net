@@ -1,7 +1,7 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.04.00"
+#define NEURON_VERSION "02.04.01"
 //              Datum   16.08.2019
 
 #include <vector>
@@ -65,7 +65,7 @@ class Neuron
 
         void inputs(unsigned int inputs);
         unsigned int inputs();
-        void deleteInput(unsigned int input);
+        bool deleteInput(unsigned int input);
 
 
         void activationFunction(Activation activationFunction);
@@ -90,16 +90,16 @@ class Neuron
         std::vector<float> input();
 
         //void connectInput(float *ptr_float);
-        void connectInput(NeuronID ID, float *ptr_float);
+        bool connectInput(NeuronID ID, float *ptr_float);
         //void connectInput(NeuronType type, float *ptr_float);
-        void connectInput(unsigned int input, NeuronID ID, float *ptr_float);
-        void connectInput(Neuron *ptr_neuron);
-        void connectInput(unsigned int input, Neuron *ptr_neuron);
+        bool connectInput(unsigned int input, NeuronID ID, float *ptr_float);
+        bool connectInput(Neuron *ptr_neuron);
+        bool connectInput(unsigned int input, Neuron *ptr_neuron);
         /*  Connect a Neuron's output to this Neuron's input.
          *  This lets the Neuron communicate between without copys of the output-values
          *  sins V02.02.01
          */
-        void disconnect(unsigned int input);
+        bool disconnect(unsigned int input);
 
 
         float netInput();
@@ -108,6 +108,7 @@ class Neuron
         NeuronID inputID(unsigned int input);
         std::vector<NeuronID> inputID();
         float *ptr_weight(unsigned int input);
+        float *ptr_weight(NeuronID  connectionID);
 
         void run();
 
@@ -120,6 +121,9 @@ class Neuron
 
         static const std::string typeString(NeuronType TYPE);
         static const std::string activationString(Activation activationFunction);
+
+        void needsUpdate();
+        bool isUpdated();
 
     private:
         void init(unsigned int inputs, Activation activationFunction, bool enableAverage);

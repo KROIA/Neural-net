@@ -113,7 +113,7 @@ unsigned int Neuron::inputs()
 {
     return _inputs;
 }
-void Neuron::deleteInput(unsigned int input)
+bool Neuron::deleteInput(unsigned int input)
 {
     if(input >= _inputs)
     {
@@ -128,9 +128,11 @@ void Neuron::deleteInput(unsigned int input)
         _weightList.erase(_weightList.begin()+input);
         _inputConnectionID_list.erase(_inputConnectionID_list.begin()+input);
         _inputs--;
+        return true;
     } catch (std::exception &e) {
         error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",e.what());
     }
+    return false;
 }
 
 void Neuron::activationFunction(Activation activationFunction)
@@ -286,7 +288,7 @@ std::vector<float> Neuron::input()
 {
     connectInput(input,ID,ptr_float);
 }*/
-void Neuron::connectInput(NeuronID ID, float *ptr_float)
+bool Neuron::connectInput(NeuronID ID, float *ptr_float)
 {
     bool allFull = true;
     for(unsigned int a=0; a<_inputs; a++)
@@ -294,21 +296,21 @@ void Neuron::connectInput(NeuronID ID, float *ptr_float)
         if(_inputConnectionList[a] == false)
         {
             allFull = false;
-            connectInput(a,ID,ptr_float);
-            break;
+            return connectInput(a,ID,ptr_float);
         }else if(_inputConnectionID_list[a].ID == ID.ID && _inputConnectionID_list[a].TYPE == ID.TYPE)
         {
             qDebug() << "Connection: " << ID.ID<<" "<<QString::fromStdString(this->typeString(ID.TYPE))<<" to: "<<this->ID().ID<<" "<<QString::fromStdString(this->typeString(this->ID().TYPE))<<" already exists.";
-            return;
+            return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
         inputs(_inputs+1);
-        connectInput(_inputs-1,ID,ptr_float);
+        return connectInput(_inputs-1,ID,ptr_float);
     }
+    return false;
 }
-void Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_float)
+bool Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_float)
 {
     if(input >= _inputs)
     {
@@ -321,8 +323,9 @@ void Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_float)
     _inputConnectionList[input] = true;
     _inputConnectionID_list[input] = ID;
     _ptr_inputList[input] = ptr_float;
+    return true;
 }
-void Neuron::connectInput(Neuron *ptr_neuron)
+bool Neuron::connectInput(Neuron *ptr_neuron)
 {
     bool allFull = true;
     for(unsigned int a=0; a<_inputs; a++)
@@ -330,21 +333,21 @@ void Neuron::connectInput(Neuron *ptr_neuron)
         if(_inputConnectionList[a] == false)
         {
             allFull = false;
-            connectInput(a,ptr_neuron);
-            break;
+            return connectInput(a,ptr_neuron);
         }else if(_inputConnectionID_list[a].ID == ptr_neuron->ID().ID && _inputConnectionID_list[a].TYPE == ptr_neuron->ID().TYPE)
         {
             qDebug() << "Connection: " << ptr_neuron->ID().ID<<" "<<QString::fromStdString(this->typeString(ptr_neuron->ID().TYPE))<<" to: "<<this->ID().ID<<" "<<QString::fromStdString(this->typeString(this->ID().TYPE))<<" already exists.";
-            return;
+            return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
         inputs(_inputs+1);
-        connectInput(_inputs-1,ptr_neuron);
+        return connectInput(_inputs-1,ptr_neuron);
     }
+    return false;
 }
-void Neuron::connectInput(unsigned int input,Neuron *ptr_neuron)
+bool Neuron::connectInput(unsigned int input,Neuron *ptr_neuron)
 {
     if(input >= _inputs)
     {
@@ -356,23 +359,24 @@ void Neuron::connectInput(unsigned int input,Neuron *ptr_neuron)
     }
     for(unsigned int connection=0; connection<_inputConnectionID_list.size(); connection++)
     {
-        if(_inputConnectionID_list[connection].ID == ptr_neuron->ID().ID)
+        if(_inputConnectionID_list[connection].ID == ptr_neuron->ID().ID && _inputConnectionID_list[connection].TYPE == ptr_neuron->ID().TYPE)
         {
             qDebug() << "Trying to connect a connection which already exists. ignore command";
-            return;
+            return false;
         }
     }
     _inputConnectionList[input] = true;
     _inputConnectionID_list[input] = ptr_neuron->ID();
     _ptr_inputList[input] = ptr_neuron->ptr_output();
+    return true;
 }
-void Neuron::disconnect(unsigned int input)
+bool Neuron::disconnect(unsigned int input)
 {
     if(input >= _inputs)
     {
         error_general("disconnect(unsigned int ["+std::to_string(input)+"])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
     }
-    deleteInput(input);
+    return deleteInput(input);
 }
 
 
@@ -415,6 +419,18 @@ float *Neuron::ptr_weight(unsigned int input)
     }
     return &_weightList[input];
 }
+float *Neuron::ptr_weight(NeuronID  connectionID)
+{
+    for(unsigned int a=0; a<_inputConnectionID_list.size(); a++)
+    {
+        if(connectionID.ID == _inputConnectionID_list[a].ID &&
+           connectionID.TYPE == _inputConnectionID_list[a].TYPE)
+        {
+            return ptr_weight(a);
+        }
+    }
+    error_general("ptr_weight(NeuronID [.ID="+std::to_string(connectionID.ID)+",.TYPE="+Neuron::typeString(connectionID.TYPE)+"])","No connection with such an ID");
+}
 std::vector<NeuronID> Neuron::inputID()
 {
     return _inputConnectionID_list;
@@ -422,7 +438,7 @@ std::vector<NeuronID> Neuron::inputID()
 
 void Neuron::run()
 {
-    //if(_update == true)
+    if(_update == true)
     {
         calc_netInput();
         try {
@@ -508,6 +524,14 @@ const std::string Neuron::activationString(Activation activationFunction)
         }
     }
     return str;
+}
+void Neuron::needsUpdate()
+{
+    _update = true;
+}
+bool Neuron::isUpdated()
+{
+    return !_update;
 }
 void Neuron::calc_netInput()
 {

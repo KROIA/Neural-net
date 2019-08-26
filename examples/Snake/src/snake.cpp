@@ -57,15 +57,17 @@ Snake::Snake(QWidget *parent) :
     _selectedSnake = ui->selectedSnake_slider->value();
 
     net->updateNetConfiguration();
-    net->saveToNetFile();
+
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
-   /* net->connectNeuronViaID(0,0);
+    net->connectNeuronViaID(0,0);
     net->connectNeuronViaID(20,1);
     net->connectNeuronViaID(21,2);
     net->connectNeuronViaID(0,19);
-    net->connectNeuronViaID(19,0);*/
+    net->connectNeuronViaID(19,0);
+
+    net->saveToNetFile();
 
     /*try {
         net->genomFromNetFile();
