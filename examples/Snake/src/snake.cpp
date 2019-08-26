@@ -37,14 +37,14 @@ Snake::Snake(QWidget *parent) :
     unsigned int hiddenX = 1;
     unsigned int hiddenY = 20;
     unsigned int outputs = 2;                       // left | right
-
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs);
     net->bias(true);
     net->loadFromNetFile("snake","net");
     net->mutationFactor(0.05);
     net->mutationChangeWeight(0.1);
 
-    _backpropNet = new BackpropNet(net->inputNeurons(),
+    _backpropNet = new BackpropNet(0,
+                                   net->inputNeurons(),
                                    net->hiddenNeuronsX(),
                                    net->hiddenNeuronsY(),
                                    net->outputNeurons(),
@@ -56,6 +56,24 @@ Snake::Snake(QWidget *parent) :
     ui->selectedSnake_slider->setRange(0,net->animals()-1);
     _selectedSnake = ui->selectedSnake_slider->value();
 
+    net->updateNetConfiguration();
+    net->saveToNetFile();
+    _backpropNet->updateNetConfiguration();
+
+    //-------additional connections
+   /* net->connectNeuronViaID(0,0);
+    net->connectNeuronViaID(20,1);
+    net->connectNeuronViaID(21,2);
+    net->connectNeuronViaID(0,19);
+    net->connectNeuronViaID(19,0);*/
+
+    /*try {
+        net->genomFromNetFile();
+    } catch (std::runtime_error &e) {
+        qDebug() << "net->genomFromNetFile() "<<e.what();
+    }*/
+
+    //-----------------------------
     generation = 0;
 
   /*  qDebug() << "fieldOfView";
@@ -884,8 +902,13 @@ void Snake::on_pause_pushButton_clicked()
 void Snake::on_saveStats_pushbutton_clicked()
 {
     qDebug() << "save";
-    saveVersusData();
-    net->saveToNetFile();
+    try{
+        saveVersusData();
+        net->saveToNetFile();
+    }catch(std::runtime_error &e)
+    {
+        qDebug() << "error: "<< e.what();
+    }
     bool fileExists = false;
     FILE *statsFile = fopen(_statsFilename.c_str(),"r");
     if(statsFile)
@@ -987,36 +1010,6 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             break;
         }
     }
-}
-void Snake::on_versusBot_pushButton_clicked()
-{
-    /*
-
-    _versusEnvironment->controlSnakeDeath(0,true);
-    _versusEnvironment->controlSnakeDeath(1,true);
-
-    if(_versusBot && _enableDisplay)
-    {
-        _environment->showInfoText(false);
-        _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
-    }
-    else
-    {
-        _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
-        _versusEnvironment->showInfoText(false);
-    }
-
-    _botScore = 0;
-    _botFood = 0;
-    _botSteps = 0;
-    _botDeaths = 0;
-    _botKills = 0;
-
-    _playerScore = 0;
-    _playerFood = 0;
-    _playerSteps = 0;
-    _playerDeaths = 0;
-    _playerKills = 0;*/
 }
 void Snake::on_mapinfo_checkbox_stateChanged(int arg1)
 {
