@@ -47,6 +47,7 @@ struct Connection
     NeuronID source_ID;
     NeuronID destination_ID;
     float weight;
+    bool direction;
 };
 
 class Neuron
@@ -90,21 +91,25 @@ class Neuron
         std::vector<float> input();
 
         //void connectInput(float *ptr_float);
-        bool connectInput(NeuronID ID, float *ptr_float);
+        bool connectInput(NeuronID ID, float *ptr_float,bool forward = true);
         //void connectInput(NeuronType type, float *ptr_float);
-        bool connectInput(unsigned int input, NeuronID ID, float *ptr_float);
-        bool connectInput(Neuron *ptr_neuron);
-        bool connectInput(unsigned int input, Neuron *ptr_neuron);
+        bool connectInput(unsigned int input, NeuronID ID, float *ptr_float,bool forward = true);
+        bool connectInput(Neuron *ptr_neuron,bool forward = true);
+        bool connectInput(unsigned int input, Neuron *ptr_neuron,bool forward = true);
         /*  Connect a Neuron's output to this Neuron's input.
          *  This lets the Neuron communicate between without copys of the output-values
          *  sins V02.02.01
          */
         bool disconnect(unsigned int input);
+        bool inputConnectionDirection(NeuronID inputID);
+        std::vector<bool>   inputConnectionDirection();
 
 
         float netInput();
         float output();
-        float *ptr_output();
+        float *ptr_output();        //use for forward connections
+        float *ptr_loopBackOutput();//use for backward connections
+
         NeuronID inputID(unsigned int input);
         std::vector<NeuronID> inputID();
         float *ptr_weight(unsigned int input);
@@ -156,6 +161,7 @@ class Neuron
         //std::vector<float>          _inputList;
         float                       _netInput;
         float                       _output;
+        float                       _delayedOutput; //for loopbacksignal
 
         unsigned int                _inputs;
         bool                        _enableAverage;
@@ -165,6 +171,7 @@ class Neuron
 
         NeuronID                    _ID;
         std::vector<NeuronID>       _inputConnectionID_list;
+        std::vector<bool>           _inputConnectionDirection_List;
 
 };
 #endif // NEURON_H

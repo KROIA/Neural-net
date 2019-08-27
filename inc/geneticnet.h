@@ -136,7 +136,7 @@ class GeneticNet
          *  inputNeurons()
          *  sins V02.03.00
          */
-        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
         void                connectionList(std::vector<std::vector<Connection> >connections);
         std::vector<Connection> *connectionList(unsigned int netID);
         std::vector<std::vector<Connection>* > connectionList();

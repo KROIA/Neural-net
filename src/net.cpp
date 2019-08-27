@@ -579,6 +579,7 @@ void                Net::run()
         _allNeuronList[neuron]->needsUpdate();
     }
     bool allUpdated = false;
+   // qDebug() << "----------------start run-------------------";
     while(!allUpdated)
     {
         for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
@@ -590,20 +591,49 @@ void                Net::run()
                 {
                     for(unsigned int input=0; input<_allNeuronList[neuron]->inputs(); input++)
                     {
+                       /* qDebug() << "_allNeuronList[neuron]->inputID(input).TYPE: "<<QString::fromStdString(Neuron::typeString(_allNeuronList[neuron]->inputID(input).TYPE));
+                        qDebug() << "_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated(): "<<_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated();
+                        qDebug() << "_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE: "<<QString::fromStdString(Neuron::typeString(_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE));
+                        qDebug() << "_allNeuronList[neuron]->ID().TYPE: "<<QString::fromStdString(Neuron::typeString(_allNeuronList[neuron]->ID().TYPE));
+                        qDebug() << "_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID: " << _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID;
+                        qDebug() << "_allNeuronList[neuron]->ID().ID: "<<_allNeuronList[neuron]->ID().ID;
+*/
+                        /*if(_allNeuronList[neuron]->inputID(input).TYPE == NeuronType::costum ||
+                           _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::hidden ||
+                           _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::output)
+                        {
+                            qDebug() << "first true";
+                        }
+                        if(!_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated())
+                        {
+                            qDebug() << "second true";
+                        }
+                        if(!(_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE == _allNeuronList[neuron]->ID().TYPE &&    //if it is a looped back neuron
+                           _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID   == _allNeuronList[neuron]->ID().ID))
+                        {
+                            qDebug() << "third true";
+                        }*/
                         if((_allNeuronList[neuron]->inputID(input).TYPE == NeuronType::costum ||
                             _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::hidden ||
                             _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::output) &&
                             (!_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated() &&
-                            !(_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE == _allNeuronList[neuron]->inputID(input).TYPE &&    //if it is a looped back neuron
-                              _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID   == _allNeuronList[neuron]->inputID(input).ID)))       //
+                             _allNeuronList[neuron]->inputConnectionDirection(_allNeuronList[neuron]->inputID(input)) == true
+                            /*!(_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().TYPE == _allNeuronList[neuron]->ID().TYPE &&    //if it is a looped back neuron
+                              _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID   == _allNeuronList[neuron]->ID().ID)*/))       //
                         {
                             readyToCalcCostumNeuron = false;
+                            qDebug() << "don't run neuron: "<<neuron;
                            // allUpdated = false;
                         }
                     }
                     if(readyToCalcCostumNeuron)
                     {
+                        if(neuron == 21)
+                        {
+
+                        }
                         _allNeuronList[neuron]->run();
+                        //qDebug() << "run ID: "<<neuron << " Type: "<<QString::fromStdString(Neuron::typeString(_allNeuronList[neuron]->ID().TYPE));
                     }
                 }
             /*}else
@@ -620,6 +650,7 @@ void                Net::run()
             }
         }
     }
+  //  qDebug() << "----------------end run-------------------";
     /*if(_update)
     {
         if(!_noHiddenLayer)
@@ -793,20 +824,20 @@ void                Net::updateNetConfiguration()
         {
             case NeuronType::input:
             {
-                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_connectionList[connection].source_ID,&_inputSignalList[_connectionList[connection].source_ID.ID]);
+                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_connectionList[connection].source_ID,&_inputSignalList[_connectionList[connection].source_ID.ID],_connectionList[connection].direction);
                 break;
             }
             case NeuronType::hidden:
             case NeuronType::output:
             case NeuronType::costum:
             {
-                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_allNeuronList[_connectionList[connection].source_ID.ID]);
+                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_allNeuronList[_connectionList[connection].source_ID.ID],_connectionList[connection].direction);
 
                 break;
             }
             case NeuronType::bias:
             {
-                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_connectionList[connection].source_ID,&_biasValue);
+                _allNeuronList[_connectionList[connection].destination_ID.ID]->connectInput(_connectionList[connection].source_ID,&_biasValue,_connectionList[connection].direction);
                 break;
             }
         }
@@ -950,7 +981,7 @@ void                Net::updateNetConfiguration()
     }*/
 
 }
-void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron)
+void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward)
 {
     unsigned int maxNeuronID = hiddenNeuronsX() * hiddenNeuronsY() + outputNeurons()  -1;
 
@@ -967,7 +998,7 @@ void                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
     // dummy code
     try
     {
-        if(_allNeuronList[toNeuron]->connectInput(_allNeuronList[fromNeuron]))
+        if(_allNeuronList[toNeuron]->connectInput(_allNeuronList[fromNeuron],forward))
         {
             _connections++;
             _costumConnections++;
@@ -1162,6 +1193,7 @@ void        Net::prepareConnectionList()
                     _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
                     _connectionList[_connectionList.size()-1].source_ID.ID = input;
                     _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::input;
+                    _connectionList[_connectionList.size()-1].direction = true;
                 }
             }else {
                 for(unsigned int hiddenNeuronY2=0; hiddenNeuronY2<_hiddenY; hiddenNeuronY2++)
@@ -1173,6 +1205,7 @@ void        Net::prepareConnectionList()
                     _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
                     _connectionList[_connectionList.size()-1].source_ID.ID = ID-_hiddenY+hiddenNeuronY2;
                     _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::hidden;
+                    _connectionList[_connectionList.size()-1].direction = true;
                 }
             }
             if(_bias)
@@ -1184,6 +1217,7 @@ void        Net::prepareConnectionList()
                 _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
                 _connectionList[_connectionList.size()-1].source_ID.ID = 0;
                 _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::bias;
+                _connectionList[_connectionList.size()-1].direction = true;
             }
             ID++;
         }
@@ -1202,6 +1236,7 @@ void        Net::prepareConnectionList()
                 _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::input;
                 _connectionList[_connectionList.size()-1].netID = this->ID();
                 _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
+                _connectionList[_connectionList.size()-1].direction = true;
 
                // _outputNeuronList[ID]->connectInput(NeuronType::input,&_inputSignalList[input]);
                // _connections++;
@@ -1215,6 +1250,7 @@ void        Net::prepareConnectionList()
                 _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
                 _connectionList[_connectionList.size()-1].source_ID.ID = 0;
                 _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::bias;
+                _connectionList[_connectionList.size()-1].direction = true;
             }
             ID++;
         }
@@ -1231,6 +1267,7 @@ void        Net::prepareConnectionList()
                 _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::hidden;
                 _connectionList[_connectionList.size()-1].netID = this->ID();
                 _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
+                _connectionList[_connectionList.size()-1].direction = true;
 
 
 
@@ -1246,6 +1283,7 @@ void        Net::prepareConnectionList()
                 _connectionList[_connectionList.size()-1].weight = Neuron::calcRandWeight(_randEngine);
                 _connectionList[_connectionList.size()-1].source_ID.ID = 0;
                 _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::bias;
+                _connectionList[_connectionList.size()-1].direction = true;
             }
             ID++;
         }

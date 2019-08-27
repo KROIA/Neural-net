@@ -366,6 +366,8 @@ void SaveNet::loadFile()
                     a++;
                     _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = stof(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")));
                     a++;
+                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].direction = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                    a++;
                 }
 
                 if(inputCounter == inputs)
@@ -501,6 +503,7 @@ void SaveNet::saveFile()
                 fprintf(_file,"\t\t\t\t[NeuronType]<%i>\"%s\"\n",_neuronList[net][neuron]->inputID()[input].TYPE,Neuron::typeString(_neuronList[net][neuron]->inputID()[input].TYPE).c_str());
                 //[w]   -> weight
                 fprintf(_file,"\t\t\t\t[w]<%.8f>\n",(double)_neuronList[net][neuron]->weight(input));
+                fprintf(_file,"\t\t\t\t[dir]<%i>\n",_neuronList[net][neuron]->inputConnectionDirection(_neuronList[net][neuron]->inputID(input)));
                 fprintf(_file,"\t\t\t}\n");
             }
             fprintf(_file,"\t\t}\n");

@@ -110,7 +110,7 @@ class Net
          *  inputNeurons()
          *  sins V02.01.00
          */
-        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
         void                connectionList(std::vector<Connection> connections);
         std::vector<Connection> *connectionList();
     private:

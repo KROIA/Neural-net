@@ -61,11 +61,11 @@ Snake::Snake(QWidget *parent) :
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
-    net->connectNeuronViaID(0,0);
-    net->connectNeuronViaID(20,1);
-    net->connectNeuronViaID(21,2);
-    net->connectNeuronViaID(0,19);
-    net->connectNeuronViaID(19,0);
+    net->connectNeuronViaID(0,0,false);
+    net->connectNeuronViaID(20,1,false);
+    net->connectNeuronViaID(21,2,false);
+    net->connectNeuronViaID(0,19,false);
+    net->connectNeuronViaID(19,0,false);
 
     net->saveToNetFile();
 

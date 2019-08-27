@@ -894,13 +894,13 @@ void                    GeneticNet::updateNetConfiguration()
         error_general("updateNetConfiguration()",e);
     }
 }
-void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron)
+void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward)
 {
     try
     {
         for(unsigned int a=0; a<_animals; a++)
         {
-            _netList[a]->connectNeuronViaID(fromNeuron,toNeuron);
+            _netList[a]->connectNeuronViaID(fromNeuron,toNeuron,forward);
         }
     } catch (std::runtime_error &e) {
         error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
