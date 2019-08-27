@@ -9,8 +9,25 @@
 
 #include <QDebug>
 
+#include <cstdlib>
+#include <pthread.h>
+#include <unistd.h>
+#include <time.h>
+
 #define GENETICNET_MIN_ANIMALS 2
 #define GENETICNET_MAX_ANIMALS 1000
+
+#define __enableGeneticNetThread
+
+struct thread_data_geneticNet {
+   int  thread_id;
+   Net *net;
+   bool *exit;
+   bool *pause;
+   pthread_mutex_t *lock;
+   bool isPaused;
+   long *delayMicros;
+};
 
 class GeneticNet
 {
@@ -156,6 +173,8 @@ class GeneticNet
         void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<float> &newGen1,std::vector<float> &newGen2);
         void learn_mutate(std::vector<float> &genom);
 
+        //Threads
+        static void *runThread(void *threadarg);
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
         std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
@@ -180,5 +199,14 @@ class GeneticNet
         std::default_random_engine          _randEngine;
 
         SaveNet _saveNet;
+
+        //Threads
+        pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
+        std::vector<thread_data_geneticNet> _threadData;
+        std::vector<pthread_t>  _threadList;
+        bool                    _threadExit;
+        bool                    _threadPause;
+        long                    _threadDelayMicros;
+
 };
 #endif // GENETICNET_H

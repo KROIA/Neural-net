@@ -622,7 +622,7 @@ void                Net::run()
                               _allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->ID().ID   == _allNeuronList[neuron]->ID().ID)*/))       //
                         {
                             readyToCalcCostumNeuron = false;
-                            qDebug() << "don't run neuron: "<<neuron;
+                          //  qDebug() << "don't run neuron: "<<neuron;
                            // allUpdated = false;
                         }
                     }

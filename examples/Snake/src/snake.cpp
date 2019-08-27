@@ -10,8 +10,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.00.04";
-    QString datum   = "05.06.2019";
+    QString version = "00.01.00";
+    QString datum   = "27.08.2019";
 
 
     QString infoLabelText  = "Snake AI © by Alex Krieg\n";
@@ -34,8 +34,8 @@ Snake::Snake(QWidget *parent) :
 
     unsigned int animals = 100;
     unsigned int inputs = /*_fieldOfView.size()*/3 * (3 + 2); //3 Sensor Layer (food,snake,obsticle)
-    unsigned int hiddenX = 1;
-    unsigned int hiddenY = 20;
+    unsigned int hiddenX = 2;
+    unsigned int hiddenY = 10;
     unsigned int outputs = 2;                       // left | right
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs);
     net->bias(true);
@@ -61,12 +61,16 @@ Snake::Snake(QWidget *parent) :
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
+    try{
     net->connectNeuronViaID(0,0,false);
     net->connectNeuronViaID(20,1,false);
     net->connectNeuronViaID(21,2,false);
     net->connectNeuronViaID(0,19,false);
     net->connectNeuronViaID(19,0,false);
-
+    }catch(std::runtime_error &e)
+    {
+        qDebug() << "can't connect: "<< e.what();
+    }
     net->saveToNetFile();
 
     /*try {
@@ -169,13 +173,13 @@ Snake::Snake(QWidget *parent) :
 
     _updateTimer2 = new QTimer(this);
     connect(_updateTimer2,SIGNAL(timeout()),this,SLOT(timerEvent2()));
-    _updateTimer2->start(3000);
-    _calculationPerSecond   = 0;
-    _calculationCounter     = 0;
+    _updateTimer2->start(1000);
+    _genPerSecond   = 0;
+    _genPerSecCounter     = 0;
+    _calcPerSecond = 0;
+    _calcPerSecCounter = 0;
     _playerKeyInputDisabler = false;
     _modus = Modus::geneticTraining;
-
-
 }
 
 
@@ -236,7 +240,7 @@ void Snake::timerEvent()
             ui->botDeaths_label->setText(QString::number(_botDeaths));
             ui->botKills_label->setText(QString::number(_botKills));
             ui->botScore_label->setText(QString::number(_botScore));*/
-            ui->playerFood_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().food));
+           /* ui->playerFood_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().food));
             ui->playerSteps_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().steps));
             ui->playerDeaths_label->setText(QString::number(_versusEnvironment->player(0)->deathCount()));
             ui->playerKills_label->setText(QString::number(_playerKills));
@@ -246,7 +250,7 @@ void Snake::timerEvent()
             ui->botSteps_label->setText(QString::number(_versusEnvironment->player(1)->averageScore().steps));
             ui->botDeaths_label->setText(QString::number(_versusEnvironment->player(1)->deathCount()));
             ui->botKills_label->setText(QString::number(_botKills));
-            ui->botScore_label->setText(QString::number(getScore(_versusEnvironment->player(1))));
+            ui->botScore_label->setText(QString::number(getScore(_versusEnvironment->player(1))));*/
             break;
         }
         case Modus::backpropTraining:
@@ -256,22 +260,8 @@ void Snake::timerEvent()
         }
     }
 
-
-    if(_updateTimer->interval() != ui->speed_slider->value())
-    {
-        _updateTimer->setInterval(500 - ui->speed_slider->value());
-    }
-    if(_environment->foodAmount() != ui->food_slider->value())
-    {
-        _environment->foodAmount(ui->food_slider->value());
-        _versusEnvironment->foodAmount(ui->food_slider->value());
-        _backpropTrainingEnvironment->foodAmount(ui->food_slider->value());
-    }
-    ui->score_label->setText(QString::number(_averageScore_smoth));
-
-    ui->food_label->setText(QString::number(_environment->player(0)->food()));
-    ui->steps_label->setText(QString::number(generation));
-    this->update();
+    if(_enableDisplay)
+      this->update();
     handleNet();
     switch(_modus)
     {
@@ -294,9 +284,76 @@ void Snake::timerEvent()
 }
 void Snake::timerEvent2()
 {
-        _calculationPerSecond =(float) /*_calculationPerSecond*0.9*/ + 1000*_calculationCounter/(float)_updateTimer2->interval();
-        ui->genPerSec_label->setText(QString::fromStdString(to_string(_calculationPerSecond)));
-        _calculationCounter = 0;
+
+        float filter = 0.9;
+        _genPerSecond =(float)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(float)_updateTimer2->interval());
+        ui->genPerSec_label->setText(QString::fromStdString(to_string(_genPerSecond)));
+        _genPerSecCounter = 0;
+
+        _calcPerSecond =(float) /*_genPerSecond*0.9*/ + 1000*_calcPerSecCounter/(float)_updateTimer2->interval();
+
+
+        _averageCalcPerSec = filter*_averageCalcPerSec + (1-filter)* _calcPerSecond;
+        ui->calcPerSec_label->setText(QString::fromStdString(to_string(/*_calcPerSecond*/_averageCalcPerSec)));
+        _averageCalcPerSec_List.push_back(_averageCalcPerSec);
+        _calcPerSecCounter = 0;
+
+        switch(_modus)
+        {
+            case Modus::geneticTraining:
+            {
+               // _environment->update();
+                break;
+            }
+            case Modus::versusAI:
+            {
+               // _versusEnvironment->update();
+
+             /*   ui->playerFood_label->setText(QString::number(_playerFood+_versusEnvironment->player(0)->food()));
+                ui->playerSteps_label->setText(QString::number(_playerSteps+_versusEnvironment->player(0)->steps()));
+                ui->playerDeaths_label->setText(QString::number(_playerDeaths));
+                ui->playerKills_label->setText(QString::number(_playerKills));
+                ui->playerScore_label->setText(QString::number(_playerScore));
+
+                ui->botFood_label->setText(QString::number(_botFood+_versusEnvironment->player(1)->food()));
+                ui->botSteps_label->setText(QString::number(_botSteps+_versusEnvironment->player(1)->steps()));
+                ui->botDeaths_label->setText(QString::number(_botDeaths));
+                ui->botKills_label->setText(QString::number(_botKills));
+                ui->botScore_label->setText(QString::number(_botScore));*/
+                ui->playerFood_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().food));
+                ui->playerSteps_label->setText(QString::number(_versusEnvironment->player(0)->averageScore().steps));
+                ui->playerDeaths_label->setText(QString::number(_versusEnvironment->player(0)->deathCount()));
+                ui->playerKills_label->setText(QString::number(_playerKills));
+                ui->playerScore_label->setText(QString::number(getScore(_versusEnvironment->player(0))));
+
+                ui->botFood_label->setText(QString::number(_versusEnvironment->player(1)->averageScore().food));
+                ui->botSteps_label->setText(QString::number(_versusEnvironment->player(1)->averageScore().steps));
+                ui->botDeaths_label->setText(QString::number(_versusEnvironment->player(1)->deathCount()));
+                ui->botKills_label->setText(QString::number(_botKills));
+                ui->botScore_label->setText(QString::number(getScore(_versusEnvironment->player(1))));
+                break;
+            }
+            case Modus::backpropTraining:
+            {
+               // _backpropTrainingEnvironment->update();
+                break;
+            }
+        }
+
+        if(_updateTimer->interval() != ui->speed_slider->value())
+        {
+            _updateTimer->setInterval(ui->speed_slider->maximum() - ui->speed_slider->value());
+        }
+        if(_environment->foodAmount() != ui->food_slider->value())
+        {
+            _environment->foodAmount(ui->food_slider->value());
+            _versusEnvironment->foodAmount(ui->food_slider->value());
+            _backpropTrainingEnvironment->foodAmount(ui->food_slider->value());
+        }
+        ui->score_label->setText(QString::number(_averageScore_smoth));
+
+        ui->food_label->setText(QString::number(_environment->player(0)->food()));
+        ui->steps_label->setText(QString::number(generation));
 }
 
 void Snake::handleNet()
@@ -330,9 +387,10 @@ void Snake::handleNet()
                         inputIndex++;
                     }
                 }
-                net->run(animal);
+               // net->run(animal);
             }
-
+            net->run();
+            _calcPerSecCounter++;
             for(unsigned int animal=0; animal<net->animals(); animal++)
             {
                 if(!_environment->player(animal)->isAlive())
@@ -445,7 +503,7 @@ void Snake::handleNet()
                 net->learn(_snakeScore);
 
                 generation++;
-                _calculationCounter++;
+                _genPerSecCounter++;
 
 
                 for(unsigned int animal=0; animal<net->animals(); animal++)
@@ -931,6 +989,32 @@ void Snake::on_saveStats_pushbutton_clicked()
         fprintf(statsFile,"%.8f;%.8f;%.8f;%.8f;;%.8f;%.8f;%.8f;%.8f;;%.8f;%.8f;\n",_minScoreList[a],_maxScoreList[a],_foodScore[a],_stepScore[a],_minScoreList_smoth[a],_maxScoreList_smoth[a],_foodScore_smoth[a],_stepScore_smoth[a],_averageScoreList[a],_averageScoreList_smoth[a]);
     }
     fclose(statsFile);
+
+    //-------------------------
+    statsFile = fopen("calcPerSec.csv","r");
+    fileExists = false;
+    if(statsFile)
+    {
+        fileExists = true;
+        fclose(statsFile);
+    }
+    statsFile = fopen("calcPerSec.csv","a");
+    if(!statsFile)
+        return;
+
+    if(!fileExists)
+    {
+        fprintf(statsFile,"Calculations Per Second\n");
+    }
+    for(unsigned int a=0; a<_averageCalcPerSec_List.size(); a++)
+    {
+        fprintf(statsFile,"%.8f;\n",(double)_averageCalcPerSec_List[a]);
+    }
+    fclose(statsFile);
+    //-------------------------
+
+
+    _averageCalcPerSec_List.clear();
     _minScoreList.clear();
     _maxScoreList.clear();
     _foodScore.clear();

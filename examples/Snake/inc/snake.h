@@ -106,8 +106,12 @@ class Snake : public QMainWindow
 
         bool _selfControl;
         bool _enableDisplay;
-        float _calculationPerSecond;
-        unsigned int _calculationCounter;
+        float _genPerSecond;
+        unsigned int _genPerSecCounter;
+        float _calcPerSecond;
+        unsigned int _calcPerSecCounter;
+        float        _averageCalcPerSec;        //Test case
+        std::vector<float>  _averageCalcPerSec_List;
         unsigned int _saveCounter;
 
 //#ifdef TESTMODE

@@ -12,7 +12,27 @@
 #include "player.h"
 #include "food.h"
 
+#include <cstdlib>
+#include <pthread.h>
+#include <unistd.h>
+#include <time.h>
+
+
+//#define __enableEnviromentThread
+
 using namespace std;
+
+struct thread_data_player {
+   int  thread_id;
+   vector<Player*> *player;
+   vector<Food*> *food;
+   vector<vector<int>  >*viewMap;
+   bool *exit;
+   bool *pause;
+   pthread_mutex_t *lock;
+   bool isPaused;
+   long *delayMicros;
+};
 
 enum MapData
 {
@@ -82,6 +102,9 @@ class Environment : public QObject
         void obsticleReplace();
 
     private:
+        //Threads
+        static void *runThread(void *threadarg);
+
         QPainter   *_painter;
         QWidget    *_parent;
 
@@ -111,6 +134,15 @@ class Environment : public QObject
         bool   _drawEnable;
 
        // int test = 0;
+
+
+        //Threads
+        pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
+        std::vector<thread_data_player> _threadData;
+        std::vector<pthread_t>  _threadList;
+        bool                    _threadExit;
+        bool                    _threadPause;
+        long                    _threadDelayMicros;
 };
 
 #endif // Environment_H

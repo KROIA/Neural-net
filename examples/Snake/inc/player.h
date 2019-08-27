@@ -83,8 +83,8 @@ class Player : public QObject
 
 
     signals:
-        void collision(unsigned int player,vector<QPoint>);
-        void starved(unsigned int player);
+        //void collision(unsigned int player,vector<QPoint>);
+        //void starved(unsigned int player);
 
     private:
 

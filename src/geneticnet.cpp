@@ -174,12 +174,34 @@ void                    GeneticNet::animals(unsigned int animals)
     }
     if(animals > _animals)
     {
+       _threadExit = true;
+       _threadPause = false;
+       _threadDelayMicros = 1000000;
+       if(_threadList.size() != 0)
+       {
+           for(unsigned int a=0; a<_threadList.size(); a++)
+           {
+               pthread_join(_threadList[a], NULL);
+           }
+       }
        _netList.reserve(animals);
+       _threadList.reserve(animals);
+       _threadData.reserve(animals);
        for(unsigned int a=0; a<animals - _animals; a++)
         {
             _netList.push_back(new Net(a));
             _netList[_netList.size()-1]->ID(_netList.size()-1);
             _scoreList.push_back(0);
+            _threadList.push_back(pthread_t());
+
+            _threadData.push_back(thread_data_geneticNet());
+            _threadData[a].thread_id = a;
+            _threadData[a].net = _netList[a];
+            _threadData[a].exit = &_threadExit;
+            _threadData[a].pause = &_threadPause;
+            _threadData[a].lock = &_threadLock;
+            _threadData[a].isPaused = false;
+            _threadData[a].delayMicros = &_threadDelayMicros;
         }
 
     }
@@ -190,10 +212,27 @@ void                    GeneticNet::animals(unsigned int animals)
             delete _netList[_netList.size()-1];
             _netList.erase(_netList.end()-1);
             _scoreList.erase(_scoreList.end()-1);
+            _threadList.erase(_threadList.end()-1);
+            _threadData.erase(_threadData.end()-1);
         }
     }
     _animals = animals;
     _update  = true;
+
+#ifdef __enableGeneticNetThread
+    _threadExit = false;
+    _threadPause = true;
+
+    int rc;
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        rc = pthread_create(&_threadList[a], NULL, runThread, (void *)&_threadData[a]);
+        if (rc)
+        {
+            qDebug() << "Error:unable to create thread," << rc << endl;
+        }
+    }
+#endif
 }
 unsigned int            GeneticNet::animals()
 {
@@ -746,16 +785,56 @@ std::vector<std::vector<float>  >GeneticNet::output()
 
 void                    GeneticNet::run()
 {
-    if(_update)
+    //if(_update)
     {
+
+       // qDebug() << "threads start";
+#ifdef __enableGeneticNetThread
+        pthread_mutex_lock(&_threadLock);
+        _threadDelayMicros = 1000000;
+        _threadExit = false;
+        _threadPause = false;
         for(unsigned int a=0; a<_animals; a++)
         {
-            try {
-                this->run(a);
-            } catch (std::runtime_error &e) {
-                error_general("run()","this->run("+std::to_string(a)+");",e);
-            }
+            _threadData[a].isPaused = false;
         }
+        pthread_mutex_unlock(&_threadLock);
+        int pause = 0;
+        bool _pause;
+        std::vector<bool> restartCheckList(_animals,false);
+
+        do{
+            pause = 0;
+            for(unsigned int a=0; a<_animals; a++)
+            {
+                if(!restartCheckList[a])
+                {
+                    pause++;
+                    continue;
+                }
+                pthread_mutex_lock(&_threadLock);
+                _pause = _threadData[a].isPaused;
+                pthread_mutex_unlock(&_threadLock);
+                if(_pause)
+                {
+                   restartCheckList[a] = true;
+                }
+                //pthread_join(_threadList[a], NULL);
+            }
+        }while(pause != _animals);
+
+        pthread_mutex_lock(&_threadLock);
+        _threadPause = true;
+        pthread_mutex_unlock(&_threadLock);
+#else
+
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            _netList[a]->run();
+        }
+#endif
+
+        //qDebug() << "threads ended";
         _update = false;
     }
 }
@@ -1021,6 +1100,72 @@ void                    GeneticNet::learn_mutate(std::vector<float> &genom)
             genom[a] += _mutationChangeWeight * ran;
         }
     }
+}
+void                   *GeneticNet::runThread(void *threadarg)
+{
+    pthread_detach(pthread_self());
+    struct thread_data_geneticNet *my_data;
+    bool ret = false;
+    bool pause = false;
+    bool enableLoop = false;
+    //bool lastPauseState = false;
+    my_data = (struct thread_data_geneticNet *) threadarg;
+    struct timespec time, timestart;
+    time.tv_sec = 0;
+    pthread_mutex_lock(my_data->lock);
+    my_data->isPaused = false;
+    time.tv_nsec = *my_data->delayMicros;
+    pthread_mutex_unlock(my_data->lock);
+    qDebug() << "thread start: "<<my_data->thread_id << " "<<my_data->net;
+
+    while(!ret)
+    {
+        if(enableLoop)
+        {
+            try {
+
+                my_data->net->run();
+                //pause = true;
+                pthread_mutex_lock(my_data->lock);
+                my_data->isPaused = true;
+                pthread_mutex_unlock(my_data->lock);
+                enableLoop = false;
+
+            } catch (std::runtime_error &e) {
+               // error_general("run()","this->run("+std::to_string(my_data->thread_id)+");",e);
+            }
+        }else {
+            //qDebug() << "thread: "<<my_data->thread_id << " sleeping";
+            //usleep(1);
+            nanosleep(&time, NULL);
+            pthread_mutex_lock(my_data->lock);
+            ret = *my_data->exit;
+            //pause = *my_data->pause;
+            pause = my_data->isPaused;
+            time.tv_nsec = *my_data->delayMicros;
+            pthread_mutex_unlock(my_data->lock);
+            if(!pause)
+            {
+                enableLoop = true;
+                /*pthread_mutex_lock(my_data->lock);
+                my_data->isPaused = false;
+                pthread_mutex_unlock(my_data->lock);*/
+            }
+
+        }
+        /*if(pause != lastPauseState)
+        {
+            if(pause)
+            {
+                qDebug() << "thread: "<<my_data->thread_id << " pause ON";
+            }else {
+                qDebug() << "thread: "<<my_data->thread_id << " pause OFF";
+            }
+        }
+        lastPauseState = pause;*/
+    }
+    qDebug() << "thread stop: "<<my_data->thread_id << " "<<my_data->net;
+    pthread_exit(NULL);
 }
 //----------ERROR
 
