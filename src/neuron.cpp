@@ -3,7 +3,7 @@
 
 Neuron::Neuron()
 {
-    init(1,Activation::Sigmoid,false);
+    init(NEURON_MIN_INPUTS,Activation::Sigmoid,false);
 }
 Neuron::Neuron(unsigned int inputs)
 {
@@ -24,7 +24,7 @@ void Neuron::init(unsigned int inputs, Activation activationFunction, bool enabl
     _output = 0;
     _delayedOutput = 0;
     _update = true;
-    _randEngine = std::default_random_engine(rand()%100 /*+ ti->tm_hour+ti->tm_min+ti->tm_sec*/);
+    _randEngine = std::default_random_engine(rand()%100);
     this->ID(NeuronID{.ID = unsigned(rand()) % 30000,.TYPE = NeuronType::none});
     try {
         this->inputs(inputs);
@@ -33,7 +33,6 @@ void Neuron::init(unsigned int inputs, Activation activationFunction, bool enabl
     } catch (std::runtime_error &e) {
         error_general("init(unsigned int ["+std::to_string(inputs)+"] , Activation ["+std::to_string(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
     }
-
 }
 Neuron::~Neuron()
 {
@@ -69,8 +68,6 @@ void Neuron::inputs(unsigned int inputs)
     }
     if(inputs != _inputs)
     {
-        //_weightList = std::vector<float> (inputs,0);
-        //_inputList  = std::vector<float> (inputs,0);
         if(inputs > _inputs)
         {
             try{
@@ -91,7 +88,7 @@ void Neuron::inputs(unsigned int inputs)
                 _inputConnectionList.push_back(false);
                 _weightList.push_back(0);
                 _inputConnectionID_list.push_back(NeuronID{.ID = NEURON_ID_INVALID,.TYPE = NeuronType::none});
-                _inputConnectionDirection_List.push_back(true);
+                _inputConnectionDirection_List.push_back(ConnectionDirection::forward);
                 _inputs++;
                 randWeight(_inputs-1);
             } catch (std::exception &e) {
@@ -123,10 +120,7 @@ bool Neuron::deleteInput(unsigned int input)
     {
         error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
     }
-
     try{
-
-        //delete _ptr_inputList[input];
         _ptr_inputList.erase(_ptr_inputList.begin()+input);
         _inputConnectionList.erase(_inputConnectionList.begin()+input);
         _weightList.erase(_weightList.begin()+input);
@@ -224,24 +218,36 @@ std::vector<float> Neuron::weight()
     return _weightList;
 }
 
-/*void Neuron::input(unsigned int pos, float input)
+void Neuron::input(unsigned int pos, float input)
 {
     if(pos >= _inputs)
     {
         error_general("input(unsigned int ["+std::to_string(pos)+"] , float ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,pos,(unsigned int)0,_inputs-1));
     }
-    //_inputList[pos] = input;
+    if(_ptr_inputList[pos] == nullptr)
+    {
+        error_general("input(unsigned int ["+std::to_string(pos)+"] , float ["+std::to_string(input)+"] )","input: "+std::to_string(pos)+" of Neuron is not assigned to another Neuron or variable.");
+    }
+    *_ptr_inputList[pos] = input;
     _update         = true;
-}*/
-/*void Neuron::input(std::vector<float> inputList)
+}
+void Neuron::input(std::vector<float> inputList)
 {
     if(inputList.size() != _inputs)
     {
         error_general("input(std::vector<float>)","parameter 0 has the wrong size: "+std::to_string(inputList.size())+" Correct size is "+std::to_string(_inputs));
     }
-    //_inputList  = inputList;
+    try{
+        for(unsigned int a=0; a<_ptr_inputList.size(); a++)
+        {
+            input(a,inputList[a]);
+        }
+    }catch(std::runtime_error &e)
+    {
+         error_general("input(std::vector<float>)",e);
+    }
     _update     = true;
-}*/
+}
 float Neuron::input(unsigned int input)
 {
     if(input >= _inputs)
@@ -256,8 +262,6 @@ float Neuron::input(unsigned int input)
 }
 std::vector<float> Neuron::input()
 {
-    //return _inputList;
-    //bastel
     std::vector<float> retVal(_inputs,0);
     for(unsigned int a=0; a<_inputs; a++)
     {
@@ -270,29 +274,6 @@ std::vector<float> Neuron::input()
     return retVal;
 }
 
-
-/*void Neuron::connectInput(float *ptr_float)
-{
-    bool allFull = true;
-    for(unsigned int a=0; a<_inputs; a++)
-    {
-        if(_inputConnectionList[a] == false)
-        {
-            allFull = false;
-            connectInput(a,ptr_float);
-            break;
-        }
-    }
-    if(allFull)                         // If all Inputs are used, create a new one and connect to it.
-    {
-        inputs(_inputs+1);
-        connectInput(_inputs-1,ptr_float);
-    }
-}*/
-/*void Neuron::connectInput(NeuronID ID, float *ptr_float)
-{
-    connectInput(input,ID,ptr_float);
-}*/
 bool Neuron::connectInput(NeuronID ID, float *ptr_float,bool forward)
 {
     bool allFull = true;
@@ -479,6 +460,11 @@ void Neuron::run()
         _update = false;
     }
 }
+
+const std::string Neuron::neuronIDString(NeuronID ID)
+{
+    return "NeuronID {\nID: "+std::to_string(ID.ID)+"\nTYPE: "+Neuron::typeString(ID.TYPE)+"}\n";
+}
 const std::string Neuron::typeString(NeuronType TYPE)
 {
     std::string str;
@@ -502,6 +488,11 @@ const std::string Neuron::typeString(NeuronType TYPE)
         case NeuronType::output:
         {
             str = "output";
+            break;
+        }
+        case NeuronType::costum:
+        {
+            str = "costum";
             break;
         }
         case NeuronType::bias:
@@ -554,6 +545,26 @@ const std::string Neuron::activationString(Activation activationFunction)
         }
     }
     return str;
+}
+const std::string Neuron::connectionString(Connection connection)
+{
+    std::string message;
+    message  = "netID:  "+std::to_string(connection.netID)+"\n"+
+               "SourceNeuron {\n"+
+               "ID:     "+std::to_string(connection.source_ID.ID)+"\n"+
+               "TYPE:   "+Neuron::typeString(connection.source_ID.TYPE)+"}\n"+
+               "DestinationNeuron {\n"+
+               "ID:     "+std::to_string(connection.destination_ID.ID)+"\n"+
+               "TYPE:   "+Neuron::typeString(connection.destination_ID.TYPE)+"}\n"+
+               "weight: "+std::to_string(connection.weight)+"\n"+
+               "direction: "+Neuron::directionSring(connection.direction);
+    return message;
+}
+const std::string Neuron::directionSring(bool dir)
+{
+    if(dir)
+        return "forward";
+    return "backward";
 }
 void Neuron::needsUpdate()
 {

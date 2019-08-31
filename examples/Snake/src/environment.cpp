@@ -55,10 +55,12 @@ Environment::Environment(QWidget *parent,QPainter *p,unsigned int player)
         _threadData[a].exit = &_threadExit;
         _threadData[a].pause = &_threadPause;
         _threadData[a].lock = &_threadLock;
+        _threadData[a].condition_var = &_thread_condition_var;
         _threadData[a].isPaused = false;
         _threadData[a].delayMicros = &_threadDelayMicros;
+        _threadData[a].killPlayer = false;
     }
-
+    _debugCount = 0;
 
 
 
@@ -266,31 +268,36 @@ void Environment::setSnakeOnMap(unsigned int player)
         qDebug() << "out of Range error: void Environment::setSnakeOnMap(unsigned int player) : " << player;
         return;
     }
+    if(_player[player]->pos()->size() == 0)
+    {
+        qDebug() << "Player: "<<player<<" size == 0";
+    }
     for(unsigned int a=0; a<_player[player]->size(); a++)
     {
-        if(_player[player]->pos(a).rx() >= _mapsize.width() ||
-           _player[player]->pos(a).rx() < 0 ||
-           _player[player]->pos(a).ry() >= _mapsize.height() ||
-           _player[player]->pos(a).rx() < 0)
+        if(_player[player]->pos(a)->rx() >= _mapsize.width() ||
+           _player[player]->pos(a)->rx() < 0 ||
+           _player[player]->pos(a)->ry() >= _mapsize.height() ||
+           _player[player]->pos(a)->rx() < 0)
         {
             qDebug() << "ERROR: snake: "<<player<<" out of Boudry";
             qDebug() << _player[player]->pos(a);
             controlSnakeDeath(player,true);
         }else
         {
+           // qDebug() <<"a"<<a;
             //crashes for no reason
-            if(_viewMap[_player[player]->pos(a).rx()][_player[player]->pos(a).ry()] == MapData::obsticle)
+            if(_viewMap[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()] == MapData::obsticle)
             {
                 controlSnakeDeath(player,true);
                 return;
             }
-            _viewMap[_player[player]->pos(a).rx()][_player[player]->pos(a).ry()] = MapData::snake;
+            _viewMap[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()] = MapData::snake;
             //_map[_player[player]->pos()[a].rx()][_player[player]->pos()[a].y()]->frameSize(5);
             //_map[_player[player]->pos()[a].rx()][_player[player]->pos()[a].y()]->frameColor(_player[player]->color(a));
-            _map[_player[player]->pos(a).rx()][_player[player]->pos(a).ry()]->frame(false);
-            _map[_player[player]->pos(a).rx()][_player[player]->pos(a).ry()]->color(_player[player]->color(a));
+            _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->frame(false);
+            _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->color(_player[player]->color(a));
 
-            _map[_player[player]->pos(a).rx()][_player[player]->pos(a).ry()]->end(QPoint(tileSize()*1.3,tileSize()*1.3));
+            _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->end(QPoint(tileSize()*1.3,tileSize()*1.3));
         }
     }
 }
@@ -335,22 +342,26 @@ void Environment::update()
         }
 #endif
     }
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+    //clock_t startTime = clock();
+    //qDebug() << "sEnv: ";
 #ifdef __enableEnviromentThread
 //Thread begin
     unsigned int playerSize = _player.size();
     pthread_mutex_lock(&_threadLock);
-    _threadDelayMicros = 1000000;
-    _threadExit = false;
+    //_threadDelayMicros = 1000000;
+
     _threadPause = false;
     for(unsigned int a=0; a<playerSize; a++)
     {
         _threadData[a].isPaused = false;
     }
+    pthread_cond_broadcast( &_thread_condition_var);
     pthread_mutex_unlock(&_threadLock);
     int pause = 0;
     bool _pause;
 
-  //  qDebug() << "sEnv";
    // Sleep(10);
     vector<bool> restartCheckList(playerSize,false);
 
@@ -358,7 +369,7 @@ void Environment::update()
         pause = 0;
         for(unsigned int a=0; a<playerSize; a++)
         {
-            if(!restartCheckList[a])
+            if(restartCheckList[a])
             {
                 pause++;
                 continue;
@@ -378,12 +389,22 @@ void Environment::update()
     pthread_mutex_lock(&_threadLock);
     _threadPause = true;
     pthread_mutex_unlock(&_threadLock);
+    for(unsigned int player=0; player<_player.size(); player++)
+    {
+        if(_threadData[player].killPlayer == true)
+        {
+            controlSnakeDeath(player,true);
+            _threadData[player].killPlayer = false;
+        }
+    }
 
 //Thread end
 #else
    // Sleep(10);
     for(unsigned int playerOne=0; playerOne<_player.size(); playerOne++)
     {
+        if(!_player[playerOne]->isAlive())
+            continue;
     //---------Check Snake Food collision
         //for(unsigned int a=0; a<_player[c]->pos().size(); a++)        //optimise
                                                                         //only check if the head has a collision with a food
@@ -392,8 +413,8 @@ void Environment::update()
          {
             for(unsigned int b=0; b<_food.size(); b++)
             {
-                if(_player[playerOne]->pos(0).x() == _food[b]->pos().x() &&   //optimise
-                   _player[playerOne]->pos(0).y() == _food[b]->pos().y())     //optimise
+                if(_player[playerOne]->pos(0)->x() == _food[b]->pos().x() &&   //optimise
+                   _player[playerOne]->pos(0)->y() == _food[b]->pos().y())     //optimise
                 {
                 //    qDebug() << "Food eaten. Amount: " << _food[b]->amount();
                     _player[playerOne]->addFood(_food[b]->amount());
@@ -404,12 +425,16 @@ void Environment::update()
         }
         for(unsigned int snakeTwo=0; snakeTwo<_player.size(); snakeTwo++)
         {
+            if(!_player[snakeTwo]->isAlive() || !_player[playerOne]->isAlive())
+                continue;
             if(playerOne == snakeTwo)
                 continue;
             for(unsigned int b=0; b<_player[snakeTwo]->size(); b++)
             {
-                if(_player[playerOne]->pos(0).x() == _player[snakeTwo]->pos(b).x() &&
-                   _player[playerOne]->pos(0).y() == _player[snakeTwo]->pos(b).y())
+                if(!_player[snakeTwo]->isAlive() || !_player[playerOne]->isAlive())
+                    continue;
+                if(_player[playerOne]->pos(0)->x() == _player[snakeTwo]->pos(b)->x() &&
+                   _player[playerOne]->pos(0)->y() == _player[snakeTwo]->pos(b)->y())
                 {
                  //   qDebug() << "Collision between snakes: " << c << " : " << a;
                     if(b == 0)
@@ -417,11 +442,11 @@ void Environment::update()
                         if(_player[playerOne]->size() > _player[snakeTwo]->size())
                         {
                             controlSnakeDeath(snakeTwo,true);
-                            emit playerKill(playerOne,snakeTwo);
+                            //emit playerKill(playerOne,snakeTwo);
                         }
                         else {
                             controlSnakeDeath(playerOne,true);
-                            emit playerKill(snakeTwo,playerOne);
+                            //emit playerKill(snakeTwo,playerOne);
                         }
                     }else
                     {
@@ -431,22 +456,36 @@ void Environment::update()
                             _player[snakeTwo] ->addFood(_player[playerOne]->food()/2);
                         }
                         controlSnakeDeath(playerOne,true);
-                        emit playerKill(snakeTwo,playerOne);
+                        //emit playerKill(snakeTwo,playerOne);
                     }
+                    continue;
                 }
             }
         }
-        _player[playerOne]->update();
     }
 #endif
-    //-----------------------------------
+    for(unsigned int player=0; player<_player.size(); player++)
+    {
+        _player[player]->update();
+    }
 
-  //  qDebug() << "fEnv";
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+    //qDebug() << "fEnv: " << _timeinterval;
+    //-----------------------------------
+    _timeinterval = 0.9*_timeinterval + 0.1*time_span.count();
+#ifdef __DEBUG_TIMEINTERVAL
+    if(_debugCount > 1000)
+    {
+        qDebug() << "e: "<<_timeinterval;
+        _debugCount = 0;
+    }
+    _debugCount++;
+#endif
     for(unsigned int a=0; a<_food.size(); a++)
     {
         _food[a]->update();
     }
-
     for(unsigned int y=0; y<mapsize().height(); y++)
     {
         for(unsigned int x=0; x<mapsize().width(); x++)
@@ -528,7 +567,28 @@ void Environment::update()
     for(unsigned int a=0; a<_player.size(); a++)
     {
         if(_player[a]->isAlive())
-            setSnakeOnMap(a);
+        {
+            try{
+                setSnakeOnMap(a);
+            }
+            catch(std::runtime_error &e)
+            {
+                //qDebug() << "ERROR  setSnakeOnMap("<<a<<") "<< e.what();
+                std::string errorMessage = "ERROR: setSnakeOnMap("+std::to_string(a)+")\n";
+                errorMessage+= std::string(e.what())+"\n";
+                errorMessage+= "playersize: "+std::to_string(_player[a]->size()) +"\n";
+                qDebug() << QString::fromStdString(errorMessage);
+                FILE *file = fopen("error_e.txt","a");
+                if(file)
+                {
+                    fprintf(file,"%s\n",errorMessage.c_str());
+                    fclose(file);
+                }
+            }catch(...)
+            {
+                qDebug() << "ERROR setSnakeOnMap("<<a<<")"<< "alife? : "<<_player[a]->isAlive();
+            }
+        }
     }
     //----------Set Food
    /* test++;
@@ -695,15 +755,15 @@ vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoi
         outputData[food_layer].push_back(0);
         outputData[snake_layer].push_back(0);
         outputData[obsticle_layer].push_back(0);
-        if(_player[player]->pos(0).x()+fieldOfView[a].x() >= _viewMap.size() || _player[player]->pos(0).x()+fieldOfView[a].x() < 0)
+        if(_player[player]->pos(0)->x()+fieldOfView[a].x() >= _viewMap.size() || _player[player]->pos(0)->x()+fieldOfView[a].x() < 0)
         {
             rawData.push_back(MapData::nothing);
-        }else if(_player[player]->pos(0).y()+fieldOfView[a].y() >= _viewMap[_player[player]->pos(0).x()+fieldOfView[a].x()].size() || _player[player]->pos(0).y()+fieldOfView[a].y() < 0)
+        }else if(_player[player]->pos(0)->y()+fieldOfView[a].y() >= _viewMap[_player[player]->pos(0)->x()+fieldOfView[a].x()].size() || _player[player]->pos(0)->y()+fieldOfView[a].y() < 0)
         {
             rawData.push_back(MapData::nothing);
         }else
         {
-            QPoint pos = QPoint(_player[player]->pos(0).x()+fieldOfView[a].x(),_player[player]->pos(0).y()+fieldOfView[a].y());
+            QPoint pos = QPoint(_player[player]->pos(0)->x()+fieldOfView[a].x(),_player[player]->pos(0)->y()+fieldOfView[a].y());
             rawData.push_back(_viewMap[pos.x()][pos.y()]);
             switch(_viewMap[pos.x()][pos.y()])
             {
@@ -725,7 +785,7 @@ vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoi
                     for(unsigned int b=0; b<_player[player]->size(); b++)
                     {
                        // qDebug() << "b: " << b << "pos: "<<_player[player]->pos(b) << " | " << pos;
-                        if(_player[player]->pos(b).x() == pos.x() && _player[player]->pos(b).y() == pos.y())
+                        if(_player[player]->pos(b)->x() == pos.x() && _player[player]->pos(b)->y() == pos.y())
                         {
                             outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f; //good snake
                             break;
@@ -834,7 +894,7 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
         //for(int a=-1; a>viewDirection[0].x()*viewLength; a--)
         for(int a=1; a<viewLength; a++)
         {
-            QPoint pos = QPoint(_player[player]->pos(0).x()+a*viewDirection[x].x(),_player[player]->pos(0).y()+a*viewDirection[x].y());
+            QPoint pos = QPoint(_player[player]->pos(0)->x()+a*viewDirection[x].x(),_player[player]->pos(0)->y()+a*viewDirection[x].y());
             if(pos.x() >= _viewMap.size() || pos.x() < 0)
             {
                 continue;
@@ -867,7 +927,7 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                     for(unsigned int b=0; b<_player[player]->size(); b++)
                     {
                        // qDebug() << "b: " << b << "pos: "<<_player[player]->pos(b) << " | " << pos;
-                        if(_player[player]->pos(b).x() == pos.x() && _player[player]->pos(b).y() == pos.y())
+                        if(_player[player]->pos(b)->x() == pos.x() && _player[player]->pos(b)->y() == pos.y())
                         {
                             outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((float)viewLength-(float)a)/(float)viewLength; //good snake
                             break;
@@ -936,7 +996,10 @@ bool Environment::drawEnable()
 {
     return _drawEnable;
 }
-
+double Environment::cycleTime()
+{
+    return _timeinterval;
+}
 
 void *Environment::runThread(void *threadarg)
 {
@@ -960,147 +1023,203 @@ void *Environment::runThread(void *threadarg)
     QPoint  player_head_pos;
     unsigned int foodSize;
     unsigned int players;
-
-
-
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+    high_resolution_clock::time_point t1;
+    high_resolution_clock::time_point t2;
+    duration<double> time_span;
+    double _timeInterval = 0;
+    unsigned int _debugCount = 0;
+#endif
     while(!ret)
     {
 
         if(enableLoop)
         {
-
-            //begin
-            bool playerIsAlive;
-            pthread_mutex_lock(my_data->lock);
-            playerIsAlive = (*my_data->player)[my_data->thread_id]->isAlive();
-            pthread_mutex_unlock(my_data->lock);
-            if(!playerIsAlive)
-                enableLoop = false;
-
-            if(enableLoop)
-            {
+             try{
+                //begin
+                bool playerIsAlive;
                 pthread_mutex_lock(my_data->lock);
-                plyer_size          = (*my_data->player)[my_data->thread_id]->size();
-                player_head_pos     = (*my_data->player)[my_data->thread_id]->pos(0);
-                foodSize            = my_data->food->size();
-                players             = (*my_data->player).size();
+                playerIsAlive = (*my_data->player)[my_data->thread_id]->isAlive();
                 pthread_mutex_unlock(my_data->lock);
-
-                vector<Food> foodList;
-                foodList.reserve(foodSize);
-                for(unsigned int a=0; a<foodSize; a++)
+                if(!playerIsAlive)
                 {
-                    Food tmpFood(QSize(10,10));
-                    foodList.push_back(tmpFood);
-                    pthread_mutex_lock(my_data->lock);
-                    foodList[a] = *(*my_data->food)[a];
-                    pthread_mutex_unlock(my_data->lock);
+                    enableLoop = false;
+                    continue;
                 }
 
-                if(plyer_size != 0)
+                //if(enableLoop)
                 {
-                    // check collision with food
-                    bool foodIsAlive;
-                    QPoint foodPos;
-                    for(unsigned int food=0; food<foodSize; food++)
+                    pthread_mutex_lock(my_data->lock);
+                    plyer_size          = (*my_data->player)[my_data->thread_id]->size();
+                    pthread_mutex_unlock(my_data->lock);
+                    if(plyer_size == 0)
                     {
-                        /*pthread_mutex_lock(my_data->lock);
-                        foodIsAlive = (*my_data->food)[food]->isAlive();
-                        foodPos = (*my_data->food)[food]->pos();
-                        pthread_mutex_unlock(my_data->lock);*/
-                        if(!foodList[food].isAlive())
-                            continue;
+                        enableLoop = false;
+                        bool ___alive;
+                        pthread_mutex_lock(my_data->lock);
+                        ___alive = (*my_data->player)[my_data->thread_id]->isAlive();
+                        pthread_mutex_unlock(my_data->lock);
+                        continue;
+                    }
+                    pthread_mutex_lock(my_data->lock);
+                    player_head_pos     = *(*my_data->player)[my_data->thread_id]->pos(0);
+                    foodSize            = my_data->food->size();
+                    players             = (*my_data->player).size();
+                    pthread_mutex_unlock(my_data->lock);
 
-                        //check collsison between snake and foods
-                        if(player_head_pos == foodList[food].pos())
-                        {
-                            int foodAmount;
-                           /* pthread_mutex_lock(my_data->lock);
-                            foodAmount = (*my_data->food)[food]->amount();
-                            pthread_mutex_unlock(my_data->lock);*/
-
-                            (*my_data->player)[my_data->thread_id]->addFood(foodList[food].amount());
-                            (*my_data->food)[food]->eaten();
-                        }
+                    vector<Food> foodList;
+                    foodList.reserve(foodSize);
+                    for(unsigned int a=0; a<foodSize; a++)
+                    {
+                        Food tmpFood(QSize(10,10));
+                        foodList.push_back(tmpFood);
+                        pthread_mutex_lock(my_data->lock);
+                        foodList[a] = *(*my_data->food)[a];
+                        pthread_mutex_unlock(my_data->lock);
                     }
 
-                    // check collision with snakes
-                    unsigned int snakeTwo_size;
-                    for(unsigned int snakeTwo=0; snakeTwo<players; snakeTwo++)
+                    if(plyer_size != 0)
                     {
-                        if(snakeTwo == my_data->thread_id)
-                            continue;
-
-                        pthread_mutex_lock(my_data->lock);
-                        snakeTwo_size = (*my_data->player)[snakeTwo]->size();
-                        pthread_mutex_unlock(my_data->lock);
-
-                        for(unsigned int snakeTwoTiles=0; snakeTwoTiles<snakeTwo_size; snakeTwoTiles++)
+                        // check collision with food
+                        bool foodIsAlive;
+                        QPoint foodPos;
+                        for(unsigned int food=0; food<foodSize; food++)
                         {
-                            QPoint snakeTwoTile_pos;
+                            /*pthread_mutex_lock(my_data->lock);
+                            foodIsAlive = (*my_data->food)[food]->isAlive();
+                            foodPos = (*my_data->food)[food]->pos();
+                            pthread_mutex_unlock(my_data->lock);*/
+                            if(!foodList[food].isAlive())
+                                continue;
+
+                            //check collsison between snake and foods
+                            if(player_head_pos == foodList[food].pos())
+                            {
+                                int foodAmount;
+                               /* pthread_mutex_lock(my_data->lock);
+                                foodAmount = (*my_data->food)[food]->amount();
+                                pthread_mutex_unlock(my_data->lock);*/
+                                pthread_mutex_lock(my_data->lock);
+                                (*my_data->player)[my_data->thread_id]->addFood(foodList[food].amount());
+                                (*my_data->food)[food]->eaten();
+                                pthread_mutex_unlock(my_data->lock);
+                            }
+                        }
+
+                        // check collision with snakes
+                        unsigned int snakeTwo_size;
+                        for(unsigned int snakeTwo=0; snakeTwo<players; snakeTwo++)
+                        {
+                            if(snakeTwo == my_data->thread_id)
+                                continue;
+
                             pthread_mutex_lock(my_data->lock);
-                            snakeTwoTile_pos = (*my_data->player)[snakeTwo]->pos(snakeTwoTiles);
+                            snakeTwo_size = (*my_data->player)[snakeTwo]->size();
                             pthread_mutex_unlock(my_data->lock);
 
-                            if(snakeTwoTile_pos == player_head_pos)
+                            for(unsigned int snakeTwoTiles=0; snakeTwoTiles<snakeTwo_size; snakeTwoTiles++)
                             {
-                                if(snakeTwoTiles == 0) // head a head collision
+                                QPoint snakeTwoTile_pos;
+                                pthread_mutex_lock(my_data->lock);
+                                snakeTwoTile_pos = *(*my_data->player)[snakeTwo]->pos(snakeTwoTiles);
+                                pthread_mutex_unlock(my_data->lock);
+
+                                if(snakeTwoTile_pos == player_head_pos)
                                 {
-                                    if(plyer_size > snakeTwo_size)
+                                    if(snakeTwoTiles == 0) // head a head collision
                                     {
-                                        //controlSnakeDeath(snakeTwo,true);
-                                        (*my_data->player)[snakeTwo]->kill();
+                                        if(plyer_size > snakeTwo_size)
+                                        {
+                                            //controlSnakeDeath(snakeTwo,true);
+                                         /*   pthread_mutex_lock(my_data->lock);
+                                            (*my_data->player)[snakeTwo]->kill();
+                                            pthread_mutex_unlock(my_data->lock);*/
+                                        }
+                                        else
+                                        {
+                                            pthread_mutex_lock(my_data->lock);
+                                            my_data->killPlayer = true;
+                                            //(*my_data->player)[my_data->thread_id]->kill();
+                                            pthread_mutex_unlock(my_data->lock);
+                                        }
+                                    }else
+                                    {
+                                        //only if you use Killreward
+                                       /* bool killreward;
+                                        pthread_mutex_lock(my_data->lock);
+                                        killreward = (*my_data->player)[snakeTwo]->killreward();
+                                        pthread_mutex_unlock(my_data->lock);
+                                        if(killreward)
+                                        {
+                                            (*my_data->player)[snakeTwo]->addFood((*my_data->player)[my_data->thread_id]->food()/2);
+                                        }*/
+                                        pthread_mutex_lock(my_data->lock);
+                                        my_data->killPlayer = true;
+                                        //(*my_data->player)[my_data->thread_id]->kill();
+                                        pthread_mutex_unlock(my_data->lock);
                                     }
-                                    else
-                                    {
-                                        (*my_data->player)[my_data->thread_id]->kill();
-                                    }
-                                }else
-                                {
-                                    //only if you use Killreward
-                                   /* bool killreward;
-                                    pthread_mutex_lock(my_data->lock);
-                                    killreward = (*my_data->player)[snakeTwo]->killreward();
-                                    pthread_mutex_unlock(my_data->lock);
-                                    if(killreward)
-                                    {
-                                        (*my_data->player)[snakeTwo]->addFood((*my_data->player)[my_data->thread_id]->food()/2);
-                                    }*/
-                                    (*my_data->player)[my_data->thread_id]->kill();
                                 }
                             }
                         }
+                       // if(my_data->thread_id == 0)
+                       //    qDebug() << "update:     "<<my_data->thread_id << " ptr: " <<(*my_data->player)[my_data->thread_id];
+            /*           pthread_mutex_lock(my_data->lock);
+                        (*my_data->player)[my_data->thread_id]->update();
+                       pthread_mutex_unlock(my_data->lock);*/
+
+
                     }
-                   // if(my_data->thread_id == 0)
-                   //    qDebug() << "update:     "<<my_data->thread_id << " ptr: " <<(*my_data->player)[my_data->thread_id];
-                    (*my_data->player)[my_data->thread_id]->update();
-
-
+                    //qDebug() << "run: "<<my_data->thread_id;
                 }
-                //qDebug() << "run: "<<my_data->thread_id;
+            }
+            catch(std::runtime_error &e)
+            {
+                qDebug() << "ERROR  main "<< e.what();
+                FILE *file = fopen("error_e.txt","a");
+                if(file)
+                {
+                    fprintf(file,"%s\n",(std::string("ERROR  enviroment ")+std::to_string(my_data->thread_id)+e.what()).c_str());
+                    fclose(file);
+                }
             }
             //end
           //  if(my_data->thread_id == 0)
           //      qDebug() << "sleep     : "<<my_data->thread_id << " ptr: " <<(*my_data->player)[my_data->thread_id];
             enableLoop = false;
-            pthread_mutex_lock(my_data->lock);
-            my_data->isPaused = true;
-            pthread_mutex_unlock(my_data->lock);
         }else
         {
             //qDebug() << "thread: "<<my_data->thread_id << " sleeping";
             //usleep(1);
-            nanosleep(&time, NULL);
+            //nanosleep(&time, NULL);
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+            t2 = high_resolution_clock::now();
+            time_span = duration_cast<duration<double>>(t2 - t1);
+            _timeInterval = 0.9*_timeInterval + 0.1*time_span.count();
+            if(_debugCount > 1000)
+            {
+                if(my_data->thread_id == 0)
+                    qDebug() << "e_: "<<my_data->thread_id << " " <<_timeInterval;
+                _debugCount = 0;
+            }
+            _debugCount++;
+#endif
+
             pthread_mutex_lock(my_data->lock);
+            my_data->isPaused = true;
+            pthread_mutex_unlock(my_data->lock);
+            pthread_mutex_lock(my_data->lock);
+            pthread_cond_wait( my_data->condition_var, my_data->lock );
             ret = *my_data->exit;
             //pause = *my_data->pause;
-            pause = my_data->isPaused;
-            time.tv_nsec = *my_data->delayMicros;
+            //pause = my_data->isPaused;
+            //time.tv_nsec = *my_data->delayMicros;
             pthread_mutex_unlock(my_data->lock);
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+            t1 = high_resolution_clock::now();
+#endif
 
 
-
-            if(!pause)
+            //if(!pause)
             {
                // if(my_data->thread_id == 0)
                //     qDebug() << "awake     : "<<my_data->thread_id << " ptr: " <<(*my_data->player)[my_data->thread_id];
@@ -1121,3 +1240,4 @@ void *Environment::runThread(void *threadarg)
     qDebug() << "thread stop: "<<my_data->thread_id << " "<<(*my_data->player)[my_data->thread_id];
     pthread_exit(NULL);
 }
+

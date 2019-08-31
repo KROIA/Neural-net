@@ -79,17 +79,17 @@ void Player::pos(vector<QPoint> pos)
         sollSize(_playerPos.size());
     }
 }
-QPoint Player::pos(unsigned int index)
+QPoint *Player::pos(unsigned int index)
 {
     if(_playerPos.size() <= index)
     {
-        return QPoint(0,0);
+        throw std::runtime_error("pos(unsigned int ["+std::to_string(index)+"]) out of range : 0 - "+std::to_string(_playerPos.size()-1));
     }
-    return _playerPos[index];
+    return &_playerPos[index];
 }
-vector<QPoint> Player::pos()
+vector<QPoint> *Player::pos()
 {
-    return _playerPos;
+    return &_playerPos;
 }
 void Player::standardColor(QColor standard)
 {

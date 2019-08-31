@@ -46,8 +46,8 @@ class Player : public QObject
         void addFood(int increment = 1);
 
         void pos(vector<QPoint> pos);
-        QPoint pos(unsigned int index);
-        vector<QPoint> pos();
+        QPoint *pos(unsigned int index);
+        vector<QPoint> *pos();
 
         void standardColor(QColor standard);
         QColor standardColor();

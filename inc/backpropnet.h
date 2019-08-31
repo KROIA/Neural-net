@@ -1,8 +1,8 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.03.00"
-//                      Datum   26.08.2019
+#define    BACKPROPNET_VERSION "02.03.01"
+//                      Datum   31.08.2019
 
 #include "net.h"
 #include "savenet.h"

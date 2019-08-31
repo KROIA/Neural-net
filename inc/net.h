@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.03.01"
-//              Datum   26.08.2019
+#define    NET_VERSION "02.03.02"
+//              Datum   31.08.2019
 
 #include "neuron.h"
 #include <math.h>
@@ -96,6 +96,8 @@ class Net
         std::vector<Neuron*> hiddenNeuronX(unsigned int hiddenX);    // |    Alle in einer Spalte
         std::vector<Neuron*> hiddenNeuronY(unsigned int hiddenY);    // --   Alle in einer Reihe
         std::vector<std::vector<Neuron*> > *hiddenNeuron();
+        Neuron               *costumNeuron(NeuronID ID);
+        std::vector<Neuron*> *costumNeuron();
         Neuron              *outputNeuron(unsigned int output);
         std::vector<Neuron*> *outputNeuron();
         std::vector<Neuron*> *allNeurons();
@@ -110,9 +112,17 @@ class Net
          *  inputNeurons()
          *  sins V02.01.00
          */
-        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
+        bool                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
+        bool                connectNeuron(Connection connection);
+        bool                connectNeuron(std::vector<Connection> connections);
         void                connectionList(std::vector<Connection> connections);
         std::vector<Connection> *connectionList();
+
+        NeuronID            addNeuron();
+        NeuronID            addNeuron(Neuron *neuron);
+        NeuronID            addNeuron(Connection connection);
+        NeuronID            addNeuron(std::vector<Connection> inputConnections);
+
     private:
         void init(unsigned int inputs,
                   unsigned int hiddenX,
@@ -123,6 +133,7 @@ class Net
                   Activation func);
 
         void prepareConnectionList();
+        void update_ptr_genomList();
    //     void setGenomToNeuron();
    //     void getGenomFromNeuron();
 

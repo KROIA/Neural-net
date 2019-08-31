@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.04.01"
-//              Datum   16.08.2019
+#define NEURON_VERSION "02.04.02"
+//              Datum   31.08.2019
 
 #include <vector>
 #include <math.h>
@@ -11,12 +11,11 @@
 #include <time.h>
 #include <QDebug>
 
-#define NEURON_MIN_INPUTS 1
+#define NEURON_MIN_INPUTS 0
 #define NEURON_MAX_INPUTS 500
 #define __FLOATINPOINT_TOLERANCE 0.0000001
 #define NEURON_ID_INVALID 65535
 #define NEURON_ID_NOTDEFINED 65534
-
 
 enum Activation{        // https://en.wikipedia.org/wiki/Activation_function
     Linear   = 0,       // https://en.wikipedia.org/wiki/Identity_function
@@ -33,12 +32,30 @@ enum NeuronType{
     hidden = 2,         // It's a Neuron in the hiddenlayer
     output = 3,         // It's a Neuron in the outputlayer
     costum = 4,         // It's a costum Neuron and can be everywere except the inputlayer
-    bias   = 5,
+    bias   = 5,         // It's a bias -> a constant value.
+};
+
+enum ConnectionDirection{
+    forward  = 1,
+    backward = 0,
 };
 
 struct NeuronID{
     unsigned int ID;
+    /* A value which should be only once given to the Neuron.
+       Every Neuron must have it's own ID.
+       This ID will be used for accesing the Neuron in a Vector so it should begin at 0 and counts up for every new Neuron in the Net
+     */
     NeuronType  TYPE;
+    /* The TYPE specify which Neuron it is.
+       This is necessary because you may wanna connect a custom float variable to a Neuron,
+       the variable does not have an Neuron ID so it will be stimulated by an
+        NeuronID.ID     = inputnumber
+        NeuronID.TYPE   = NeuronType::input
+
+       That means, the Net will have two NeuronID's with the ID==0 but
+       the TYPE will always be different.
+    */
 };
 
 struct Connection
@@ -50,24 +67,71 @@ struct Connection
     bool direction;
 };
 
+
 class Neuron
 {
     public:
         Neuron();
+        /*Constructor of Neuron
+            Parameter:
+            none
+
+          setup as default:
+           | inputs: NEURON_MIN_INPUTS
+           | activation: Activation::Sigmoid
+           | enableAverage: false
+        */
         Neuron(unsigned int inputs);
+        /* Constructor of Neuron
+          Parameter:
+           | inputs: input connection, have to be connected later
+
+          setup as default:
+           | activation: Activation::Sigmoid
+           | enableAverage: false
+        */
         Neuron(unsigned int inputs, Activation activationFunction);
+        /* Constructor of Neuron
+          Parameter:
+           | inputs: input connection, have to be connected later
+           | activation: set your chosen Activationfunction. see enum Activation above.
+
+          setup as default:
+           | enableAverage: false
+        */
         Neuron(unsigned int inputs, Activation activationFunction, bool enableAverage);
+        /* Constructor of Neuron
+          Parameter:
+           | inputs: input connection, have to be connected later
+           | activation: set your chosen Activationfunction. see enum Activation above.
+           | enableAverage: if true  ->  The netinput will be averaged out before it is given to the Activation Function.
+                                         This may make sense if the Neuron has lots of inputs eg. inputs > 50.
+                               false ->  No averaging will be done.
+        */
         ~Neuron();
 
         void ID(NeuronID ID);
+        /* Set ID of the Neuron to identify it in your Net
+          Parameter:
+           | ID: See struct NeuronID above
+        */
         void ID(unsigned int ID);
+        /* Set the ID number of the NeuronID
+        */
         void TYPE(NeuronType TYPE);
+        /* Set the TYPE of the NeuronID
+        */
         NeuronID ID();
+        /* Returns the NeuronID
+        */
 
         void inputs(unsigned int inputs);
         unsigned int inputs();
         bool deleteInput(unsigned int input);
-
+        /* returns
+           [1] -> deletion of the connection succeed
+           [0] -> error, couldn't delete connection
+        */
 
         void activationFunction(Activation activationFunction);
         Activation activationFunction();
@@ -80,13 +144,14 @@ class Neuron
         void randWeight(unsigned int input);
         void weight(unsigned int pos, float weight);
         void weight(std::vector<float>  weightList);
-        void weight(NeuronID ID,float weight);
+        void weight(NeuronID ID,float weight);                                  // Sets the weight of the connection between Neuron [ID] and Neuron [this]
+
 
         float weight(unsigned int pos);
         std::vector<float> weight();
 
-     //   void input(unsigned int pos, float input);
-     //   void input(std::vector<float> inputList);
+        void input(unsigned int pos, float input);
+        void input(std::vector<float> inputList);
         float input(unsigned int input);
         std::vector<float> input();
 
@@ -124,8 +189,11 @@ class Neuron
         static float deriv_activation_Gaussian(float netInput);
         static float deriv_activation_Sigmoid(float netInput);
 
+        static const std::string neuronIDString(NeuronID ID);
         static const std::string typeString(NeuronType TYPE);
         static const std::string activationString(Activation activationFunction);
+        static const std::string connectionString(Connection connection);
+        static const std::string directionSring(bool dir);
 
         void needsUpdate();
         bool isUpdated();
@@ -158,7 +226,6 @@ class Neuron
         std::vector<float>          _weightList;
         std::vector<float*>         _ptr_inputList;
         std::vector<bool>           _inputConnectionList;
-        //std::vector<float>          _inputList;
         float                       _netInput;
         float                       _output;
         float                       _delayedOutput; //for loopbacksignal

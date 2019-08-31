@@ -17,10 +17,15 @@
 #include <unistd.h>
 #include <time.h>
 
-
+#include <ctime>
+#include <ratio>
+#include <chrono>
 //#define __enableEnviromentThread
+//#define __DEBUG_TIMEINTERVAL
+//#define __DEBUG_TIMEINTERVAL_IN_THREAD
 
 using namespace std;
+using namespace std::chrono;
 
 struct thread_data_player {
    int  thread_id;
@@ -30,8 +35,10 @@ struct thread_data_player {
    bool *exit;
    bool *pause;
    pthread_mutex_t *lock;
+   pthread_cond_t *condition_var;
    bool isPaused;
    long *delayMicros;
+   bool killPlayer;
 };
 
 enum MapData
@@ -93,6 +100,8 @@ class Environment : public QObject
         bool showInfoText();
         void drawEnable(bool enable);
         bool drawEnable();
+
+        double cycleTime();
     signals:
         void playerKill(unsigned int,unsigned int);
 
@@ -138,11 +147,16 @@ class Environment : public QObject
 
         //Threads
         pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
+
         std::vector<thread_data_player> _threadData;
         std::vector<pthread_t>  _threadList;
         bool                    _threadExit;
         bool                    _threadPause;
         long                    _threadDelayMicros;
+
+        double _timeinterval;
+        unsigned int _debugCount;
 };
 
 #endif // Environment_H

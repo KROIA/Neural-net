@@ -9,6 +9,16 @@
 #include <geneticnet.h>
 #include <backpropnet.h>
 
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+#include <QLineSeries>
+
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
+QT_CHARTS_USE_NAMESPACE
+
 enum Modus{
     geneticTraining = 0,
     versusAI = 1,
@@ -68,6 +78,9 @@ class Snake : public QMainWindow
         void on_selectedSnake_slider_valueChanged(int value);
 
     private:
+        string GetLastErrorStdStr();
+        void saveError(std::string error);
+        void savePeroformanceData();
         Ui::Snake *ui;
         Environment *_environment;
         QPainter   *_painter;
@@ -109,9 +122,12 @@ class Snake : public QMainWindow
         float _genPerSecond;
         unsigned int _genPerSecCounter;
         float _calcPerSecond;
-        unsigned int _calcPerSecCounter;
+        long _calcPerSecCounter;
         float        _averageCalcPerSec;        //Test case
         std::vector<float>  _averageCalcPerSec_List;
+        std::vector<double>  _averageEnviromentCycleTime;
+        std::vector<double>  _averageNetCycleTime;
+        std::vector<double>  _averageSnakeCycleTime;
         unsigned int _saveCounter;
 
 //#ifdef TESTMODE
@@ -152,6 +168,29 @@ class Snake : public QMainWindow
 
         bool _playerKeyInputDisabler;
 
+
+        //statistics
+        unsigned int _maxChartSize;
+
+        float _stats_maxAverageScore;
+        float _stats_maxCalcPerSec;
+        float _stats_maxGenPerSec;
+        QLineSeries *_stats_averageScore_LineSeries;
+        QLineSeries *_stats_Score_LineSeries;
+        QLineSeries *_stats_calcPerSec_Lineseries;
+        QLineSeries *_stats_genPerSec_Lineseries;
+
+        QChart  *_stats_score_Chart;
+        QChart  *_stats_performanceChart;
+
+        QChartView  *_stats_score_chartview;
+        QChartView  *_stats_performance_chartview;
+
+        unsigned int _fullSycleTimeDebugCount;
+        double       _fullSycleTime;
+        std::chrono::high_resolution_clock::time_point _fullSycleTimeStart;
+        std::chrono::high_resolution_clock::time_point _fullSycleTimeEnd;
+        std::chrono::duration<double> _fullSycleTime_span;
 
 //#endif
 

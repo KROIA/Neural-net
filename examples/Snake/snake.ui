@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1279</width>
+    <width>1521</width>
     <height>815</height>
    </rect>
   </property>
@@ -241,8 +241,8 @@
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>431</width>
-      <height>31</height>
+      <width>771</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -731,7 +731,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1279</width>
+     <width>1521</width>
      <height>21</height>
     </rect>
    </property>

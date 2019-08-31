@@ -1,8 +1,8 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.05.00"
-//                      Datum  26.08.2019
+#define    GENETICNET_VERSION "02.05.01"
+//                      Datum  31.08.2019
 
 #include "net.h"
 #include "savenet.h"
@@ -14,10 +14,16 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 #define GENETICNET_MIN_ANIMALS 2
 #define GENETICNET_MAX_ANIMALS 1000
 
 #define __enableGeneticNetThread
+//#define __DEBUG_TIMEINTERVAL
+//#define __DEBUG_TIMEINTERVAL_IN_THREAD
 
 struct thread_data_geneticNet {
    int  thread_id;
@@ -25,6 +31,7 @@ struct thread_data_geneticNet {
    bool *exit;
    bool *pause;
    pthread_mutex_t *lock;
+   pthread_cond_t *condition_var;
    bool isPaused;
    long *delayMicros;
 };
@@ -154,9 +161,20 @@ class GeneticNet
          *  sins V02.03.00
          */
         void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
+        bool                connectNeuron(Connection connection);
+        bool                connectNeuron(std::vector<Connection> connections);
         void                connectionList(std::vector<std::vector<Connection> >connections);
         std::vector<Connection> *connectionList(unsigned int netID);
         std::vector<std::vector<Connection>* > connectionList();
+
+        NeuronID            addNeuron();
+        NeuronID            addNeuron(Neuron *neuron);
+        NeuronID            addNeuron(Connection connection);
+        NeuronID            addNeuron(std::vector<Connection> inputConnections);
+
+
+
+        double              cycleTime();
 
     private:
 
@@ -202,11 +220,14 @@ class GeneticNet
 
         //Threads
         pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
         std::vector<thread_data_geneticNet> _threadData;
         std::vector<pthread_t>  _threadList;
         bool                    _threadExit;
         bool                    _threadPause;
         long                    _threadDelayMicros;
 
+        double  _timeInterval;
+        unsigned int _debugCount;
 };
 #endif // GENETICNET_H
