@@ -9,20 +9,14 @@ Item {
     Repeater{
         model: ui.startNeuron.length
         Connection{
-            xStart: Math.cos(((360/net.neurons)*ui.startNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)+
-                    Math.sin(((360/net.neurons)*ui.startNeuron[index])*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200
-
-            yStart: {console.debug("y:"+(Math.cos(((360/net.neurons)*ui.startNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)+
-                                   (Math.sin(((360/net.neurons)*ui.startNeuron[index]))*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200))
-
-
-                return (Math.cos(((360/net.neurons)*ui.startNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)+
-                        (Math.sin((360/net.neurons)*ui.startNeuron[index])+90)*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200
-            }
-                xEnd: Math.cos(((360/net.neurons)*ui.endNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)+
-                  Math.sin(((360/net.neurons)*ui.endNeuron[index])*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200
-            yEnd: Math.sin(((360/net.neurons)*ui.endNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)+
-                  (1-Math.cos(((360/net.neurons)*ui.endNeuron[index]))*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200
+            xStart: //(Math.cos(((360/net.neurons)*ui.startNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2))+
+                    (Math.sin(((360/net.neurons)*ui.startNeuron[index])*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
+            yStart: //(Math.cos(((360/net.neurons)*ui.startNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2))+
+                    (Math.sin(((360/net.neurons)*ui.startNeuron[index]-90)*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
+            xEnd: //(Math.cos(((360/net.neurons)*ui.endNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2))+
+                  (Math.sin(((360/net.neurons)*ui.endNeuron[index])*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
+            yEnd: //(Math.sin(((360/net.neurons)*ui.endNeuron[index]+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2))+
+                  (Math.sin(((360/net.neurons)*ui.endNeuron[index]-90)*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
             weight: ui.connectionWeight[index]
             value: ui.neuronValueVect[ui.startNeuron[index]]
         }
@@ -34,14 +28,14 @@ Item {
         x:200
         y:200
         model: net.neurons
+
         delegate: Neuron{
             id:neuron
             neuronid: index
+            diameter: net.diameter
             neuronValue: ui.neuronValueVect[index]
-            connectionInputX: {
-                return Math.cos(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)}
-            connectionInputY: {
-                return Math.sin(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)}
+            connectionInputX: Math.cos(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)
+            connectionInputY: Math.sin(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)
             connectionOutputX: connectionInputX
             connectionOutputY: connectionInputY
         }

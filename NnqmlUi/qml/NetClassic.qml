@@ -25,6 +25,7 @@ Rectangle{
             neuronid: index
             x:100
             y:100+(net.distanceY*index)
+            diameter: net.diameter
             neuronValue:{
                     net.layerPositionX[index]=0
                     net.layerPositionY[index]=index
@@ -37,6 +38,7 @@ Rectangle{
         Neuron{
             neuronid: index
             x:100+net.distanceX
+            diameter: net.diameter
             y:100+(net.distanceY*index)
             neuronValue:{
                 net.layerPositionX[index+ui.input]=1
@@ -51,6 +53,7 @@ Rectangle{
             neuronid: index
             x:100+net.distanceX*(ui.hiddenX+1)
             y:100+(net.distanceY*index)
+            diameter: net.diameter
             neuronValue:{
                 net.layerPositionX[index+ui.input+ui.hiddenY]=2
                 net.layerPositionY[index+ui.input+ui.hiddenY]=index

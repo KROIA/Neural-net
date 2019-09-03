@@ -4,6 +4,7 @@ import QtQuick 2.12
 Rectangle {
     id: neuron
     property int i: 1
+    property int diameter: 50
     property int totalHeight: parent.height
     property int totalWidth: parent.width
     property int layerX: 0
@@ -14,18 +15,7 @@ Rectangle {
     property int connectionOutputY: height/2
     property int biasx: 0
     property int biasy: height/2
-
-    property real neuronValue:{
-        var neuronValue=2
-        ui.layerId=layerX
-        ui.neuronId = i
-        neuronValue=ui.neuronValue
-
-        //if(i==0){
-         //   drawingCanvas.requestPaint()}
-        return neuronValue
-    }
-
+    property real neuronValue:0
     property string neuronColor:if(neuronValue<0){
                                       return"darkred";
                                         }
@@ -34,8 +24,8 @@ Rectangle {
                                       return"darkgreen";
                                         }
 
-    width: net.diameter
-    height: net.diameter
+    width: neuron.diameter
+    height: neuron.diameter
     border.color: "black"
     color:{
         if(neuronValue!=0){
