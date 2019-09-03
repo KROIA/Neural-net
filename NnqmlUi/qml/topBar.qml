@@ -32,7 +32,7 @@ Button{
 }
 Button{
     id:zoomOut
-    onClicked: {ui.zoom=ui.zoom-0.1}
+    onClicked: {if(ui.zoom>0.2){ui.zoom=ui.zoom-0.1}}
     text: "-"
     width: topBar.height
 }
@@ -46,5 +46,18 @@ Button{
     }
     text: "create new"
 }
+ComboBox{
+    model: ListModel {
+        id: netVisOp
+        ListElement { text: "Cicle"}
+        ListElement { text: "Classic"}
+    }
+    currentIndex: ui.ansicht
+    onCurrentIndexChanged: {
+        ui.ansicht=currentIndex;
+    }
+
+}
+
 }
 }

@@ -11,8 +11,11 @@ netThread::netThread(QObject *parent):
     maxSteps(1000000);
     _bias = true;
     enableAverage = false;
+    m_activFunc=4;
     setupNet();
     net->loadFromNetFile();
+    net->updateNetConfiguration();
+    net->saveToNetFile();
     qDebug()<<"net done, press enter\n";
 }
 
@@ -90,7 +93,9 @@ unsigned long netThread::learningSteps(){
 bool netThread::bias(){
     return _bias;
 }
-
+void netThread::activFunc(int i){
+    m_activFunc=i;
+}
 void netThread::bias(bool i){
     _bias=i;
 }
@@ -106,8 +111,32 @@ void netThread::setupNet(){
     _inputNeurons = unsigned(daten.trainingInput.daten(_counter).size());
     _outputNeuron = unsigned(daten.trainingOutput.daten(_counter).size());
     //qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
-    net= new BackpropNet(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Activation::Sigmoid);
+    qDebug()<<m_activFunc;
+    /*Activation a;
+    switch (m_activFunc) {
+        case 0: a=Linear;
+        break;
+        case 1: a=ReLu;
+        break;
+        case 2: a=Binary;
+        break;
+        case 3: a=Gaussian;
+        break;
+        case 4: a=Sigmoid;
+        break;
+        default: a=Linear;
+        break;
+        }*/
+    net= new BackpropNet(1);
     net->mutationFactor(float(0.0005));
+    net->loadFromNetFile();
+    net->set(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Sigmoid);
+    net->updateNetConfiguration();
+    net->saveToNetFile();
+}
+void netThread::reset(){
+    net->set(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Sigmoid);
+    net->updateNetConfiguration();
 
 }
 vector<qreal> netThread::errorChart(){

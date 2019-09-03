@@ -64,6 +64,7 @@ class GeneticNet
         unsigned int            outputNeurons();
         void                    costumNeurons(unsigned int costum);
         unsigned int            costumNeurons();
+        void                    costumConnections(unsigned int connections);
         void                    neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
 
 
@@ -137,6 +138,9 @@ class GeneticNet
          */
         void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
         void                connectionList(std::vector<std::vector<Connection> >connections);
+        std::vector<Connection> *connectionList(unsigned int netID);
+        std::vector<std::vector<Connection>* > connectionList();
+
     private:
 
         void                    init(unsigned int animals,

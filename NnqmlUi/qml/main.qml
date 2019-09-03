@@ -11,6 +11,15 @@ ApplicationWindow {
     Ui{
         id:ui
         property real zoom: 1
+        property int ansicht: 0
+        /*ListModel {
+                id: activationFunc
+                ListElement { text: "Linear"}
+                ListElement { text: "ReLu"}
+                ListElement { text: "Binary"}
+                ListElement { text: "Gaussian"}
+                ListElement { text: "Sigmoid"}
+            }*/
     }
     MainInfo{
         id:mainInfo

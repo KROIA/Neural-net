@@ -12,6 +12,9 @@ Rectangle {
     property int connectionInputY: height/2
     property int connectionOutputX: width
     property int connectionOutputY: height/2
+    property int biasx: 0
+    property int biasy: height/2
+
     property real neuronValue:{
         var neuronValue=2
         ui.layerId=layerX
@@ -65,18 +68,5 @@ Rectangle {
                       return "black"
                   }
         }
-    Rectangle{
-        x: neuron.connectionInputX
-        y: neuron.connectionInputY-5
-        width:10
-        height: 10
-        color: "blue"
-    }
-    Rectangle{
-        x: neuron.connectionOutputX
-        y: neuron.connectionOutputY-5
-        width:10
-        height: 10
-        color: "yellow"
-    }
+
 }

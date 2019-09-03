@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+
 Mainwindow::Mainwindow(QObject *parent) :
     QObject(parent)
 {
@@ -8,60 +9,16 @@ Mainwindow::Mainwindow(QObject *parent) :
     workThread->net->saveToNetFile("Test");
     uiUpdateTimer = new QTimer(this);
     connect(uiUpdateTimer, SIGNAL(timeout()),this,SLOT(uiUpdate()));
-    //m_errorChart.clear();
-
-    m_errorChart.push_back(qreal(workThread->averageError()));
-    m_errorChart.push_back(qreal(workThread->averageError())+1);
-    m_errorChart.push_back(qreal(workThread->averageError())+2);
-    m_errorChart.push_back(qreal(workThread->averageError())+3);
-    m_errorChart.push_back(qreal(workThread->averageError())+2);
     uiUpdate();
-    db.saveBackpropNet(workThread->net);
-    BackpropNet *testnet;
-    testnet = new BackpropNet();
-    BackpropNet *testnet1;
-    testnet1 = new BackpropNet();
     emit hiddenXChanged();
     emit hiddenYChanged();
     emit biasChanged();
+    endNeuron();
 }
 
 Mainwindow::~Mainwindow()
 {
     workThread->stop=false;
-}
-
-void Mainwindow::setNeuronId(const int &id){
-    m_NeuronId=id;
-    m_NeuronValue=2;
-    int inputId=0;
-    int outputId=int(workThread->net->hiddenNeuronsX())+1;
-    if(inputId==m_LayerId&&unsigned(m_NeuronId)<workThread->net->inputNeurons()){
-        m_NeuronValue=workThread->net->input(unsigned(m_NeuronId));
-    }
-    if(inputId<m_LayerId&&outputId>m_LayerId&&unsigned(m_NeuronId)<workThread->net->hiddenNeuronsY()){
-        m_NeuronValue=workThread->net->hiddenNeuron((unsigned(m_LayerId)-1),unsigned(m_NeuronId))->output();
-    }
-    if(outputId==m_LayerId&&unsigned(m_NeuronId)<workThread->net->outputNeurons()){
-        m_NeuronValue=workThread->net->outputNeuron(unsigned(m_NeuronId))->output();
-    }
-}
-
-void Mainwindow::setConnectionId(const int &id){
-    m_ConnectionId=id;
-    int inputId=0;
-    int outputId=int(workThread->net->hiddenNeuronsX())+1;
-    if(inputId<m_LayerId&&outputId>m_LayerId&&unsigned(m_NeuronId)<workThread->net->hiddenNeuronsY()){
-        m_connectionStrength=workThread->net->hiddenNeuron((unsigned(m_LayerId)-1),unsigned(m_NeuronId))->weight(unsigned(id));
-    }
-    if(outputId==m_LayerId&&unsigned(m_NeuronId)<workThread->net->outputNeurons()){
-        m_connectionStrength=workThread->net->outputNeuron(unsigned(m_NeuronId))->weight(unsigned(id));
-    }
-}
-
-
-float Mainwindow::connectionStrength() const{
-    return m_connectionStrength;
 }
 
 int Mainwindow::input() const{
@@ -77,15 +34,6 @@ int Mainwindow::output() const{
     return int(workThread->net->outputNeurons());
 }
 
-void Mainwindow::setLayerId(const int &id){
-    m_LayerId=id;
-}
-
-float Mainwindow::neuronValue() const{
-
-    //qDebug()<<"return neuronValue: "<<m_NeuronValue;
-    return m_NeuronValue;
-}
 void Mainwindow::start(){
     workThread->stop =false;
     workThread->start();
@@ -121,14 +69,13 @@ void Mainwindow::stop(){
 void Mainwindow::uiUpdate(){
     net=workThread->net;
     m_errorChart.push_back(qreal(workThread->averageError()));
-    emit neuronValueChanged();
     emit learningStepsChanged();
     emit averageErrorChanged();
-    emit connectionStrengthChanged();
     emit biasChanged();
     emit trainingSetChanged();
     emit outputSetChanged();
     emit errorChartChanged();
+    emit netValueChanged();
 }
 
 int Mainwindow::learningSteps()const{
@@ -142,7 +89,7 @@ float Mainwindow::averageError() const{
 }
 void Mainwindow::reset(){
     stop();
-    workThread->setupNet();
+    workThread->reset();
     uiUpdate();
 }
 void Mainwindow::creatNew(float maxError, int maxSteps){
@@ -164,13 +111,13 @@ void Mainwindow::creatNew(float maxError, int maxSteps){
   qDebug()<<"creating finished";
 }
 vector<qreal> Mainwindow::trainingSet()const{
-    vector<qreal> test;
+    vector<qreal> trainingSetVect;
     if(m_trainingSetId<int(workThread->daten.trainingInput.daten().size())){
     for (unsigned int i=0;i<workThread->daten.trainingInput.daten(0).size();++i) {
-        test.push_back(qreal(workThread->daten.trainingInput.daten(unsigned(m_trainingSetId),i)));
+        trainingSetVect.push_back(qreal(workThread->daten.trainingInput.daten(unsigned(m_trainingSetId),i)));
     }
     }
-    return test;
+    return trainingSetVect;
 }
 
 void Mainwindow::setTrainingSetId(const int &i){
@@ -194,6 +141,93 @@ void Mainwindow::setTrainingSet(const vector<qreal> &set){
     workThread->daten.trainingInput.daten(set);
 }
 vector<qreal> Mainwindow::errorChart() const{
-    qDebug()<<m_errorChart.size();
     return m_errorChart;
+}
+vector<qreal> Mainwindow::toQreal(vector<float> v){
+    vector<qreal> returnVec;
+    for (unsigned int i=0;i<v.size();++i) {
+        returnVec.push_back(qreal(v[i]));
+    }
+    return  returnVec;
+}
+vector<float> Mainwindow::toFloat(vector<qreal> v){
+    vector<float> returnVec;
+    for (unsigned int i=0;i<v.size();++i) {
+        returnVec.push_back(float(v[i]));
+    }
+    return returnVec;
+}
+
+vector<int> Mainwindow::startNeuron()const{
+    vector<int> vect;
+    vector<Connection> con=*workThread->net->connectionList();
+    for (unsigned int i=0;i<workThread->net->connections();++i) {
+        switch (con[i].source_ID.TYPE) {
+            case 1:
+                vect.push_back(int(con[i].source_ID.ID));
+                break;
+            case 5:
+            //qDebug()<<"Bias";
+                break;
+            default:
+                vect.push_back(int(workThread->net->inputNeurons()+con[i].source_ID.ID));
+                break;
+        }
+    }
+    return vect;
+}
+vector<int> Mainwindow::endNeuron()const{
+    vector<int> vect;
+    vector<Connection> con=*workThread->net->connectionList();
+    for (unsigned int i=0;i<workThread->net->connections();++i) {
+        switch (con[i].source_ID.TYPE) {
+            case 5:
+                break;
+            default:
+                vect.push_back(int(workThread->net->inputNeurons()+con[i].destination_ID.ID));
+                break;
+        }
+    }
+    return vect;
+}
+
+
+vector<qreal> Mainwindow::connectionWeight()const{
+    vector<qreal> vect;
+    vector<Connection> con=*workThread->net->connectionList();
+    for (unsigned int i=0;i<workThread->net->connections();++i) {
+        if(con[i].source_ID.TYPE!=5&&con[i].destination_ID.TYPE!=5){
+            vect.push_back(qreal(con[i].weight));
+        }
+    }
+    return vect;
+}
+vector<qreal> Mainwindow::neuronValueVect()const{
+    vector<qreal> vect;
+    vector<Neuron *> neuron=*workThread->net->allNeurons();
+    for (unsigned int i=0;i<workThread->net->inputNeurons();++i) {
+        vect.push_back(qreal(workThread->net->input(i)));
+    }
+    for (unsigned int i=0;i<workThread->net->allNeurons()->size();++i) {
+        vect.push_back(qreal(neuron[i]->netInput()));
+    }
+    return vect;
+}
+vector<int> Mainwindow::neuronTyp()const{
+    vector<int> vect;
+    vector<Neuron *> neuron=*workThread->net->allNeurons();
+    for (unsigned int i=0;i<workThread->net->inputNeurons();++i) {
+        vect.push_back(1);
+    }
+    for (unsigned int i=0;i<workThread->net->allNeurons()->size();++i) {
+        vect.push_back(neuron[i]->ID().TYPE);
+    }
+    return vect;
+}
+int Mainwindow::activFunc() const{
+    return  workThread->net->activationFunction();
+}
+
+void Mainwindow::setActivFunc(const int &id){
+    workThread->activFunc(id);
 }

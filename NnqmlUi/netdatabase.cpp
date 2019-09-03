@@ -20,11 +20,11 @@ void NetDataBase::commandOutput(QString command){
     query->prepare(command);
     bool fail;
     fail=query->exec();
-    if(fail==false){
+    /*if(fail==false){
         qDebug()<<"SQL Command failed:";
         qDebug()<<command;
         qDebug()<<"";
-    }
+    }*/
     query->first();
 }
 void NetDataBase::openDb(){

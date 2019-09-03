@@ -1,7 +1,7 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.03.00"
+#define    NET_VERSION "02.03.01"
 //              Datum   26.08.2019
 
 #include "neuron.h"
@@ -61,6 +61,8 @@ class Net
         void         costumNeurons(unsigned int costum);
         unsigned int costumNeurons();
         unsigned int connections();
+        unsigned int costumConnections();
+        void         costumConnections(unsigned int connections);
         void         neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
 
         void bias(bool enableBias);
@@ -110,7 +112,7 @@ class Net
          */
         void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron);
         void                connectionList(std::vector<Connection> connections);
-
+        std::vector<Connection> *connectionList();
     private:
         void init(unsigned int inputs,
                   unsigned int hiddenX,
@@ -139,6 +141,7 @@ class Net
         unsigned int _hiddenY;
         unsigned int _outputs;
         unsigned int _connections;
+        unsigned int  _costumConnections;
         bool         _bias;
         bool         _enableAverage;
         Activation   _activationFunction;

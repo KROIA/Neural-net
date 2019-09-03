@@ -27,6 +27,7 @@ public:
     void hiddenNeuronY(unsigned int i);
     void outputNeuron(unsigned int i);
     float maxError();
+    void activFunc(int i);
     unsigned long maxSteps();
     void maxError(float i);
     void maxSteps(unsigned long i);
@@ -36,6 +37,7 @@ public:
     BackpropNet *net;
     Daten daten;
     vector<qreal> errorChart();
+    void reset();
 signals:
     void netTrained();
 public slots:
@@ -52,7 +54,7 @@ private:
     bool enableAverage;
     bool _bias;
     bool finished;
-
+    unsigned int m_activFunc;
     FILE *genomlogFile;
     FILE *logfile;
     vector<float> genom;

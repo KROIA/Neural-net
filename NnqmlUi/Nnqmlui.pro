@@ -49,10 +49,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 DISTFILES += \
     qml/Connection.qml \
     qml/ErrorChart.qml \
+    qml/NetClassic.qml \
     qml/NetInCircel.qml \
     qml/main.qml \
     qml/Neuron.qml \
-    qml/Layer.qml \
     qml/Net.qml \
     qml/MainInfo.qml \
     qml/SideBar.qml \

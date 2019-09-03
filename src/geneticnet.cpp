@@ -91,6 +91,7 @@ void                    GeneticNet::loadFromNetFile()
         this->biasValue(_saveNet.biasValue());
         this->costumNeurons(_saveNet.costumConnections());
         this->connectionList(_saveNet.connectionList());
+        this->costumConnections(_saveNet.costumConnections());
         this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
         this->updateNetConfiguration();
  //       this->genom(_saveNet.genom());
@@ -291,6 +292,17 @@ void                    GeneticNet::costumNeurons(unsigned int costum)
 unsigned int            GeneticNet::costumNeurons()
 {
     return _netList[0]->costumNeurons();
+}
+void                    GeneticNet::costumConnections(unsigned int connections)
+{
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        try {
+            _netList[a]->costumConnections(connections);
+        } catch (std::runtime_error &e) {
+            error_general("costumConnections(unsigned int ["+std::to_string(connections)+"],","animal: "+std::to_string(a),e);
+        }
+    }
 }
 void                    GeneticNet::neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
 {
@@ -908,6 +920,25 @@ void                    GeneticNet::connectionList(std::vector<std::vector<Conne
         }
     } catch (std::runtime_error &e) {
         error_general("connectionList(std::vector<std::vector<Connection> >connections)",e);
+    }
+}
+std::vector<Connection> *GeneticNet::connectionList(unsigned int netID)
+{
+    for(unsigned int net=0; net<_netList.size(); net++)
+    {
+        if(_netList[net]->ID() == netID)
+        {
+            return _netList[netID]->connectionList();
+        }
+    }
+    error_general("connectionList(unsigned int ["+std::to_string(netID)+"])","No net with such an ID");
+}
+std::vector<std::vector<Connection>* >GeneticNet::connectionList()
+{
+    std::vector<std::vector<Connection>*> list;
+    for(unsigned int net=0; net<_netList.size(); net++)
+    {
+        list.push_back(_netList[net]->connectionList());
     }
 }
 

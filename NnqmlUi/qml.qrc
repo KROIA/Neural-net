@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
-        <file>qml/Layer.qml</file>
         <file>qml/Net.qml</file>
         <file>qml/Neuron.qml</file>
         <file>qml/MainInfo.qml</file>
@@ -11,5 +10,6 @@
         <file>qml/ErrorChart.qml</file>
         <file>qml/Connection.qml</file>
         <file>qml/NetInCircel.qml</file>
+        <file>qml/NetClassic.qml</file>
     </qresource>
 </RCC>

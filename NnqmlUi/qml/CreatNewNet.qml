@@ -82,6 +82,17 @@ Dialog {
             text: "Bios"
             checked: true
         }
+        ComboBox{
+                            id: activationFunc
+            model: ListModel {
+                ListElement { text: "Linear"}
+                ListElement { text: "ReLu"}
+                ListElement { text: "Binary"}
+                ListElement { text: "Gaussian"}
+                ListElement { text: "Sigmoid"}
+            }
+            currentIndex: 0
+        }
         /*SpinBox{
             id: bios
             minimumValue: 0

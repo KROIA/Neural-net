@@ -4,11 +4,11 @@ import QtQuick.Controls 1.4
 import QtCharts 2.3
 Rectangle{
     id:mainInfo
-    NetInCircel{
-    zoom:ui.zoom
+    property bool sourceLoaded: false
+    Net{
+
     }
 
-    property bool sourceLoaded: false
     /*ListView {
         id: root
         focus: true
@@ -21,16 +21,13 @@ Rectangle{
 
         model: ListModel {
             ListElement {component: "Net.qml"}
-            ListElement {component: "ErrorChart.qml"}
         }
 
         delegate: Loader {
             width: root.width
             height: root.height
-
             source: component
             asynchronous: true
-
             onLoaded: sourceLoaded = true
         }
     }*/
