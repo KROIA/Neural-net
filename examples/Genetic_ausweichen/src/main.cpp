@@ -22,7 +22,7 @@
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 
-const float VERSION = 9.01;
+const float VERSION = 9.02;
 #define NETWORK
 
 using namespace std;
@@ -48,7 +48,7 @@ vector<vector<unsigned int>	>	lastMap;
 
 unsigned int animals = 100;
 
-unsigned int inputs 	= 10; //Window size
+unsigned int inputs 	= 9; //Window size
 unsigned int hiddenX 	= 1;
 unsigned int hiddenY 	= 8;
 unsigned int outputs 	= 4; //Control
@@ -108,9 +108,9 @@ bool killKey						= false;
 int animalViewMap[animalViewMapSize][animalViewMapSize] = {
 {0,0,0,1,0,0,0},
 {0,0,0,1,0,0,0},
-{0,0,1,1,1,0,0},	
-{0,0,1,8,1,0,0},
-{0,0,1,1,1,0,0},
+{0,0,0,1,0,0,0},
+{1,1,1,8,1,1,1},
+{0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0}
 };
@@ -1410,12 +1410,10 @@ void readConfg()
 			}
 			if(strcmp(Input,"const_animal_hiddenUnitsX") == 0){
 				fscanf(config,"%i",&hiddenX);
-				if(hiddenX < 1){hiddenX = 1;}
 				printf("const_animal_hiddenUnitsX: %i\n",hiddenX);
 			}
 			if(strcmp(Input,"const_animal_hiddenUnitsY") == 0){
 				fscanf(config,"%i",&hiddenY);
-				if(hiddenY < 1){hiddenY = 1;}
 				printf("const_animal_hiddenUnitsY: %i\n",hiddenY);
 			}
 			if(strcmp(Input,"const_animal_outputUnits") == 0){
@@ -1707,7 +1705,7 @@ void setupMapView()
 	else
 	{
 		//printf("err\n");
-		if(inputs != 10)
+        if(inputs != 9)
 		{
 			error = 1;
 		}

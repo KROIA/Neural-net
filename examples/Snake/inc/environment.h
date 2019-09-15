@@ -52,7 +52,9 @@ enum AI_dataLayer
 {
     food_layer = 0,
     snake_layer = 1,
-    obsticle_layer = 2
+    obsticle_layer = 2,
+    selfSnake_layer = 3,
+    direction_layer = 4,
 };
 
 class Environment : public QObject
@@ -92,7 +94,7 @@ class Environment : public QObject
 
         Player *player(unsigned int player = 0);
         unsigned int playerAmount();
-        vector<vector<float>    >AI_mapData(unsigned int player, vector<QPoint>   fieldOfView);
+        vector<vector<float>    >AI_mapData(unsigned int player);
         vector<vector<float>    >AI_mapData_simple(unsigned int player);
         vector<QPoint> rotate_90(vector<QPoint> data,QPoint rotPoint, int amount = 1);
 

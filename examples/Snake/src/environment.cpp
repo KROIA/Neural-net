@@ -279,8 +279,8 @@ void Environment::setSnakeOnMap(unsigned int player)
            _player[player]->pos(a)->ry() >= _mapsize.height() ||
            _player[player]->pos(a)->rx() < 0)
         {
-            qDebug() << "ERROR: snake: "<<player<<" out of Boudry";
-            qDebug() << _player[player]->pos(a);
+            //qDebug() << "ERROR: snake: "<<player<<" out of Boudry";
+            //qDebug() << *_player[player]->pos(a);
             controlSnakeDeath(player,true);
         }else
         {
@@ -665,181 +665,125 @@ unsigned int Environment::playerAmount()
 {
     return _player.size();
 }
-vector<vector<float>    >Environment::AI_mapData(unsigned int player,vector<QPoint>   fieldOfView)
+vector<vector<float>    >Environment::AI_mapData(unsigned int player)
 {
+    //layer 0 = food
+    //layer 1 = snake
+    //layer 2 = obsticle
+    //layer 3 = selfSnake
+    vector<vector<float> >outputData(5);
 
-    vector<int>   rawData;
-    vector<vector<float>    >outputData(3,vector<float>());
-    //vector<QPoint> coordView;
-    if(fieldOfView.size() == 0 || player >= _player.size())
-        return outputData;
+    outputData[food_layer].reserve(_mapsize.width()*_mapsize.height());
+    outputData[snake_layer].reserve(_mapsize.width()*_mapsize.height());
+    outputData[obsticle_layer].reserve(_mapsize.width()*_mapsize.height());
+    outputData[selfSnake_layer].reserve(_mapsize.width()*_mapsize.height());
+    outputData[direction_layer] = vector<float>(4,0);
+    outputData[direction_layer][_player[player]->direction()] = 1;
 
-
-    geometry::Angle rotAnge = 0;
-    switch(_player[player]->direction()){
-        case Direction::_up:
-        {
-            rotAnge = 0;
-            fieldOfView = rotate_90(fieldOfView,QPoint(0,0),4);
-            break;
-        }
-        case Direction::_left:
-        {
-            rotAnge = 270;
-            fieldOfView = rotate_90(fieldOfView,QPoint(0,0),3);
-            break;
-        }
-        case Direction::_down:
-        {
-            rotAnge = 180;
-            fieldOfView = rotate_90(fieldOfView,QPoint(0,0),2);
-
-            break;
-        }
-        case Direction::_right:
-        {
-            rotAnge = 90;
-            fieldOfView = rotate_90(fieldOfView,QPoint(0,0),1);
-            break;
-        }
-    }
-
-  //  fieldOfView = geometry::rotate(fieldOfView,QPoint(0,0),rotAnge);
-    int c = 0;
-
-    vector<QPointF> fieldOfFiew_F;
-    for(unsigned int a=0; a<fieldOfView.size(); a++)
+    for(unsigned int y=0; y<_mapsize.height(); y++)
     {
-        fieldOfFiew_F.push_back(QPointF((float)fieldOfView[a].x(),(float)fieldOfView[a].y()));
-    }
-    fieldOfFiew_F = geometry::rotate(fieldOfFiew_F,QPoint(0,0),rotAnge);
-  /*  if(_player[player]->direction() == Direction::_up)
-    {
-        fieldOfFiew_F = geometry::rotate(fieldOfFiew_F,QPoint(0,0),geometry::Angle(180));
-        fieldOfFiew_F = geometry::rotate(fieldOfFiew_F,QPoint(0,0),geometry::Angle(180));
-        fieldOfView = geometry::rotate(fieldOfView,QPoint(0,0),geometry::Angle(180));
-        fieldOfView = geometry::rotate(fieldOfView,QPoint(0,0),geometry::Angle(180));
-    }
-    for(unsigned int a=0; a<fieldOfView.size(); a++)
-    {
-       fieldOfView[a] = QPoint((int)round(fieldOfFiew_F[a].x()),(int)round(fieldOfFiew_F[a].y()));
-    }
-
-    qDebug() << "fieldOfView_";
-
-    for(unsigned int a=0; a<sqrt(fieldOfFiew_F.size()); a++)
-    {
-        string txt = "";
-        for(unsigned int b=0; b<sqrt(fieldOfFiew_F.size()); b++)
+        for(unsigned int x=0; x<_mapsize.width(); x++)
         {
-            txt+= to_string(fieldOfFiew_F[c].x())+"|"+to_string(fieldOfFiew_F[c].y())+"  ";
-            c++;
-        }
-        qDebug() << QString::fromStdString(txt);
-    }
-    c = 0;
-    for(unsigned int a=0; a<sqrt(fieldOfFiew_F.size()); a++)
-    {
-        string txt = "";
-        for(unsigned int b=0; b<sqrt(fieldOfFiew_F.size()); b++)
-        {
-            txt+= to_string((int)round(fieldOfFiew_F[c].x()))+"|"+to_string((int)round(fieldOfFiew_F[c].y()))+"  ";
-            c++;
-        }
-        qDebug() << QString::fromStdString(txt);
-    }*/
-
-    for(unsigned int a=0; a<fieldOfView.size(); a++)
-    {
-
-        outputData[food_layer].push_back(0);
-        outputData[snake_layer].push_back(0);
-        outputData[obsticle_layer].push_back(0);
-        if(_player[player]->pos(0)->x()+fieldOfView[a].x() >= _viewMap.size() || _player[player]->pos(0)->x()+fieldOfView[a].x() < 0)
-        {
-            rawData.push_back(MapData::nothing);
-        }else if(_player[player]->pos(0)->y()+fieldOfView[a].y() >= _viewMap[_player[player]->pos(0)->x()+fieldOfView[a].x()].size() || _player[player]->pos(0)->y()+fieldOfView[a].y() < 0)
-        {
-            rawData.push_back(MapData::nothing);
-        }else
-        {
-            QPoint pos = QPoint(_player[player]->pos(0)->x()+fieldOfView[a].x(),_player[player]->pos(0)->y()+fieldOfView[a].y());
-            rawData.push_back(_viewMap[pos.x()][pos.y()]);
-            switch(_viewMap[pos.x()][pos.y()])
+            switch(_viewMap[x][y])
             {
                 case MapData::food:
                 {
-                    for(unsigned int b=0; b<_food.size(); b++)
+                    //FOOD
+                    for(unsigned int z=0; z<_food.size(); z++)
                     {
-                        if(_food[b]->pos().x() == pos.x() && _food[b]->pos().y() == pos.y())
+                        if(_food[z]->pos() == QPoint(x,y))
                         {
-                            outputData[food_layer][outputData[food_layer].size()-1] = (float)_food[b]->amount()/100;
-                            //outputData[food_layer][outputData[food_layer].size()-1] = 1;
+                            outputData[food_layer].push_back(_food[z]->amount());
+                            z=_food.size();
                         }
                     }
+                    outputData[snake_layer].push_back(0);
+                    outputData[selfSnake_layer].push_back(0);
+                    outputData[obsticle_layer].push_back(0);
+                    //FOOD END
                     break;
                 }
                 case MapData::snake:
                 {
-                    outputData[snake_layer][outputData[snake_layer].size()-1] = -1.0f; //bad snake
-                    for(unsigned int b=0; b<_player[player]->size(); b++)
+                    //SNAKE
+                    for(unsigned int z=0; z<_player.size(); z++)
                     {
-                       // qDebug() << "b: " << b << "pos: "<<_player[player]->pos(b) << " | " << pos;
-                        if(_player[player]->pos(b)->x() == pos.x() && _player[player]->pos(b)->y() == pos.y())
+                        for(unsigned int s=0; s<_player[z]->size(); s++)
                         {
-                            outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f; //good snake
-                            break;
+                            if(*_player[z]->pos(s) == QPoint(x,y))
+                            {
+                                if(z == player)
+                                {
+                                    if(s == 0)
+                                    {
+                                        outputData[selfSnake_layer].push_back(1);
+                                    }else {
+                                        outputData[selfSnake_layer].push_back(-1);
+                                    }
+
+                                    outputData[snake_layer].push_back(0);
+                                }else
+                                {
+                                    outputData[snake_layer].push_back(1);
+                                    outputData[selfSnake_layer].push_back(0);
+
+                                }
+                                outputData[food_layer].push_back(0);
+                                outputData[obsticle_layer].push_back(0);
+                                s = _player[z]->size();
+                                z = _player.size();
+                                break;
+                            }
                         }
                     }
+
+                    //SNAKE END
                     break;
                 }
                 case MapData::obsticle:
                 {
-                    outputData[obsticle_layer][outputData[obsticle_layer].size()-1] = 1;
+                    outputData[obsticle_layer].push_back(1);
+                    outputData[food_layer].push_back(0);
+                    outputData[snake_layer].push_back(0);
+                    outputData[selfSnake_layer].push_back(0);
                     break;
                 }
                 case MapData::nothing:
                 {
-
+                    outputData[food_layer].push_back(0);
+                    outputData[snake_layer].push_back(0);
+                    outputData[selfSnake_layer].push_back(0);
+                    outputData[obsticle_layer].push_back(0);
                     break;
                 }
             }
+
+            //SNAKE
+
+            //SNAKE END
         }
     }
-
     /*if(player == 0)
     {
-       qDebug() << "AI_mapData: "<<outputData;
-       //qDebug() << "AI_mapData";
-        c = 0;
-        for(unsigned int a=0; a<sqrt(rawData.size()); a++)
+        qDebug() << "food: "<<outputData[food_layer].size() << " snake: "<< outputData[snake_layer].size() << " obsticle: "<<outputData[obsticle_layer].size() << " self: "<<outputData[selfSnake_layer].size();
+        string line="";
+        for(unsigned int a=0; a<outputData.size(); a++)
         {
-            QString raw = "";
-            QString food = "";
-            QString snake = "";
-            QString obsticle = "";
-            for(unsigned int b=0; b<sqrt(rawData.size()); b++)
+            unsigned int pos =0;
+            qDebug() << "\n"<< a <<"\n";
+            for(unsigned int y=0; y<_mapsize.height(); y++)
             {
-                raw+=QString::number(rawData[c]);
-                food+=QString::number(outputData[food_layer][c]);
-                snake+=QString::number((int)outputData[snake_layer][c]);
-                obsticle+=QString::number((int)outputData[obsticle_layer][c]);
-                c++;
+                for(unsigned int x=0; x<_mapsize.width(); x++)
+                {
+                    line+=to_string((int)outputData[a][pos]);
+                    pos++;
+                }
+                qDebug() << QString::fromStdString(line);
+                line = "";
             }
-            qDebug() << raw << "  |  " << food << "  |  " << snake << "  |  " << obsticle;
         }
     }*/
     return outputData;
-
-    /*for(unsigned int x=0; x<fieldOfView.size(); x++)
-    {
-        vector<QPoint> tmpLine;
-        for(unsigned int y=0; y<fieldOfView[x].size(); y++)
-        {
-            //tmpLine.push_back(geometry::rotate(_map[pointOfView.x()+fieldOfView[x][y].x()][pointOfView.y()+fieldOfView[x][y].y()],))
-            tmpLine.push_back(QPoint(pointOfView.x()fieldOfView[x].,pointOfView.y()));
-        }
-    }*/
 }
 vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
 {

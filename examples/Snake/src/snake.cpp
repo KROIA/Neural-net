@@ -2,6 +2,8 @@
 #include "ui_snake.h"
 #include <QDebug>
 
+//#define GLOBALVIEW
+//#define DEBUG_PRINTS
 
 
 Snake::Snake(QWidget *parent) :
@@ -10,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.01.01";
-    QString datum   = "27.08.2019";
+    QString version = "00.02.00";
+    QString datum   = "04.09.2019";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -33,14 +35,19 @@ Snake::Snake(QWidget *parent) :
     _respawnAmount        = 3;
     _versusSaveFileName   = "versusSave.csv";
     _versusSaveScoreInterval = 2;
+    QSize mapsize{100,100};
     //----------------NEURAL NET------------------
 
-    unsigned int animals = 100;
+    unsigned int animals = 300;
+#ifdef GLOBALVIEW
+    unsigned int inputs = /*_fieldOfView.size()*/4 * (mapsize.width() * mapsize.height()) + 4; //3 Sensor Layer (food,snake,obsticle)
+#else
     unsigned int inputs = /*_fieldOfView.size()*/3 * (3 + 2); //3 Sensor Layer (food,snake,obsticle)
+#endif
     unsigned int hiddenX = 1;
-    unsigned int hiddenY = 10;
-    unsigned int outputs = 2;                       // left | right
-    net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Gaussian);
+    unsigned int hiddenY = 5;
+    unsigned int outputs = 3;                       // left | right
+    net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
     net->bias(true);
     net->loadFromNetFile("snake","net");
     net->mutationFactor(0.05);
@@ -80,6 +87,7 @@ Snake::Snake(QWidget *parent) :
             net->connectNeuronViaID(0,newNeuronID.ID,ConnectionDirection::forward);
             net->connectNeuronViaID(newNeuronID.ID,net->outputNeuron(0,0)->ID().ID,ConnectionDirection::forward);
         }
+    net->update_ptr_genomList();
     }catch(std::runtime_error &e)
     {
         qDebug() << "can't connect: "<< e.what();
@@ -141,7 +149,7 @@ Snake::Snake(QWidget *parent) :
     _versusSaveScoreCount = 0;
 //#else
     _environment = new Environment(this,_painter,net->animals());
-    _environment->mapsize(QSize(100,100));
+    _environment->mapsize(mapsize);
     _environment->tileSize(3);
     _environment->tileSpace(1);
     _environment->scale(2);
@@ -265,6 +273,8 @@ Snake::Snake(QWidget *parent) :
     _fullSycleTimeDebugCount = 0;
     _fullSycleTime           = 0;
     _averageCalcPerSec       = 0;
+
+    qDebug() << "Setup done";
 }
 
 
@@ -336,7 +346,9 @@ void Snake::timerEvent()
         _fullSycleTime = 0.5*_fullSycleTime + 0.5*_fullSycleTime_span.count();
         if(_fullSycleTimeDebugCount > 1000)
         {
+#ifdef DEBUG_PRINTS
             qDebug() << "sycletime: " <<_fullSycleTime;
+#endif
             _fullSycleTimeDebugCount = 0;
         }
         if(_fullSycleTime_span.count() > 100)
@@ -584,7 +596,12 @@ void Snake::handleNet()
                     continue;
                 }
                 //vector<vector<float>    > netInput = _environment->AI_mapData(animal,_fieldOfView);
+#ifdef GLOBALVIEW
+                vector<vector<float>    > netInput = _environment->AI_mapData(animal);
+#else
                 vector<vector<float>    > netInput = _environment->AI_mapData_simple(animal);
+#endif
+
                 unsigned int inputIndex = 0;
                 for(unsigned int b=0; b<netInput.size(); b++)
                 {
@@ -605,11 +622,6 @@ void Snake::handleNet()
                     continue;
                 }
                 vector<float> output = net->output(animal);
-                if(output.size() != 2)
-                {
-                    qDebug() << "error: net outputSize wrong: "<< output.size();
-                    continue;
-                }
 
                 //----------------Control the Snakes-------------------
                /* if(animal == 0 && _selfControl)
@@ -627,13 +639,20 @@ void Snake::handleNet()
                         _environment->controlSnakeDirection(animal,Direction::_right);
                     }
                 }*/
+
+#ifdef GLOBALVIEW
+                _environment->controlSnakeDirection(animal,getDirectionFromData(output,_environment->player(animal)->direction()));
+#else
                 _environment->controlSnakeDirection(animal,getDirectionFromData(output));
+#endif
+
             }
 
             if(deathCounter == net->animals())
             {
+#ifdef DEBUG_PRINTS
                 qDebug() << "all death";
-
+#endif
                 _snakeScore.clear();
                 float averageScore = 0;
                 float maxScore = 0;
@@ -642,6 +661,7 @@ void Snake::handleNet()
                 float averageStepScore = 0;
                 for(unsigned int animal=0; animal<net->animals(); animal++)
                 {
+#ifdef DEBUG_PRINTS
                     if(animal == 0)
                     {
                         qDebug() << "score: food:"<<_environment->player(animal)->averageScore().food<< " steps: "<< _environment->player(animal)->averageScore().steps;
@@ -651,6 +671,7 @@ void Snake::handleNet()
                             qDebug() << "--: food:"<<_environment->player(animal)->score(b).food<< " steps: "<< _environment->player(animal)->score(b).steps;
                         }
                     }
+#endif
                     _snakeScore.push_back(getScore(_environment->player(animal)));
                     if(animal == 0)
                     {
@@ -666,9 +687,9 @@ void Snake::handleNet()
                     averageFoodScore    += _environment->player(animal)->averageScore().food / net->animals();
                     averageStepScore    += (float)_environment->player(animal)->averageScore().steps / net->animals();
                 }
-
+#ifdef DEBUG_PRINTS
                 qDebug() << "average score: "<<averageScore;
-
+#endif
                 _minScoreList.push_back(minScore);
                 _maxScoreList.push_back(maxScore);
                 _averageScoreList.push_back(averageScore);
@@ -730,11 +751,13 @@ void Snake::handleNet()
                     _stats_Score_LineSeries->remove(0);
                 }
                 _stats_score_Chart->axisX()->setMin(_stats_averageScore_LineSeries->at(0).x());
-
+#ifdef DEBUG_PRINTS
                 qDebug() << "learn";
+#endif
                 net->learn(_snakeScore);
+#ifdef DEBUG_PRINTS
                 qDebug() << "learnEnd";
-
+#endif
                 generation++;
                 _genPerSecCounter++;
 
@@ -747,7 +770,7 @@ void Snake::handleNet()
                 }
                 _environment->obsticleReplace();
                 _saveCounter++;
-                if(_saveCounter > 50)
+                if(_saveCounter > 500)
                 {
                     _saveCounter = 0;
                     on_saveStats_pushbutton_clicked();
@@ -771,7 +794,11 @@ void Snake::handleNet()
                 _versusEnvironment->player(1)->revive();
             }
             _versusEnvironment->AI_mapData_simple(0);
-            vector<vector<float>    > netInput = _versusEnvironment->AI_mapData_simple(1);
+#ifdef GLOBALVIEW
+                vector<vector<float>    > netInput = _environment->AI_mapData(1);
+#else
+           vector<vector<float>    > netInput = _versusEnvironment->AI_mapData_simple(1);
+#endif
             unsigned int inputIndex = 0;
             for(unsigned int b=0; b<netInput.size(); b++)
             {
@@ -784,24 +811,12 @@ void Snake::handleNet()
             net->run(_selectedSnake);
 
             vector<float> output = net->output(_selectedSnake);
-            if(output.size() != 2)
-            {
-                qDebug() << "error: net outputSize wrong: "<< output.size();
-            }
-            else
-            {
-                /*if(output[0] > 0.2f && output[1] > 0.2f)
-                {
-                    if(output[0] > output[1])
-                    {
-                        _versusEnvironment->controlSnakeDirection(1,Direction::_left);
-                    }else
-                    {
-                        _versusEnvironment->controlSnakeDirection(1,Direction::_right);
-                    }
-                }*/
-                _versusEnvironment->controlSnakeDirection(1,getDirectionFromData(output));
-            }
+#ifdef GLOBALVIEW
+            _environment->controlSnakeDirection(1,getDirectionFromData(output,_environment->player(animal)->direction()));
+#else
+            _versusEnvironment->controlSnakeDirection(1,getDirectionFromData(output));
+#endif
+
 
 
             _versusSaveScoreCount++;
@@ -825,8 +840,10 @@ void Snake::handleNet()
                     _versusBotAverageScore_tmpBuffer.erase(_versusBotAverageScore_tmpBuffer.begin());
                 }
                 _versusBotAverageScore.push_back(_versusEnvironment->player(1)->averageScore(_versusBotAverageScore_tmpBuffer));
+#ifdef DEBUG_PRINTS
                 qDebug() << "player: F: "<<_versusPlayerScore[_versusPlayerScore.size()-1].food << " S: "<<_versusPlayerScore[_versusPlayerScore.size()-1].steps << " A: " <<_versusPlayerAverageScore[_versusPlayerAverageScore.size()-1].food << " : " <<_versusPlayerAverageScore[_versusPlayerAverageScore.size()-1].steps;
                 qDebug() << "Bot   : F: "<<_versusBotScore[_versusBotScore.size()-1].food << " S: "<<_versusBotScore[_versusBotScore.size()-1].steps<< " A: " <<_versusBotAverageScore[_versusBotAverageScore.size()-1].food << " : " <<_versusBotAverageScore[_versusBotAverageScore.size()-1].steps;
+#endif
             }
             break;
         }
@@ -899,7 +916,9 @@ void Snake::saveBackpropTrainingsData()
 {
     if(_backpropTrainingInputs.size() == 0)
     {
+#ifdef DEBUG_PRINTS
         qDebug() << "saveBackpropTrainingsData no data to save";
+#endif
     }
     if(_backpropTrainingInputs.size() != _backpropTrainingOutputs.size())
     {
@@ -983,7 +1002,9 @@ void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vect
             tmpOutput.push_back(stof(outputList.substr(0,outputList.find(";"))));
             outputList = outputList.substr(outputList.find(";")+1,outputList.size());
         }while(outputList.find(";") != -1);
+#ifdef DEBUG_PRINTS
         qDebug() << tmpInput << tmpOutput;
+#endif
         inputs.push_back(tmpInput);
         outputs.push_back(tmpOutput);
     }
@@ -992,17 +1013,56 @@ void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vect
 }
 Direction Snake::getDirectionFromData(vector<float> inputs)
 {
-    if(inputs[0] > 0.2f || inputs[1] > 0.2f)
+    Direction dir = Direction::_up;
+    float maximum = inputs[0];
+    unsigned int index = 0;
+    for(unsigned int a=1; a<inputs.size(); a++)
+    {
+        if(maximum < inputs[a])
+        {
+            maximum = inputs[a];
+            index = a;
+        }
+    }
+    switch(index)
+    {
+        case 0:
+        {
+            dir = Direction::_up;
+            break;
+        }
+        case 1:
+        {
+            dir = Direction::_left;
+            break;
+        }
+        case 2:
+        {
+            dir = Direction::_right;
+            break;
+        }
+        default:
+        {
+            qDebug() << "getDirectionFromData(vector<float> inputs) " << index;
+        }
+    }
+    /*if(inputs[0] > 0.2f || inputs[1] > 0.2f)
     {
         if(inputs[0] > inputs[1])
         {
-            return Direction::_left;
+            dir = Direction::_left;
         }else
         {
-            return Direction::_right;
+            dir = Direction::_right;
         }
-    }
-    return Direction::_up;
+    }*/
+    return dir;
+}
+Direction Snake::getDirectionFromData(vector<float> inputs,Direction moveDirection)
+{
+    int dir = getDirectionFromData(inputs);
+    //qDebug() << "dir: "<<dir<<" moving: "<<(int)moveDirection << " now: "<<(int)Direction((dir + moveDirection)%4);
+    return Direction((dir + moveDirection)%4);
 }
 float Snake::getScore(Player *player)
 {
@@ -1425,7 +1485,9 @@ void Snake::on_backpropTraining_pushButton_clicked()
             _logfile = fopen("backpropScore.csv","a");           //Saves the error in the file: score.csv
             fprintf(_logfile,"%.5f;\n",averageError);            //
             fclose(_logfile);
+#ifdef DEBUG_PRINTS
             qDebug() << "averageNetError: "<< averageError;
+#endif
             _backpropNet->saveToNetFile();
             logGenom(_backpropNet->genom());
         }
@@ -1439,7 +1501,9 @@ void Snake::on_backpropTraining_pushButton_clicked()
 
     }while(averageError > minimalError && trainingSteps < 10000 && abs(lastAverageError-averageError) > 0.001);
     _backpropNet->saveToNetFile();
+#ifdef DEBUG_PRINTS
     qDebug() << "end Training, steps: "<<trainingSteps;
+#endif
     _backpropTrainingInputs.clear();
     _backpropTrainingOutputs.clear();
 }

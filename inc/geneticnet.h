@@ -24,6 +24,7 @@
 #define __enableGeneticNetThread
 //#define __DEBUG_TIMEINTERVAL
 //#define __DEBUG_TIMEINTERVAL_IN_THREAD
+#define __DEBUG_GENETICNET
 
 struct thread_data_geneticNet {
    int  thread_id;
@@ -34,6 +35,7 @@ struct thread_data_geneticNet {
    pthread_cond_t *condition_var;
    bool isPaused;
    long *delayMicros;
+   unsigned int debugParam;
 };
 
 class GeneticNet
@@ -127,7 +129,7 @@ class GeneticNet
         Neuron                 *hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
         std::vector<Neuron*>     hiddenNeuronX(unsigned int animal, unsigned int hiddenX);    // |    Alle in einer Spalte
         std::vector<Neuron*>     hiddenNeuronY(unsigned int animal, unsigned int hiddenY);    // --   Alle in einer Reihe
-        std::vector<std::vector<Neuron*> > *hiddenNeuron(unsigned int animal);
+        std::vector<std::vector<Neuron*> > hiddenNeuron(unsigned int animal);
         Neuron                 *outputNeuron(unsigned int animal, unsigned int output);
         std::vector<Neuron*>   *outputNeuron(unsigned int animal);
 
@@ -160,12 +162,13 @@ class GeneticNet
          *  inputNeurons()
          *  sins V02.03.00
          */
-        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,bool forward = true);
-        bool                connectNeuron(Connection connection);
-        bool                connectNeuron(std::vector<Connection> connections);
-        void                connectionList(std::vector<std::vector<Connection> >connections);
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
+        bool                connectNeuron(Connection *connection);
+        bool                connectNeuron(std::vector<Connection> *connections);
+        void                connectionList(std::vector<std::vector<Connection> >*connections);
         std::vector<Connection> *connectionList(unsigned int netID);
-        std::vector<std::vector<Connection>* > connectionList();
+        std::vector<std::vector<Connection> *> connectionList();
+        void                clearConnectionList();
 
         NeuronID            addNeuron();
         NeuronID            addNeuron(Neuron *neuron);
@@ -175,6 +178,7 @@ class GeneticNet
 
 
         double              cycleTime();
+        void                update_ptr_genomList();
 
     private:
 
@@ -193,6 +197,7 @@ class GeneticNet
 
         //Threads
         static void *runThread(void *threadarg);
+        static void *runThread_setupNet(void *threadarg);
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
         std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
@@ -221,8 +226,13 @@ class GeneticNet
         //Threads
         pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
         pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
+
+        pthread_mutex_t _threadLock_setupNet=PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var_setupNet   = PTHREAD_COND_INITIALIZER;
         std::vector<thread_data_geneticNet> _threadData;
         std::vector<pthread_t>  _threadList;
+        std::vector<thread_data_geneticNet> _threadData_setupNet;
+        std::vector<pthread_t>  _threadList_setupNet;
         bool                    _threadExit;
         bool                    _threadPause;
         long                    _threadDelayMicros;

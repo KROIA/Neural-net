@@ -44,6 +44,7 @@ class Snake : public QMainWindow
         void loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs);
         void modeReset();
         Direction getDirectionFromData(vector<float> inputs);
+        Direction getDirectionFromData(vector<float> inputs,Direction moveDirection);
         void logGenom(vector<float> genom);
         float getScore(Player *player);
         float getScore(Score score);

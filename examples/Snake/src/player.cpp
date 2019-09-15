@@ -301,7 +301,7 @@ void Player::revive()
 
     _direction = rand()%4;
     //_playerPos = vector<QPoint>(sollSize());
-    _lastPos = QPoint(5+rand() %(_mapSize.width()-10),5+rand()%(_mapSize.height()-10));
+    _lastPos = QPoint(5+rand() %(_mapSize.width()-_mapSize.width()/10),5+rand()%(_mapSize.height()-_mapSize.height()/10));
     while(_playerPos.size() < sollSize())
     {
         _playerPos.push_back(_lastPos);
