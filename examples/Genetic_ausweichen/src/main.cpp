@@ -22,7 +22,7 @@
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 
-const float VERSION = 9.02;
+const float VERSION = 9.00;
 #define NETWORK
 
 using namespace std;
@@ -48,12 +48,12 @@ vector<vector<unsigned int>	>	lastMap;
 
 unsigned int animals = 100;
 
-unsigned int inputs 	= 9; //Window size
-unsigned int hiddenX 	= 1;
-unsigned int hiddenY 	= 8;
+unsigned int inputs 	= 10; //Window size
+unsigned int hiddenX 	= 8;
+unsigned int hiddenY 	= 1;
 unsigned int outputs 	= 4; //Control
 float mutation		 	= 0.1;
-bool _bias				= true;
+bool bias				= true;
 unsigned int stopTimeLearn 	= 1500;
 unsigned int stopTimeTest 	= 120000;
 bool 			enableAverage =false;
@@ -108,9 +108,9 @@ bool killKey						= false;
 int animalViewMap[animalViewMapSize][animalViewMapSize] = {
 {0,0,0,1,0,0,0},
 {0,0,0,1,0,0,0},
-{0,0,0,1,0,0,0},
-{1,1,1,8,1,1,1},
-{0,0,0,0,0,0,0},
+{0,0,1,1,1,0,0},	
+{0,0,1,8,1,0,0},
+{0,0,1,1,1,0,0},
 {0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0}
 };
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
 	readConfg();
 	writeConfig();
 	setupMapView();
-    /*if(_bias)
+	/*if(bias)
 	{
 		geneticSize = ((inputs+1) * hiddenX)+(((hiddenX+1)* hiddenX) * (hiddenY-1))+((hiddenX+1)*outputs); //Alle Gewichtungen hintereinander
 	}
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
 	{
 		geneticSize = inputs * hiddenX + hiddenX*hiddenX * (hiddenY-1) + hiddenX*outputs; //Alle Gewichtungen hintereinander
 	}*/
-    calcNet = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,_bias,enableAverage,Activation::Sigmoid);
+    calcNet = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,bias,enableAverage,Activation::Sigmoid);
     calcNet->mutationFactor(mutation);
     calcNet->mutationChangeWeight(mutationChangeFactor);
 	printf("calcNet setup done\n");
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
     printf("hiddenX: %i\n",calcNet->hiddenNeuronsX());
     printf("hiddenY: %i\n",calcNet->hiddenNeuronsY());
     printf("outputs: %i\n",calcNet->outputNeurons());
-    printf("_bias: %i\n",calcNet->bias());
+    printf("bias: %i\n",calcNet->bias());
 
 //	calcNet->setMutationValue(mutationChangeFactor);
 	printf("setMutationValue done\n");
@@ -520,7 +520,7 @@ thread_skip		           =vector<int>									(animals,0);                       
 //dbgSteuerung			   =vector<vector<int>	>						(animals,vector<int>(0));
 	for(a = 0;a<animals; a++)
 	{		
-        thread_net.push_back(new Net(a,inputs,hiddenX,hiddenY,outputs,_bias,enableAverage,Activation::Sigmoid));
+        thread_net.push_back(new Net(inputs,hiddenX,hiddenY,outputs,bias,enableAverage,Activation::Sigmoid));
        // thread_net[a]->mutationFactor(mutationChangeFactor);
 		thread_Timer.push_back(new Timer());
 		thread_randEngine.push_back(default_random_engine(rand()%500));
@@ -1359,7 +1359,7 @@ void writeConfig()
 		fprintf(config,"const_animal_hiddenUnitsX %i\n"			,hiddenX);
 		fprintf(config,"const_animal_hiddenUnitsY %i\n"			,hiddenY);
 		fprintf(config,"const_animal_outputUnits %i\n"			,outputs);
-        fprintf(config,"const_animal_makeBias ");if(_bias){fprintf(config,"true\n");}else{fprintf(config,"false\n");}
+		fprintf(config,"const_animal_makeBias ");if(bias){fprintf(config,"true\n");}else{fprintf(config,"false\n");}
 		fprintf(config,"const_animal_enableAverage ");if(enableAverage){fprintf(config,"true\n");}else{fprintf(config,"false\n");}
 		fprintf(config,"animal_mutationRate %.4f\n"				,mutation);
 		fprintf(config,"animal_startfood %i\n"					,food_Config);
@@ -1410,10 +1410,12 @@ void readConfg()
 			}
 			if(strcmp(Input,"const_animal_hiddenUnitsX") == 0){
 				fscanf(config,"%i",&hiddenX);
+				if(hiddenX < 1){hiddenX = 1;}
 				printf("const_animal_hiddenUnitsX: %i\n",hiddenX);
 			}
 			if(strcmp(Input,"const_animal_hiddenUnitsY") == 0){
 				fscanf(config,"%i",&hiddenY);
+				if(hiddenY < 1){hiddenY = 1;}
 				printf("const_animal_hiddenUnitsY: %i\n",hiddenY);
 			}
 			if(strcmp(Input,"const_animal_outputUnits") == 0){
@@ -1529,15 +1531,15 @@ void readConfg()
 			if(strcmp(Input,"const_animal_makeBias")==0){
 				fscanf(config,"%s",Input);
 				if(strcmp(Input,"true")==0){
-                    _bias = true;
+					bias = true;
 				}
 				else
 				{
 					if(strcmp(Input,"false")==0){
-                        _bias = false;
+						bias = false;
 					}
 				}
-                printf("const_animal_makeBias: %i\n",_bias);
+				printf("const_animal_makeBias: %i\n",bias);
 			}
 			if(strcmp(Input,"const_animal_enableAverage")==0){
 				fscanf(config,"%s",Input);
@@ -1705,7 +1707,7 @@ void setupMapView()
 	else
 	{
 		//printf("err\n");
-        if(inputs != 9)
+		if(inputs != 10)
 		{
 			error = 1;
 		}

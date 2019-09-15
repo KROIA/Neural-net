@@ -51,9 +51,7 @@ float Neuron::deriv_activation_Gaussian(float netInput)
 
 float Neuron::activation_Sigmoid(float netInput)
 {
-    // PI / 5 = 0.628318531
-    return atan((double)netInput)* 0.628318531
-;
+    return atan((double)netInput * 5)* 3.141592653589/5;
 }
 float Neuron::deriv_activation_Sigmoid(float netInput)
 {

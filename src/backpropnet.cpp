@@ -106,7 +106,7 @@ void                    BackpropNet::loadFromNetFile()
     try {
         _saveNet.loadFile();
     } catch (std::runtime_error &e) {
-       __DEBUG_BACKPROPNET(this,"loadFromNetFile()"," Warning: "+std::string(e.what()));
+        qDebug() << "BackpropNet::loadFromNetFile() Warning: "<< e.what();
         return;
     }
     try {
@@ -115,12 +115,11 @@ void                    BackpropNet::loadFromNetFile()
         //this->biasValue(_saveNet.biasValue());
         //this->genom(_saveNet.genom(genomSelection));
         this->biasValue(_saveNet.biasValue());
-
-        this->connectionList(_saveNet.connectionList(genomSelection));
+        this->costumNeurons(_saveNet.costumConnections());
+        this->connectionList(_saveNet.connectionList(0));
+        this->costumConnections(_saveNet.costumConnections());
         this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
         this->updateNetConfiguration();
-        //this->genom(_saveNet.genom(genomSelection));
-
     } catch (std::runtime_error &e) {
         error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
                       "unable to apply the settings. Maybe the file is damaged.",e);
@@ -252,7 +251,6 @@ void                BackpropNet::learn()
                 }
                 hidden_error[x-1][y] = derivative(this->hiddenNeuron(x-1,y)->netInput()) * weightError;
             }
-            //qDebug() << "error: "<<hidden_error[x-1][0];
         }
     }
     //----------INPUT CONNECTIONS
@@ -397,109 +395,6 @@ float               BackpropNet::derivative(float netinput)
     }
     return derivative;
 }
-
-void         BackpropNet::costumNeurons(unsigned int costum)
-{
-    printIllegalFunctionMessage("costumNeurons(unsigned int ["+std::to_string(costum)+"])");
-}
-
-unsigned int BackpropNet::costumNeurons()
-{
-    printIllegalFunctionMessage("costumNeurons()");
-    return 0;
-}
-
-unsigned int BackpropNet::costumConnections()
-{
-    printIllegalFunctionMessage("costumConnections()");
-    return 0;
-}
-
-void         BackpropNet::costumConnections(unsigned int connections)
-{
-    printIllegalFunctionMessage("costumConnections(unsigned int ["+std::to_string(connections)+"])");
-}
-
-void         BackpropNet::neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
-{
-    printIllegalFunctionMessage("neurons(unsigned int ["+std::to_string(neurons)+"] ,unsigned int ["+std::to_string(hiddenNeurons)+"] ,unsigned int ["+std::to_string(outputNeurons)+"] ,unsigned int ["+std::to_string(costumNeurons)+"] )");
-}
-
-Neuron               *BackpropNet::costumNeuron(NeuronID ID)
-{
-    printIllegalFunctionMessage("costumNeuron(NeuronID ["+Neuron::neuronIDString(ID)+"])");
-    return nullptr;
-}
-
-std::vector<Neuron*> *BackpropNet::costumNeuron()
-{
-    printIllegalFunctionMessage("costumNeuron()");
-    return nullptr;
-}
-
-bool                BackpropNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction)
-{
-    printIllegalFunctionMessage("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"],ConnectionDirection ["+Neuron::directionSring(direction)+"])");
-    return false;
-}
-
-bool                BackpropNet::connectNeuron(Connection *connection)
-{
-    printIllegalFunctionMessage("connectNeuron(Connection *connection)");
-    return false;
-}
-
-bool                BackpropNet::connectNeuron(std::vector<Connection> *connections)
-{
-    printIllegalFunctionMessage("connectNeuron(std::vector<Connection> *connections)");
-    return false;
-}
-
-void                BackpropNet::connectionList(std::vector<Connection> *connections)
-{
-    printIllegalFunctionMessage("connectionList(std::vector<Connection> *connections)");
-}
-
-std::vector<Connection> *BackpropNet::connectionList()
-{
-    printIllegalFunctionMessage("connectionList()");
-    return nullptr;
-}
-
-void                BackpropNet::clearConnectionList()
-{
-    printIllegalFunctionMessage("clearConnectionList()");
-}
-
-NeuronID            BackpropNet::addNeuron()
-{
-    printIllegalFunctionMessage("addNeuron()");
-    return NeuronID();
-}
-
-NeuronID            BackpropNet::addNeuron(Neuron *neuron)
-{
-    printIllegalFunctionMessage("addNeuron(Neuron *neuron)");
-    return NeuronID();
-}
-
-NeuronID            BackpropNet::addNeuron(Connection connection)
-{
-    printIllegalFunctionMessage("addNeuron(Connection ["+Neuron::connectionString(connection)+"])");
-    return NeuronID();
-}
-
-NeuronID            BackpropNet::addNeuron(std::vector<Connection> inputConnections)
-{
-    printIllegalFunctionMessage("addNeuron(std::vector<Connection> inputConnections)");
-    return NeuronID();
-}
-
-void BackpropNet::printIllegalFunctionMessage(std::string func)
-{
-    __DEBUG_BACKPROPNET(this,func,"THIS FUNCTION IS NOT ALLOWED IN THE BACKPROBNET");
-}
-
 
 
 std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
