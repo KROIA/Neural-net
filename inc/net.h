@@ -1,7 +1,6 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-
 #define    NET_VERSION "02.04.01"
 //              Datum   15.09.2019
 
@@ -34,10 +33,6 @@
 #endif
 #endif
 //---------
-=======
-#define    NET_VERSION "02.03.01"
-//              Datum   26.08.2019
-
 
 #include "neuron.h"
 #include <math.h>
@@ -154,9 +149,8 @@ class Net
          *  inputNeurons()
          *  sins V02.01.00
          */
-
         bool                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
-          bool                connectNeuron(Connection *connection);
+        bool                connectNeuron(Connection *connection);
         bool                connectNeuron(std::vector<Connection> *connections);
         void                connectionList(std::vector<Connection> *connections);
         std::vector<Connection> *connectionList();
@@ -176,7 +170,6 @@ class Net
            | none
          */
 #endif
-
     private:
         void init(unsigned int inputs,
                   unsigned int hiddenX,

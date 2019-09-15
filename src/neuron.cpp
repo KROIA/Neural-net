@@ -114,9 +114,7 @@ unsigned int Neuron::inputs()
 {
     return _inputs;
 }
-
 int Neuron::deleteInput(unsigned int input)
-
 {
     if(input >= _inputs)
     {
@@ -132,14 +130,11 @@ int Neuron::deleteInput(unsigned int input)
         _inputConnectionID_list.erase(_inputConnectionID_list.begin()+input);
         _inputConnectionDirection_List.erase(_inputConnectionDirection_List.begin()+input);
         _inputs--;
-        return true;
     } catch (std::exception &e) {
         error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",e.what());
         return 0;
     }
-
     return 1;
-
 }
 
 void Neuron::activationFunction(Activation activationFunction)
@@ -298,20 +293,17 @@ bool Neuron::connectInput(NeuronID ID, float *ptr_sourceNeuronOutput,ConnectionD
             __DEBUG_NEURON(this,"connectInput(NeuronID ["+Neuron::neuronIDString(ID)+"] , float *ptr_sourceNeuronOutput , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
                            "Connection: " + std::to_string(ID.ID) +" "+this->typeString(ID.TYPE)+" to: "+std::to_string(this->ID().ID)+" "+this->typeString(this->ID().TYPE)+" already exists.");
 #endif
-
             return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
         inputs(_inputs+1);
-
         return connectInput(_inputs-1,ID,ptr_sourceNeuronOutput,direction);
     }
     return false;
 }
 bool Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_sourceNeuronOutput,ConnectionDirection direction)
-
 {
     if(input >= _inputs)
     {
@@ -323,13 +315,11 @@ bool Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_sourceNeur
     }
     _inputConnectionList[input] = true;
     _inputConnectionID_list[input] = ID;
-
     _inputConnectionDirection_List[input] = direction;
     _ptr_inputList[input] = ptr_sourceNeuronOutput;
     return true;
 }
 bool Neuron::connectInput(Neuron *ptr_neuron,ConnectionDirection direction)
-
 {
     bool allFull = true;
     for(unsigned int a=0; a<_inputs; a++)
@@ -337,7 +327,6 @@ bool Neuron::connectInput(Neuron *ptr_neuron,ConnectionDirection direction)
         if(_inputConnectionList[a] == false)
         {
             allFull = false;
-
             return connectInput(a,ptr_neuron,direction);
         }else if(_inputConnectionID_list[a].ID == ptr_neuron->ID().ID && _inputConnectionID_list[a].TYPE == ptr_neuron->ID().TYPE)
         {
@@ -345,20 +334,17 @@ bool Neuron::connectInput(Neuron *ptr_neuron,ConnectionDirection direction)
             __DEBUG_NEURON(this,"connectInput(Neuron *ptr_neuron , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
                            "Connection: " + std::to_string(ptr_neuron->ID().ID)+" "+this->typeString(ptr_neuron->ID().TYPE)+" to: "+std::to_string(this->ID().ID)+" "+this->typeString(this->ID().TYPE)+" already exists.");
 #endif
-
             return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
         inputs(_inputs+1);
-
         return connectInput(_inputs-1,ptr_neuron,direction);
     }
     return false;
 }
 bool Neuron::connectInput(unsigned int input,Neuron *ptr_neuron,ConnectionDirection direction)
-
 {
     if(input >= _inputs)
     {
@@ -372,18 +358,15 @@ bool Neuron::connectInput(unsigned int input,Neuron *ptr_neuron,ConnectionDirect
     {
         if(_inputConnectionID_list[connection].ID == ptr_neuron->ID().ID && _inputConnectionID_list[connection].TYPE == ptr_neuron->ID().TYPE)
         {
-
 #ifdef _DEBUG_NEURON_CONNECT
             __DEBUG_NEURON(this,"connectInput(unsigned int ["+std::to_string(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
                            "Trying to connect a connection which already exists. ignore command. Input: "+std::to_string(input)+" Neuron: "+std::to_string((unsigned int)ptr_neuron)+" direction: "+ Neuron::directionSring(direction));
 #endif
-
             return false;
         }
     }
     _inputConnectionList[input] = true;
     _inputConnectionID_list[input] = ptr_neuron->ID();
-
     _inputConnectionDirection_List[input] = direction;
     if(direction == ConnectionDirection::forward)
     {
@@ -391,7 +374,6 @@ bool Neuron::connectInput(unsigned int input,Neuron *ptr_neuron,ConnectionDirect
     }else{
         _ptr_inputList[input] = ptr_neuron->ptr_loopBackOutput();
     }
-
     return true;
 }
 bool Neuron::disconnect(unsigned int input)
@@ -421,7 +403,6 @@ bool Neuron::disconnect(NeuronID sourceNeuron)
             return disconnect(input);
         }
     }
-
 #ifdef _DEBUG_NEURON_CONNECT
     __DEBUG_NEURON(this,"disconnect(NeuronID ["+Neuron::neuronIDString(sourceNeuron)+"])",
                    "No neuron with such an ID is connected to this neuron");
@@ -442,7 +423,6 @@ ConnectionDirection Neuron::inputConnectionDirection(NeuronID inputID)
 std::vector<ConnectionDirection>   Neuron::inputConnectionDirection()
 {
     return _inputConnectionDirection_List;
-
 }
 
 
@@ -484,7 +464,6 @@ float *Neuron::ptr_weight(unsigned int input)
     return &_weightList[input];
 }
 float *Neuron::ptr_weight(NeuronID  connectionID)
-
 {
     for(unsigned int a=0; a<_inputConnectionID_list.size(); a++)
     {
@@ -614,7 +593,6 @@ const std::string Neuron::activationString(Activation activationFunction)
     }
     return str;
 }
-
 const std::string Neuron::connectionString(Connection connection)
 {
     std::string message;
@@ -638,7 +616,6 @@ const std::string Neuron::directionSring(ConnectionDirection dir)
 void Neuron::needsUpdate()
 {
     _delayedOutput = _output;
-
     _update = true;
 }
 bool Neuron::isUpdated()

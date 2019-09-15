@@ -112,15 +112,11 @@ void                    BackpropNet::loadFromNetFile()
     try {
         this->set(_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
                   _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
-        //this->biasValue(_saveNet.biasValue());
-        //this->genom(_saveNet.genom(genomSelection));
         this->biasValue(_saveNet.biasValue());
-
         this->connectionList(_saveNet.connectionList(genomSelection));
         this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
         this->updateNetConfiguration();
         //this->genom(_saveNet.genom(genomSelection));
-
     } catch (std::runtime_error &e) {
         error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
                       "unable to apply the settings. Maybe the file is damaged.",e);

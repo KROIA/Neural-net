@@ -162,7 +162,6 @@ class GeneticNet
          *  inputNeurons()
          *  sins V02.03.00
          */
-
         void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
         bool                connectNeuron(Connection *connection);
         bool                connectNeuron(std::vector<Connection> *connections);
@@ -180,7 +179,6 @@ class GeneticNet
 
         double              cycleTime();
         void                update_ptr_genomList();
-
 
     private:
 
