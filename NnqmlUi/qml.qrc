@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/Net.qml</file>
+        <file>qml/Neuron.qml</file>
+        <file>qml/MainInfo.qml</file>
+        <file>qml/SideBar.qml</file>
+        <file>qml/TopBar.qml</file>
+        <file>qml/CreatNewNet.qml</file>
+        <file>qml/ErrorChart.qml</file>
+        <file>qml/Connection.qml</file>
+        <file>qml/NetInCircel.qml</file>
+        <file>qml/NetClassic.qml</file>
+        <file>qml/jsSource.js</file>
+    </qresource>
+</RCC>
