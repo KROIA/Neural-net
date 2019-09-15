@@ -1163,6 +1163,7 @@ std::vector<Connection> *GeneticNet::connectionList(unsigned int netID)
     }
     error_general("connectionList(unsigned int ["+std::to_string(netID)+"])","No net with such an ID");
 }
+
 std::vector<std::vector<Connection> *>GeneticNet::connectionList()
 {
     std::vector<std::vector<Connection> * > list;
@@ -1170,6 +1171,7 @@ std::vector<std::vector<Connection> *>GeneticNet::connectionList()
     {
         list.push_back(_netList[net]->connectionList());
     }
+
     return list;
 }
 void                    GeneticNet::clearConnectionList()

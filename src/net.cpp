@@ -615,6 +615,7 @@ void                Net::run()
         _allNeuronList[neuron]->needsUpdate();
     }
     bool allUpdated = false;
+
 #if defined(_DEBUG_NET_RUN)
     __DEBUG_NET(this,"run()","while neurons not updated");
 #endif
@@ -624,6 +625,7 @@ void                Net::run()
         __DEBUG_NET(this,"run()","calculates neuron ID: "+Neuron::neuronIDString(_calculationOrderList[neuron]));
 #endif
         _allNeuronList[_calculationOrderList[neuron].ID]->run();
+
     }
    /* while(!allUpdated)
     {
@@ -844,6 +846,7 @@ bool                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
     }
     try
     {
+
         if(_allNeuronList[toNeuron]->connectInput(_allNeuronList[fromNeuron],direction))
         {
             _connections++;
@@ -851,6 +854,8 @@ bool                Net::connectNeuronViaID(unsigned int fromNeuron,unsigned int
             update_ptr_genomList();
             prepareCalculationOrderList();
         }
+ronIndexX << " Y" << fromNeuronIndexY << " is connected to outputNeuron:  X" <<toNeuronIndexX << " Y"<<toNeuronIndexY;
+
     } catch (std::runtime_error &e) {
 #if defined(_DEBUG_NET_CONNECT)
         __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+std::string(e.what()));
@@ -868,7 +873,9 @@ bool                Net::connectNeuron(Connection *connection)
     prepareCalculationOrderList();
     return ret;
 }
+
 bool                Net::intern_connectNeuron(Connection *connection)
+
 {
 #if defined(_DEBUG_NET_CONNECT)
     __DEBUG_NET(this,"connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])","begin");

@@ -1,6 +1,7 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
+
 #define NEURON_VERSION "02.04.03"
 //              Datum   15.09.2019
 
@@ -31,6 +32,7 @@
 #define _DEBUG_NEURON_DELETE_INPUT
 #endif
 #endif
+
 
 #include <vector>
 #include <math.h>
@@ -202,6 +204,7 @@ class Neuron
             | std::vector errors
          */
         unsigned int inputs();
+
         /* Returns the amount of inputs. Also those who aren't connected.
 
           ERROR:
@@ -564,6 +567,7 @@ class Neuron
            | none
          */
         float *ptr_weight(unsigned int input);
+
         /* Returns the pointer to the weight variable of the input 'input'.
 
           ERROR:
@@ -577,6 +581,7 @@ class Neuron
            | from ptr_weight(unsigned int input)
            | No connection is comming from the neuron with the ID 'connectionID'
          */
+
 
         void run();
         /* Calculates the next output.
@@ -622,6 +627,9 @@ class Neuron
            | none
          */
 #endif
+
+        void needsUpdate();
+        bool isUpdated();
 
     private:
         void init(unsigned int inputs, Activation activationFunction, bool enableAverage);
