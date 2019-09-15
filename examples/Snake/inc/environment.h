@@ -12,34 +12,7 @@
 #include "player.h"
 #include "food.h"
 
-#include <cstdlib>
-#include <pthread.h>
-#include <unistd.h>
-#include <time.h>
-
-#include <ctime>
-#include <ratio>
-#include <chrono>
-//#define __enableEnviromentThread
-//#define __DEBUG_TIMEINTERVAL
-//#define __DEBUG_TIMEINTERVAL_IN_THREAD
-
 using namespace std;
-using namespace std::chrono;
-
-struct thread_data_player {
-   int  thread_id;
-   vector<Player*> *player;
-   vector<Food*> *food;
-   vector<vector<int>  >*viewMap;
-   bool *exit;
-   bool *pause;
-   pthread_mutex_t *lock;
-   pthread_cond_t *condition_var;
-   bool isPaused;
-   long *delayMicros;
-   bool killPlayer;
-};
 
 enum MapData
 {
@@ -52,9 +25,7 @@ enum AI_dataLayer
 {
     food_layer = 0,
     snake_layer = 1,
-    obsticle_layer = 2,
-    selfSnake_layer = 3,
-    direction_layer = 4,
+    obsticle_layer = 2
 };
 
 class Environment : public QObject
@@ -94,7 +65,7 @@ class Environment : public QObject
 
         Player *player(unsigned int player = 0);
         unsigned int playerAmount();
-        vector<vector<float>    >AI_mapData(unsigned int player);
+        vector<vector<float>    >AI_mapData(unsigned int player, vector<QPoint>   fieldOfView);
         vector<vector<float>    >AI_mapData_simple(unsigned int player);
         vector<QPoint> rotate_90(vector<QPoint> data,QPoint rotPoint, int amount = 1);
 
@@ -102,8 +73,6 @@ class Environment : public QObject
         bool showInfoText();
         void drawEnable(bool enable);
         bool drawEnable();
-
-        double cycleTime();
     signals:
         void playerKill(unsigned int,unsigned int);
 
@@ -113,9 +82,6 @@ class Environment : public QObject
         void obsticleReplace();
 
     private:
-        //Threads
-        static void *runThread(void *threadarg);
-
         QPainter   *_painter;
         QWidget    *_parent;
 
@@ -145,20 +111,6 @@ class Environment : public QObject
         bool   _drawEnable;
 
        // int test = 0;
-
-
-        //Threads
-        pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
-        pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
-
-        std::vector<thread_data_player> _threadData;
-        std::vector<pthread_t>  _threadList;
-        bool                    _threadExit;
-        bool                    _threadPause;
-        long                    _threadDelayMicros;
-
-        double _timeinterval;
-        unsigned int _debugCount;
 };
 
 #endif // Environment_H

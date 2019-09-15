@@ -14,7 +14,6 @@ class Food : public QObject
 {
         Q_OBJECT
     public:
-        Food(const Food &food);
         Food(QSize mapSize);
         ~Food();
         void respawn();
@@ -29,8 +28,6 @@ class Food : public QObject
 
         bool isAlive();
         void update();
-
-        Food &operator=(const Food &food);
 
     signals:
 

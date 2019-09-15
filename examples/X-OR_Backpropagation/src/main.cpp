@@ -26,14 +26,14 @@ int main(int argc, char *argv[])
     printf("setup\n");
     unsigned int inputNeurons = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
     unsigned int hiddenNeuronX= 1;
-    unsigned int hiddenNeuronY= 2;
+    unsigned int hiddenNeuronY= 4;
     unsigned int outputNeuron = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
     bool bias = true;
     bool enableAverage = false;
 
-    BackpropNet net(0,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Gaussian); //Makes the Net object
+    BackpropNet net(inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,bias,enableAverage,Activation::Sigmoid); //Makes the Net object
     net.loadFromNetFile();
-    net.mutationFactor(0.05);
+    net.mutationFactor(0.005);
 
     genomlogFile = fopen("genom.csv","r");
     if(!genomlogFile)
@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
 
 
         net.input(trainingsSet[counter]);       // Sets the input of the net with the trainingset [counter]
-        net.run();
         output = net.output();                  // Calculates the output vector and returns it
         net.expected(outputSet[counter]);       // Tells the net the right results
 
@@ -99,7 +98,7 @@ int main(int argc, char *argv[])
 
                 logGenom(net.genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
             }
-            if(averageError < 0.0005 || learningSteps > 1000000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
+            if(averageError < 0.005 || learningSteps > 1000000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
             {
                 netFinished(net);
             }
@@ -150,7 +149,7 @@ void printNet(Net &net)
         {
             printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.outputNeuron(y)->input(b),net.outputNeuron(y)->weight(b));
         }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.output(y));
+            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.outputNeuron(y)->output());
             printf("---------------------------------------------------------------------------------\n");
     }
     printf("=================================================================================\n");
@@ -193,7 +192,6 @@ void netFinished(BackpropNet &net)
 
             cmdXY(0,genom.size() / 5 +4);
             net.input(trainingsSet[counter]);
-            net.run();
             output = net.output();
 
             printf("inputs are:\t");

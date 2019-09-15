@@ -37,7 +37,7 @@ Enviroment::Enviroment()
     _net->mutationFactor(0.1);
 //    _net->set(animals,inputs,hiddenX,hiddenY,outputs,bias,enableAverage,func);
 
-    _net->saveToNetFile();
+
 
 
     _averageScore = 0;
@@ -221,13 +221,11 @@ void Enviroment::tick()
                 _net->saveToNetFile();
             }
             _file = fopen("score.csv","a");
-            if(_file)
-            {
-                fprintf(_file,"%f;\n",_averageScore);
-                fclose(_file);
-            }
+            fprintf(_file,"%f;\n",_averageScore);
+            fclose(_file);
         }
     }
+
 }
 
 struct Coord Enviroment::getRandomPos()

@@ -74,8 +74,8 @@ class SaveNet
         void neuronsOfNet(unsigned int ID,std::vector<Neuron*> *neurons);
         std::vector<Neuron*> neuronsOfNet(unsigned int ID);
 
-        std::vector<Connection> *connectionList(unsigned int animal);
-        std::vector<std::vector<Connection> > *connectionList();
+        std::vector<Connection> connectionList(unsigned int animal);
+        std::vector<std::vector<Connection> > connectionList();
 
 
         void clearGenomList();
