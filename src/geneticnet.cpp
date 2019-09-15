@@ -39,6 +39,16 @@ GeneticNet::~GeneticNet()
         }
     }
     _scoreList.clear();
+#ifdef __enableGeneticNetThread
+    pthread_mutex_lock(&_threadLock);
+    _threadExit = true;
+    pthread_cond_broadcast( &_thread_condition_var );
+    pthread_mutex_unlock(&_threadLock);
+    for(unsigned int a=_threadList.size(); a>0; a--)
+    {
+        pthread_join(_threadList[a], NULL);
+    }
+#endif
 }
 void                    GeneticNet::set(unsigned int animals,
                             unsigned int inputs,
@@ -57,8 +67,11 @@ void                    GeneticNet::set(unsigned int animals,
     this->bias(enableBias);
     this->enableAverage(enableAverage);
     this->activationFunction(func);
-
-
+    this->clearConnectionList();
+    this->updateNetConfiguration();
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "Geneticnet constructor Setup done";
+#endif
 }
 
 void                    GeneticNet::netFileName(std::string filename)
@@ -79,12 +92,21 @@ std::string             GeneticNet::netFileEnding()
 }
 void                    GeneticNet::loadFromNetFile()
 {
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "loadFromNetFile() " << _saveNet.filename().c_str()<<"."<<_saveNet.fileEnding().c_str();
+#endif
     try {
         _saveNet.loadFile();
     } catch (std::runtime_error &e) {
         qDebug() << "Warning: "<< e.what();
         return;
+    }catch(...)
+    {
+        qDebug() << "ERROR: _saveNet.loadfile()";
     }
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "read done -> applaying...";
+#endif
     try {
         this->set(_saveNet.animals(),_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
                   _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
@@ -93,14 +115,17 @@ void                    GeneticNet::loadFromNetFile()
         this->connectionList(_saveNet.connectionList());
         this->costumConnections(_saveNet.costumConnections());
         this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
-        this->updateNetConfiguration();
  //       this->genom(_saveNet.genom());
-        qDebug() << "only backloop test";
+        //qDebug() << "only backloop test";
 
     } catch (std::runtime_error &e) {
         error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
                       "unable to apply the settings. Maybe the file is damaged.",e);
     }
+    this->updateNetConfiguration();
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "applaying done";
+#endif
 }
 void                    GeneticNet::loadFromNetFile(std::string filename)
 {
@@ -115,6 +140,9 @@ void                    GeneticNet::loadFromNetFile(std::string filename,std::st
 }
 void                    GeneticNet::saveToNetFile()
 {
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "saveToNetFile() " << _saveNet.filename().c_str()<<"."<<_saveNet.fileEnding().c_str();
+#endif
     try {
         _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
                      this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
@@ -127,6 +155,9 @@ void                    GeneticNet::saveToNetFile()
     } catch (std::runtime_error &e) {
         error_general("saveToNetFile()",e);
     }
+#ifdef __DEBUG_GENETICNET
+    qDebug() << "save done";
+#endif
 }
 void                    GeneticNet::saveToNetFile(std::string filename)
 {
@@ -150,6 +181,7 @@ void                    GeneticNet::init(unsigned int animals,
                                          bool enableAverage,
                                          Activation func)
 {
+    _debugCount = 0;
     _randEngine = std::default_random_engine(rand()%100);
     _animals = 0;
     _currentAnimal = 0;
@@ -174,12 +206,55 @@ void                    GeneticNet::animals(unsigned int animals)
     }
     if(animals > _animals)
     {
+       _threadExit = true;
+       _threadPause = false;
+       _threadDelayMicros = 1000000;
+       if(_threadList.size() != 0)
+       {
+           for(unsigned int a=0; a<_threadList.size(); a++)
+           {
+               pthread_join(_threadList[a], NULL);
+           }
+       }
+       if(_threadList_setupNet.size() != 0)
+       {
+           for(unsigned int a=0; a<_threadList_setupNet.size(); a++)
+           {
+               pthread_join(_threadList_setupNet[a], NULL);
+           }
+       }
        _netList.reserve(animals);
-       for(unsigned int a=0; a<animals - _animals; a++)
+       _threadList.reserve(animals);
+       _threadData.reserve(animals);
+       _threadList_setupNet.reserve(animals);
+       _threadData_setupNet.reserve(animals);
+       for(unsigned int a=_animals; a<animals; a++)
         {
             _netList.push_back(new Net(a));
             _netList[_netList.size()-1]->ID(_netList.size()-1);
             _scoreList.push_back(0);
+            _threadList.push_back(pthread_t());
+            _threadList_setupNet.push_back(pthread_t());
+
+            _threadData.push_back(thread_data_geneticNet());
+            _threadData[a].thread_id = a;
+            _threadData[a].net = _netList[a];
+            _threadData[a].exit = &_threadExit;
+            _threadData[a].pause = &_threadPause;
+            _threadData[a].lock = &_threadLock;
+            _threadData[a].condition_var = &_thread_condition_var;
+            _threadData[a].isPaused = false;
+            _threadData[a].delayMicros = &_threadDelayMicros;
+
+            _threadData_setupNet.push_back(thread_data_geneticNet());
+            _threadData_setupNet[a].thread_id = a;
+            _threadData_setupNet[a].net = _netList[a];
+            _threadData_setupNet[a].exit = &_threadExit;
+            _threadData_setupNet[a].pause = &_threadPause;
+            _threadData_setupNet[a].lock = &_threadLock_setupNet;
+            _threadData_setupNet[a].condition_var = &_thread_condition_var_setupNet;
+            _threadData_setupNet[a].isPaused = false;
+            _threadData_setupNet[a].delayMicros = &_threadDelayMicros;
         }
 
     }
@@ -190,10 +265,30 @@ void                    GeneticNet::animals(unsigned int animals)
             delete _netList[_netList.size()-1];
             _netList.erase(_netList.end()-1);
             _scoreList.erase(_scoreList.end()-1);
+            _threadList.erase(_threadList.end()-1);
+            _threadData.erase(_threadData.end()-1);
+            _threadData_setupNet.erase(_threadData_setupNet.end()-1);
+            _threadList_setupNet.erase(_threadList_setupNet.end()-1);
         }
     }
     _animals = animals;
     _update  = true;
+
+#ifdef __enableGeneticNetThread
+    _threadExit = false;
+    _threadPause = true;
+
+
+    int rc;
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        rc = pthread_create(&_threadList[a], NULL, runThread, (void *)&_threadData[a]);
+        if (rc)
+        {
+            qDebug() << "Error:unable to create thread," << rc << endl;
+        }
+    }
+#endif
 }
 unsigned int            GeneticNet::animals()
 {
@@ -550,7 +645,7 @@ float                   GeneticNet::hidden(unsigned int animal, unsigned int hid
     {
         error_general("hidden(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hidden(hiddenX,hiddenY);
     } catch (std::runtime_error &e) {
@@ -559,7 +654,7 @@ float                   GeneticNet::hidden(unsigned int animal, unsigned int hid
 }
 std::vector<float>      GeneticNet::hidden(unsigned int hiddenX, unsigned int hiddenY)
 {
-    this->run();
+    //this->run();
     std::vector<float> ret(_animals);
     for(unsigned int a=0; a<_animals; a++)
     {
@@ -571,22 +666,22 @@ std::vector<float>      GeneticNet::hidden(unsigned int hiddenX, unsigned int hi
     }
     return ret;
 }
-/*std::vector<float>      GeneticNet::hiddenX(unsigned int animal, unsigned int hiddenX) // |    Alle in einer Spalte
+std::vector<float>      GeneticNet::hiddenX(unsigned int animal, unsigned int hiddenX) // |    Alle in einer Spalte
 {
     if(animal > _animals-1)
     {
         error_general("hiddenX(unsigned int ["+std::to_string(animal)+"] , unsinged int ["+std::to_string(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hiddenX(hiddenX);
     } catch (std::runtime_error &e) {
         error_general("hiddenX(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] )","return _netList["+std::to_string(animal)+"]->hiddenX("+std::to_string(hiddenX)+")",e);
     }
-}*/
-/*std::vector<std::vector<float>  >GeneticNet::hiddenX(unsigned int hiddenX)
+}
+std::vector<std::vector<float>  >GeneticNet::hiddenX(unsigned int hiddenX)
 {
-    this->run();
+    //this->run();
     std::vector<std::vector<float>  > hidX(_animals);
     for(unsigned int a=0; a<_animals; a++)
     {
@@ -597,23 +692,23 @@ std::vector<float>      GeneticNet::hidden(unsigned int hiddenX, unsigned int hi
         }
     }
     return hidX;
-}*/
-/*std::vector<float>      GeneticNet::hiddenY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
+}
+std::vector<float>      GeneticNet::hiddenY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
 {
     if(animal > _animals-1)
     {
         error_general("hiddenY(unsigned int ["+std::to_string(animal)+"] , unsinged int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hiddenY(hiddenY);
     } catch (std::runtime_error &e) {
         error_general("hiddenY(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenY("+std::to_string(hiddenY)+")",e);
     }
-}*/
-/*std::vector<std::vector<float>  >GeneticNet::hiddenY(unsigned int hiddenY)
+}
+std::vector<std::vector<float>  >GeneticNet::hiddenY(unsigned int hiddenY)
 {
-    this->run();
+    //this->run();
     std::vector<std::vector<float>  > hidY(_animals);
     for(unsigned int a=0; a<_animals; a++)
     {
@@ -624,63 +719,63 @@ std::vector<float>      GeneticNet::hidden(unsigned int hiddenX, unsigned int hi
         }
     }
     return hidY;
-}*/
+}
 
-/*Neuron                 *GeneticNet::hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY)
+Neuron                 *GeneticNet::hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY)
 {
     if(animal > _animals-1)
     {
         error_general("hiddenNeuron(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] , unsinged int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hiddenNeuron(hiddenX,hiddenY);
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuron(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] , unsinged int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuron("+std::to_string(hiddenX)+","+std::to_string(hiddenY)+")",e);
     }
-}*/
-/*std::vector<Neuron*>    GeneticNet::hiddenNeuronX(unsigned int animal, unsigned int hiddenX)// |    Alle in einer Spalte
+}
+std::vector<Neuron*>    GeneticNet::hiddenNeuronX(unsigned int animal, unsigned int hiddenX)// |    Alle in einer Spalte
 {
     if(animal > _animals-1)
     {
         error_general("hiddenNeuronX(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hiddenNeuronX(hiddenX);
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuronX(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenX)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuronX("+std::to_string(hiddenX)+");",e);
     }
-}*/
-/*std::vector<Neuron*>    GeneticNet::hiddenNeuronY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
+}
+std::vector<Neuron*>    GeneticNet::hiddenNeuronY(unsigned int animal, unsigned int hiddenY)// --   Alle in einer Reihe
 {
     if(animal > _animals-1)
     {
         error_general("hiddenNeuronY(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->hiddenNeuronY(hiddenY);
     } catch (std::runtime_error &e) {
         error_general("hiddenNeuronY(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","return _netList["+std::to_string(animal)+"]->hiddenNeuronY("+std::to_string(hiddenY)+")",e);
     }
-}*/
-/*std::vector<std::vector<Neuron*> > *GeneticNet::hiddenNeuron(unsigned int animal)
+}
+std::vector<std::vector<Neuron*> > GeneticNet::hiddenNeuron(unsigned int animal)
 {
     if(animal > _animals-1)
     {
         error_general("hiddenNeuron(unsigned int ["+std::to_string(animal)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     return _netList[animal]->hiddenNeuron();
-}*/
+}
 Neuron                 *GeneticNet::outputNeuron(unsigned int animal, unsigned int output)
 {
     if(animal > _animals-1)
     {
         error_general("outputNeuron(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->outputNeuron(output);
     } catch (std::runtime_error &e) {
@@ -693,7 +788,7 @@ std::vector<Neuron*>   *GeneticNet::outputNeuron(unsigned int animal)
     {
         error_general("outputNeuron(unsigned int ["+std::to_string(animal)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->outputNeuron();
     } catch (std::runtime_error &e) {
@@ -708,7 +803,7 @@ float                   GeneticNet::output(unsigned int animal, unsigned int out
     {
         error_general("output(unsigned int ["+std::to_string(animal)+"] , unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->output(output);
     } catch (std::runtime_error &e) {
@@ -721,7 +816,7 @@ std::vector<float>      GeneticNet::output(unsigned int animal)
     {
         error_general("output(unsigned int ["+std::to_string(animal)+"] )",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,_animals-1));
     }
-    this->run();
+    //this->run();
     try {
         return _netList[animal]->output();
     } catch (std::runtime_error &e) {
@@ -730,7 +825,7 @@ std::vector<float>      GeneticNet::output(unsigned int animal)
 }
 std::vector<std::vector<float>  >GeneticNet::output()
 {
-    this->run();
+    //this->run();
     std::vector<std::vector<float>  > out(_animals);
     for(unsigned int a=0; a<_animals; a++)
     {
@@ -748,14 +843,99 @@ void                    GeneticNet::run()
 {
     if(_update)
     {
+        double timeout = 1; //1 sec
+       // qDebug() << "threads start";
+        std::chrono::high_resolution_clock::time_point t2;
+        std::chrono::duration<double> time_span;
+        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
+#ifdef __enableGeneticNetThread
+        pthread_mutex_lock(&_threadLock);
+        _threadDelayMicros = 1000000;
+        _threadExit = false;
+        _threadPause = false;
         for(unsigned int a=0; a<_animals; a++)
         {
-            try {
-                this->run(a);
-            } catch (std::runtime_error &e) {
-                error_general("run()","this->run("+std::to_string(a)+");",e);
-            }
+            _threadData[a].isPaused = false;
         }
+        pthread_cond_broadcast( &_thread_condition_var );
+        pthread_mutex_unlock(&_threadLock);
+        unsigned int pause = 0;
+        unsigned int _pause;
+        std::vector<bool> restartCheckList(_animals,false);
+
+        do{
+            pause = 0;
+            for(unsigned int a=0; a<_animals; a++)
+            {
+                t2 = std::chrono::high_resolution_clock::now();
+                time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+                if(time_span.count() >= timeout)
+                {
+                    qDebug() << "GeneticNet::run() thread timeout: "<<timeout;
+                    qDebug() << "Threads running: "<<_animals-pause;
+                    timeout+=timeout;
+                    pause = 0;
+                    for(unsigned int b=0; b<_animals; b++)
+                    {
+                        if(restartCheckList[b])
+                        {
+                            pause++;
+                        }
+                    }
+
+                    FILE *p_file = fopen("threadTimeout.txt","a");
+                    if(p_file)
+                    {
+                        fprintf(p_file,"running threads: %i\n",_animals-pause);
+                        pthread_mutex_lock(&_threadLock);
+                        for(unsigned int b=0; b<_animals; b++)
+                        {
+                            fprintf(p_file,"thread: %i\tdebugParam: %i\tpaused: %i\n",b,_threadData[b].debugParam,_threadData[b].isPaused);
+                        }
+                        pthread_mutex_unlock(&_threadLock);
+                        fclose(p_file);
+                    }
+                }
+                if(restartCheckList[a])
+                {
+                    pause++;
+                    continue;
+                }
+                pthread_mutex_lock(&_threadLock);
+                _pause = _threadData[a].debugParam;
+                pthread_mutex_unlock(&_threadLock);
+                if(_pause == 7)
+                {
+                   restartCheckList[a] = true;
+                }
+                //pthread_join(_threadList[a], NULL);
+            }
+        }while(pause != _animals);
+
+        pthread_mutex_lock(&_threadLock);
+        _threadPause = true;
+        pthread_mutex_unlock(&_threadLock);
+#else
+
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            _netList[a]->run();
+        }
+#endif
+
+        t2 = std::chrono::high_resolution_clock::now();
+        time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+        _timeInterval = 0.9*_timeInterval + 0.1*time_span.count();
+#ifdef __DEBUG_TIMEINTERVAL
+        if(_debugCount > 1000)
+        {
+            qDebug() << "n: "<<_timeInterval;
+            _debugCount = 0;
+        }
+        _debugCount++;
+#endif
+        //qDebug() << "threads ended";
         _update = false;
     }
 }
@@ -884,7 +1064,23 @@ void                    GeneticNet::learn()
 
 void                    GeneticNet::updateNetConfiguration()
 {
-    try
+#ifdef __enableGeneticNetThread
+       int rc;
+       for(unsigned int a=0; a<_animals; a++)
+       {
+           rc = pthread_create(&_threadList_setupNet[a], NULL, runThread_setupNet, (void *)&_threadData_setupNet[a]);
+           if (rc)
+           {
+               qDebug() << "Error:unable to create thread," << rc << endl;
+           }
+       }
+       for(unsigned int a=0; a<_animals; a++)
+       {
+           pthread_join(_threadList_setupNet[a], NULL);
+       }
+       qDebug() << "setup nets done";
+#endif
+   /* try
     {
         for(unsigned int a=0; a<_animals; a++)
         {
@@ -892,31 +1088,65 @@ void                    GeneticNet::updateNetConfiguration()
         }
     } catch (std::runtime_error &e) {
         error_general("updateNetConfiguration()",e);
-    }
+    }*/
 }
-void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron)
+void                    GeneticNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction)
 {
     try
     {
         for(unsigned int a=0; a<_animals; a++)
         {
-            _netList[a]->connectNeuronViaID(fromNeuron,toNeuron);
+            _netList[a]->connectNeuronViaID(fromNeuron,toNeuron,direction);
         }
     } catch (std::runtime_error &e) {
         error_general("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"])",e);
     }
 }
-void                    GeneticNet::connectionList(std::vector<std::vector<Connection> >connections)
+bool                    GeneticNet::connectNeuron(Connection *connection)
 {
-    if(connections.size() != _animals)
+    bool ret = 0;
+    try
     {
-        error_general("connectionList(std::vector<std::vector<Connection> >connections)","size of connections: "+std::to_string(connections.size())+" ist not the same as _animals: "+std::to_string(_animals));
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            if(_netList[a]->connectNeuron(connection)){
+                ret = 1;
+                _netList[a]->update_ptr_genomList();
+            }
+        }
+
+    } catch (std::runtime_error &e) {
+        error_general("connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])",e);
+    }
+    return ret;
+}
+bool                    GeneticNet::connectNeuron(std::vector<Connection> *connections)
+{
+    bool ret = 0;
+    try
+    {
+        for(unsigned int a=0; a<_animals; a++)
+        {
+            if(_netList[a]->connectNeuron(connections)){
+                ret = 1;
+            }
+        }
+    } catch (std::runtime_error &e) {
+        error_general("connectNeuron(std::vector<Connection> [connection list])",e);
+    }
+    return ret;
+}
+void                    GeneticNet::connectionList(std::vector<std::vector<Connection> >*connections)
+{
+    if(connections->size() != _animals)
+    {
+        error_general("connectionList(std::vector<std::vector<Connection> >connections)","size of connections: "+std::to_string(connections->size())+" ist not the same as _animals: "+std::to_string(_animals));
     }
     try
     {
         for(unsigned int a=0; a<_animals; a++)
         {
-            _netList[a]->connectionList(connections[a]);
+            _netList[a]->connectionList(&(*connections)[a]);
         }
     } catch (std::runtime_error &e) {
         error_general("connectionList(std::vector<std::vector<Connection> >connections)",e);
@@ -933,13 +1163,76 @@ std::vector<Connection> *GeneticNet::connectionList(unsigned int netID)
     }
     error_general("connectionList(unsigned int ["+std::to_string(netID)+"])","No net with such an ID");
 }
-std::vector<std::vector<Connection>* >GeneticNet::connectionList()
+
+std::vector<std::vector<Connection> *>GeneticNet::connectionList()
 {
-    std::vector<std::vector<Connection>*> list;
+    std::vector<std::vector<Connection> * > list;
     for(unsigned int net=0; net<_netList.size(); net++)
     {
         list.push_back(_netList[net]->connectionList());
     }
+
+    return list;
+}
+void                    GeneticNet::clearConnectionList()
+{
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        _netList[a]->clearConnectionList();
+    }
+}
+
+NeuronID                GeneticNet::addNeuron()
+{
+    NeuronID ID;
+    try {
+        for(unsigned int a=0; a<_netList.size(); a++)
+        {
+            ID = _netList[a]->addNeuron();
+        }
+    } catch (std::runtime_error &e) {
+        error_general("addNeuron()",e);
+    }
+    return ID;
+}
+NeuronID                GeneticNet::addNeuron(Neuron *neuron)
+{
+    NeuronID ID;
+    try {
+        for(unsigned int a=0; a<_netList.size(); a++)
+        {
+            ID = _netList[a]->addNeuron(neuron);
+        }
+    } catch (std::runtime_error &e) {
+        error_general("addNeuron(Neruon *neuron)",e);
+    }
+    return ID;
+}
+NeuronID                GeneticNet::addNeuron(Connection connection)
+{
+    NeuronID ID;
+    try {
+        for(unsigned int a=0; a<_netList.size(); a++)
+        {
+            ID = _netList[a]->addNeuron(connection);
+        }
+    } catch (std::runtime_error &e) {
+        error_general("addNeuron(Connection ["+Neuron::connectionString(connection)+"])",e);
+    }
+    return ID;
+}
+NeuronID                GeneticNet::addNeuron(std::vector<Connection> inputConnections)
+{
+    NeuronID ID;
+    try {
+        for(unsigned int a=0; a<_netList.size(); a++)
+        {
+            ID = _netList[a]->addNeuron(inputConnections);
+        }
+    } catch (std::runtime_error &e) {
+        error_general("addNeuron(std::vector<Connection> [connection list])",e);
+    }
+    return ID;
 }
 
 void                    GeneticNet::learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2)
@@ -1021,6 +1314,165 @@ void                    GeneticNet::learn_mutate(std::vector<float> &genom)
             genom[a] += _mutationChangeWeight * ran;
         }
     }
+}
+double                 GeneticNet::cycleTime()
+{
+    return _timeInterval;
+}
+void                   GeneticNet::update_ptr_genomList()
+{
+    for(unsigned int a=0; a<_animals; a++)
+    {
+        _netList[a]->update_ptr_genomList();
+    }
+}
+void                   *GeneticNet::runThread(void *threadarg)
+{
+    //pthread_detach(pthread_self());
+    struct thread_data_geneticNet *my_data;
+    bool ret = false;
+    bool pause = false;
+    bool enableLoop = false;
+    //bool lastPauseState = false;
+    my_data = (struct thread_data_geneticNet *) threadarg;
+    struct timespec time, timestart;
+    time.tv_sec = 0;
+    pthread_mutex_lock(my_data->lock);
+    my_data->isPaused = false;
+    time.tv_nsec = *my_data->delayMicros;
+    pthread_mutex_unlock(my_data->lock);
+    qDebug() << "thread start: "<<my_data->thread_id << " "<<my_data->net;
+    pthread_mutex_lock(my_data->lock);
+    my_data->debugParam = 1; //start
+    pthread_mutex_unlock(my_data->lock);
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+    std::chrono::high_resolution_clock::time_point t1;
+    std::chrono::high_resolution_clock::time_point t2;
+    std::chrono::duration<double> time_span;
+    double _timeInterval = 0;
+    unsigned int _debugCount = 0;
+#endif
+    while(!ret)
+    {
+        if(enableLoop)
+        {
+            try {
+
+                pthread_mutex_lock(my_data->lock);
+                my_data->debugParam = 3; //run begin
+                pthread_mutex_unlock(my_data->lock);
+                my_data->net->run();
+                //pause = true;
+                pthread_mutex_lock(my_data->lock);
+                my_data->debugParam = 4; //run end
+                pthread_mutex_unlock(my_data->lock);
+
+            }
+            catch(std::runtime_error &e)
+                {
+                pthread_mutex_lock(my_data->lock);
+                    my_data->debugParam = 20; //error 1
+                    pthread_mutex_unlock(my_data->lock);
+                    qDebug() << "ERROR  thread "<< my_data->thread_id << " : " << e.what();
+                    FILE *file = fopen("error_n.txt","a");
+                    if(file)
+                    {
+                        fprintf(file,"%s\n",(std::string("ERROR  net ")+std::to_string(my_data->thread_id)+e.what()).c_str());
+                        fclose(file);
+                    }
+                }catch(...)
+            {
+                pthread_mutex_lock(my_data->lock);
+                my_data->debugParam = 21; //error 2
+                pthread_mutex_unlock(my_data->lock);
+                qDebug() << "ERROR  thread "<< my_data->thread_id << " : ";
+                FILE *file = fopen("error_n.txt","a");
+                if(file)
+                {
+                    fprintf(file,"%s\n",(std::string("ERROR  net ")+std::to_string(my_data->thread_id)).c_str());
+                    fclose(file);
+                }
+            }
+            enableLoop = false;
+            pthread_mutex_lock(my_data->lock);
+            my_data->debugParam = 5; //finish
+            pthread_mutex_unlock(my_data->lock);
+        }else {
+            //qDebug() << "thread: "<<my_data->thread_id << " sleeping";
+            //usleep(1);
+
+            //nanosleep(&time, NULL);
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+            t2 = std::chrono::high_resolution_clock::now();
+            time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+            _timeInterval = 0.9*_timeInterval + 0.1*time_span.count();
+            if(_debugCount > 1000)
+            {
+                if(my_data->thread_id == 0)
+                    qDebug() << "n_: "<<my_data->thread_id << " " <<_timeInterval;
+                _debugCount = 0;
+            }
+            _debugCount++;
+#endif
+            pthread_mutex_lock(my_data->lock);
+            my_data->debugParam = 6; //set isPaused to true
+            my_data->isPaused = true;
+            my_data->debugParam = 7; //isPaused true
+            pthread_mutex_unlock(my_data->lock);
+
+
+
+            pthread_mutex_lock(my_data->lock);
+            pthread_cond_wait( my_data->condition_var, my_data->lock);
+            ret = *my_data->exit;
+            //pause = *my_data->pause;
+            //pause = my_data->isPaused;
+            //time.tv_nsec = *my_data->delayMicros;
+            my_data->debugParam = 2; //enableLoop
+            pthread_mutex_unlock(my_data->lock);
+            enableLoop = true;
+
+
+#ifdef __DEBUG_TIMEINTERVAL_IN_THREAD
+            t1 = std::chrono::high_resolution_clock::now();
+#endif
+           // if(!pause)
+           // {
+           //     enableLoop = true;
+                /*pthread_mutex_lock(my_data->lock);
+                my_data->isPaused = false;
+                pthread_mutex_unlock(my_data->lock);*/
+           // }
+
+        }
+        /*if(pause != lastPauseState)
+        {
+            if(pause)
+            {
+                qDebug() << "thread: "<<my_data->thread_id << " pause ON";
+            }else {
+                qDebug() << "thread: "<<my_data->thread_id << " pause OFF";
+            }
+        }
+        lastPauseState = pause;*/
+    }
+    qDebug() << "thread stop: "<<my_data->thread_id << " "<<my_data->net;
+    pthread_exit(NULL);
+}
+void                   *GeneticNet::runThread_setupNet(void *threadarg)
+{
+    //pthread_detach(pthread_self());
+    struct thread_data_geneticNet *my_data;
+    my_data = (struct thread_data_geneticNet *) threadarg;
+
+ //   my_data->net = new Net(my_data->thread_id);
+    qDebug() << "threadSetup begin: "<<my_data->thread_id;
+    //pthread_mutex_lock(my_data->lock);
+    my_data->net->updateNetConfiguration();
+    //pthread_mutex_unlock(my_data->lock);
+    //my_data->net->updateNetConfiguration();
+    qDebug() << "threadSetup done: "<<my_data->thread_id;
+    pthread_exit(NULL);
 }
 //----------ERROR
 

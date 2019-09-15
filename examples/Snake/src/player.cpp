@@ -79,17 +79,17 @@ void Player::pos(vector<QPoint> pos)
         sollSize(_playerPos.size());
     }
 }
-QPoint Player::pos(unsigned int index)
+QPoint *Player::pos(unsigned int index)
 {
     if(_playerPos.size() <= index)
     {
-        return QPoint(0,0);
+        throw std::runtime_error("pos(unsigned int ["+std::to_string(index)+"]) out of range : 0 - "+std::to_string(_playerPos.size()-1));
     }
-    return _playerPos[index];
+    return &_playerPos[index];
 }
-vector<QPoint> Player::pos()
+vector<QPoint> *Player::pos()
 {
-    return _playerPos;
+    return &_playerPos;
 }
 void Player::standardColor(QColor standard)
 {
@@ -127,14 +127,9 @@ void Player::update()
         _playerColor.push_back(_lastColor);
     }
 
-   /* for(unsigned int a=0; a<_playerPos.size(); a++)
-    {
-        qDebug() << "index: "<< a << " "<<_playerPos[a];
-    }
-    qDebug() << "";*/
     //----------Shift
 
-    _lastPos = _playerPos[_playerPos.size()-1];
+    _lastPos   = _playerPos[_playerPos.size()-1];
     _lastColor = _playerColor[_playerColor.size()-1];
     for(int a=_playerPos.size()-2; a>=0; a--)
     {
@@ -199,7 +194,8 @@ void Player::update()
     if(food() <= 0)
     {
      //   qDebug() << "starved: "<< _playerIndex;
-        emit starved(_playerIndex);
+     //   emit starved(_playerIndex);
+        this->kill();
     }
     if(food() / _foodPerTile > size()-1)
     {
@@ -265,7 +261,8 @@ void Player::checkForSelfCollision()
     if(collisionPos.size() != 0)
     {
        // qDebug() << "collision: "<< _playerIndex;
-        emit collision(_playerIndex,collisionPos);
+       // emit collision(_playerIndex,collisionPos);
+        this->kill();
     }
 }
 void Player::kill()
@@ -303,8 +300,14 @@ void Player::revive()
     _steps = 0;
 
     _direction = rand()%4;
-    _playerPos = vector<QPoint>(sollSize());
-    _playerPos[0] = QPoint(5+rand() %(_mapSize.width()-10),5+rand()%(_mapSize.height()-10));
+    //_playerPos = vector<QPoint>(sollSize());
+    _lastPos = QPoint(5+rand() %(_mapSize.width()-_mapSize.width()/10),5+rand()%(_mapSize.height()-_mapSize.height()/10));
+    while(_playerPos.size() < sollSize())
+    {
+        _playerPos.push_back(_lastPos);
+        _playerColor.push_back(_standardBodyColor);
+    }
+
 
     _playerColor = vector<QColor>(sollSize());
     _playerColor[0] = _standardBodyColor;

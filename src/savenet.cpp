@@ -285,12 +285,20 @@ void SaveNet::loadFile()
     //this->genomsize();
 
     fileBuffer.clear();
+    tmpBuffer = "";
     while(!feof(_file))
     {
-        char list[255];
-        fgets(list,255,_file);
-        tmpBuffer = list;
-        fileBuffer.push_back(list);
+        char list[1024];
+        if(fgets(list,1024,_file) == nullptr)
+        {
+            break;
+        }
+        tmpBuffer += list;
+        if(tmpBuffer.find("\n") != -1)
+        {
+            fileBuffer.push_back(tmpBuffer);
+            tmpBuffer = "";
+        }
     }
     fclose(_file);
 
@@ -313,71 +321,100 @@ void SaveNet::loadFile()
 
     for(unsigned int a=0; a<fileBuffer.size(); a++)
     {
-
-        if(fileBuffer[a].find("[NET]") != -1)
+        //if(fileBuffer[a].find("[NET]") != -1)
+        if(a == 50)
         {
-            netID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-            _connectionListFromFile.push_back(std::vector<Connection>());
-        }else if(fileBuffer[a].find("[NeuronID]") != -1)
-        {
-            readPos   = ReadPos::NeuronID;
-           // ptr_tmpNeuron = new Neuron();
-        }else if(fileBuffer[a].find("[Inputs]") != -1)
-        {
-            readPos   = ReadPos::Inputs;
-        }else if(fileBuffer[a].find("[Connections]") != -1)
-        {
-            readPos   = ReadPos::Connections;
-            _connectionListFromFile[_connectionListFromFile.size()-1].reserve(_connections);
+            a=50;
         }
-
-        switch(readPos)
+        while(fileBuffer[a] != "\n")
         {
-            case ReadPos::NeuronID:
+           // qDebug() << "a: "<<a<<" "<<QString::fromStdString(fileBuffer[a]);
+            if(fileBuffer[a].find("N") == 0)
             {
-                if(fileBuffer[a].find("[ID]") != -1)
-                {
-                    neuronID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-                    a++;
-                    neuronID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-                    readPos = ReadPos::nothing;
-                }
-                break;
-            }
-            case ReadPos::Inputs:
-            {
-                //ptr_tmpNeuron->inputs(atoi(fileBuffer[a+2].substr(fileBuffer[a+2].find("<")+1,fileBuffer[a+2].find(">")).c_str()));
-                inputs = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-                readPos = ReadPos::nothing;
-                break;
-            }
-            case ReadPos::Connections:
-            {
-                //connections einlesen
-                if(fileBuffer[a].find("[ID]") != -1)
-                {
-                    _connectionListFromFile[_connectionListFromFile.size()-1].push_back(Connection());
-                    inputCounter++;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].netID = netID;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].destination_ID = neuronID;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-                    a++;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
-                    a++;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = stof(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")));
-                    a++;
-                }
+                //netID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                netID = atoi(fileBuffer[a].substr(fileBuffer[a].find("N")+1,fileBuffer[a].find("D")).c_str());
+                fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("D"),fileBuffer[a].size());
+                _connectionListFromFile.push_back(std::vector<Connection>());
 
-                if(inputCounter == inputs)
-                {
-                    inputCounter = 0;
-                    readPos = ReadPos::nothing;
-                }
-                break;
-            }
-            default:
+            }else if(fileBuffer[a].find("D") == 0) //if(fileBuffer[a].find("[NeuronID]") != -1)
             {
+                //fileBuffer[a] = fileBuffer[a].substr(1,fileBuffer[a].size());
+                readPos   = ReadPos::NeuronID;
+               // ptr_tmpNeuron = new Neuron();
+            }else if(fileBuffer[a].find("I") == 0) //if(fileBuffer[a].find("[Inputs]") != -1)
+            {
+                //fileBuffer[a] = fileBuffer[a].substr(1,fileBuffer[a].size());
+                readPos   = ReadPos::Inputs;
+            }else if(fileBuffer[a].find("C") == 0) //if(fileBuffer[a].find("[Connections]") != -1)
+            {
+               // fileBuffer[a] = fileBuffer[a].substr(1,fileBuffer[a].size());
+                readPos   = ReadPos::Connections;
+                _connectionListFromFile[_connectionListFromFile.size()-1].reserve(_connections);
+            }
 
+            switch(readPos)
+            {
+                case ReadPos::NeuronID:
+                {
+                    if(fileBuffer[a].find("D") == 0) //if(fileBuffer[a].find("[ID]") != -1)
+                    {
+                        //neuronID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                        neuronID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("D")+1,fileBuffer[a].find("T")).c_str());
+                        //a++;
+                        //neuronID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                        neuronID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("T")+1,fileBuffer[a].find("I")).c_str());
+                        fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("I"),fileBuffer[a].size());
+                        readPos = ReadPos::nothing;
+                    }
+                    break;
+                }
+                case ReadPos::Inputs:
+                {
+                    //ptr_tmpNeuron->inputs(atoi(fileBuffer[a+2].substr(fileBuffer[a+2].find("<")+1,fileBuffer[a+2].find(">")).c_str()));
+                    inputs = atoi(fileBuffer[a].substr(fileBuffer[a].find("I")+1,fileBuffer[a].find("C")).c_str());
+                    fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("C"),fileBuffer[a].size());
+                    readPos = ReadPos::nothing;
+                    break;
+                }
+                case ReadPos::Connections:
+                {
+                    //connections einlesen
+                    //if(fileBuffer[a].find("i") == 0)
+                    {
+                        _connectionListFromFile[_connectionListFromFile.size()-1].push_back(Connection());
+                        inputCounter++;
+                        /*_connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].netID = netID;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].destination_ID = neuronID;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                        a++;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                        a++;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = stof(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")));
+                        a++;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].direction = atoi(fileBuffer[a].substr(fileBuffer[a].find("<")+1,fileBuffer[a].find(">")).c_str());
+                        a++;*/
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].netID = netID;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].destination_ID = neuronID;
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.ID = atoi(fileBuffer[a].substr(fileBuffer[a].find("i")+1,fileBuffer[a].find("t")).c_str());
+                        fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("i")+1,fileBuffer[a].size());
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.TYPE = (NeuronType)atoi(fileBuffer[a].substr(fileBuffer[a].find("t")+1,fileBuffer[a].find("w")).c_str());
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = stof(fileBuffer[a].substr(fileBuffer[a].find("w")+1,fileBuffer[a].find("d")));
+                        _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].direction = (ConnectionDirection)atoi(fileBuffer[a].substr(fileBuffer[a].find("d")+1,fileBuffer[a].find("i")).c_str());
+                        fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("i"),fileBuffer[a].size());
+                    }
+
+                    if(inputCounter == inputs)
+                    {
+                        inputCounter = 0;
+                        readPos = ReadPos::nothing;
+                        fileBuffer[a] = fileBuffer[a].substr(fileBuffer[a].find("|")+1,fileBuffer[a].size());
+                    }
+                    break;
+                }
+                default:
+                {
+
+                }
             }
         }
         _animals = _connectionListFromFile.size();
@@ -412,6 +449,8 @@ void SaveNet::loadFile()
         }
         this->addGenom(addGen);*/
     }
+    qDebug() << "read finish";
+    qDebug() << "nets: "<<_connectionListFromFile.size() << " connections: "<<_connectionListFromFile[0].size();
     inputCounter = 0;
 }
 void SaveNet::loadFile(std::string filename)
@@ -476,37 +515,50 @@ void SaveNet::saveFile()
     for(unsigned int net=0; net<_neuronList.size(); net++)
     {
         //[NET] Net ID
-        fprintf(_file,"[NET]<%i>\n{\n",_ID_list[net]);      //save net ID
+        //fprintf(_file,"[NET]<%i>\n{\n",_ID_list[net]);      //save net ID
+        fprintf(_file,"N%i",_ID_list[net]);      //save net ID
 
         for(unsigned int neuron=0; neuron<_neuronList[net].size(); neuron++)
         {
             //[NeuronID]
             //[ID]          -> ID-value
             //[NeuronType]  -> TYPE
-            fprintf(_file,"\t{\n");
+            /*fprintf(_file,"\t{\n");
             fprintf(_file,"\t\t[NeuronID]\n");
             fprintf(_file,"\t\t{\n");
             fprintf(_file,"\t\t\t[ID]<%i>\n",_neuronList[net][neuron]->ID().ID);
             fprintf(_file,"\t\t\t[NeuronType]<%i>\"%s\"\n",_neuronList[net][neuron]->ID().TYPE,Neuron::typeString(_neuronList[net][neuron]->ID().TYPE).c_str());
-            fprintf(_file,"\t\t}\n");
+            fprintf(_file,"\t\t}\n");*/
+            fprintf(_file,"D%i",_neuronList[net][neuron]->ID().ID);
+            fprintf(_file,"T%i",_neuronList[net][neuron]->ID().TYPE);
 
             //[Inputs]      -> amount of inputs of the Neuron
-            fprintf(_file,"\t\t[Inputs]<%i>\n",_neuronList[net][neuron]->inputs());
-            fprintf(_file,"\t\t[Connections]\n\t\t{\n",_neuronList[net][neuron]->inputs());
+            /*fprintf(_file,"\t\t[Inputs]<%i>\n",_neuronList[net][neuron]->inputs());
+            fprintf(_file,"\t\t[Connections]\n\t\t{\n",_neuronList[net][neuron]->inputs());*/
+            fprintf(_file,"I%i",_neuronList[net][neuron]->inputs());
+            fprintf(_file,"C%i",_neuronList[net][neuron]->inputs());
             for(unsigned int input=0; input<_neuronList[net][neuron]->inputs(); input++)
             {
                 // connectionAddress to the following weight, has Parameter of struct NeuronID
-                fprintf(_file,"\t\t\t{\n");
+                /*fprintf(_file,"\t\t\t{\n");
                 fprintf(_file,"\t\t\t\t[ID]<%i>\n",_neuronList[net][neuron]->inputID()[input].ID);
                 fprintf(_file,"\t\t\t\t[NeuronType]<%i>\"%s\"\n",_neuronList[net][neuron]->inputID()[input].TYPE,Neuron::typeString(_neuronList[net][neuron]->inputID()[input].TYPE).c_str());
                 //[w]   -> weight
                 fprintf(_file,"\t\t\t\t[w]<%.8f>\n",(double)_neuronList[net][neuron]->weight(input));
-                fprintf(_file,"\t\t\t}\n");
+                fprintf(_file,"\t\t\t\t[dir]<%i>\n",_neuronList[net][neuron]->inputConnectionDirection(_neuronList[net][neuron]->inputID(input)));
+                fprintf(_file,"\t\t\t}\n");*/
+                fprintf(_file,"i%i",_neuronList[net][neuron]->inputID()[input].ID);
+                fprintf(_file,"t%i",_neuronList[net][neuron]->inputID()[input].TYPE);
+                //[w]   -> weight
+                fprintf(_file,"w%.4f",(double)_neuronList[net][neuron]->weight(input));
+                fprintf(_file,"d%i",_neuronList[net][neuron]->inputConnectionDirection(_neuronList[net][neuron]->inputID(input)));
             }
-            fprintf(_file,"\t\t}\n");
-            fprintf(_file,"\t}\n");
+            /*fprintf(_file,"\t\t}\n");
+            fprintf(_file,"\t}\n");*/
+            fprintf(_file,"i|");
         }
-        fprintf(_file,"}\n");
+        //fprintf(_file,"}\n");
+        fprintf(_file,"\n");
     }
 
     fclose(_file);
@@ -875,17 +927,17 @@ void SaveNet::saveGenomOfNet(unsigned int ID)
         _genomsize = _genomList.size();
     }
 }
-std::vector<Connection> SaveNet::connectionList(unsigned int animal)
+std::vector<Connection> *SaveNet::connectionList(unsigned int animal)
 {
     if(animal >= animals())
     {
         error_general("connectionList(unsigned int ["+std::to_string(animal)+"])",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,animals()));
     }
-    return _connectionListFromFile[animal];
+    return &_connectionListFromFile[animal];
 }
-std::vector<std::vector<Connection> > SaveNet::connectionList()
+std::vector<std::vector<Connection> > *SaveNet::connectionList()
 {
-    return _connectionListFromFile;
+    return &_connectionListFromFile;
 }
 void SaveNet::clearGenomList()
 {
