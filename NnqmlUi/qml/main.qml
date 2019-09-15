@@ -2,14 +2,17 @@ import Mainwindowclass 1.0
 import QtQuick.Controls 2.0
 import QtQuick 2.12
 import QtQuick.Controls 1.4
+import "jsSource.js" as MyScript
+
 ApplicationWindow {
     id: window
     visible: true
     width: 800
-    height: 800
+    height: 400
     property variant win;
     Ui{
         id:ui
+        property bool setNewCon: false
         property real zoom: 1
         property int ansicht: 0
         /*ListModel {
@@ -34,7 +37,7 @@ ApplicationWindow {
 
     SideBar{
         id:sideBar
-        width:200
+        width:1
         height: window.height-topBar.height
         x: window.width-sideBar.width
         y: topBar.height

@@ -38,6 +38,7 @@ void Mainwindow::start(){
     workThread->stop =false;
     workThread->start();
     uiUpdateTimer->start(1000);
+    qDebug()<<"stürzt nicht ab";
 }
 void Mainwindow::setHiddenX(const int &i){
     workThread->hiddenNeuronX(unsigned(i));
@@ -67,8 +68,7 @@ void Mainwindow::stop(){
 }
 
 void Mainwindow::uiUpdate(){
-    net=workThread->net;
-    m_errorChart.push_back(qreal(workThread->averageError()));
+    //m_errorChart.push_back(qreal(workThread->averageError()));
     emit learningStepsChanged();
     emit averageErrorChanged();
     emit biasChanged();
@@ -90,7 +90,7 @@ float Mainwindow::averageError() const{
 void Mainwindow::reset(){
     stop();
     workThread->reset();
-    uiUpdate();
+    workThread->start();
 }
 void Mainwindow::creatNew(float maxError, int maxSteps){
   stop();
@@ -194,10 +194,17 @@ vector<int> Mainwindow::endNeuron()const{
 
 vector<qreal> Mainwindow::connectionWeight()const{
     vector<qreal> vect;
+
     vector<Connection> con=*workThread->net->connectionList();
     for (unsigned int i=0;i<workThread->net->connections();++i) {
+        if(i<con.size()){
         if(con[i].source_ID.TYPE!=5&&con[i].destination_ID.TYPE!=5){
             vect.push_back(qreal(con[i].weight));
+        }
+        }
+        else {
+            qDebug()<<"add 1";
+            vect.push_back(1);
         }
     }
     return vect;
@@ -230,4 +237,13 @@ int Mainwindow::activFunc() const{
 
 void Mainwindow::setActivFunc(const int &id){
     workThread->activFunc(id);
+}
+
+void Mainwindow::addNeuron(){
+
+}
+
+void Mainwindow::addConnection(unsigned int start, unsigned int end){
+    workThread->net->connectNeuronViaID(start, end);
+    emit netStructurChanged();
 }

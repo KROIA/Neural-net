@@ -1,14 +1,19 @@
 import QtQuick.Controls 2.0
 import QtQuick 2.12
 
-Rectangle {
+Item {
     id: neuron
+    signal clicked()
+    signal released()
+    width: neuron.diameter
+    height: neuron.diameter
     property int i: 1
     property int diameter: 50
     property int totalHeight: parent.height
     property int totalWidth: parent.width
     property int layerX: 0
     property int neuronid: 0
+    property int neuronVisibilaty: 1
     property int connectionInputX: 0
     property int connectionInputY: height/2
     property int connectionOutputX: width
@@ -23,22 +28,36 @@ Rectangle {
                                         {
                                       return"darkgreen";
                                         }
+    Rectangle{
+        id:neuronRect
+        anchors.fill: parent
 
-    width: neuron.diameter
-    height: neuron.diameter
-    border.color: "black"
-    color:{
-        if(neuronValue!=0){
-               return Qt.lighter(neuronColor,(1-Math.abs(neuronValue))*4);
-                }
-        else{
-            return "white";
-        }
+        border.color: if(neuron.neuronVisibilaty==1){
+                          return "black"
+                      }
+                      else if(neuron.neuronVisibilaty==2){
+                                  return "grey"
+                              }
+                     else{
+                          return "white"
+                      }
+        visible: if(neuron.neuronVisibilaty==0){
+                     return 0
+                 }
+                else{
+                     return 1
+                 }
+        color:
+            if(neuron.neuronVisibilaty!=0&&neuron.neuronValue!=0){
+                   return Qt.lighter(neuron.neuronColor,(1-Math.abs(neuron.neuronValue))*4);
+            }
+            else{
+                return "white"
+            }
 
+        border.width: 4
+        radius: neuron.diameter*0.5
     }
-
-    border.width: 1
-    radius: net.diameter*0.5
     Text {
         id: text
             anchors.fill: parent
@@ -58,5 +77,16 @@ Rectangle {
                       return "black"
                   }
         }
+    MouseArea{
+        id: mouseArea
+        z:1
+        anchors.fill: parent
+        onClicked: {
+                neuron.clicked();
+        }
+        onReleased: {
+            neuron.released();
+        }
+    }
 
 }

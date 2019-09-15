@@ -88,6 +88,8 @@ public slots:
     void uiUpdate();
     void reset();
     void creatNew(float maxError, int maxSteps);
+    void addNeuron();
+    void addConnection(unsigned int start, unsigned int end);
 private:
     BackpropNet *net;
     NetDataBase db;

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
+
 Item {
     id:netCircle
     anchors.fill:parent
@@ -19,6 +20,7 @@ Item {
                   (Math.sin(((360/net.neurons)*ui.endNeuron[index]-90)*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
             weight: ui.connectionWeight[index]
             value: ui.neuronValueVect[ui.startNeuron[index]]
+            connectionVisibilaty: net.connectionVisible[index]
         }
     }
     PathView {
@@ -38,6 +40,14 @@ Item {
             connectionInputY: Math.sin(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)
             connectionOutputX: connectionInputX
             connectionOutputY: connectionInputY
+            neuronVisibilaty: net.neuronVisible[index]
+            onClicked: {
+                net.neuronClicked(index)
+            }
+            onReleased: {
+                net.neuronReleased(index)
+            }
+
         }
 
         path: Path {
@@ -51,9 +61,11 @@ Item {
             }
             PathArc {
                 x: pathView.width/2; y:0
-                radiusX: pathView.width/2; radiusY: pathView.height/2
+                radiusX: pathView.width/2
+                radiusY: pathView.height/2
                 useLargeArc: true
             }
+
         }
     }
 }

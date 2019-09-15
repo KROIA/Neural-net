@@ -23,6 +23,7 @@ void netThread::run(){
     while(finished==false){
     //qDebug()<<daten.trainingInput.daten(_counter)[0]<<""<<daten.trainingInput.daten(_counter)[1];
     net->input(daten.trainingInput.daten(_counter));//counter]);       // Sets the input of the net with the trainingset [counter]
+    net->run();
     outputVector = net->output();                  // Calculates the output vector and returns it
     net->expected(daten.trainingOutput.daten(_counter));//counter]);
     _averageError += abs(net->netError());    //The net calculates the error of netprediction and expected output                                   //Saving only the positive value of the error to stop the training later when the error is low enough
@@ -130,13 +131,20 @@ void netThread::setupNet(){
     net= new BackpropNet(1);
     net->mutationFactor(float(0.0005));
     net->loadFromNetFile();
-    net->set(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Sigmoid);
+    net->set(_inputNeurons,_hiddenNeuronX,
+             _hiddenNeuronY,_outputNeuron,
+             _bias,enableAverage,Sigmoid);
     net->updateNetConfiguration();
     net->saveToNetFile();
 }
 void netThread::reset(){
-    net->set(_inputNeurons,_hiddenNeuronX,_hiddenNeuronY,_outputNeuron,_bias,enableAverage,Sigmoid);
+    net= new BackpropNet(1);
+    net->mutationFactor(float(0.0005));
+    net->set(_inputNeurons,_hiddenNeuronX,
+             _hiddenNeuronY,_outputNeuron,
+             _bias,enableAverage,Sigmoid);
     net->updateNetConfiguration();
+    net->saveToNetFile();
 
 }
 vector<qreal> netThread::errorChart(){

@@ -11,5 +11,6 @@
         <file>qml/Connection.qml</file>
         <file>qml/NetInCircel.qml</file>
         <file>qml/NetClassic.qml</file>
+        <file>qml/jsSource.js</file>
     </qresource>
 </RCC>

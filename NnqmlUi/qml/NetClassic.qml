@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.12
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
@@ -15,6 +15,7 @@ Rectangle{
             yEnd: net.layerPositionY[ui.endNeuron[index]]*net.distanceY+(net.diameter/2)+100
             weight: ui.connectionWeight[index]
             value: ui.neuronValueVect[ui.startNeuron[index]]
+            connectionVisibilaty: net.connectionVisible[index]
         }
 
     }
@@ -30,6 +31,12 @@ Rectangle{
                     net.layerPositionX[index]=0
                     net.layerPositionY[index]=index
                     return ui.neuronValueVect[index]}
+            onClicked:{
+                net.neuronClicked(index)
+            }
+            onReleased: {
+                net.neuronReleased(index)
+            }
             }
         }
     Repeater{
@@ -44,7 +51,13 @@ Rectangle{
                 net.layerPositionX[index+ui.input]=1
                 net.layerPositionY[index+ui.input]=index
                 return ui.neuronValueVect[index+ui.input]}
+            onClicked:{
+                net.neuronClicked(index)
             }
+            onReleased: {
+                net.neuronReleased(index)
+            }
+        }
     }
     Repeater{
         id:output
@@ -58,6 +71,12 @@ Rectangle{
                 net.layerPositionX[index+ui.input+ui.hiddenY]=2
                 net.layerPositionY[index+ui.input+ui.hiddenY]=index
                 return ui.neuronValueVect[index+ui.input]}
+            onClicked:{
+                net.neuronClicked(index)
+            }
+            onReleased: {
+                net.neuronReleased(index)
+            }
             }
     }
 }

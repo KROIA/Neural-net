@@ -8,27 +8,4 @@ Rectangle{
     Net{
 
     }
-
-    /*ListView {
-        id: root
-        focus: true
-        anchors.fill: parent
-        snapMode: ListView.SnapOneItem
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        highlightMoveDuration: 250
-        orientation: ListView.Horizontal
-        boundsBehavior: Flickable.StopAtBounds
-
-        model: ListModel {
-            ListElement {component: "Net.qml"}
-        }
-
-        delegate: Loader {
-            width: root.width
-            height: root.height
-            source: component
-            asynchronous: true
-            onLoaded: sourceLoaded = true
-        }
-    }*/
 }
