@@ -40,7 +40,7 @@ Item {
             connectionInputY: Math.sin(((360/net.neurons)*index+90)*(Math.PI/180))*(net.diameter/2)+(net.diameter/2)
             connectionOutputX: connectionInputX
             connectionOutputY: connectionInputY
-            neuronVisibilaty: net.neuronVisible[index]
+            //neuronVisibilaty: net.neuronVisible[index]
             onClicked: {
                 net.neuronClicked(index)
             }

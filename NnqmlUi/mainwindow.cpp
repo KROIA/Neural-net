@@ -6,7 +6,6 @@ Mainwindow::Mainwindow(QObject *parent) :
     m_LayerId=0;
     m_NeuronId=0;
     workThread = new netThread(this);
-    workThread->net->saveToNetFile("Test");
     uiUpdateTimer = new QTimer(this);
     connect(uiUpdateTimer, SIGNAL(timeout()),this,SLOT(uiUpdate()));
     uiUpdate();
@@ -101,6 +100,7 @@ void Mainwindow::creatNew(float maxError, int maxSteps){
   m_NeuronId=0;
   m_errorChart.clear();
   reset();
+  workThread->creatStandartCon();
   emit trainingSetChanged();
   emit outputSetChanged();
   emit hiddenXChanged();
@@ -108,6 +108,9 @@ void Mainwindow::creatNew(float maxError, int maxSteps){
   emit biasChanged();
   emit outputChanged();
   emit inputChanged();
+  emit netStructurChanged();
+  emit netValueChanged();
+  qDebug()<<"Reset abgschlossen";
   qDebug()<<"creating finished";
 }
 vector<qreal> Mainwindow::trainingSet()const{
@@ -134,15 +137,19 @@ vector<qreal> Mainwindow::outputSet()const{
 
     return test;
 }
+
 void Mainwindow::setOutputSet(const vector<qreal> &set){
     workThread->daten.trainingOutput.daten(set,unsigned(m_trainingSetId));
 }
+
 void Mainwindow::setTrainingSet(const vector<qreal> &set){
     workThread->daten.trainingInput.daten(set);
 }
+
 vector<qreal> Mainwindow::errorChart() const{
     return m_errorChart;
 }
+
 vector<qreal> Mainwindow::toQreal(vector<float> v){
     vector<qreal> returnVec;
     for (unsigned int i=0;i<v.size();++i) {
@@ -150,6 +157,7 @@ vector<qreal> Mainwindow::toQreal(vector<float> v){
     }
     return  returnVec;
 }
+
 vector<float> Mainwindow::toFloat(vector<qreal> v){
     vector<float> returnVec;
     for (unsigned int i=0;i<v.size();++i) {
@@ -160,7 +168,9 @@ vector<float> Mainwindow::toFloat(vector<qreal> v){
 
 vector<int> Mainwindow::startNeuron()const{
     vector<int> vect;
+    qDebug()<<"connections from conncetions"<<workThread->net->connections();
     vector<Connection> con=*workThread->net->connectionList();
+    qDebug()<<"connections from array"<<con.size();
     for (unsigned int i=0;i<workThread->net->connections();++i) {
         switch (con[i].source_ID.TYPE) {
             case 1:
@@ -176,6 +186,7 @@ vector<int> Mainwindow::startNeuron()const{
     }
     return vect;
 }
+
 vector<int> Mainwindow::endNeuron()const{
     vector<int> vect;
     vector<Connection> con=*workThread->net->connectionList();
@@ -203,12 +214,12 @@ vector<qreal> Mainwindow::connectionWeight()const{
         }
         }
         else {
-            qDebug()<<"add 1";
             vect.push_back(1);
         }
     }
     return vect;
 }
+
 vector<qreal> Mainwindow::neuronValueVect()const{
     vector<qreal> vect;
     vector<Neuron *> neuron=*workThread->net->allNeurons();
@@ -220,6 +231,7 @@ vector<qreal> Mainwindow::neuronValueVect()const{
     }
     return vect;
 }
+
 vector<int> Mainwindow::neuronTyp()const{
     vector<int> vect;
     vector<Neuron *> neuron=*workThread->net->allNeurons();
@@ -231,6 +243,7 @@ vector<int> Mainwindow::neuronTyp()const{
     }
     return vect;
 }
+
 int Mainwindow::activFunc() const{
     return  workThread->net->activationFunction();
 }
@@ -238,6 +251,7 @@ int Mainwindow::activFunc() const{
 void Mainwindow::setActivFunc(const int &id){
     workThread->activFunc(id);
 }
+
 
 void Mainwindow::addNeuron(){
 

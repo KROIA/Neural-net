@@ -37,7 +37,7 @@ ApplicationWindow {
 
     SideBar{
         id:sideBar
-        width:1
+        width:250
         height: window.height-topBar.height
         x: window.width-sideBar.width
         y: topBar.height

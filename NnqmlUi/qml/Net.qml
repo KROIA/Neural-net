@@ -58,8 +58,8 @@ Item {
                         return false
 
             }
-            function neuronClicked(index){
-                if(ui.setNewCon==true){
+            /*function neuronClicked(index){
+                /*if(ui.setNewCon==true){
                     net.neuronVisible=Source.showAllNeuron(net.neuronVisible);
                     net.connectionVisible=Source.showAllCon(net.connectionVisible)
                     if(net.newConStartSet==false&&index>ui.input){
@@ -90,7 +90,7 @@ Item {
             }
             function neuronReleased(index){
                 net.onNeuronClicked=false
-            }
+            }*/
 
         }
 

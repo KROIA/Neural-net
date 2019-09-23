@@ -92,7 +92,7 @@ public slots:
     void addConnection(unsigned int start, unsigned int end);
 private:
     BackpropNet *net;
-    NetDataBase db;
+    //NetDataBase db;
     int m_NeuronId;
     float m_NeuronValue;
     int m_ConnectionId;

@@ -12,6 +12,7 @@ netThread::netThread(QObject *parent):
     _bias = true;
     enableAverage = false;
     m_activFunc=4;
+    qDebug()<<"bis da chunt";
     setupNet();
     net->loadFromNetFile();
     net->updateNetConfiguration();
@@ -20,6 +21,7 @@ netThread::netThread(QObject *parent):
 }
 
 void netThread::run(){
+    _learningSteps=0;
     while(finished==false){
     //qDebug()<<daten.trainingInput.daten(_counter)[0]<<""<<daten.trainingInput.daten(_counter)[1];
     net->input(daten.trainingInput.daten(_counter));//counter]);       // Sets the input of the net with the trainingset [counter]
@@ -94,7 +96,7 @@ unsigned long netThread::learningSteps(){
 bool netThread::bias(){
     return _bias;
 }
-void netThread::activFunc(int i){
+void netThread::activFunc(unsigned int i){
     m_activFunc=i;
 }
 void netThread::bias(bool i){
@@ -111,8 +113,8 @@ void netThread::setupNet(){
     finished=false;
     _inputNeurons = unsigned(daten.trainingInput.daten(_counter).size());
     _outputNeuron = unsigned(daten.trainingOutput.daten(_counter).size());
-    //qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
-    qDebug()<<m_activFunc;
+    qDebug()<<_hiddenNeuronX<<"\t"<<_hiddenNeuronY<<"\t"<<_maxError<<"\t"<<_maxSteps<<"\t";
+    qDebug()<<"activation Funktion="<<m_activFunc;
     /*Activation a;
     switch (m_activFunc) {
         case 0: a=Linear;
@@ -130,22 +132,20 @@ void netThread::setupNet(){
         }*/
     net= new BackpropNet(1);
     net->mutationFactor(float(0.0005));
-    net->loadFromNetFile();
     net->set(_inputNeurons,_hiddenNeuronX,
              _hiddenNeuronY,_outputNeuron,
              _bias,enableAverage,Sigmoid);
     net->updateNetConfiguration();
-    net->saveToNetFile();
 }
 void netThread::reset(){
     net= new BackpropNet(1);
+    _learningSteps=0;
     net->mutationFactor(float(0.0005));
     net->set(_inputNeurons,_hiddenNeuronX,
              _hiddenNeuronY,_outputNeuron,
-             _bias,enableAverage,Sigmoid);
+             _bias,enableAverage,Sigmoid); 
     net->updateNetConfiguration();
     net->saveToNetFile();
-
 }
 vector<qreal> netThread::errorChart(){
     return _errorChart;
@@ -174,3 +174,71 @@ void netThread::maxError(float i){
 void netThread::maxSteps(unsigned long i){
     _maxSteps=i;
 }
+
+void netThread::creatStandartCon(){
+    vector<Connection> con;
+
+    for (unsigned int i=0;i<_inputNeurons*_hiddenNeuronY;++i) {
+        Connection tempCon;
+        NeuronID neuronSourceID;
+        neuronSourceID.ID=i/_hiddenNeuronY;
+        neuronSourceID.TYPE= NeuronType::input;
+        NeuronID destinationID = net->hiddenNeuron(0,i%_hiddenNeuronY)->ID();
+        tempCon.netID=i;
+        tempCon.source_ID=neuronSourceID;
+        tempCon.destination_ID=destinationID;
+        con.push_back(tempCon);
+    }
+    if(_hiddenNeuronX>1){
+        for (unsigned int i=0;i<_hiddenNeuronX-1;++i) {
+            for (unsigned int j=0;j<_hiddenNeuronY;++j) {
+                NeuronID neuronSourceID= net->hiddenNeuron(i,j)->ID();
+                Connection tempCon;
+                qDebug()<<"j"<<j;
+                for(unsigned int o=0;j<_hiddenNeuronY;++j){
+                    NeuronID destinationID = net->hiddenNeuron(i+1,o)->ID();
+                    tempCon.netID=o+j*_hiddenNeuronY+i*_hiddenNeuronY+_inputNeurons*_hiddenNeuronY;
+                    tempCon.source_ID=neuronSourceID;
+                    tempCon.destination_ID=destinationID;
+                    con.push_back(tempCon);
+                    qDebug()<<"o"<<o;
+                }
+            }
+        }
+    }
+
+    for (unsigned int i=0;i<_hiddenNeuronY*_outputNeuron;++i) {
+        NeuronID destinationID = net->hiddenNeuron(_hiddenNeuronX-1,i%_hiddenNeuronY)->ID();
+        Connection tempCon;
+        NeuronID neuronSourceID= net->outputNeuron(i/_hiddenNeuronY)->ID();
+        tempCon.netID=i+_inputNeurons*_hiddenNeuronY+(_hiddenNeuronX-1)*_hiddenNeuronY;
+        tempCon.source_ID=neuronSourceID;
+        tempCon.destination_ID=destinationID;
+        con.push_back(tempCon);
+    }
+    for (unsigned int i=0;i<_hiddenNeuronX;++i) {
+        for (unsigned int j=0;j<_hiddenNeuronY;++j) {
+            NeuronID destinationID = net->hiddenNeuron(i,j)->ID();
+            Connection tempCon;
+            NeuronID neuronSourceID;
+            neuronSourceID.TYPE= NeuronType::bias;
+            tempCon.netID=_inputNeurons*_hiddenNeuronY+(_hiddenNeuronX-1)*_hiddenNeuronY+i*hiddenNeuronY()+j;
+            tempCon.source_ID=neuronSourceID;
+            tempCon.destination_ID=destinationID;
+            con.push_back(tempCon);
+        }
+    }
+    for (unsigned int i=0;i<_outputNeuron;++i) {
+            NeuronID destinationID = net->outputNeuron(i)->ID();
+            Connection tempCon;
+            NeuronID neuronSourceID;
+            neuronSourceID.TYPE= NeuronType::bias;
+            tempCon.netID=_inputNeurons*_hiddenNeuronY+(_hiddenNeuronX-1)*_hiddenNeuronY+_hiddenNeuronX*_hiddenNeuronY+i;
+            tempCon.source_ID=neuronSourceID;
+            tempCon.destination_ID=destinationID;
+            con.push_back(tempCon);
+        }
+    net->connectionList(con);
+    }
+
+

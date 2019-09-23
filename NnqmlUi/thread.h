@@ -27,7 +27,7 @@ public:
     void hiddenNeuronY(unsigned int i);
     void outputNeuron(unsigned int i);
     float maxError();
-    void activFunc(int i);
+    void activFunc(unsigned int i);
     unsigned long maxSteps();
     void maxError(float i);
     void maxSteps(unsigned long i);
@@ -38,6 +38,7 @@ public:
     Daten daten;
     vector<qreal> errorChart();
     void reset();
+    void creatStandartCon();
 signals:
     void netTrained();
 public slots:

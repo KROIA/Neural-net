@@ -6,7 +6,7 @@ Rectangle{
     id: netClassic
     x:0
     y:0
-    Repeater{
+    /*Repeater{
         model:ui.startNeuron.length
         Connection{
             xStart: net.layerPositionX[ui.startNeuron[index]]*net.distanceX+net.diameter+100
@@ -78,5 +78,5 @@ Rectangle{
                 net.neuronReleased(index)
             }
             }
-    }
+    }*/
 }
