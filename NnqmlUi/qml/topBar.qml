@@ -12,29 +12,29 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: 4
                 spacing: 10
-            Button{
+            TopBarButton{
                 id:run
                 text:"run"
                 onClicked:ui.start();
             }
-            Button{
+            TopBarButton{
                 id:stop
                 onClicked:ui.stop();
                 text: "stop"
             }
 
-            Button{
+            TopBarButton{
                 id:reset
                 onClicked: ui.reset()
                 text: "reset"
             }
-            Button{
+            TopBarButton{
                 id:zoomIn
                 onClicked: {ui.zoom=ui.zoom+0.1}
                 text: "+"
                 width: topBar.height
             }
-            Button{
+            TopBarButton{
                 id:zoomOut
                 onClicked: {if(ui.zoom>0.2){ui.zoom=ui.zoom-0.1}}
                 text: "-"
@@ -61,7 +61,7 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: 4
                 spacing: 10
-                Button{
+                TopBarButton{
                     id:creatNew
                     onClicked:{
                         ui.stop();
@@ -71,7 +71,7 @@ Rectangle {
                     }
                     text: "create new"
                 }
-                Button{
+                TopBarButton{
                     id:addCon
                     onClicked:  {
                         ui.setNewCon=true

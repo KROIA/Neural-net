@@ -51,6 +51,7 @@ DISTFILES += \
     qml/ErrorChart.qml \
     qml/NetClassic.qml \
     qml/NetInCircel.qml \
+    qml/TopBarButton.qml \
     qml/main.qml \
     qml/Neuron.qml \
     qml/Net.qml \

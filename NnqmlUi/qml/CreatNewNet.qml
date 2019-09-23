@@ -30,6 +30,7 @@ Dialog {
         ui.maxLearningSteps=maxSteps.value
         ui.bias=biosCheckbox.checked
         ui.creatNew(maxError.value/100,maxSteps.value)
+
         window.update()
         }
     GridLayout{

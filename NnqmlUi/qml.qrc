@@ -12,5 +12,6 @@
         <file>qml/NetInCircel.qml</file>
         <file>qml/NetClassic.qml</file>
         <file>qml/jsSource.js</file>
+        <file>qml/TopBarButton.qml</file>
     </qresource>
 </RCC>
