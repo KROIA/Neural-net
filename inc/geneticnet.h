@@ -180,6 +180,8 @@ class GeneticNet
         double              cycleTime();
         void                update_ptr_genomList();
 
+        SaveNet            *saveNet();
+
     private:
 
         void                    init(unsigned int animals,

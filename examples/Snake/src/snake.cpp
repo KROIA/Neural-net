@@ -12,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.02.00";
-    QString datum   = "04.09.2019";
+    QString version = "00.02.01";
+    QString datum   = "24.09.2019";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -50,6 +50,14 @@ Snake::Snake(QWidget *parent) :
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
     net->bias(true);
     net->loadFromNetFile("snake","net");
+    float gen = 0;
+    try {
+        net->saveNet()->getExtraParam("generation",gen);
+    } catch (...) {
+
+    }
+
+    generation = (unsigned int) gen;
     net->mutationFactor(0.05);
     net->mutationChangeWeight(0.1);
 
@@ -102,7 +110,7 @@ Snake::Snake(QWidget *parent) :
     }*/
 
     //-----------------------------
-    generation = 0;
+   // generation = 0;
 
   /*  qDebug() << "fieldOfView";
     int c = 0;
@@ -186,12 +194,13 @@ Snake::Snake(QWidget *parent) :
 
 
     _selfControl = false;
-    _pause = false;
+    _pause = true;
     _enableDisplay = true;
 
     _updateTimer = new QTimer(this);
     connect(_updateTimer,SIGNAL(timeout()),this,SLOT(timerEvent()));
-    _updateTimer->start(200);
+    if(!_pause)
+     _updateTimer->start(200);
 
     _updateTimer2 = new QTimer(this);
     connect(_updateTimer2,SIGNAL(timeout()),this,SLOT(timerEvent2()));
@@ -273,6 +282,17 @@ Snake::Snake(QWidget *parent) :
     _fullSycleTimeDebugCount = 0;
     _fullSycleTime           = 0;
     _averageCalcPerSec       = 0;
+    _averageScore_smoth      = 0;
+
+    _step = 0;
+
+    _record_enable = false;
+    _record_displayAutoEnabler = false;
+    _record_imageIndex = 0;
+    _record_generationInterval = ui->record_generationInterval_spinbox->value();
+    _record_stepInterval = ui->record_stepInterval_spinbox->value();
+    _record_generationIndex = generation;
+    _record_imageList.reserve(1000);
 
     qDebug() << "Setup done";
 }
@@ -420,6 +440,12 @@ void Snake::timerEvent()
 
     if(_enableDisplay)
       this->update();
+    if(_record_enable)
+    {
+        takescreenshot();
+        if(_record_imageList.size() >= 100)
+            savescreenshot();
+    }
     try{
         handleNet();
     }catch(std::runtime_error &e)
@@ -459,6 +485,9 @@ void Snake::timerEvent()
             break;
         }
     }
+
+
+    _step++;
 }
 void Snake::timerEvent2()
 {
@@ -573,6 +602,7 @@ void Snake::timerEvent2()
 
         ui->food_label->setText(QString::number(_environment->player(0)->food()));
         ui->steps_label->setText(QString::number(generation));
+        ui->record_imagesInBuffer_label->setText(QString::number(_record_imageList.size()));
 }
 
 void Snake::handleNet()
@@ -614,6 +644,7 @@ void Snake::handleNet()
                // net->run(animal);
              }
             net->run();
+
             //_calcPerSecCounter++;
             for(unsigned int animal=0; animal<net->animals(); animal++)
             {
@@ -650,6 +681,8 @@ void Snake::handleNet()
 
             if(deathCounter == net->animals())
             {
+                if(_record_enable)
+                    savescreenshot();
 #ifdef DEBUG_PRINTS
                 qDebug() << "all death";
 #endif
@@ -775,7 +808,16 @@ void Snake::handleNet()
                     _saveCounter = 0;
                     on_saveStats_pushbutton_clicked();
                 }
+                _step = 0;
                // on_saveStats_pushbutton_clicked();
+                if(_record_enable &&
+                   _record_displayAutoEnabler &&
+                   (generation%_record_generationInterval == 0 ||
+                    (generation-1)%_record_generationInterval == 0))
+                {
+                    qDebug() << "toggle display";
+                    on_toggleDisplay_pushbutton_clicked();
+                }
             }
             break;
         }
@@ -1257,7 +1299,9 @@ void Snake::on_saveStats_pushbutton_clicked()
     qDebug() << "save";
     try{
         saveVersusData();
+        net->saveNet()->setExtraParam("generation",(float)generation);
         net->saveToNetFile();
+        savescreenshot();
     }catch(std::runtime_error &e)
     {
         qDebug() << "error: "<< e.what();
@@ -1360,6 +1404,10 @@ void Snake::on_kill_pushButton_clicked()
         }
     }
 }
+void Snake::on_toggleDisplay_pushbutton_clicked(bool checked)
+{
+    _record_displayAutoEnabler = !_record_displayAutoEnabler;
+}
 void Snake::on_toggleDisplay_pushbutton_clicked()
 {
     _enableDisplay = !_enableDisplay;
@@ -1367,13 +1415,16 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
     _versusEnvironment->drawEnable(_enableDisplay);
     _backpropTrainingEnvironment->drawEnable(_enableDisplay);
 
+
     if(!_enableDisplay)
     {
         _versusEnvironment->showInfoText(false);
         _environment->showInfoText(false);
         _backpropTrainingEnvironment->showInfoText(false);
+
         return;
     }
+
 
     switch(_modus)
     {
@@ -1536,6 +1587,12 @@ void Snake::modeReset()
     _versusEnvironment->player(0)->resetDeathCount();
     _versusEnvironment->player(1)->resetScore();
     _versusEnvironment->player(1)->resetDeathCount();
+
+
+    if(_record_enable)
+        savescreenshot();
+    _step = 0;
+
 }
 
 void Snake::onSnakeKilled(unsigned int killer,unsigned int victim)
@@ -1637,10 +1694,69 @@ void Snake::saveError(std::string error)
 }
 
 
+void Snake::on_record_start_pushButton_clicked(bool checked)
+{
+    _record_enable = !_record_enable;
+    if(_record_savePath != ui->record_fileName_lineEdit->text())
+    {
+        _record_savePath = ui->record_fileName_lineEdit->text();
+        //_record_imageIndex = 0;
+    }
+    _record_generationInterval = (unsigned int)ui->record_generationInterval_spinbox->value();
+    _record_stepInterval = (unsigned int)ui->record_stepInterval_spinbox->value();
+    if(_record_enable)
+    {
+        on_record_clearBuffer_pushButton_clicked();
+        ui->record_start_pushButton->setText("stop record");
+    }
+    else
+    {
+        ui->record_start_pushButton->setText("start record");
+    }
 
+}
+void Snake::takescreenshot()
+{
+    if(generation%_record_generationInterval != 0 || _step % _record_stepInterval != 0)
+        return;
+    _record_imageList.push_back(this->grab());
+    ui->record_imagesInBuffer_label->setText(QString::number(_record_imageList.size()));
+}
+void Snake::savescreenshot()
+{
+    if(_record_imageList.size() == 0)
+        return;
+    //if(_record_imageList.size() > 100)
+    {
+        if(_record_generationIndex != generation)
+        {
+            _record_imageIndex = 0;
+            _record_generationIndex = generation;
+        }
+        QString folderPath = "generation_"+QString::number(_record_generationIndex);
+        if(_record_savePath != "")
+        {
+            folderPath = _record_savePath +"\\"+ folderPath;
+        }
+        mkdir(folderPath.toStdString().c_str());
+        for(unsigned int a=0; a<_record_imageList.size(); a++)
+        {
+            QString path = folderPath + "\\"+QString::number(_record_imageIndex*_record_stepInterval)+".png";
+            qDebug() << "save image: "<<path;
+            QFile file(path);
+            file.open(QIODevice::WriteOnly);
+            _record_imageList[a].save(&file, "PNG");
+            _record_imageIndex++;
+        }
+        _record_imageList.clear();
+        _record_imageList.reserve(1000);
+    }
+}
 
-
-
-
+void Snake::on_record_clearBuffer_pushButton_clicked()
+{
+    _record_imageList.clear();
+    _record_imageList.reserve(1000);
+}
 
 

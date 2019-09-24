@@ -1324,6 +1324,10 @@ void                   GeneticNet::update_ptr_genomList()
         _netList[a]->update_ptr_genomList();
     }
 }
+SaveNet                *GeneticNet::saveNet()
+{
+    return &_saveNet;
+}
 void                   *GeneticNet::runThread(void *threadarg)
 {
     //pthread_detach(pthread_self());

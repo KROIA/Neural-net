@@ -12,6 +12,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QLineSeries>
+#include <QPixmap>
 
 #include <ctime>
 #include <ratio>
@@ -78,10 +79,18 @@ class Snake : public QMainWindow
 
         void on_selectedSnake_slider_valueChanged(int value);
 
+        void on_record_start_pushButton_clicked(bool checked);
+
+        void on_record_clearBuffer_pushButton_clicked();
+
+        void on_toggleDisplay_pushbutton_clicked(bool checked);
+
     private:
         string GetLastErrorStdStr();
         void saveError(std::string error);
         void savePeroformanceData();
+        void takescreenshot();
+        void savescreenshot();
         Ui::Snake *ui;
         Environment *_environment;
         QPainter   *_painter;
@@ -112,6 +121,7 @@ class Snake : public QMainWindow
         vector<float> _foodScore_smoth_tmp;
         vector<float> _stepScore_smoth_tmp;
 
+        unsigned int _step;
         unsigned int generation;
         float _averageScore_smoth;
 
@@ -192,6 +202,15 @@ class Snake : public QMainWindow
         std::chrono::high_resolution_clock::time_point _fullSycleTimeStart;
         std::chrono::high_resolution_clock::time_point _fullSycleTimeEnd;
         std::chrono::duration<double> _fullSycleTime_span;
+
+        unsigned int _record_imageIndex;
+        unsigned int _record_generationIndex;
+        unsigned int _record_generationInterval;
+        unsigned int _record_stepInterval;
+        bool         _record_enable;
+        bool         _record_displayAutoEnabler;
+        QString      _record_savePath;
+        vector<QPixmap>_record_imageList;
 
 //#endif
 
