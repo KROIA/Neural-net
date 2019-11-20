@@ -1,11 +1,13 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "00.01.01"
-//              Datum   27.10.2018
+#define SAVENET_VERSION "02.01.00"
+//              Datum   16.08.2019
 
 #include <net.h>
 #include <time.h>
+
+
 
 class SaveNet
 {
@@ -24,7 +26,14 @@ class SaveNet
         void hiddenNeuronsY(unsigned int hiddenY);
         unsigned int hiddenNeuronsY();
         void outputNeurons(unsigned int outputs);
+        unsigned int neurons();
         unsigned int outputNeurons();
+        unsigned int hiddenNeurons();
+        unsigned int costumNeurons();
+        unsigned int connections();
+        unsigned int costumConnections();
+
+
         void bias(bool bias);
         bool bias();
         void biasValue(float value);
@@ -44,12 +53,12 @@ class SaveNet
         void saveFile();
         void saveFile(std::string filename);
 
-        void setGenom(std::vector<float>   genom);
-        void setGenom(unsigned int index,std::vector<float>   genom);
-        void setGenom(std::vector<std::vector<float>   > genomList);
-        void addGenom(std::vector<float>   genom);
-        void addGenom(std::vector<std::vector<float>   > genomList);
-        std::vector<float>  genom(unsigned int index);
+      //  void setGenom(std::vector<float>   genom);
+      //  void setGenom(unsigned int index,std::vector<float>   genom);
+      //  void setGenom(std::vector<std::vector<float>   > genomList);
+      //  void addGenom(std::vector<float>   genom);
+      //  void addGenom(std::vector<std::vector<float>   > genomList);
+        std::vector<float>  genom(unsigned int ID);
         std::vector<std::vector<float>  > genom();
         unsigned int animals();
 
@@ -62,7 +71,12 @@ class SaveNet
                  bool         average,
                  Activation   activationFunction,
                  float        biasValue);
-        //void net(Net *net);
+        void neuronsOfNet(unsigned int ID,std::vector<Neuron*> *neurons);
+        std::vector<Neuron*> neuronsOfNet(unsigned int ID);
+
+        std::vector<Connection> *connectionList(unsigned int animal);
+        std::vector<std::vector<Connection> > *connectionList();
+
 
         void clearGenomList();
         void clearExternParam();
@@ -70,6 +84,7 @@ class SaveNet
     private:
         void checkParam();
         unsigned int genomsize();
+        void saveGenomOfNet(unsigned int ID);
 
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
@@ -86,6 +101,7 @@ class SaveNet
         unsigned int _saves;
         FILE *_file;
 
+        unsigned int _animals;
         unsigned int _inputs;
         unsigned int _hiddenX;
         unsigned int _hiddenY;
@@ -94,6 +110,12 @@ class SaveNet
         bool         _average;
         float        _biasValue;
         Activation   _activationFuncton;
+        unsigned int _neurons;
+        unsigned int  _hiddenNeurons;
+        unsigned int  _outputNeurons;
+        unsigned int  _costumNeurons;
+        unsigned int _connections;
+        unsigned int  _costumConnections;
         std::vector<std::string> _extraParamName;
         std::vector<float>       _extraParamValue;
 
@@ -109,5 +131,15 @@ class SaveNet
         bool        _check_biasValue;
         bool        _check_average;
         bool        _check_activationFunction;
+        bool        _check_neurons;
+        bool         _check_hiddenNeurons;
+        bool         _check_outputNeurons;
+        bool         _check_costumNeuron;
+        bool        _check_connections;
+        bool         _check_costumConnections;
+
+        std::vector<std::vector<Neuron*>    > _neuronList;
+        std::vector<std::vector<Connection> > _connectionListFromFile;
+        std::vector<unsigned int>             _ID_list;
 };
 #endif // SAVENET_H

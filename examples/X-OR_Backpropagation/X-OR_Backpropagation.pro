@@ -37,3 +37,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    $$netIncPath/net.h \
+    $$netIncPath/neuron.h \
+    $$netIncPath/activation.h \
+    $$netIncPath/backpropnet.h \
+    $$netIncPath/savenet.h

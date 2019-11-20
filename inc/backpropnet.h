@@ -1,23 +1,23 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.02.00"
-//                      Datum   27.10.2018
+#define    BACKPROPNET_VERSION "02.04.00"
+//                      Datum   15.09.2019
 
 #include "net.h"
 #include "savenet.h"
 
-#include <QDebug>
-
 class BackpropNet : public Net
 {
     public:
-        BackpropNet();
-        BackpropNet(unsigned int inputs,
+        BackpropNet(unsigned int ID = 0);
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
                     unsigned int hiddenX,
                     unsigned int hiddenY,
                     unsigned int outputs);
-        BackpropNet(unsigned int inputs,
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
                     unsigned int hiddenX,
                     unsigned int hiddenY,
                     unsigned int outputs,
@@ -32,6 +32,8 @@ class BackpropNet : public Net
                         bool enableBias,
                         bool enableAverage,
                         Activation func);
+
+
 
         void        netFileName(std::string filename);
         std::string netFileName();
@@ -55,6 +57,28 @@ class BackpropNet : public Net
         void expected(std::vector<float> expected);
         void learn();
         void learn(std::vector<float> expected);
+
+        // Functions which aren't allowed for backpropagation yet:
+        void         costumNeurons(unsigned int costum);
+        unsigned int costumNeurons();
+        unsigned int costumConnections();
+        void         costumConnections(unsigned int connections);
+        void         neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
+        Neuron               *costumNeuron(NeuronID ID);
+        std::vector<Neuron*> *costumNeuron();
+        bool                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
+        bool                connectNeuron(Connection *connection);
+        bool                connectNeuron(std::vector<Connection> *connections);
+        void                connectionList(std::vector<Connection> *connections);
+        std::vector<Connection> *connectionList();
+        void                clearConnectionList();
+        NeuronID            addNeuron();
+        NeuronID            addNeuron(Neuron *neuron);
+        NeuronID            addNeuron(Connection connection);
+        NeuronID            addNeuron(std::vector<Connection> inputConnections);
+        void printIllegalFunctionMessage(std::string func);
+        //--------------------------------------------------------
+
     private:
         void init();
         //----------ERROR
@@ -78,4 +102,20 @@ class BackpropNet : public Net
 
         SaveNet _saveNet;
 };
+
+inline void __DEBUG_BACKPROPNET_(Net *ptr_net,std::string func,std::string message)
+{
+#ifdef _DEBUG_NET_ONLY_ID
+    if(ptr_net->ID() != _DEBUG_NET_ONLY_ID)
+        return;
+#endif
+#ifdef QT_APPLICATION
+    qDebug() << "["+QString::number(ptr_net->ID())+"] BackpropNet::"+QString::fromStdString(func)+" "+QString::fromStdString(message);
+#else
+    std::cout << "["<<ptr_net->ID()<<"]"<<"Net::"<<func<<" "<<message << std::endl;
+#endif
+
+#define __DEBUG_BACKPROPNET(net,func,message)(__DEBUG_BACKPROPNET_(net,func,message));
+
+}
 #endif // BACKPROPNET_H

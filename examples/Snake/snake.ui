@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1279</width>
+    <width>1521</width>
     <height>815</height>
    </rect>
   </property>
@@ -241,8 +241,8 @@
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>431</width>
-      <height>31</height>
+      <width>771</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -685,14 +685,206 @@
      <enum>Qt::Vertical</enum>
     </property>
    </widget>
+   <widget class="QLabel" name="calcPerSec_label">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>130</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Calc per Sec.</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="food_label_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Calc per Sec.</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>430</y>
+      <width>201</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="record_imagesInBuffer_label">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>90</y>
+       <width>41</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="record_fileName_lineEdit">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>20</y>
+       <width>81</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>scr</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="record_start_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>80</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>start record</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="record_imagesInBuffer_label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>40</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>gen. interval</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="record_generationInterval_spinbox">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>40</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>1000</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="record_imagesInBuffer_label_2">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>20</y>
+       <width>41</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Folder</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="record_imagesInBuffer_label_4">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>90</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Images in Buffer</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="record_clearBuffer_pushButton">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>90</y>
+       <width>80</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>clear Buffer</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="record_imagesInBuffer_label_5">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>60</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>step. interval</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="record_stepInterval_spinbox">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>60</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>1000</number>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1279</width>
-     <height>21</height>
+     <width>1521</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

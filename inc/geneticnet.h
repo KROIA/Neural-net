@@ -1,16 +1,42 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.02.00"
-//                      Datum   27.10.2018
+#define    GENETICNET_VERSION "02.05.01"
+//                      Datum  31.08.2019
 
 #include "net.h"
 #include "savenet.h"
 
 #include <QDebug>
 
+#include <cstdlib>
+#include <pthread.h>
+#include <unistd.h>
+#include <time.h>
+
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 #define GENETICNET_MIN_ANIMALS 2
 #define GENETICNET_MAX_ANIMALS 1000
+
+#define __enableGeneticNetThread
+//#define __DEBUG_TIMEINTERVAL
+//#define __DEBUG_TIMEINTERVAL_IN_THREAD
+#define __DEBUG_GENETICNET
+
+struct thread_data_geneticNet {
+   int  thread_id;
+   Net *net;
+   bool *exit;
+   bool *pause;
+   pthread_mutex_t *lock;
+   pthread_cond_t *condition_var;
+   bool isPaused;
+   long *delayMicros;
+   unsigned int debugParam;
+};
 
 class GeneticNet
 {
@@ -62,6 +88,11 @@ class GeneticNet
         unsigned int            hiddenNeuronsY();
         void                    outputNeurons(unsigned int outputs);
         unsigned int            outputNeurons();
+        void                    costumNeurons(unsigned int costum);
+        unsigned int            costumNeurons();
+        void                    costumConnections(unsigned int connections);
+        void                    neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
+
 
         void                    bias(bool enableBias);
         bool                    bias();
@@ -79,6 +110,7 @@ class GeneticNet
         std::vector<float>      genom(unsigned int animal);
         std::vector<std::vector<float>  >genom();
         unsigned int            genomsize();
+        void                    genomFromNetFile();
 
         void                    input(unsigned int animal, unsigned int input, float signal);
         float                   input(unsigned int animal, unsigned int input);
@@ -97,7 +129,7 @@ class GeneticNet
         Neuron                 *hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
         std::vector<Neuron*>     hiddenNeuronX(unsigned int animal, unsigned int hiddenX);    // |    Alle in einer Spalte
         std::vector<Neuron*>     hiddenNeuronY(unsigned int animal, unsigned int hiddenY);    // --   Alle in einer Reihe
-        std::vector<std::vector<Neuron*> > *hiddenNeuron(unsigned int animal);
+        std::vector<std::vector<Neuron*> > hiddenNeuron(unsigned int animal);
         Neuron                 *outputNeuron(unsigned int animal, unsigned int output);
         std::vector<Neuron*>   *outputNeuron(unsigned int animal);
 
@@ -124,6 +156,32 @@ class GeneticNet
 
         void                learn(std::vector<float>   scoreList);
         void                learn();
+
+        void                updateNetConfiguration();
+        /*  Needed after every change in the Net-structure like
+         *  inputNeurons()
+         *  sins V02.03.00
+         */
+        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
+        bool                connectNeuron(Connection *connection);
+        bool                connectNeuron(std::vector<Connection> *connections);
+        void                connectionList(std::vector<std::vector<Connection> >*connections);
+        std::vector<Connection> *connectionList(unsigned int netID);
+        std::vector<std::vector<Connection> *> connectionList();
+        void                clearConnectionList();
+
+        NeuronID            addNeuron();
+        NeuronID            addNeuron(Neuron *neuron);
+        NeuronID            addNeuron(Connection connection);
+        NeuronID            addNeuron(std::vector<Connection> inputConnections);
+
+
+
+        double              cycleTime();
+        void                update_ptr_genomList();
+
+        SaveNet            *saveNet();
+
     private:
 
         void                    init(unsigned int animals,
@@ -136,9 +194,12 @@ class GeneticNet
                                      Activation func);
 
         void learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2);
-        void learn_crossover(std::vector<float> oldGen1,std::vector<float> oldGen2,std::vector<float> &newGen1,std::vector<float> &newGen2);
+        void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<float> &newGen1,std::vector<float> &newGen2);
         void learn_mutate(std::vector<float> &genom);
 
+        //Threads
+        static void *runThread(void *threadarg);
+        static void *runThread_setupNet(void *threadarg);
         //----------ERROR
         std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
         std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
@@ -163,5 +224,22 @@ class GeneticNet
         std::default_random_engine          _randEngine;
 
         SaveNet _saveNet;
+
+        //Threads
+        pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
+
+        pthread_mutex_t _threadLock_setupNet=PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var_setupNet   = PTHREAD_COND_INITIALIZER;
+        std::vector<thread_data_geneticNet> _threadData;
+        std::vector<pthread_t>  _threadList;
+        std::vector<thread_data_geneticNet> _threadData_setupNet;
+        std::vector<pthread_t>  _threadList_setupNet;
+        bool                    _threadExit;
+        bool                    _threadPause;
+        long                    _threadDelayMicros;
+
+        double  _timeInterval;
+        unsigned int _debugCount;
 };
 #endif // GENETICNET_H

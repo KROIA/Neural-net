@@ -1,5 +1,9 @@
 #include "food.h"
 
+Food::Food(const Food &food)
+{
+    this->operator=(food);
+}
 Food::Food(QSize mapSize)
 {
     _mapSize = mapSize;
@@ -70,7 +74,7 @@ QColor Food::color()
 }
 bool Food::isAlive()
 {
-    return _eaten;
+    return !_eaten;
 }
 void Food::update()
 {
@@ -86,4 +90,14 @@ void Food::update()
 void Food::eaten()
 {
     _eaten = true;
+}
+Food &Food::operator=(const Food &food)
+{
+    this->_mapSize      = food._mapSize;
+    this->_pos          = food._pos;
+    this->_color        = food._color;
+    this->_amount       = food._amount;
+    this->_eaten        = food._eaten;
+    this->_liveCounter  = food._liveCounter;
+    return *this;
 }
