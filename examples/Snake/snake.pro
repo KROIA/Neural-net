@@ -35,8 +35,10 @@ username     = AlexKrieg
 QT_work_dir  = C:/Users/$$username/Documents/QT
 geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = $$QT_work_dir/DLL/Rect
+configPath   = $$QT_work_dir/DLL/Config
 
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
+      $$configPath//$$DLL_buildPath/Config.dll
 
 incPath = inc
 srcPath = src
@@ -47,6 +49,7 @@ INCLUDEPATH += $$netIncPath \
                $$incPath \
                $$rectPath \
                $$geometryPath \
+               $$configPath \
 
 
 SOURCES += \

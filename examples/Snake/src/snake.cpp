@@ -12,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "00.02.01";
-    QString datum   = "24.09.2019";
+    QString version = "01.00.00";
+    QString datum   = "25.11.2019";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -26,30 +26,76 @@ Snake::Snake(QWidget *parent) :
     ui->info_label->setText(infoLabelText);
 
 
-    _statsFilename = "stats.csv";
 
 
     // setupFieldOfView();
 
-    bool enableKillreward = false;
-    _respawnAmount        = 3;
-    _versusSaveFileName   = "versusSave.csv";
+
+
+    // comfigParam
+    bool enableKillreward   = false;
+    unsigned int hiddenX    = 1;
+    unsigned int hiddenY    = 5;
+    unsigned int animals    = 100;
+    _respawnAmount          = 3;
+    int mapSizeX            = 100;
+    int mapSizeY            = 100;
+    QString netFileName     = "snake";
+    float net_mutationFactor = 0.05f;
+    float net_mutationChangeWeight = 0.1f;
+    unsigned int enviromentTileSize = 6;
+    unsigned int enviromentTileSpace = 1;
+
+    unsigned int versusEnviromentTileSize = 30;
+    unsigned int versusEnviromentTileSpace = 2;
+
+    //end comfigParam
+    Config config("snakeConfig.txt");
+    config.read();
+    config.parameterUInt("net_hiddenX",hiddenX,"rw");
+    config.parameterUInt("net_hiddenY",hiddenY,"rw");
+    config.parameterFloat("net_mutationFactor",net_mutationFactor,"rw");
+    config.parameterFloat("net_mutationChangeWeight",net_mutationChangeWeight,"rw");
+    config.parameterUInt("animals",animals,"rw");
+
+    config.parameterUInt("respawnAmountPerRound",_respawnAmount,"rw");
+    config.parameterBool("enableKillreward",enableKillreward,"rw");
+
+    config.parameterInt("mapsize_X",mapSizeX,"rw");
+    config.parameterInt("mapsize_Y",mapSizeY,"rw");
+    config.parameterUInt("enviromentTileSize",enviromentTileSize,"rw");
+    config.parameterUInt("enviromentTileSpace",enviromentTileSpace,"rw");
+    config.parameterUInt("versusEnviromentTileSize",versusEnviromentTileSize,"rw");
+    config.parameterUInt("versusEnviromentTileSpace",versusEnviromentTileSpace,"rw");
+
+   // QString valueGrabber = "stats.csv";
+    //config.parameter("stats_Filename",valueGrabber,"rw"); _statsFilename = valueGrabber.toStdString();
+   // valueGrabber = "versusSave.csv";
+   // config.parameter("versusStats_Filename",valueGrabber,"rw"); _statsFilename = valueGrabber.toStdString();
+    config.parameter("net_Filename",netFileName,"rw");
+    config.save();
+
+    _statsFilename      = netFileName.toStdString()+"_stats.csv";
+    _versusSaveFileName = netFileName.toStdString()+"_versusStats.csv";
+    _calcPerSecFileName = netFileName.toStdString()+"_calcPerSec.csv";
+
+    //config.parameter()
+
     _versusSaveScoreInterval = 2;
-    QSize mapsize{100,100};
+    QSize mapsize{mapSizeX,mapSizeY};
     //----------------NEURAL NET------------------
 
-    unsigned int animals = 300;
+
 #ifdef GLOBALVIEW
     unsigned int inputs = /*_fieldOfView.size()*/4 * (mapsize.width() * mapsize.height()) + 4; //3 Sensor Layer (food,snake,obsticle)
 #else
     unsigned int inputs = /*_fieldOfView.size()*/3 * (3 + 2); //3 Sensor Layer (food,snake,obsticle)
 #endif
-    unsigned int hiddenX = 1;
-    unsigned int hiddenY = 5;
-    unsigned int outputs = 3;                       // left | right
+
+    unsigned int outputs = 3;
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
     net->bias(true);
-    net->loadFromNetFile("snake","net");
+    net->loadFromNetFile(netFileName.toStdString(),"net");
     float gen = 0;
     try {
         net->saveNet()->getExtraParam("generation",gen);
@@ -58,8 +104,8 @@ Snake::Snake(QWidget *parent) :
     }
 
     generation = (unsigned int) gen;
-    net->mutationFactor(0.05);
-    net->mutationChangeWeight(0.1);
+    net->mutationFactor(net_mutationFactor);
+    net->mutationChangeWeight(net_mutationChangeWeight);
 
     _backpropNet = new BackpropNet(0,
                                    net->inputNeurons(),
@@ -103,36 +149,15 @@ Snake::Snake(QWidget *parent) :
     }*/
     net->saveToNetFile();
 
-    /*try {
-        net->genomFromNetFile();
-    } catch (std::runtime_error &e) {
-        qDebug() << "net->genomFromNetFile() "<<e.what();
-    }*/
-
-    //-----------------------------
-   // generation = 0;
-
-  /*  qDebug() << "fieldOfView";
-    int c = 0;
-    for(unsigned int a=0; a<sqrt(_fieldOfView.size()); a++)
-    {
-        QString txt = "";
-        for(unsigned int b=0; b<sqrt(_fieldOfView.size()); b++)
-        {
-            txt+=QString::number(_fieldOfView[c].x())+"|"+QString::number(_fieldOfView[c].y())+"  ";
-            c++;
-        }
-        qDebug() << txt;
-    }*/
 
 
     _painter = new QPainter(this);
 //#ifdef TESTMODE
     _versusEnvironment = new Environment(this,_painter,2);
     _versusEnvironment->mapsize(QSize(30,30));
-    _versusEnvironment->tileSize(10);
-    _versusEnvironment->tileSpace(2);
-    _versusEnvironment->scale(3);
+    _versusEnvironment->scale(1);
+    _versusEnvironment->tileSize(versusEnviromentTileSize);
+    _versusEnvironment->tileSpace(versusEnviromentTileSpace);
     _versusEnvironment->drawPos(QPoint(300,15));
 
     _versusEnvironment->player(0)->globalView(true);
@@ -158,9 +183,10 @@ Snake::Snake(QWidget *parent) :
 //#else
     _environment = new Environment(this,_painter,net->animals());
     _environment->mapsize(mapsize);
-    _environment->tileSize(3);
-    _environment->tileSpace(1);
-    _environment->scale(2);
+    _environment->scale(1);
+    _environment->tileSize(enviromentTileSize);
+    _environment->tileSpace(enviromentTileSpace);
+
     _environment->drawPos(QPoint(300,15));
 
     _backpropTrainingEnvironment = new Environment(this,_painter,1);
@@ -371,10 +397,10 @@ void Snake::timerEvent()
 #endif
             _fullSycleTimeDebugCount = 0;
         }
-        if(_fullSycleTime_span.count() > 100)
+       /* if(_fullSycleTime_span.count() > 100)
         {
             _fullSycleTime = 0;
-        }
+        }*/
         _fullSycleTimeDebugCount++;
     }catch(std::runtime_error &e)
     {
@@ -440,7 +466,7 @@ void Snake::timerEvent()
 
     if(_enableDisplay)
       this->update();
-    if(_record_enable)
+    if(_record_enable && _enableDisplay)
     {
         takescreenshot();
         if(_record_imageList.size() >= 100)
@@ -802,12 +828,12 @@ void Snake::handleNet()
                     _environment->player(animal)->revive();
                 }
                 _environment->obsticleReplace();
-                _saveCounter++;
+   /*             _saveCounter++;
                 if(_saveCounter > 500)
                 {
                     _saveCounter = 0;
                     on_saveStats_pushbutton_clicked();
-                }
+                }*/
                 _step = 0;
                // on_saveStats_pushbutton_clicked();
                 if(_record_enable &&
@@ -815,8 +841,20 @@ void Snake::handleNet()
                    (generation%_record_generationInterval == 0 ||
                     (generation-1)%_record_generationInterval == 0))
                 {
-                    qDebug() << "toggle display";
-                    on_toggleDisplay_pushbutton_clicked();
+                    //if(_record_generationInterval > 1)
+                    {
+                        if(generation%_record_generationInterval == 0 && !_enableDisplay)
+                        {
+                            qDebug() << "toggleDisplay on";
+                            on_toggleDisplay_pushbutton_clicked();
+                        }else if((generation-1)%_record_generationInterval == 0 && _enableDisplay)
+                        {
+                            qDebug() << "toggleDisplay off";
+                            on_toggleDisplay_pushbutton_clicked();
+                        }
+                    }
+
+
                 }
             }
             break;
@@ -1292,7 +1330,10 @@ void Snake::on_pause_pushButton_clicked()
     if(_pause)
         _updateTimer->stop();
     else
+    {
+        _fullSycleTimeStart = std::chrono::high_resolution_clock::now();
         _updateTimer->start();
+    }
 }
 void Snake::on_saveStats_pushbutton_clicked()
 {
@@ -1349,14 +1390,14 @@ void Snake::on_saveStats_pushbutton_clicked()
 }
 void Snake::savePeroformanceData()
 {
-    FILE *statsFile = fopen("calcPerSec.csv","r");
+    FILE *statsFile = fopen(_calcPerSecFileName.c_str(),"r");
     bool fileExists = false;
     if(statsFile)
     {
         fileExists = true;
         fclose(statsFile);
     }
-    statsFile = fopen("calcPerSec.csv","a");
+    statsFile = fopen(_calcPerSecFileName.c_str(),"a");
     if(!statsFile)
         return;
 
@@ -1717,6 +1758,7 @@ void Snake::on_record_start_pushButton_clicked(bool checked)
 }
 void Snake::takescreenshot()
 {
+
     if(generation%_record_generationInterval != 0 || _step % _record_stepInterval != 0)
         return;
     _record_imageList.push_back(this->grab());

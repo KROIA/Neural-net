@@ -8,6 +8,7 @@
 
 #include <geneticnet.h>
 #include <backpropnet.h>
+#include <config.h>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -135,11 +136,12 @@ class Snake : public QMainWindow
         float _calcPerSecond;
         long _calcPerSecCounter;
         float        _averageCalcPerSec;        //Test case
-        std::vector<float>  _averageCalcPerSec_List;
+        std::vector<float>   _averageCalcPerSec_List;
         std::vector<double>  _averageEnviromentCycleTime;
         std::vector<double>  _averageNetCycleTime;
         std::vector<double>  _averageSnakeCycleTime;
         unsigned int _saveCounter;
+        std::string _calcPerSecFileName;
 
 //#ifdef TESTMODE
         int _modus;

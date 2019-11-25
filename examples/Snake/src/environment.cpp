@@ -98,6 +98,8 @@ QSize Environment::mapsize()
 }
 void Environment::tileSize(unsigned int size)
 {
+    if(size == 0)
+        size=1;
     _tileSize = size * scale();
 }
 unsigned int Environment::tileSize()
@@ -167,10 +169,11 @@ void Environment::mapInit()
             tmpRect->end(QPoint(tileSize(),tileSize()));
 
             tmpRect->drawPos(QPoint(drawPos().x()+(tileSize()+_tileSpace)*x,drawPos().y()+(tileSize()+_tileSpace)*y));
-
             tmpRect->frame(false);
-            tmpRect->frameSize(5);
+#ifdef _DRAW_TILEFRAME
+            tmpRect->frameSize(0);
             tmpRect->frameColor(_environmentColor);
+#endif
             tmpRect->color(_environmentColor);
 
             tmpMapVec.push_back(tmpRect);
@@ -292,12 +295,15 @@ void Environment::setSnakeOnMap(unsigned int player)
                 return;
             }
             _viewMap[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()] = MapData::snake;
+#ifdef _DRAW_TILEFRAME
             //_map[_player[player]->pos()[a].rx()][_player[player]->pos()[a].y()]->frameSize(5);
             //_map[_player[player]->pos()[a].rx()][_player[player]->pos()[a].y()]->frameColor(_player[player]->color(a));
             _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->frame(false);
+#endif
+
             _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->color(_player[player]->color(a));
 
-            _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->end(QPoint(tileSize()*1.3,tileSize()*1.3));
+            _map[_player[player]->pos(a)->rx()][_player[player]->pos(a)->ry()]->end(QPoint(tileSize()+tileSpace()/2,tileSize()+tileSpace()/2));
         }
     }
 }
@@ -335,22 +341,23 @@ void Environment::update()
                 _food.push_back(new Food(_mapsize));
             }
         }
-#ifdef __enableEnviromentThread
+/*#ifdef __enableEnviromentThread
         for(unsigned int a=0; a<_player.size(); a++)
         {
             _threadData[a].food = &_food;
         }
-#endif
+#endif*/
     }
+    std::chrono::high_resolution_clock::time_point t2;
+    std::chrono::duration<double> time_span;
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-    //clock_t startTime = clock();
-    //qDebug() << "sEnv: ";
 #ifdef __enableEnviromentThread
-//Thread begin
+
+    double timeout = 1; //1 sec
     unsigned int playerSize = _player.size();
     pthread_mutex_lock(&_threadLock);
-    //_threadDelayMicros = 1000000;
+
 
     _threadPause = false;
     for(unsigned int a=0; a<playerSize; a++)
@@ -359,8 +366,8 @@ void Environment::update()
     }
     pthread_cond_broadcast( &_thread_condition_var);
     pthread_mutex_unlock(&_threadLock);
-    int pause = 0;
-    bool _pause;
+    unsigned int pause = 0;
+    unsigned int _pause;
 
    // Sleep(10);
     vector<bool> restartCheckList(playerSize,false);
@@ -369,15 +376,42 @@ void Environment::update()
         pause = 0;
         for(unsigned int a=0; a<playerSize; a++)
         {
+            if(time_span.count() >= timeout)
+            {
+                qDebug() << "GeneticNet::run() thread timeout: "<<timeout;
+                qDebug() << "Threads running: "<<playerSize-pause;
+                timeout+=timeout;
+                pause = 0;
+                for(unsigned int b=0; b<playerSize; b++)
+                {
+                    if(restartCheckList[b])
+                    {
+                        pause++;
+                    }
+                }
+
+                FILE *p_file = fopen("EnviromentThreadTimeout.txt","a");
+                if(p_file)
+                {
+                    fprintf(p_file,"running threads: %i\n",playerSize-pause);
+                    pthread_mutex_lock(&_threadLock);
+                    for(unsigned int b=0; b<playerSize; b++)
+                    {
+                        fprintf(p_file,"thread: %i\tdebugParam: %i\tpaused: %i\n",b,_threadData[b].debugParam,_threadData[b].isPaused);
+                    }
+                    pthread_mutex_unlock(&_threadLock);
+                    fclose(p_file);
+                }
+            }
             if(restartCheckList[a])
             {
                 pause++;
                 continue;
             }
             pthread_mutex_lock(&_threadLock);
-            _pause = _threadData[a].isPaused;
+            _pause = _threadData[a].debugParam;
             pthread_mutex_unlock(&_threadLock);
-            if(_pause)
+            if(_pause == 7)
             {
                restartCheckList[a] = true;
             }
@@ -469,8 +503,8 @@ void Environment::update()
         _player[player]->update();
     }
 
-    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+    t2 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t2 - t1);
     //qDebug() << "fEnv: " << _timeinterval;
     //-----------------------------------
     _timeinterval = 0.9*_timeinterval + 0.1*time_span.count();
@@ -495,7 +529,9 @@ void Environment::update()
                 _viewMap[x][y] = MapData::nothing;
                 if(_drawEnable)
                 {
+#ifdef _DRAW_TILEFRAME
                     _map[x][y]->frame(false);
+#endif
                     _map[x][y]->color(_environmentColor);
                     _map[x][y]->end(QPoint(tileSize(),tileSize()));
                 }
@@ -549,12 +585,14 @@ void Environment::update()
             _viewMap[_food[a]->pos().x()][_food[a]->pos().y()] = MapData::food;
             if(_drawEnable)
             {
+#ifdef _DRAW_TILEFRAME
                 _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameSize(2);
                 _map[_food[a]->pos().x()][_food[a]->pos().y()]->frameColor(QColor((_food[a]->color().red()*80)/100,(_food[a]->color().green()*80)/100,(_food[a]->color().blue()*80)/100));
                 _map[_food[a]->pos().x()][_food[a]->pos().y()]->frame(true);
+#endif
                 _map[_food[a]->pos().x()][_food[a]->pos().y()]->color(_food[a]->color());
 
-                _map[_food[a]->pos().x()][_food[a]->pos().y()]->end(QPoint(tileSize()*0.8,tileSize()*0.8));
+               // _map[_food[a]->pos().x()][_food[a]->pos().y()]->end(QPoint(tileSize()*0.8,tileSize()*0.8));
                 if(_showInfoText)
                 {
                     _labelMap[_food[a]->pos().x()][_food[a]->pos().y()]->setText(QString::number(_food[a]->amount()));
@@ -959,6 +997,7 @@ void *Environment::runThread(void *threadarg)
     pthread_mutex_lock(my_data->lock);
     my_data->isPaused = true;
     time.tv_nsec = *my_data->delayMicros;
+    my_data->debugParam = 1; //start
     pthread_mutex_unlock(my_data->lock);
     qDebug() << "thread start: "<<my_data->thread_id << " "<<(*my_data->player)[my_data->thread_id];
 
@@ -1150,6 +1189,7 @@ void *Environment::runThread(void *threadarg)
 
             pthread_mutex_lock(my_data->lock);
             my_data->isPaused = true;
+            my_data->debugParam = 7; //end
             pthread_mutex_unlock(my_data->lock);
             pthread_mutex_lock(my_data->lock);
             pthread_cond_wait( my_data->condition_var, my_data->lock );

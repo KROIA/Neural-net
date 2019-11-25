@@ -208,19 +208,19 @@ void                    GeneticNet::animals(unsigned int animals)
     {
        _threadExit = true;
        _threadPause = false;
-       _threadDelayMicros = 1000000;
+   //    _threadDelayMicros = 1000000;
        if(_threadList.size() != 0)
        {
            for(unsigned int a=0; a<_threadList.size(); a++)
            {
-               pthread_join(_threadList[a], NULL);
+               pthread_join(_threadList[a], nullptr);
            }
        }
        if(_threadList_setupNet.size() != 0)
        {
            for(unsigned int a=0; a<_threadList_setupNet.size(); a++)
            {
-               pthread_join(_threadList_setupNet[a], NULL);
+               pthread_join(_threadList_setupNet[a], nullptr);
            }
        }
        _netList.reserve(animals);
@@ -237,24 +237,24 @@ void                    GeneticNet::animals(unsigned int animals)
             _threadList_setupNet.push_back(pthread_t());
 
             _threadData.push_back(thread_data_geneticNet());
-            _threadData[a].thread_id = a;
+            _threadData[a].thread_id = (int)a;
             _threadData[a].net = _netList[a];
             _threadData[a].exit = &_threadExit;
             _threadData[a].pause = &_threadPause;
             _threadData[a].lock = &_threadLock;
             _threadData[a].condition_var = &_thread_condition_var;
             _threadData[a].isPaused = false;
-            _threadData[a].delayMicros = &_threadDelayMicros;
+     //       _threadData[a].delayMicros = &_threadDelayMicros;
 
             _threadData_setupNet.push_back(thread_data_geneticNet());
-            _threadData_setupNet[a].thread_id = a;
+            _threadData_setupNet[a].thread_id = (int)a;
             _threadData_setupNet[a].net = _netList[a];
             _threadData_setupNet[a].exit = &_threadExit;
             _threadData_setupNet[a].pause = &_threadPause;
             _threadData_setupNet[a].lock = &_threadLock_setupNet;
             _threadData_setupNet[a].condition_var = &_thread_condition_var_setupNet;
             _threadData_setupNet[a].isPaused = false;
-            _threadData_setupNet[a].delayMicros = &_threadDelayMicros;
+            //_threadData_setupNet[a].delayMicros = &_threadDelayMicros;
         }
 
     }
@@ -851,7 +851,7 @@ void                    GeneticNet::run()
 
 #ifdef __enableGeneticNetThread
         pthread_mutex_lock(&_threadLock);
-        _threadDelayMicros = 1000000;
+      //  _threadDelayMicros = 1000000;
         _threadExit = false;
         _threadPause = false;
         for(unsigned int a=0; a<_animals; a++)
@@ -1341,9 +1341,9 @@ void                   *GeneticNet::runThread(void *threadarg)
     time.tv_sec = 0;
     pthread_mutex_lock(my_data->lock);
     my_data->isPaused = false;
-    time.tv_nsec = *my_data->delayMicros;
+    //time.tv_nsec = *my_data->delayMicros;
     pthread_mutex_unlock(my_data->lock);
-    qDebug() << "thread start: "<<my_data->thread_id << " "<<my_data->net;
+ //   qDebug() << "thread start: "<<my_data->thread_id << " "<<my_data->net;
     pthread_mutex_lock(my_data->lock);
     my_data->debugParam = 1; //start
     pthread_mutex_unlock(my_data->lock);
@@ -1458,7 +1458,7 @@ void                   *GeneticNet::runThread(void *threadarg)
         }
         lastPauseState = pause;*/
     }
-    qDebug() << "thread stop: "<<my_data->thread_id << " "<<my_data->net;
+  //  qDebug() << "thread stop: "<<my_data->thread_id << " "<<my_data->net;
     pthread_exit(NULL);
 }
 void                   *GeneticNet::runThread_setupNet(void *threadarg)
@@ -1468,12 +1468,12 @@ void                   *GeneticNet::runThread_setupNet(void *threadarg)
     my_data = (struct thread_data_geneticNet *) threadarg;
 
  //   my_data->net = new Net(my_data->thread_id);
-    qDebug() << "threadSetup begin: "<<my_data->thread_id;
+ //   qDebug() << "threadSetup begin: "<<my_data->thread_id;
     //pthread_mutex_lock(my_data->lock);
     my_data->net->updateNetConfiguration();
     //pthread_mutex_unlock(my_data->lock);
     //my_data->net->updateNetConfiguration();
-    qDebug() << "threadSetup done: "<<my_data->thread_id;
+ //   qDebug() << "threadSetup done: "<<my_data->thread_id;
     pthread_exit(NULL);
 }
 //----------ERROR

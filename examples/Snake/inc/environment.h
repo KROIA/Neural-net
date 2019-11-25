@@ -24,6 +24,8 @@
 //#define __DEBUG_TIMEINTERVAL
 //#define __DEBUG_TIMEINTERVAL_IN_THREAD
 
+//#define _DRAW_TILEFRAME
+
 using namespace std;
 using namespace std::chrono;
 
@@ -39,6 +41,7 @@ struct thread_data_player {
    bool isPaused;
    long *delayMicros;
    bool killPlayer;
+   unsigned int debugParam;
 };
 
 enum MapData

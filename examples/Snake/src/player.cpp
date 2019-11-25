@@ -83,7 +83,11 @@ QPoint *Player::pos(unsigned int index)
 {
     if(_playerPos.size() <= index)
     {
-        throw std::runtime_error("pos(unsigned int ["+std::to_string(index)+"]) out of range : 0 - "+std::to_string(_playerPos.size()-1));
+        if(_playerPos.size() == 0)
+        {
+            throw std::runtime_error("Player::pos(unsigned int ["+std::to_string(index)+"]) _playerPos.size() == 0");
+        }
+        throw std::runtime_error("Player::pos(unsigned int ["+std::to_string(index)+"]) out of range : 0 - "+std::to_string(_playerPos.size()-1));
     }
     return &_playerPos[index];
 }

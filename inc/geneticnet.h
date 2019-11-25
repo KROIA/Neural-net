@@ -34,7 +34,7 @@ struct thread_data_geneticNet {
    pthread_mutex_t *lock;
    pthread_cond_t *condition_var;
    bool isPaused;
-   long *delayMicros;
+   //long *delayMicros;
    unsigned int debugParam;
 };
 
@@ -237,7 +237,7 @@ class GeneticNet
         std::vector<pthread_t>  _threadList_setupNet;
         bool                    _threadExit;
         bool                    _threadPause;
-        long                    _threadDelayMicros;
+    //  long                    _threadDelayMicros;
 
         double  _timeInterval;
         unsigned int _debugCount;
