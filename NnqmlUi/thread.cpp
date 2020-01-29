@@ -145,6 +145,7 @@ void netThread::reset(){
              _hiddenNeuronY,_outputNeuron,
              _bias,enableAverage,Sigmoid); 
     net->updateNetConfiguration();
+    creatStandartCon();
     net->saveToNetFile();
 }
 vector<qreal> netThread::errorChart(){

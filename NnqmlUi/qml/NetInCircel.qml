@@ -20,7 +20,7 @@ Item {
                   (Math.sin(((360/net.neurons)*ui.endNeuron[index]-90)*(Math.PI/180))*(netCircle.bigDiameter/2)+(netCircle.bigDiameter/2)+200)
             weight: ui.connectionWeight[index]
             value: ui.neuronValueVect[ui.startNeuron[index]]
-            connectionVisibilaty: net.connectionVisible[index]
+            connectionVisibilaty: 1//net.connectionVisible[index]
         }
     }
     PathView {
@@ -29,7 +29,7 @@ Item {
         height: netCircle.bigDiameter
         x:200
         y:200
-        model: net.neurons
+        model: ui.neuronValueVect.length
 
         delegate: Neuron{
             id:neuron

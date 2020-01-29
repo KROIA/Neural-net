@@ -90,6 +90,15 @@ void Mainwindow::reset(){
     stop();
     workThread->reset();
     workThread->start();
+    emit trainingSetChanged();
+    emit outputSetChanged();
+    emit hiddenXChanged();
+    emit hiddenYChanged();
+    emit biasChanged();
+    emit outputChanged();
+    emit inputChanged();
+    emit netStructurChanged();
+    emit netValueChanged();
 }
 void Mainwindow::creatNew(float maxError, int maxSteps){
   stop();
@@ -171,7 +180,7 @@ vector<int> Mainwindow::startNeuron()const{
     qDebug()<<"connections from conncetions"<<workThread->net->connections();
     vector<Connection> con=*workThread->net->connectionList();
     qDebug()<<"connections from array"<<con.size();
-    for (unsigned int i=0;i<workThread->net->connections();++i) {
+    for (unsigned int i=0;i<con.size();++i) {
         switch (con[i].source_ID.TYPE) {
             case 1:
                 vect.push_back(int(con[i].source_ID.ID));
@@ -190,7 +199,7 @@ vector<int> Mainwindow::startNeuron()const{
 vector<int> Mainwindow::endNeuron()const{
     vector<int> vect;
     vector<Connection> con=*workThread->net->connectionList();
-    for (unsigned int i=0;i<workThread->net->connections();++i) {
+    for (unsigned int i=0;i<con.size();++i) {
         switch (con[i].source_ID.TYPE) {
             case 5:
                 break;
@@ -207,7 +216,7 @@ vector<qreal> Mainwindow::connectionWeight()const{
     vector<qreal> vect;
 
     vector<Connection> con=*workThread->net->connectionList();
-    for (unsigned int i=0;i<workThread->net->connections();++i) {
+    for (unsigned int i=0;i<con.size();++i) {
         if(i<con.size()){
         if(con[i].source_ID.TYPE!=5&&con[i].destination_ID.TYPE!=5){
             vect.push_back(qreal(con[i].weight));
@@ -259,5 +268,7 @@ void Mainwindow::addNeuron(){
 
 void Mainwindow::addConnection(unsigned int start, unsigned int end){
     workThread->net->connectNeuronViaID(start, end);
+    workThread->net->updateNetConfiguration();
     emit netStructurChanged();
+    emit netValueChanged();
 }
