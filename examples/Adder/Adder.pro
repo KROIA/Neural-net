@@ -20,18 +20,17 @@ srcPath = src
 netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
-               $$incPath \
+               $$inc
 
 SOURCES += \
     $$srcPath/main.cpp \
+    $$srcPath/pid.cpp \
     $$netSrcPath/net.cpp \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
-    $$netSrcPath/geneticnet.cpp \
+    $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
-    $$netSrcPath/error.cpp\
-    $$srcPath/timer.cpp \
-
+    $$netSrcPath/error.cpp
 
 
 # Default rules for deployment.
@@ -40,10 +39,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$incPath/timer.h \
+    $$srcPath/pid.h \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
+    $$netIncPath/activation.h \
     $$netIncPath/backpropnet.h \
-    $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h

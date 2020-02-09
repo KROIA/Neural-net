@@ -29,7 +29,8 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/savenet.cpp \
-    $$srcPath/enviroment.cpp
+    $$srcPath/enviroment.cpp \
+    $$netSrcPath/error.cpp\
 
 
 # Default rules for deployment.
@@ -38,4 +39,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$incPath/enviroment.h
+    $$incPath/enviroment.h \
+    $$netIncPath/net.h \
+    $$netIncPath/neuron.h \
+    $$netIncPath/backpropnet.h \
+    $$netIncPath/geneticnet.h \
+    $$netIncPath/savenet.h \
+    $$netIncPath/error.h

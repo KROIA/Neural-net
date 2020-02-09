@@ -1,70 +1,67 @@
 #include "neuron.h"
 
-
-Neuron::Neuron()
+unsigned int Neuron::_globalNeurons = 0;
+Neuron::Neuron(QObject *parent)
+    : QObject (parent)
 {
     init(NEURON_MIN_INPUTS,Activation::Sigmoid,false);
 }
-Neuron::Neuron(unsigned int inputs)
+Neuron::Neuron(unsigned int inputs,
+               QObject *parent)
+    : QObject (parent)
 {
     init(inputs,Activation::Sigmoid,false);
 }
-Neuron::Neuron(unsigned int inputs, Activation activationFunction)
+Neuron::Neuron(unsigned int inputs,
+               Activation activationFunction,
+               QObject *parent)
+    : QObject (parent)
 {
     init(inputs,activationFunction,false);
 }
-Neuron::Neuron(unsigned int inputs, Activation activationFunction, bool enableAverage)
+Neuron::Neuron(unsigned int inputs,
+               Activation activationFunction,
+               bool enableAverage,
+               QObject *parent)
+    : QObject (parent)
 {
     init(inputs,activationFunction,enableAverage);
 }
-void Neuron::init(unsigned int inputs, Activation activationFunction, bool enableAverage)
-{
-    _inputs = 0;
-    _netInput = 0;
-    _output = 0;
-    _delayedOutput = 0;
-    _update = true;
-    _randEngine = std::default_random_engine(rand()%100);
-    this->ID(NeuronID{.ID = unsigned(rand()) % 30000,.TYPE = NeuronType::none});
-    try {
-        this->inputs(inputs);
-        this->activationFunction(activationFunction);
-        this->enableAverage(enableAverage);
-    } catch (std::runtime_error &e) {
-        error_general("init(unsigned int ["+std::to_string(inputs)+"] , Activation ["+activationString(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
-    }
-}
+
 Neuron::~Neuron()
 {
+   _globalNeurons--;
    _weightList.clear();
    _ptr_inputList.clear();
    _inputConnectionList.clear();
    _inputConnectionID_list.clear();
    _inputConnectionDirection_List.clear();
 }
-void Neuron::ID(NeuronID ID)
+void Neuron::set_ID(NeuronID ID)
 {
     _ID = ID;
 }
-void Neuron::ID(unsigned int ID)
+void Neuron::set_ID(unsigned int ID)
 {
     _ID.ID = ID;
 }
-void Neuron::TYPE(NeuronType TYPE)
+void Neuron::set_TYPE(NeuronType TYPE)
 {
     _ID.TYPE = TYPE;
 }
-NeuronID Neuron::ID()
+NeuronID Neuron::get_ID()
 {
     return _ID;
 }
 
 
-void Neuron::inputs(unsigned int inputs)
+void Neuron::set_inputs(unsigned int inputs)
 {
     if(inputs < NEURON_MIN_INPUTS || inputs > NEURON_MAX_INPUTS)
     {
-        error_general("inputs(unsigned int ["+std::to_string(inputs)+"] )",error_paramOutOfRange(0,inputs,(unsigned int)NEURON_MIN_INPUTS,(unsigned int)NEURON_MAX_INPUTS));
+        addError(Error("set_inputs(unsigned int ["+QString::number(inputs)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',static_cast<unsigned int>(NEURON_MIN_INPUTS),inputs,static_cast<unsigned int>(NEURON_MAX_INPUTS),']')));
+        return;
     }
     if(inputs != _inputs)
     {
@@ -78,7 +75,9 @@ void Neuron::inputs(unsigned int inputs)
                 _inputConnectionDirection_List.reserve(inputs);
             }
             catch (std::exception &e) {
-                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
+                addError(Error("inputs(unsigned int ["+QString::number(inputs)+"])",QString(e.what())));
+                return;
+                //error_general("inputs(unsigned int ["+QString::number(inputs)+"])",e.what());
             }
         }
         while(inputs > _inputs)
@@ -87,14 +86,19 @@ void Neuron::inputs(unsigned int inputs)
                 _ptr_inputList.push_back(nullptr);
                 _inputConnectionList.push_back(false);
                 _weightList.push_back(0);
-                _inputConnectionID_list.push_back(NeuronID{.ID = NEURON_ID_INVALID,.TYPE = NeuronType::none});
+                NeuronID id;
+                id.ID = NEURON_ID_INVALID;
+                id.TYPE = NeuronType::none;
+                _inputConnectionID_list.push_back(id);
                 _inputConnectionDirection_List.push_back(ConnectionDirection::forward);
                 _inputs++;
-                randWeight(_inputs-1);
+                set_randWeight(_inputs-1);
             } catch (std::exception &e) {
-                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
+                addError(Error("inputs(unsigned int ["+QString::number(inputs)+"])",QString(e.what())));
+                return;
             }catch (...) {
-                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])","unnkown");
+                addError(Error("inputs(unsigned int ["+QString::number(inputs)+"])","unnkown"));
+                return;
             }
         }
         while(inputs < _inputs)
@@ -102,15 +106,19 @@ void Neuron::inputs(unsigned int inputs)
             try{
                 deleteInput(_inputs-1);
             } catch (std::exception &e) {
-                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])",e.what());
+                //error_general("inputs(unsigned int ["+QString::number(inputs)+"])",e.what());
+                addError(Error("inputs(unsigned int ["+QString::number(inputs)+"])",QString(e.what())));
+                return;
             }catch (...) {
-                error_general("inputs(unsigned int ["+std::to_string(inputs)+"])","unnkown");
+                addError(Error("inputs(unsigned int ["+QString::number(inputs)+"])","unnkown"));
+                return;
+               // error_general("inputs(unsigned int ["+QString::number(inputs)+"])","unnkown");
             }
         }
-        _update     = true;
+        _needsCalculationUpdate     = true;
     }
 }
-unsigned int Neuron::inputs()
+unsigned int Neuron::get_inputs()
 {
     return _inputs;
 }
@@ -118,167 +126,215 @@ int Neuron::deleteInput(unsigned int input)
 {
     if(input >= _inputs)
     {
+        addError(Error("deleteInput(usnigned int ["+QString::number(input)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        /*
 #ifdef _DEBUG_NEURON_DELETE_INPUT
-        __DEBUG_NEURON(this,"deleteInput(unsigned int ["+std::to_string(input)+"])",error_paramOutOfRange((unsigned int)0,(unsigned int)input,(unsigned int)0,(unsigned int)_inputs-1));
-#endif
+        __DEBUG_NEURON(this,"deleteInput(unsigned int ["+QString::number(input)+"])",error_paramOutOfRange((unsigned int)0,(unsigned int)input,(unsigned int)0,(unsigned int)_inputs-1));
+#endif*/
         return 2;
     }
     try{
-        _ptr_inputList.erase(_ptr_inputList.begin()+input);
-        _inputConnectionList.erase(_inputConnectionList.begin()+input);
-        _weightList.erase(_weightList.begin()+input);
-        _inputConnectionID_list.erase(_inputConnectionID_list.begin()+input);
-        _inputConnectionDirection_List.erase(_inputConnectionDirection_List.begin()+input);
+        _ptr_inputList.erase(_ptr_inputList.begin()+static_cast<int>(input));
+        _inputConnectionList.erase(_inputConnectionList.begin()+static_cast<int>(input));
+        _weightList.erase(_weightList.begin()+static_cast<int>(input));
+        _inputConnectionID_list.erase(_inputConnectionID_list.begin()+static_cast<int>(input));
+        _inputConnectionDirection_List.erase(_inputConnectionDirection_List.begin()+static_cast<int>(input));
         _inputs--;
     } catch (std::exception &e) {
-        error_general("deleteInput(unsigned int ["+std::to_string(input)+"])",e.what());
+        //error_general("deleteInput(unsigned int ["+QString::number(input)+"])",e.what());
+        addError(Error("deleteInput(unsigned int ["+QString::number(input)+"] )",QString(e.what())));
         return 0;
     }
     return 1;
 }
 
-void Neuron::activationFunction(Activation activationFunction)
+void Neuron::set_activationFunction(Activation activationFunction)
 {
     if(activationFunction >= neuron_activationFunctionAmount)
     {
-        error_general("activationFunction(Avtivation ["+activationString(activationFunction)+"] )",error_paramOutOfRange((unsigned int)0,(unsigned int)activationFunction,(unsigned int)0,(unsigned int)neuron_activationFunctionAmount));
+        addError(Error("activationFunction(Activation ["+Neuron::toActivationString(activationFunction)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,activationFunction,static_cast<unsigned int>(neuron_activationFunctionAmount-1),']')));
+        return;
+       // error_general("activationFunction(Avtivation ["+toActivationString(activationFunction)+"] )",error_paramOutOfRange((unsigned int)0,(unsigned int)activationFunction,(unsigned int)0,(unsigned int)neuron_activationFunctionAmount));
     }
     _activationFunction = activationFunction;
-    _update             = true;
+    _needsCalculationUpdate             = true;
 }
-Activation Neuron::activationFunction()
+Activation Neuron::get_activationFunction()
 {
     return _activationFunction;
 }
 
-void Neuron::enableAverage(bool enableAverage)
+void Neuron::set_enableAverage(bool enableAverage)
 {
     if(_enableAverage != enableAverage)
     {
         _enableAverage = enableAverage;
-        _update        = true;
+        _needsCalculationUpdate        = true;
     }
 }
-bool Neuron::enableAverage()
+bool Neuron::get_enableAverage()
 {
     return _enableAverage;
 }
-float Neuron::calcRandWeight(std::default_random_engine &randEngine)
+double Neuron::get_calcRandWeight(std::default_random_engine &randEngine)
 {
-    return (float)(randEngine() %2000)/1000 - (float)1;
+    double val  = double((randEngine() %2000))/double(1000) - double(1);
+    if(val > 1 || val < -1)
+    {
+        qDebug() << val;
+    }
+    return val;
 }
-void Neuron::randWeight()
+void Neuron::set_randWeight()
 {
     for(unsigned int a=0; a<_inputs; a++)
     {
-        randWeight(a);
+        set_randWeight(a);
     }
 }
-void Neuron::randWeight(unsigned int input)
+void Neuron::set_randWeight(unsigned int input)
 {
-    this->weight(input,calcRandWeight(_randEngine));
+    this->set_weight(input,get_calcRandWeight(_randEngine));
 }
-void Neuron::weight(unsigned int pos, float weight)
+void Neuron::set_weight(unsigned int pos, double weight)
 {
     if(pos >= _inputs)
     {
-        error_general("weight(unsigned int ["+std::to_string(pos)+"] , float ["+std::to_string(weight)+"] )",error_paramOutOfRange((unsigned int)0,pos,(unsigned int)0,_inputs-1));
+        addError(Error("weight",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,pos,static_cast<unsigned int>(_inputs-1),']')));
+        return;
+        //error_general("weight(unsigned int ["+QString::number(pos)+"] , double ["+QString::number(weight)+"] )",error_paramOutOfRange((unsigned int)0,pos,(unsigned int)0,_inputs-1));
     }
     _weightList[pos] = weight;
 }
-void Neuron::weight(std::vector<float>  weightList)
+void Neuron::set_weight(std::vector<double>  weightList)
 {
     if(weightList.size() != _inputs)
     {
-        error_general("weight(std::vector<float>)","parameter 0 has the wrong size: "+std::to_string(weightList.size())+" Correct size is "+std::to_string(_inputs));
+        addError(Error("set_weight(std::vector<double>)",
+                        {"parameter 0 has the wrong size: "+QString::number(weightList.size()),
+                         " Correct size is "+QString::number(_inputs)}));
+        return;
+        //error_general("weight(std::vector<double>)","parameter 0 has the wrong size: "+QString::number(weightList.size())+" Correct size is "+QString::number(_inputs));
     }
     _weightList = weightList;
-    _update     = true;
+    _needsCalculationUpdate     = true;
 }
-void Neuron::weight(NeuronID ID,float weight)
+void Neuron::set_weight(NeuronID ID,double weight)
 {
     for(unsigned int a=0; a<_inputConnectionID_list.size(); a++)
     {
         if(_inputConnectionID_list[a].ID == ID.ID && _inputConnectionID_list[a].TYPE == ID.TYPE)
         {
-            this->weight(a,weight);
+            this->set_weight(static_cast<unsigned int>(a),weight);
             return;
         }
     }
-    error_general("weight(NeuronID [.ID="+std::to_string(ID.ID)+",.TYPE="+Neuron::typeString(ID.TYPE)+"],float ["+std::to_string(weight)+"])","No input with such an ID");
+    addError(Error("set_weight("+toIDString(ID)+",double ["+QString::number(weight)+"])","No input with such an ID"));
+    //error_general("weight(NeuronID [.ID="+QString::number(ID.ID)+",.TYPE="+Neuron::toTypeString(ID.TYPE)+"],double ["+QString::number(weight)+"])","No input with such an ID");
 }
 
-float Neuron::weight(unsigned int input)
+double Neuron::get_weight(unsigned int input)
 {
     if(input >= _inputs)
     {
-        error_general("weight(unsigned int ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        addError(Error("get_weight(unsigned int ["+QString::number(input)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return 0;
+        //error_general("weight(unsigned int ["+QString::number(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
     return _weightList[input];
 }
-std::vector<float> Neuron::weight()
+std::vector<double> Neuron::get_weight()
 {
     return _weightList;
 }
 
-void Neuron::input(unsigned int input, float value)
+void Neuron::set_input(unsigned int input, double value)
 {
     if(input >= _inputs)
     {
-        error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(value)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(value)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return;
+       //error_general("input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(value)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+    }
+    if(_ptr_inputList[input] == nullptr)
+    {
+        addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(value)+"] )",
+                       "Input: "+QString::number(input)+" is a nullpr, the Input have to be connected first"));
     }
     try {
         *_ptr_inputList[input] = value;
     } catch (std::runtime_error &e) {
-        error_general("input(unsigned int ["+std::to_string(input)+"] , float ["+std::to_string(value)+"] )","input: "+std::to_string(input)+" of Neuron is not assigned to another Neuron or variable. "+e.what());
+        addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(value)+"] )",
+                       {"input: "+QString::number(input)+" of Neuron is not assigned to another Neuron or variable. ",
+                        QString(e.what())}));
+        return;
+        //error_general("input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(value)+"] )","input: "+QString::number(input)+" of Neuron is not assigned to another Neuron or variable. "+e.what());
     }
-    _update         = true;
+    _needsCalculationUpdate         = true;
 }
-void Neuron::input(std::vector<float> inputList)
+void Neuron::set_input(std::vector<double> inputList)
 {
     if(inputList.size() != _inputs)
     {
-        error_general("input(std::vector<float>)","parameter 0 has the wrong size: "+std::to_string(inputList.size())+" Correct size is "+std::to_string(_inputs));
+        addError(Error("set_input(std::vector<double>)",
+                        {"parameter 0 has the wrong size: "+QString::number(inputList.size()),
+                         " Correct size is "+QString::number(_inputs)}));
+        return;
+        //error_general("input(std::vector<double>)","parameter 0 has the wrong size: "+QString::number(inputList.size())+" Correct size is "+QString::number(_inputs));
     }
-    try{
-        for(unsigned int a=0; a<_ptr_inputList.size(); a++)
-        {
-            input(a,inputList[a]);
-        }
-    }catch(std::runtime_error &e)
+    //try{
+    for(unsigned int a=0; a<_ptr_inputList.size(); a++)
     {
-         error_general("input(std::vector<float>)",e);
+        set_input(static_cast<unsigned int>(a),inputList[a]);
     }
-    _update     = true;
+    /*}catch(std::runtime_error &e)
+    {
+         error_general("input(std::vector<double>)",e);
+    }*/
+    _needsCalculationUpdate     = true;
 }
-float Neuron::input(unsigned int input)
+double Neuron::get_input(unsigned int input)
 {
     if(input >= _inputs)
     {
-        error_general("weight(unsigned int ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        addError(Error("get_input(unsigned int ["+QString::number(input)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return 0;
+        //error_general("weight(unsigned int ["+QString::number(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
-    try {
+    //try {
         return *_ptr_inputList[input];
-    }catch(std::runtime_error &e)
+    /*}catch(std::runtime_error &e)
     {
-        error_general("weight(unsigned int ["+std::to_string(input)+"] )","no input connected. ",e);
-    }
+        addError(Error("get_input(unsigned int ["+QString::number(input)+"] )",
+                 {"weight(unsigned int ["+QString::number(input)+"] )",
+                  "no input connected. ",
+                  QString(e.what())}));
+        //error_general("weight(unsigned int ["+QString::number(input)+"] )","no input connected. ",e);
+    }*/
+    //return 0;
 }
-std::vector<float> Neuron::input()
+std::vector<double> Neuron::get_input()
 {
-    std::vector<float> retVal;
+    std::vector<double> retVal(_inputs);
     for(unsigned int a=0; a<_inputs; a++)
     {
-        try {
-            retVal.push_back(*_ptr_inputList[a]);
-        } catch (std::runtime_error &e) {
-            __DEBUG_NEURON(this,"std::vector<float> Neuron::input()",e.what());
-        }
+       // try {
+            retVal[a] = *_ptr_inputList[a];
+       /* } catch (std::runtime_error &e) {
+            addError(Error("get_input()",QString(e.what())));
+            //__DEBUG_NEURON(this,"std::vector<double> Neuron::input()",e.what());
+        }*/
     }
     return retVal;
 }
 
-bool Neuron::connectInput(NeuronID ID, float *ptr_sourceNeuronOutput,ConnectionDirection direction)
+bool Neuron::connectInput(NeuronID ID, double *ptr_sourceNeuronOutput,ConnectionDirection direction)
 {
     bool allFull = true;
     for(unsigned int a=0; a<_inputs; a++)
@@ -286,60 +342,75 @@ bool Neuron::connectInput(NeuronID ID, float *ptr_sourceNeuronOutput,ConnectionD
         if(_inputConnectionList[a] == false)
         {
             allFull = false;
-            return connectInput(a,ID,ptr_sourceNeuronOutput,direction);
+            return connectInput(static_cast<unsigned int>(a),ID,ptr_sourceNeuronOutput,direction);
         }else if(_inputConnectionID_list[a].ID == ID.ID && _inputConnectionID_list[a].TYPE == ID.TYPE)
         {
-#ifdef _DEBUG_NEURON_CONNECT
-            __DEBUG_NEURON(this,"connectInput(NeuronID ["+Neuron::neuronIDString(ID)+"] , float *ptr_sourceNeuronOutput , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
-                           "Connection: " + std::to_string(ID.ID) +" "+this->typeString(ID.TYPE)+" to: "+std::to_string(this->ID().ID)+" "+this->typeString(this->ID().TYPE)+" already exists.");
-#endif
+            addError(Error("connectInput("+Neuron::toIDString(ID)+" , double *ptr_sourceNeuronOutput , ConnectionDirection ["+
+                           toDirectionString(direction)+"] )"+
+                           " Connection: " + QString::number(ID.ID) +" "+this->toTypeString(ID.TYPE)+
+                           " to: "+QString::number(this->get_ID().ID)+" "+this->toTypeString(this->get_ID().TYPE)+" already exists."));
+/*#ifdef _DEBUG_NEURON_CONNECT
+            __DEBUG_NEURON(this,"connectInput(NeuronID ["+Neuron::toIDString(ID)+"] , double *ptr_sourceNeuronOutput , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                           "Connection: " + QString::number(ID.ID) +" "+this->toTypeString(ID.TYPE)+" to: "+QString::number(this->ID().ID)+" "+this->toTypeString(this->ID().TYPE)+" already exists.");
+#endif*/
             return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
-        inputs(_inputs+1);
+        set_inputs(_inputs+1);
         return connectInput(_inputs-1,ID,ptr_sourceNeuronOutput,direction);
     }
     return false;
 }
-bool Neuron::connectInput(unsigned int input, NeuronID ID, float *ptr_sourceNeuronOutput,ConnectionDirection direction)
+bool Neuron::connectInput(unsigned int input, NeuronID ID, double *ptr_sourceNeuronOutput,ConnectionDirection direction)
 {
     if(input >= _inputs)
     {
-        error_general("connectInput(unsigned int ["+std::to_string(input)+"],NeuronID ["+std::to_string(ID.ID)+","+Neuron::typeString(ID.TYPE)+"], float [ptr])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
+        addError(Error("connectInput(unsigned int ["+QString::number(input)+"] , "+Neuron::toIDString(ID)+" , double *ptr_sourceNeuronOutput , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return false;
+        //error_general("connectInput(unsigned int ["+QString::number(input)+"],NeuronID ["+QString::number(ID.ID)+","+Neuron::toTypeString(ID.TYPE)+"], double [ptr])",error_paramOutOfRange(0,QString::number(input),"0",QString::number(_inputs-1)));
     }
     if(ptr_sourceNeuronOutput == nullptr)
     {
-        error_general("connectInput(unsigned int ["+std::to_string(input)+"],NeuronID ["+std::to_string(ID.ID)+","+Neuron::typeString(ID.TYPE)+"], float [nullptr]","pointer to the Neuron doesent exist");
+        addError(Error("connectInput(unsigned int ["+QString::number(input)+"] , "+Neuron::toIDString(ID)+" , double *ptr_sourceNeuronOutput , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                 "pointer to the Neuron doesn't exist"));
+        return false;
+        //error_general("connectInput(unsigned int ["+QString::number(input)+"],NeuronID ["+QString::number(ID.ID)+","+Neuron::toTypeString(ID.TYPE)+"], double [nullptr]","pointer to the Neuron doesn't exist");
     }
-    _inputConnectionList[input] = true;
-    _inputConnectionID_list[input] = ID;
-    _inputConnectionDirection_List[input] = direction;
-    _ptr_inputList[input] = ptr_sourceNeuronOutput;
+    _inputConnectionList[input]             = true;
+    _inputConnectionID_list[input]          = ID;
+    _inputConnectionDirection_List[input]   = direction;
+    _ptr_inputList[input]                   = ptr_sourceNeuronOutput;
     return true;
 }
 bool Neuron::connectInput(Neuron *ptr_neuron,ConnectionDirection direction)
 {
     bool allFull = true;
-    for(unsigned int a=0; a<_inputs; a++)
+    for(unsigned int input=0; input<_inputs; input++)
     {
-        if(_inputConnectionList[a] == false)
+        if(_inputConnectionList[input] == false)
         {
             allFull = false;
-            return connectInput(a,ptr_neuron,direction);
-        }else if(_inputConnectionID_list[a].ID == ptr_neuron->ID().ID && _inputConnectionID_list[a].TYPE == ptr_neuron->ID().TYPE)
+            return connectInput(input,ptr_neuron,direction);
+        }else if(_inputConnectionID_list[input].ID      == ptr_neuron->get_ID().ID &&
+                 _inputConnectionID_list[input].TYPE    == ptr_neuron->get_ID().TYPE)
         {
-#ifdef _DEBUG_NEURON_CONNECT
-            __DEBUG_NEURON(this,"connectInput(Neuron *ptr_neuron , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
-                           "Connection: " + std::to_string(ptr_neuron->ID().ID)+" "+this->typeString(ptr_neuron->ID().TYPE)+" to: "+std::to_string(this->ID().ID)+" "+this->typeString(this->ID().TYPE)+" already exists.");
-#endif
+            addError(Error("connectInput(Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                     "Connection: " + QString::number(ptr_neuron->get_ID().ID)+" "+
+                     this->toTypeString(ptr_neuron->get_ID().TYPE)+" to: "+QString::number(this->get_ID().ID)+" "+
+                     this->toTypeString(this->get_ID().TYPE)+" already exists."));
+/*#ifdef _DEBUG_NEURON_CONNECT
+            __DEBUG_NEURON(this,"connectInput(Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                           "Connection: " + QString::number(ptr_neuron->ID().ID)+" "+this->toTypeString(ptr_neuron->ID().TYPE)+" to: "+QString::number(this->ID().ID)+" "+this->toTypeString(this->ID().TYPE)+" already exists.");
+#endif*/
             return false;
         }
     }
     if(allFull)                         // If all Inputs are used, create a new one and connect to it.
     {
-        inputs(_inputs+1);
+        set_inputs(_inputs+1);
         return connectInput(_inputs-1,ptr_neuron,direction);
     }
     return false;
@@ -348,31 +419,42 @@ bool Neuron::connectInput(unsigned int input,Neuron *ptr_neuron,ConnectionDirect
 {
     if(input >= _inputs)
     {
-        error_general("connectInput(unsigned int ["+std::to_string(input)+"],Neuron [ptr])",error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
+        addError(Error("connectInput(unsigned int ["+QString::number(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return false;
+        //error_general("connectInput(unsigned int ["+QString::number(input)+"],Neuron [ptr])",error_paramOutOfRange(0,QString::number(input),"0",QString::number(_inputs-1)));
     }
     if(ptr_neuron == nullptr)
     {
-        error_general("connectInput(unsigned int ["+std::to_string(input)+"],Neuron [nullptr]","pointer to the Neuron doesent exist");
+       // error_general("connectInput(unsigned int ["+QString::number(input)+"],Neuron [nullptr]","pointer to the Neuron doesn't exist");
+        addError(Error("connectInput(unsigned int ["+QString::number(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                 "pointer to the Neuron doesn't exist"));
+        return false;
     }
     for(unsigned int connection=0; connection<_inputConnectionID_list.size(); connection++)
     {
-        if(_inputConnectionID_list[connection].ID == ptr_neuron->ID().ID && _inputConnectionID_list[connection].TYPE == ptr_neuron->ID().TYPE)
+        if(_inputConnectionID_list[connection].ID     == ptr_neuron->get_ID().ID &&
+           _inputConnectionID_list[connection].TYPE   == ptr_neuron->get_ID().TYPE)
         {
-#ifdef _DEBUG_NEURON_CONNECT
-            __DEBUG_NEURON(this,"connectInput(unsigned int ["+std::to_string(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::directionSring(direction)+"] )",
-                           "Trying to connect a connection which already exists. ignore command. Input: "+std::to_string(input)+" Neuron: "+std::to_string((unsigned int)ptr_neuron)+" direction: "+ Neuron::directionSring(direction));
-#endif
+            addError(Error("connectInput(unsigned int ["+QString::number(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                           "Connection: " + QString::number(ptr_neuron->get_ID().ID)+" "+
+                           this->toTypeString(ptr_neuron->get_ID().TYPE)+" to: "+QString::number(this->get_ID().ID)+" "+
+                           this->toTypeString(this->get_ID().TYPE)+" already exists."));
+/*#ifdef _DEBUG_NEURON_CONNECT
+            __DEBUG_NEURON(this,"connectInput(unsigned int ["+QString::number(input)+"] , Neuron *ptr_neuron , ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
+                           "Trying to connect a connection which already exists. ignore command. Input: "+QString::number(input)+" Neuron: "+QString::number((unsigned int)ptr_neuron)+" direction: "+ Neuron::toDirectionString(direction));
+#endif*/
             return false;
         }
     }
-    _inputConnectionList[input] = true;
-    _inputConnectionID_list[input] = ptr_neuron->ID();
-    _inputConnectionDirection_List[input] = direction;
+    _inputConnectionList[input]             = true;
+    _inputConnectionID_list[input]          = ptr_neuron->get_ID();
+    _inputConnectionDirection_List[input]   = direction;
     if(direction == ConnectionDirection::forward)
     {
-        _ptr_inputList[input] = ptr_neuron->ptr_output();
+        _ptr_inputList[input] = ptr_neuron->get_ptr_output();
     }else{
-        _ptr_inputList[input] = ptr_neuron->ptr_loopBackOutput();
+        _ptr_inputList[input] = ptr_neuron->get_ptr_loopBackOutput();
     }
     return true;
 }
@@ -380,16 +462,23 @@ bool Neuron::disconnect(unsigned int input)
 {
     if(input >= _inputs)
     {
-#ifdef _DEBUG_NEURON_CONNECT
-        __DEBUG_NEURON(this,"disconnect(unsigned int ["+std::to_string(input)+"])",
-                       error_paramOutOfRange(0,std::to_string(input),"0",std::to_string(_inputs-1)));
-#endif
+        addError(Error("disconnect(unsigned int ["+QString::number(input)+"] )",
+                 ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return false;
+
+/*#ifdef _DEBUG_NEURON_CONNECT
+        __DEBUG_NEURON(this,"disconnect(unsigned int ["+QString::number(input)+"])",
+                       error_paramOutOfRange(0,QString::number(input),"0",QString::number(_inputs-1)));
+#endif*/
     }
     if(!_inputConnectionList[input])
         return false;
-    _ptr_inputList[input] = nullptr;
-    _inputConnectionList[input] = false;
-    _inputConnectionID_list[input] = NeuronID{.ID = NEURON_ID_INVALID,.TYPE = NeuronType::none};
+    _ptr_inputList[input]           = nullptr;
+    _inputConnectionList[input]     = false;
+    NeuronID id;
+    id.ID = NEURON_ID_INVALID;
+    id.TYPE = none;
+    _inputConnectionID_list[input] = id;
     _inputs--;
     return true;
 }
@@ -400,16 +489,17 @@ bool Neuron::disconnect(NeuronID sourceNeuron)
         if(_inputConnectionID_list[input].ID    == sourceNeuron.ID &&
            _inputConnectionID_list[input].TYPE  == sourceNeuron.TYPE)
         {
-            return disconnect(input);
+            return disconnect(static_cast<unsigned int>(input));
         }
     }
-#ifdef _DEBUG_NEURON_CONNECT
-    __DEBUG_NEURON(this,"disconnect(NeuronID ["+Neuron::neuronIDString(sourceNeuron)+"])",
+/*#ifdef _DEBUG_NEURON_CONNECT
+    __DEBUG_NEURON(this,"disconnect(NeuronID ["+Neuron::toIDString(sourceNeuron)+"])",
                    "No neuron with such an ID is connected to this neuron");
-#endif
+#endif*/
+    addError(Error("disconnect( "+Neuron::toIDString(sourceNeuron)+" )",toIDString(sourceNeuron)+" No connection with such an ID"));
     return false;
 }
-ConnectionDirection Neuron::inputConnectionDirection(NeuronID inputID)
+ConnectionDirection Neuron::get_inputConnectionDirection(NeuronID inputID)
 {
     for(unsigned int input=0; input<_inputConnectionID_list.size(); input++)
     {
@@ -418,68 +508,80 @@ ConnectionDirection Neuron::inputConnectionDirection(NeuronID inputID)
             return _inputConnectionDirection_List[input];
         }
     }
-    error_general("inputConnectionDirection(NeuronID [.ID="+std::to_string(inputID.ID)+",.TYPE="+Neuron::typeString(inputID.TYPE)+"])","No connection with such an ID");
+
+    //error_general("inputConnectionDirection(NeuronID [.ID="+QString::number(inputID.ID)+",.TYPE="+Neuron::toTypeString(inputID.TYPE)+"])","No connection with such an ID");
+    addError(Error("get_inputConnectionDirection( "+Neuron::toIDString(inputID) + " )",Neuron::toIDString(inputID)+" No connection with such an ID"));
+    return ConnectionDirection::forward;
 }
-std::vector<ConnectionDirection>   Neuron::inputConnectionDirection()
+std::vector<ConnectionDirection>   Neuron::get_inputConnectionDirection()
 {
     return _inputConnectionDirection_List;
 }
 
 
 
-float Neuron::netInput()
+double Neuron::get_netInput()
 {
     return _netInput;
 }
-float Neuron::output()
+double Neuron::get_output()
 {
     return _output;
 }
-float *Neuron::ptr_output()
+double *Neuron::get_ptr_output()
 {
     return &_output;
 }
-float *Neuron::ptr_loopBackOutput()
+double *Neuron::get_ptr_loopBackOutput()
 {
     return &_delayedOutput;
 }
-NeuronID Neuron::inputID(unsigned int input)
+NeuronID Neuron::get_inputID(unsigned int input)
 {
     if(input >= _inputs)
     {
-         error_general("inputID(unsigned int ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        addError(Error("get_InputID(unsigned int ["+QString::number(input)+"] )",ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        NeuronID id;
+        id.ID = NEURON_ID_INVALID;
+        id.TYPE = none;
+        return id;
+         //error_general("inputID(unsigned int ["+QString::number(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
     return _inputConnectionID_list[input];
 }
-std::vector<NeuronID> Neuron::inputID()
+std::vector<NeuronID> Neuron::get_inputIDList()
 {
     return _inputConnectionID_list;
 }
-float *Neuron::ptr_weight(unsigned int input)
+double *Neuron::get_ptr_weight(unsigned int input)
 {
     if(input >= _inputs)
     {
-         error_general("ptr_weight(unsigned int ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        addError(Error("get_ptr_weight(unsigned int ["+QString::number(input)+"] )",ErrorMessage::outOfRange<unsigned int>('[',0,input,static_cast<unsigned int>(_inputs-1),']')));
+        return nullptr;
+        // error_general("ptr_weight(unsigned int ["+QString::number(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
     return &_weightList[input];
 }
-float *Neuron::ptr_weight(NeuronID  connectionID)
+double *Neuron::get_ptr_weight(NeuronID  connectionID)
 {
     for(unsigned int a=0; a<_inputConnectionID_list.size(); a++)
     {
-        if(connectionID.ID == _inputConnectionID_list[a].ID &&
-           connectionID.TYPE == _inputConnectionID_list[a].TYPE)
+        if(connectionID.ID      == _inputConnectionID_list[a].ID &&
+           connectionID.TYPE    == _inputConnectionID_list[a].TYPE)
         {
-            return ptr_weight(a);
+            return get_ptr_weight(static_cast<unsigned int>(a));
         }
     }
-    error_general("ptr_weight(NeuronID [.ID="+std::to_string(connectionID.ID)+",.TYPE="+Neuron::typeString(connectionID.TYPE)+"])","No connection with such an ID");
+    addError(Error("get_ptr_weight( "+Neuron::toIDString(connectionID)+" )",Neuron::toIDString(connectionID)+" No connection with such an ID"));
+    return nullptr;
+    //error_general("ptr_weight(NeuronID [.ID="+QString::number(connectionID.ID)+",.TYPE="+Neuron::toTypeString(connectionID.TYPE)+"])","No connection with such an ID");
 }
 
 
 void Neuron::run()
 {
-    if(_update == true)
+    if(_needsCalculationUpdate == true)
     {
 #if defined(_DEBUG_NEURON_RUN)
         __DEBUG_NEURON(this,"run()","begin");
@@ -488,33 +590,29 @@ void Neuron::run()
         __debug_timer1 = std::chrono::high_resolution_clock::now();
 #endif
         calc_netInput();
-        try {
-            calc_output();
-        } catch (std::runtime_error &e) {
-            error_general("run()",e);
-        }
-        _update = false;
+        calc_output();
+        _needsCalculationUpdate = false;
 #if defined(_DEBUG_NEURON_TIMING)
         __debug_timer2 = std::chrono::high_resolution_clock::now();
-        __debug_time_span = std::chrono::duration_cast<std::chrono::duration<double>>(__debug_timer2 - __debug_timer1);
+        __debug_time_span = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer2 - __debug_timer1);
         __debug_run_time = __debug_time_span.count()*1000;
 #endif
 #if defined(_DEBUG_NEURON_RUN)
 #if defined(_DEBUG_NEURON_TIMING)
-        __DEBUG_NEURON(this,"run()","end, time: "+std::to_string(__debug_run_time)+" ms");
+        __DEBUG_NEURON(this,"run()","end, time: "+QString::number(__debug_run_time)+" ms");
 #else
         __DEBUG_NEURON(this,"run()","end");
 #endif
 #endif
     }
 }
-const std::string Neuron::neuronIDString(NeuronID ID)
+const QString Neuron::toIDString(NeuronID ID)
 {
-    return "NeuronID {\nID: "+std::to_string(ID.ID)+"\nTYPE: "+Neuron::typeString(ID.TYPE)+"}\n";
+    return "NeuronID { ID: "+QString::number(ID.ID)+"\tTYPE: "+Neuron::toTypeString(ID.TYPE)+"}";
 }
-const std::string Neuron::typeString(NeuronType TYPE)
+const QString Neuron::toTypeString(NeuronType TYPE)
 {
-    std::string str = "["+std::to_string(TYPE)+"] ";
+    QString str = "["+QString::number(TYPE)+"] ";
     switch(TYPE)
     {
         case NeuronType::none:
@@ -555,9 +653,9 @@ const std::string Neuron::typeString(NeuronType TYPE)
     }
     return str;
 }
-const std::string Neuron::activationString(Activation activationFunction)
+const QString Neuron::toActivationString(Activation activationFunction)
 {
-    std::string str = "["+std::to_string(activationFunction)+"] ";
+    QString str = "["+QString::number(activationFunction)+"] ";
     switch(activationFunction)
     {
         case Activation::Linear:
@@ -593,34 +691,82 @@ const std::string Neuron::activationString(Activation activationFunction)
     }
     return str;
 }
-const std::string Neuron::connectionString(Connection connection)
+const QString Neuron::toConnectionString(Connection connection)
 {
-    std::string message;
-    message  = "netID:  "+std::to_string(connection.netID)+"\n"+
+    QString message;
+    message  = "netID:  "+QString::number(connection.netID)+"\n"+
                "SourceNeuron {\n"+
-               "ID:     "+std::to_string(connection.source_ID.ID)+"\n"+
-               "TYPE:   "+Neuron::typeString(connection.source_ID.TYPE)+"}\n"+
+               "ID:     "+QString::number(connection.source_ID.ID)+"\n"+
+               "TYPE:   "+Neuron::toTypeString(connection.source_ID.TYPE)+"}\n"+
                "DestinationNeuron {\n"+
-               "ID:     "+std::to_string(connection.destination_ID.ID)+"\n"+
-               "TYPE:   "+Neuron::typeString(connection.destination_ID.TYPE)+"}\n"+
-               "weight: "+std::to_string(connection.weight)+"\n"+
-               "direction: "+Neuron::directionSring(connection.direction);
+               "ID:     "+QString::number(connection.destination_ID.ID)+"\n"+
+               "TYPE:   "+Neuron::toTypeString(connection.destination_ID.TYPE)+"}\n"+
+               "weight: "+QString::number(connection.weight)+"\n"+
+               "direction: "+Neuron::toDirectionString(connection.direction);
     return message;
 }
-const std::string Neuron::directionSring(ConnectionDirection dir)
+const QString Neuron::toDirectionString(ConnectionDirection dir)
 {
     if(dir == ConnectionDirection::forward)
         return "forward";
     return "backward";
 }
+QString       Neuron::toString()
+{
+    return "not implemented";
+}
+QStringList Neuron::toStringList()
+{
+    QStringList    stringList;
+    QString line = "";
+    const QString spacer = "\t";
+    const QString newline = "\n";
+
+    stringList.push_back(toIDString(this->_ID)+newline);
+    line = "Inputs:"+spacer+QString::number(_inputs)+spacer;
+    line += "Activation:"+ spacer + toActivationString(this->_activationFunction)+spacer;
+    if(!_needsCalculationUpdate)
+        line+= "Is updated:"+spacer+"true"+spacer;
+    else
+        line+= "Is updated:"+spacer+"false"+spacer;
+
+    if(_enableAverage)
+        line+= "Enable average:"+spacer+"true"+spacer;
+    else
+        line+= "Enable average:"+spacer+"false"+spacer;
+    stringList.push_back(line+newline);
+
+    line = "weight:"+spacer;
+    for(unsigned int input=0; input<_inputs; input++)
+    {
+        line += QString::number(_weightList[input])+spacer;
+    }
+    stringList.push_back(line+newline);
+
+    line = "value:"+spacer;
+    for(unsigned int input=0; input<_inputs; input++)
+    {
+        line += QString::number(*_ptr_inputList[input])+spacer;
+    }
+    stringList.push_back(line+newline);
+    stringList.push_back("Netinp:"+spacer+QString::number(_netInput)+newline);
+
+    line = "Output:"+spacer+QString::number(_output)+spacer;
+    line+= "Delayed output:"+spacer+QString::number(_delayedOutput)+spacer;
+    stringList.push_back(line+newline);
+
+
+    return stringList;
+}
+
 void Neuron::needsUpdate()
 {
     _delayedOutput = _output;
-    _update = true;
+    _needsCalculationUpdate   = true;
 }
 bool Neuron::isUpdated()
 {
-    return !_update;
+    return !_needsCalculationUpdate;
 }
 void Neuron::calc_netInput()
 {
@@ -633,7 +779,7 @@ void Neuron::calc_netInput()
         if(_ptr_inputList[a] == nullptr)
         {
 #if defined(_DEBUG_NEURON_RUN)
-            __DEBUG_NEURON(this,"calc_netInput()","input: "+std::to_string(a)+" is not connected");
+            __DEBUG_NEURON(this,"calc_netInput()","input: "+QString::number(a)+" is not connected");
 #endif
             continue;
         }
@@ -644,13 +790,13 @@ void Neuron::calc_netInput()
         _netInput /= _inputs;
     }
 #if defined(_DEBUG_NEURON_RUN)
-    __DEBUG_NEURON(this,"calc_netInput()","end, netInput: "+std::to_string(_netInput));
+    __DEBUG_NEURON(this,"calc_netInput()","end, netInput: "+QString::number(_netInput));
 #endif
 }
 void Neuron::calc_output()
 {
 #if defined(_DEBUG_NEURON_RUN)
-    __DEBUG_NEURON(this,"calc_output()","begin, activation: "+Neuron::activationString(_activationFunction));
+    __DEBUG_NEURON(this,"calc_output()","begin, activation: "+Neuron::toActivationString(_activationFunction));
 #endif
     switch(_activationFunction)
     {
@@ -682,50 +828,123 @@ void Neuron::calc_output()
         default:
         {
 #if defined(_DEBUG_NEURON_RUN)
-             __DEBUG_NEURON(this,"calc_output()","unknown activation function ["+std::to_string(_activationFunction)+"]");
+             __DEBUG_NEURON(this,"calc_output()","unknown activation function ["+QString::number(_activationFunction)+"]");
 #endif
-            error_general("calc_output()","unknown activation function ["+std::to_string(_activationFunction)+"]");
+            //error_general("calc_output()","unknown activation function ["+QString::number(_activationFunction)+"]");
+            addError(Error("calc_output()","unknown activation function ["+QString::number(_activationFunction)+"]"));
         }
     }
 #if defined(_DEBUG_NEURON_RUN)
-    __DEBUG_NEURON(this,"calc_output()","end, output: "+std::to_string(_output));
+    __DEBUG_NEURON(this,"calc_output()","end, output: "+QString::number(_output));
 #endif
 }
 #if defined(_DEBUG_NEURON_TIMING)
-double Neuron::debug_runtime()
+double Neuron::get_runtime()
 {
     return __debug_run_time;
 }
 #endif
+void Neuron::set_seed(unsigned int seed)
+{
+    _randEngine             = std::default_random_engine(seed);
+}
 //----------ERROR
-
-std::string Neuron::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
+void Neuron::clearErrors()
 {
-    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
+    _errorList.clear();
 }
-std::string Neuron::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+Error Neuron::get_lastError() const
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    if(static_cast<unsigned int>(_errorList.size()) == 0)
+    {
+        return Error("get_LastError()",ErrorMessage::listIsEmpty("_errorList"));
+    }
+    return _errorList[_errorList.size()-1];
 }
-std::string Neuron::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+Error Neuron::get_error(unsigned int index)
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    if(static_cast<unsigned int>(_errorList.size()) == 0)
+    {
+        return Error("get_Error(unsigend int ["+QString::number(index)+"])",ErrorMessage::listIsEmpty("_errorList"));
+    }
+    if(index >= static_cast<unsigned int>(_errorList.size()))
+    {
+        return Error("get_Error(unsigend int ["+QString::number(index)+"])",ErrorMessage::outOfRange<unsigned int>('[',0,index,static_cast<unsigned int>(_errorList.size()-1),']'));
+    }
+    return _errorList[static_cast<int>(index)];
 }
-std::string Neuron::error_paramOutOfRange(unsigned int paramPos,float value,float min, float max)
+ErrorList Neuron::get_errorList() const
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    return _errorList;
 }
-void        Neuron::error_general(std::string function, std::string cause)
+unsigned int Neuron::get_errorAmount() const
+{
+    return static_cast<unsigned int>(_errorList.size());
+}
+void Neuron::init(unsigned int inputs, Activation activationFunction, bool enableAverage)
+{
+    _globalNeurons++;
+    _inputs                 = 0;
+    _netInput               = 0;
+    _output                 = 0;
+    _delayedOutput          = 0;
+    _needsCalculationUpdate = true;
+    time_t now              = time(nullptr);
+    struct tm *currentTime  = localtime(&now);
+    this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock()));
+    //_randEngine.seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec));
+    NeuronID id;
+    id.ID   = _globalNeurons;
+    id.TYPE = NeuronType::none;
+    this->set_ID(id);
+    this->set_inputs(inputs);
+    this->set_activationFunction(activationFunction);
+    this->set_enableAverage(enableAverage);
+   /* } catch (std::runtime_error &e) {
+        //error_general("init(unsigned int ["+QString::number(inputs)+"] , Activation ["+
+        //              toActivationString(activationFunction)+"] , bool ["+QString::number(enableAverage)+"])",e);
+        addError(Error("init(unsigned int ["+QString::number(inputs)+"] , Activation ["+
+                       toActivationString(activationFunction)+"] , bool ["+QString::number(enableAverage)+"])",
+                       QString(e.what())));
+        return;
+    }*/
+}
+void Neuron::addError(const Error &e)
+{
+    _errorList.push_back(e);
+    _errorList[_errorList.size()-1].setNamespace("Neuron::"+_errorList[_errorList.size()-1].getNamespace());
+    Error::print(_errorList[_errorList.size()-1]);
+    emit errorOccured(this->get_ID(),_errorList[_errorList.size()-1]);
+}
+/*
+QString Neuron::error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max)
+{
+    return " parameter "+QString::number(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
+}
+QString Neuron::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+QString Neuron::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+QString Neuron::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+void        Neuron::error_general(QString function, QString cause)
 {
     throw std::runtime_error("ERROR: Neuron::" + function + "     " + cause);
 }
-void        Neuron::error_general(std::string function, std::runtime_error &e)
+void        Neuron::error_general(QString function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        Neuron::error_general(std::string function, std::string cause, std::runtime_error &e)
+void        Neuron::error_general(QString function, QString cause, std::runtime_error &e)
 {
-    std::string error = "ERROR: Neuron::" + function + "     " + cause;
-    error += "     --> "+std::string(e.what());
+    QString error = "ERROR: Neuron::" + function + "     " + cause;
+    error += "     --> "+QString(e.what());
     throw std::runtime_error(error);
 }
+*/

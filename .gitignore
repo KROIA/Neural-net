@@ -13,6 +13,7 @@ DEV/bin
 *.gnet
 *.bnet
 *.dll
+*bin
 *qml.cpp
 examples/X-OR_Backpropagation/bin
 examples/X-OR_Backpropagation/Tests
@@ -27,11 +28,5 @@ examples/Snake/Tests
 NnqmlUi/Release/release/moc_mainwindow.cpp
 NnqmlUi/Release/Makefile
 *.autosave
-NnqmlUi/Releas/Makefile
-NnqmlUi/Releas/release/moc_predefs.h
-NnqmlUi/Releas/release/moc_mainwindow.cpp
-NnqmlUi/Releas/release/moc_thread.cpp
-NnqmlUi/Releas/release/qmlcache_loader.cpp
-NnqmlUi/Releas/usershscheappdatalocaltemptmp57bnw9
-NnqmlUi/Releas/usershscheappdatalocaltemptmprcnjjj
-NnqmlUi/Releas/usershscheappdatalocaltemptmp_ih_sy
+NnqmlUi/Releas
+examples/X-OR_Backpropagation Performance test/Release/Makefile

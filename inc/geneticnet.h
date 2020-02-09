@@ -1,13 +1,14 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.05.01"
-//                      Datum  31.08.2019
+#define    GENETICNET_VERSION "02.06.00"
+//                      Datum  02.02.2020
 
 #include "net.h"
 #include "savenet.h"
 
 #include <QDebug>
+#include <QObject>
 
 #include <cstdlib>
 #include <pthread.h>
@@ -38,16 +39,19 @@ struct thread_data_geneticNet {
    unsigned int debugParam;
 };
 
-class GeneticNet
+class GeneticNet    : public QObject
 {
+        Q_OBJECT
     public:
-        GeneticNet();
-        GeneticNet(unsigned int animals);
+        GeneticNet(QObject *parent = nullptr);
+        GeneticNet(unsigned int animals,
+                   QObject *parent = nullptr);
         GeneticNet(unsigned int animals,
                    unsigned int inputs,
                    unsigned int hiddenX,
                    unsigned int hiddenY,
-                   unsigned int outputs);
+                   unsigned int outputs,
+                   QObject *parent = nullptr);
         GeneticNet(unsigned int animals,
                    unsigned int inputs,
                    unsigned int hiddenX,
@@ -55,7 +59,8 @@ class GeneticNet
                    unsigned int outputs,
                    bool enableBias,
                    bool enableAverage,
-                   Activation func);
+                   Activation func,
+                   QObject *parent = nullptr);
         ~GeneticNet();
 
         void                    set(unsigned int animals,
@@ -67,76 +72,76 @@ class GeneticNet
                                     bool enableAverage,
                                     Activation func);
 
-        void                    netFileName(std::string filename);
-        std::string             netFileName();
-        void                    netFileEnding(std::string fileEnding);
-        std::string             netFileEnding();
+        void                    set_netFileName(QString filename);
+        QString                 get_netFileName();
+        void                    set_netFileEnding(QString fileEnding);
+        QString                 get_netFileEnding();
         void                    loadFromNetFile();
-        void                    loadFromNetFile(std::string filename);
-        void                    loadFromNetFile(std::string filename,std::string fileEnding);
+        void                    loadFromNetFile(QString filename);
+        void                    loadFromNetFile(QString filename,QString fileEnding);
         void                    saveToNetFile();
-        void                    saveToNetFile(std::string filename);
-        void                    saveToNetFile(std::string filename,std::string fileEnding);
+        void                    saveToNetFile(QString filename);
+        void                    saveToNetFile(QString filename,QString fileEnding);
 
-        void                    animals(unsigned int animals);
-        unsigned int            animals();
-        void                    inputNeurons(unsigned int inputs);
-        unsigned int            inputNeurons();
-        void                    hiddenNeuronsX(unsigned int hiddenX);
-        unsigned int            hiddenNeuronsX();
-        void                    hiddenNeuronsY(unsigned int hiddenY);
-        unsigned int            hiddenNeuronsY();
-        void                    outputNeurons(unsigned int outputs);
-        unsigned int            outputNeurons();
-        void                    costumNeurons(unsigned int costum);
-        unsigned int            costumNeurons();
-        void                    costumConnections(unsigned int connections);
-        void                    neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
-
-
-        void                    bias(bool enableBias);
-        bool                    bias();
-        void                    enableAverage(bool enableAverage);
-        bool                    enableAverage();
-        void                    biasValue(float value);
-        float                   biasValue();
-        void                    activationFunction(Activation func);
-        Activation              activationFunction();
-        bool                    noHiddenLayer();
-
-        void                    randomGenom();
-        void                    genom(std::vector<std::vector<float>    > genomList);
-        void                    genom(unsigned int animal, std::vector<float> genom);
-        std::vector<float>      genom(unsigned int animal);
-        std::vector<std::vector<float>  >genom();
-        unsigned int            genomsize();
-        void                    genomFromNetFile();
-
-        void                    input(unsigned int animal, unsigned int input, float signal);
-        float                   input(unsigned int animal, unsigned int input);
-        void                    input(unsigned int animal, std::vector<float> inputList);
-        std::vector<float>      input(unsigned int animal);
-        void                    input(std::vector<std::vector<float>    > input);
-        std::vector<std::vector<float>  >input();
-
-        float                   hidden(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
-        std::vector<float>      hidden(unsigned int hiddenX, unsigned int hiddenY);
-        std::vector<float>      hiddenX(unsigned int animal, unsigned int hiddenX);  // |    Alle in einer Spalte
-        std::vector<std::vector<float>  >hiddenX(unsigned int hiddenX);
-        std::vector<float>      hiddenY(unsigned int animal, unsigned int hiddenY);  // --   Alle in einer Reihe
-        std::vector<std::vector<float>  >hiddenY(unsigned int hiddenY);
-
-        Neuron                 *hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
-        std::vector<Neuron*>     hiddenNeuronX(unsigned int animal, unsigned int hiddenX);    // |    Alle in einer Spalte
-        std::vector<Neuron*>     hiddenNeuronY(unsigned int animal, unsigned int hiddenY);    // --   Alle in einer Reihe
-        std::vector<std::vector<Neuron*> > hiddenNeuron(unsigned int animal);
-        Neuron                 *outputNeuron(unsigned int animal, unsigned int output);
-        std::vector<Neuron*>   *outputNeuron(unsigned int animal);
+        void                    set_animals(unsigned int animals);
+        unsigned int            get_animals();
+        void                    set_inputNeurons(unsigned int inputs);
+        unsigned int            get_inputNeurons();
+        void                    set_hiddenNeuronsX(unsigned int hiddenX);
+        unsigned int            get_hiddenNeuronsX();
+        void                    set_hiddenNeuronsY(unsigned int hiddenY);
+        unsigned int            get_hiddenNeuronsY();
+        void                    set_outputNeurons(unsigned int outputs);
+        unsigned int            get_outputNeurons();
+        //void                    set_costumNeurons(unsigned int costum);
+        unsigned int            get_costumNeurons();
+        //void                    set_costumConnections(unsigned int connections);
+        //void                    set_neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
 
 
-        float                   output(unsigned int animal, unsigned int output);
-        std::vector<float>      output(unsigned int animal);
-        std::vector<std::vector<float>  >output();
+        void                    set_bias(bool enableBias);
+        bool                    get_bias();
+        void                    set_enableAverage(bool enableAverage);
+        bool                    get_enableAverage();
+        void                    set_biasValue(double value);
+        double                   get_biasValue();
+        void                    set_activationFunction(Activation func);
+        Activation              get_activationFunction();
+        bool                    hasHiddenLayer();
+
+        void                    set_randomGenom();
+        void                    set_genom(std::vector<std::vector<double>    > genomList);
+        void                    set_genom(unsigned int animal, std::vector<double> genom);
+        std::vector<double>      get_genom(unsigned int animal);
+        std::vector<std::vector<double>  >get_genom();
+        unsigned int            get_genomsize();
+        void                    set_genomFromNetFile();
+
+        void                    set_input(unsigned int animal, unsigned int input, double signal);
+        double                   get_input(unsigned int animal, unsigned int input);
+        void                    set_input(unsigned int animal, std::vector<double> inputList);
+        std::vector<double>      get_input(unsigned int animal);
+        void                    set_input(std::vector<std::vector<double>    > input);
+        std::vector<std::vector<double>  >get_input();
+
+        double                   get_hidden(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
+        std::vector<double>      get_hidden(unsigned int hiddenX, unsigned int hiddenY);
+        std::vector<double>      get_hiddenX(unsigned int animal, unsigned int hiddenX);  // |    Alle in einer Spalte
+        std::vector<std::vector<double>  >get_hiddenX(unsigned int hiddenX);
+        std::vector<double>      get_hiddenY(unsigned int animal, unsigned int hiddenY);  // --   Alle in einer Reihe
+        std::vector<std::vector<double>  >get_hiddenY(unsigned int hiddenY);
+
+        Neuron                 *get_ptr_hiddenNeuron(unsigned int animal, unsigned int hiddenX, unsigned int hiddenY);
+        std::vector<Neuron*>     get_hiddenNeuronX_ptr(unsigned int animal, unsigned int hiddenX);    // |    Alle in einer Spalte
+        std::vector<Neuron*>     get_hiddenNeuronY_ptr(unsigned int animal, unsigned int hiddenY);    // --   Alle in einer Reihe
+        std::vector<std::vector<Neuron*> > get_hiddenNeuron_ptr(unsigned int animal);
+        Neuron                 *get_ptr_outputNeuron(unsigned int animal, unsigned int output);
+        std::vector<Neuron*>   *get_ptr_outputNeuron(unsigned int animal);
+
+
+        double                   get_output(unsigned int animal, unsigned int output);
+        std::vector<double>      get_output(unsigned int animal);
+        std::vector<std::vector<double>  >get_output();
 
 
         void                    run();
@@ -146,15 +151,15 @@ class GeneticNet
 
         Net *operator[](unsigned int animal);
 
-        void                mutationFactor(float factor);
-        void                mutationChangeWeight(float weight);
+        void                set_mutationFactor(double factor);
+        void                set_mutationChangeWeight(double weight);
 
-        void                score(unsigned int animal, float score);
-        float               score(unsigned int animal);
-        void                score(std::vector<float>   scoreList);
-        std::vector<float>  score();
+        void                set_score(unsigned int animal, double score);
+        double               get_score(unsigned int animal);
+        void                set_score(std::vector<double>   scoreList);
+        std::vector<double>  get_score();
 
-        void                learn(std::vector<float>   scoreList);
+        void                learn(std::vector<double>   scoreList);
         void                learn();
 
         void                updateNetConfiguration();
@@ -162,75 +167,88 @@ class GeneticNet
          *  inputNeurons()
          *  sins V02.03.00
          */
-        void                connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
-        bool                connectNeuron(Connection *connection);
-        bool                connectNeuron(std::vector<Connection> *connections);
-        void                connectionList(std::vector<std::vector<Connection> >*connections);
-        std::vector<Connection> *connectionList(unsigned int netID);
-        std::vector<std::vector<Connection> *> connectionList();
-        void                clearConnectionList();
+        void                addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction = ConnectionDirection::forward);
+        void                addConnection(Connection connection);
+        void                addConnection(std::vector<Connection> connections);
+        void                set_connectionList(std::vector<std::vector<Connection> >connections);
 
         NeuronID            addNeuron();
         NeuronID            addNeuron(Neuron *neuron);
-        NeuronID            addNeuron(Connection connection);
-        NeuronID            addNeuron(std::vector<Connection> inputConnections);
+
+        QString             toString();
+        QStringList         toStringList();
 
 
 
-        double              cycleTime();
-        void                update_ptr_genomList();
+        SaveNet            *get_ptr_saveNet();
 
-        SaveNet            *saveNet();
+#if defined(_DEBUG_NET_TIMING)
+        double get_runtime();
+        /* Retruns the time, it takes to update the net.
 
+          ERROR:
+           | none
+         */
+#endif
+        void                clearErrors();
+        Error               get_lastError() const;
+        Error               get_error(unsigned int index);
+        ErrorList           get_errorList() const;
+        unsigned int        get_errorAmount() const;
+    signals:
+        void errorOccured(Error &e);
+    private slots:
+        void onNetError(unsigned int netID,Error &e);
     private:
 
-        void                    init(unsigned int animals,
-                                     unsigned int inputs,
-                                     unsigned int hiddenX,
-                                     unsigned int hiddenY,
-                                     unsigned int outputs,
-                                     bool enableBias,
-                                     bool enableAverage,
-                                     Activation func);
+        void                init(unsigned int animals,
+                                 unsigned int inputs,
+                                 unsigned int hiddenX,
+                                 unsigned int hiddenY,
+                                 unsigned int outputs,
+                                 bool enableBias,
+                                 bool enableAverage,
+                                 Activation func);
 
-        void learn_selectAnimal(float gesScore,unsigned int &selection1,unsigned int &selection2);
-        void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<float> &newGen1,std::vector<float> &newGen2);
-        void learn_mutate(std::vector<float> &genom);
+        void learn_selectAnimal(double gesScore,unsigned int &selection1,unsigned int &selection2);
+        void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<double> &newGen1,std::vector<double> &newGen2);
+        void learn_mutate(std::vector<double> &genom);
 
         //Threads
         static void *runThread(void *threadarg);
         static void *runThread_setupNet(void *threadarg);
-        //----------ERROR
-        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
-        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,float value,float min, float max);
-        void        error_general(std::string function, std::string cause);
-        void        error_general(std::string function, std::runtime_error &e);
-        void        error_general(std::string function, std::string cause, std::runtime_error &e);
+        void addError(const Error &e);
+       /* //----------ERROR
+        QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
+        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        void        error_general(QString function, QString cause);
+        void        error_general(QString function, std::runtime_error &e);
+        void        error_general(QString function, QString cause, std::runtime_error &e);
         //---------------
-
-        bool         _update;
+*/
+        bool         _needsCalculationUpdate;
 
         unsigned int _animals;
         unsigned int _currentAnimal;
 
-        float        _mutationFactor;
-        float        _mutationChangeWeight;
+        double        _mutationFactor;
+        double        _mutationChangeWeight;
 
         std::vector<Net*>    _netList;
-        std::vector<float>  _scoreList;
+        std::vector<double>  _scoreList;
 
         std::default_random_engine          _randEngine;
 
         SaveNet _saveNet;
 
         //Threads
-        pthread_mutex_t _threadLock=PTHREAD_MUTEX_INITIALIZER;
-        pthread_cond_t  _thread_condition_var   = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t _threadLock                     =PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var           = PTHREAD_COND_INITIALIZER;
 
-        pthread_mutex_t _threadLock_setupNet=PTHREAD_MUTEX_INITIALIZER;
-        pthread_cond_t  _thread_condition_var_setupNet   = PTHREAD_COND_INITIALIZER;
+        pthread_mutex_t _threadLock_setupNet            =PTHREAD_MUTEX_INITIALIZER;
+        pthread_cond_t  _thread_condition_var_setupNet  = PTHREAD_COND_INITIALIZER;
         std::vector<thread_data_geneticNet> _threadData;
         std::vector<pthread_t>  _threadList;
         std::vector<thread_data_geneticNet> _threadData_setupNet;
@@ -239,7 +257,19 @@ class GeneticNet
         bool                    _threadPause;
     //  long                    _threadDelayMicros;
 
-        double  _timeInterval;
         unsigned int _debugCount;
+
+        ErrorList _errorList;
+
+#ifdef _DEBUG_NET_TIMING
+        std::chrono::high_resolution_clock::time_point __debug_timer1_start;
+        std::chrono::high_resolution_clock::time_point __debug_timer1_end;
+
+        std::chrono::high_resolution_clock::time_point __debug_timer2_start;
+        std::chrono::high_resolution_clock::time_point __debug_timer2_end;
+
+        std::chrono::duration<double> __debug_time_span;
+        double __debug_run_time;
+#endif
 };
 #endif // GENETICNET_H

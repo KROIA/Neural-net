@@ -39,7 +39,7 @@ Environment::Environment(QWidget *parent,QPainter *p,unsigned int player)
 
         _player.push_back(new Player(_player.size(),mapsize()));
         _player[_player.size()-1]->standardColor(QColor(0,55+rand()%200,55+rand()%200));
-    //    connect(_player[a],SIGNAL(collision(unsigned int,vector<QPoint>)),this,SLOT(snakeCollision(unsigned int,vector<QPoint>)));
+    //    connect(_player[a],SIGNAL(collision(unsigned int,std::vector<QPoint>)),this,SLOT(snakeCollision(unsigned int,std::vector<QPoint>)));
     //    connect(_player[a],SIGNAL(starved(unsigned int)),this,SLOT(snakeStarved(unsigned int)));
 
 
@@ -147,15 +147,20 @@ void Environment::mapInit()
     foodAmount(foodAmount());
     _map.clear();
     _labelMap.clear();
-    _viewMap = vector<vector<int>   >(mapsize().width(),vector<int>(mapsize().height()));
+    _viewMap = std::vector<std::vector<int>   >();
+
+    _viewMap.reserve(mapsize().width());
 
 
     for(unsigned int x=0; x<mapsize().width(); x++)
     {
-        vector<Rect*> tmpMapVec;
-        vector<QLabel*> tmpLabelVec;
+        _viewMap.push_back(std::vector<int>());
+        _viewMap[_viewMap.size()-1].reserve(mapsize().height());
+        std::vector<Rect*> tmpMapVec;
+        std::vector<QLabel*> tmpLabelVec;
         for(unsigned int y=0; y<mapsize().height(); y++)
         {
+            _viewMap[_viewMap.size()-1].push_back(0);
             Rect *tmpRect = new Rect(_painter);
             QLabel *tmpLabel = new QLabel(_parent);
             QFont textFont;
@@ -370,7 +375,7 @@ void Environment::update()
     unsigned int _pause;
 
    // Sleep(10);
-    vector<bool> restartCheckList(playerSize,false);
+    std::vector<bool> restartCheckList(playerSize,false);
 
     do{
         pause = 0;
@@ -637,7 +642,7 @@ void Environment::update()
             //_map[x][y]->middlePoint(QPointF(0,0));
             //_map[x][y]->rotate(5);
             QPoint beginPos = QPoint(drawPos().x()+(tileSize()+_tileSpace)*x,drawPos().y()+(tileSize()+_tileSpace)*y);
-            QPointF tmpPos = geometry::rotate(QPointF((float)beginPos.x(),(float)beginPos.y()),QPointF(300,300),test);
+            QPointF tmpPos = geometry::rotate(QPointF((double)beginPos.x(),(double)beginPos.y()),QPointF(300,300),test);
             _map[x][y]->drawPos(tmpPos.toPoint());
         }
     }*/
@@ -673,7 +678,7 @@ void Environment::controlSnakeDeath(unsigned int player,bool death)
         _player[player]->revive();
 }
 
-void Environment::snakeCollision(unsigned int player,vector<QPoint> pos)
+void Environment::snakeCollision(unsigned int player,std::vector<QPoint> pos)
 {
     if(_player.size() <= player)
         player = 0;
@@ -703,19 +708,24 @@ unsigned int Environment::playerAmount()
 {
     return _player.size();
 }
-vector<vector<float>    >Environment::AI_mapData(unsigned int player)
+std::vector<std::vector<double>    >Environment::AI_mapData(unsigned int player)
 {
     //layer 0 = food
     //layer 1 = snake
     //layer 2 = obsticle
     //layer 3 = selfSnake
-    vector<vector<float> >outputData(5);
+    std::vector<std::vector<double> >outputData;
+    outputData.reserve(5);
+    for(int a=0; a<5; a++)
+    {
+        outputData.push_back(std::vector<double>());
+    }
 
     outputData[food_layer].reserve(_mapsize.width()*_mapsize.height());
     outputData[snake_layer].reserve(_mapsize.width()*_mapsize.height());
     outputData[obsticle_layer].reserve(_mapsize.width()*_mapsize.height());
     outputData[selfSnake_layer].reserve(_mapsize.width()*_mapsize.height());
-    outputData[direction_layer] = vector<float>(4,0);
+    outputData[direction_layer] = std::vector<double>({0,0,0,0});
     outputData[direction_layer][_player[player]->direction()] = 1;
 
     for(unsigned int y=0; y<_mapsize.height(); y++)
@@ -823,12 +833,13 @@ vector<vector<float>    >Environment::AI_mapData(unsigned int player)
     }*/
     return outputData;
 }
-vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
+std::vector<std::vector<double>    >  Environment::AI_mapData_simple(unsigned int player)
 {
-    vector<vector<float>    > outputData(3,vector<float>());
+    std::vector<std::vector<double>    > outputData({std::vector<double>(),std::vector<double>(),std::vector<double>()});
+
     int viewLength = 5;
-    float value = 0;
-    vector<QPoint> viewDirection;
+    double value = 0;
+    std::vector<QPoint> viewDirection;
     viewDirection.push_back(QPoint(-1,0));
     viewDirection.push_back(QPoint(0,-1));
     viewDirection.push_back(QPoint(1,0));
@@ -897,7 +908,7 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                     {
                         if(_food[b]->pos().x() == pos.x() && _food[b]->pos().y() == pos.y())
                         {
-                            outputData[food_layer][outputData[food_layer].size()-1] = (float)_food[b]->amount()/100;
+                            outputData[food_layer][outputData[food_layer].size()-1] = (double)_food[b]->amount()/100;
                             //outputData[food_layer][outputData[food_layer].size()-1] = 1;
                         }
                     }
@@ -905,13 +916,13 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                 }
                 case MapData::snake:
                 {
-                    outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((float)viewLength-(float)a)/(float)viewLength; //bad snake
+                    outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((double)viewLength-(double)a)/(double)viewLength; //bad snake
                     for(unsigned int b=0; b<_player[player]->size(); b++)
                     {
                        // qDebug() << "b: " << b << "pos: "<<_player[player]->pos(b) << " | " << pos;
                         if(_player[player]->pos(b)->x() == pos.x() && _player[player]->pos(b)->y() == pos.y())
                         {
-                            outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((float)viewLength-(float)a)/(float)viewLength; //good snake
+                            outputData[snake_layer][outputData[snake_layer].size()-1] = 1.0f * ((double)viewLength-(double)a)/(double)viewLength; //good snake
                             break;
                         }
                     }
@@ -919,7 +930,7 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
                 }
                 case MapData::obsticle:
                 {
-                    outputData[obsticle_layer][outputData[obsticle_layer].size()-1] = 1.f * ((float)viewLength-(float)a)/(float)viewLength;
+                    outputData[obsticle_layer][outputData[obsticle_layer].size()-1] = 1.f * ((double)viewLength-(double)a)/(double)viewLength;
                     break;
                 }
             }
@@ -934,7 +945,7 @@ vector<vector<float>    >  Environment::AI_mapData_simple(unsigned int player)
     return outputData;
 
 }
-vector<QPoint> Environment::rotate_90(vector<QPoint> data,QPoint rotPoint, int amount)
+std::vector<QPoint> Environment::rotate_90(std::vector<QPoint> data,QPoint rotPoint, int amount)
 {
     if(amount == 0)
         return data;
@@ -1050,7 +1061,7 @@ void *Environment::runThread(void *threadarg)
                     players             = (*my_data->player).size();
                     pthread_mutex_unlock(my_data->lock);
 
-                    vector<Food> foodList;
+                    std::vector<Food> foodList;
                     foodList.reserve(foodSize);
                     for(unsigned int a=0; a<foodSize; a++)
                     {

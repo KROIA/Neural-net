@@ -1,14 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2019-05-27T17:10:35
+# Project created by QtCreator 2020-02-06T10:11:04
 #
 #-------------------------------------------------
 
-QT       += core gui charts
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = snake
+TARGET = X-OR-GUI
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -23,68 +23,35 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
-DLL_buildPath = bin/64bit/build-Release
-
-#-------------------------------------------------------
-#---This Project needs external code--------------------
-# Qect.dll : https://github.com/KROIA/Rect
-# geometry : https://github.com/KROIA/Geometry
-
-#change your PC-username
-username     = AlexKrieg
-QT_work_dir  = C:/Users/$$username/Documents/QT
-geometryPath = $$QT_work_dir/lib/Geometry
-rectPath     = $$QT_work_dir/DLL/Rect
-configPath   = $$QT_work_dir/DLL/Config
-
-LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
-      $$configPath//$$DLL_buildPath/Config.dll
 
 incPath = inc
 srcPath = src
-
 netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
-               $$incPath \
-               $$rectPath \
-               $$geometryPath \
-               $$configPath \
-
+               $$incPath
 
 SOURCES += \
     $$srcPath/main.cpp \
-    $$srcPath/snake.cpp  \
+    $$srcPath/mainwindow.cpp \
     $$netSrcPath/net.cpp \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
-    $$netSrcPath/geneticnet.cpp \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
-    $$netSrcPath/error.cpp \
-    $$geometryPath/geometry.cpp \
-    $$srcPath/player.cpp \
-    $$srcPath/food.cpp \
-    $$srcPath/maptile.cpp \
-    $$srcPath/environment.cpp
+    $$netSrcPath/error.cpp
 
 HEADERS += \
-    $$incPath/snake.h \
-    $$geometryPath/geometry.h \
-    $$incPath/player.h \
-    $$incPath/food.h \
-    $$incPath/maptile.h \
-    $$incPath/environment.h \
+    $$incPath/mainwindow.h \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
-    $$netIncPath/activation.h \
-    $$netIncPath/savenet.h \
-    $$netIncPath/error.h \
-    $$netIncPath/geneticnet.h \
     $$netIncPath/backpropnet.h \
+    $$netIncPath/geneticnet.h \
+    $$netIncPath/savenet.h \
+    $$netIncPath/error.h
 
 FORMS += \
-        snake.ui
+        mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

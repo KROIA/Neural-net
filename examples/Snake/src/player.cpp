@@ -71,7 +71,7 @@ void Player::addFood(int increment)
     food(food() + increment);
 }
 
-void Player::pos(vector<QPoint> pos)
+void Player::pos(std::vector<QPoint> pos)
 {
     if(pos.size() >= 2)
     {
@@ -91,7 +91,7 @@ QPoint *Player::pos(unsigned int index)
     }
     return &_playerPos[index];
 }
-vector<QPoint> *Player::pos()
+std::vector<QPoint> *Player::pos()
 {
     return &_playerPos;
 }
@@ -111,7 +111,7 @@ QColor Player::color(unsigned int index)
     }
     return _playerColor[index];
 }
-vector<QColor> Player::color()
+std::vector<QColor> Player::color()
 {
     return _playerColor;
 }
@@ -170,14 +170,14 @@ void Player::update()
         tmpFood = 0;
     for(int a=0; a<size(); a++)
     {
-        float colorFactor;
+        double colorFactor;
         if(tmpFood / _foodPerTile != 0)
         {
             colorFactor = 1;
         }
         else
         {
-            colorFactor =  (float)(tmpFood % _foodPerTile)/_foodPerTile;
+            colorFactor =  (double)(tmpFood % _foodPerTile)/_foodPerTile;
         }
         //qDebug() << "food index: " << a << " : " << colorFactor << "tmpFood: " << tmpFood;
        // colorFactor = 1.f - colorFactor;
@@ -190,7 +190,7 @@ void Player::update()
         {
             sollSize(size()-1);
         }
-        _playerColor[a] = QColor(255-(float)255*colorFactor,(float)_standardBodyColor.green()*colorFactor,(float)_standardBodyColor.blue()*colorFactor);
+        _playerColor[a] = QColor(255-(double)255*colorFactor,(double)_standardBodyColor.green()*colorFactor,(double)_standardBodyColor.blue()*colorFactor);
         //_playerColor[a] = QColor(0,0,0);
     }
 
@@ -248,7 +248,7 @@ void Player::checkForSelfCollision()
     if(_death)
         return;
 
-    vector<QPoint> collisionPos;
+    std::vector<QPoint> collisionPos;
     for(unsigned int a=0; a<size(); a++)
     {
         for(unsigned int b=a+1; b<size(); b++)
@@ -304,7 +304,7 @@ void Player::revive()
     _steps = 0;
 
     _direction = rand()%4;
-    //_playerPos = vector<QPoint>(sollSize());
+    //_playerPos = std::vector<QPoint>(sollSize());
     _lastPos = QPoint(5+rand() %(_mapSize.width()-_mapSize.width()/10),5+rand()%(_mapSize.height()-_mapSize.height()/10));
     while(_playerPos.size() < sollSize())
     {
@@ -313,7 +313,12 @@ void Player::revive()
     }
 
 
-    _playerColor = vector<QColor>(sollSize());
+    _playerColor = std::vector<QColor>();
+    _playerColor.reserve(sollSize());
+    for(int a=0; a<sollSize(); a++)
+    {
+        _playerColor.push_back(QColor());
+    }
     _playerColor[0] = _standardBodyColor;
 
 
@@ -348,7 +353,7 @@ void Player::resetDeathCount()
 {
     _deathCount = 0;
 }
-vector<struct Score> Player::score()
+std::vector<struct Score> Player::score()
 {
     return _scoreList;
 }
@@ -417,7 +422,7 @@ struct Score Player::averageScore()
     }
     return tmpScore;
 }
-struct Score Player::averageScore(vector<Score> scoreList)
+struct Score Player::averageScore(std::vector<Score> scoreList)
 {
     Score averageScore;
     averageScore.food = 0;

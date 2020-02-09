@@ -29,12 +29,21 @@ static std::chrono::high_resolution_clock::time_point t2;
 static std::chrono::duration<double> time_span;
 static std::chrono::high_resolution_clock::time_point t1;
 
+#define XOR
+
+void runNet(unsigned int netID,unsigned long long &sycles,double &time);
 void printNet(Net *net);
 void setupTrainingSet();
 void netFinished(BackpropNet *net);
-void cmdXY(unsigned int x,unsigned int y);
-void logGenom(std::vector<double> genom);
+void cmdXY(int x, int y);
+void logGenom(unsigned int net,std::vector<double> genom);
+void generateTone();
 class ErrorHandler;
+
+static unsigned int hiddenNeuronX= 10;
+static unsigned int hiddenNeuronY= 10;
+static bool enableBias = true;
+static bool enableAverage = false;
 
 static std::vector<std::vector<std::vector<double> >   > _genomCompareList;
 static std::vector<std::vector<double>  >_runtimeList;
@@ -45,39 +54,116 @@ static unsigned int reserveSize = 10;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+#ifdef XOR
     setupTrainingSet(); //Setting the trainingset for the X-OR problem
+#else
+    generateTone();
+#endif
 
-    unsigned int netID              = 0;
-    unsigned int inputNeurons       = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
-    unsigned int hiddenNeuronX      = 1;
-    unsigned int hiddenNeuronY      = 4;
-    unsigned int outputNeuron       = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
-    bool enableBias                 = true;
-    bool enableAverage              = false;
-    Activation activation           = Activation::Gaussian;
-
-
-    BackpropNet *net = new BackpropNet(netID,
-                                       inputNeurons,
-                                       hiddenNeuronX,
-                                       hiddenNeuronY,
-                                       outputNeuron,
-                                       enableBias,
-                                       enableAverage,
-                                       activation); //Makes the Net object
-
-    net->loadFromNetFile();
-    net->set_mutationFactor(0.1);
-    net->updateNetConfiguration();
-    net->saveToNetFile();
+  //  net->loadFromNetFile();
+  //  net->set_mutationFactor(0.1);
+    //net->connectNeuronViaID(0,2);
+  //  net->updateNetConfiguration();
+  //  net->saveToNetFile();
 
 
+    /*genomlogFile = fopen("genom.csv","r");
+    if(!genomlogFile)
+    {
+        fclose(genomlogFile);
+        genomlogFile = fopen("genom.csv","w");
+        for(unsigned int a=0; a<net->get_genomsize(); a++)
+        {
+            fprintf(genomlogFile,"w%i;",a+1);
+        }
+        fprintf(genomlogFile,"\n");
+        fclose(genomlogFile);
+    }*/
     std::vector<double> genom;
     std::vector<double> output;
     printf("net done, press enter\n");
-    unsigned int counter =0;
+    getchar();
+
+    FILE *benchmarkFile;
+
+
+    for(unsigned int trainings = 0; trainings<100; trainings++)
+    {
+        double learnTime = 0;
+        unsigned long long sycles = 0;
+        runNet(trainings,sycles,learnTime);
+        _runtimeList.push_back({learnTime,
+                                BackpropNet::__dbg_time1,
+                                BackpropNet::__dbg_time2,
+                                BackpropNet::__dbg_time3,
+                                BackpropNet::__dbg_time4,
+                                BackpropNet::__dbg_time5,
+                                BackpropNet::__dbg_time6,
+                                BackpropNet::__dbg_time7,
+                                BackpropNet::__dbg_time8,
+                                BackpropNet::__dbg_time9,
+                                BackpropNet::__dbg_time10});
+        benchmarkFile = fopen("bench.csv","a");
+        fprintf(benchmarkFile,"%i;%.16f;\n",sycles,learnTime);
+        fclose(benchmarkFile);
+    }
+
+/*    _genomCompareList = std::vector<std::vector<std::vector<double> >   >(2);
+    _genomCompareList[0] = {{1,2,3,4,5},
+                            {2,3,4,5,6},
+                            {3,4,5,6,7},
+                            {4,5,6,7,8}};
+    _genomCompareList[1] = {{1,1,1,1,1},
+                            {2,2,2,2,2},
+                            {3,3,3,3,3},
+                            {4,4,4,4,4}};
+
+*/
+
+    unsigned int minTimedGenomSize = _genomCompareList[0].size();
+    for(unsigned int net = 1; net<_genomCompareList.size(); net++)
+    {
+        if(_genomCompareList[net].size() < minTimedGenomSize)
+        {
+            minTimedGenomSize = _genomCompareList[net].size();
+        }
+    }
+
+    std::vector<double> diverenceGenom(_genomCompareList[0][0].size());
+    double diference = 0;
+    for(unsigned int timedGenom = 0; timedGenom<minTimedGenomSize; timedGenom++)
+    {
+        for(unsigned int net = 1; net<_genomCompareList.size(); net++)
+        {
+            for(unsigned int genomIndex = 0; genomIndex<_genomCompareList[net][timedGenom].size(); genomIndex++)
+            {
+                diverenceGenom[genomIndex] += abs(_genomCompareList[net][timedGenom][genomIndex] - _genomCompareList[net-1][timedGenom][genomIndex]);
+                diference += diverenceGenom[genomIndex];
+            }
+        }
+
+        //logGenom(100,diverenceGenom);
+        diverenceGenom = std::vector<double>(_genomCompareList[0][0].size());
+
+
+    }
+
+    FILE *file = fopen("time.csv","w");
+    for(unsigned int a=0; a<_runtimeList.size(); a++)
+    {
+        for(unsigned int b=0; b<_runtimeList[a].size(); b++)
+        {
+            fprintf(file,"%.16f;",_runtimeList[a][b]);
+        }
+        fprintf(file,"\n");
+    }
+    fclose(file);
+    qDebug() << "diference: "<<diference;
+
+
+    /*unsigned int counter =0;
     unsigned int saveCounter = 0;
-    unsigned int saves = 10;
+    unsigned int saves = 1000;
     double averageError = 0;
 
 
@@ -113,7 +199,7 @@ int main(int argc, char *argv[])
                                                 //Saving only the positive value of the error to stop the training later when the error is low enough
         net->learn();                            //Improve the net
         learningSteps++;                        //Adding one training cycle
-
+       // logGenom(net->genom());
         if(isnan(averageError))
         {
             qDebug() << "nan";
@@ -147,11 +233,12 @@ int main(int argc, char *argv[])
             }
             if(averageError < 0.0005 || learningSteps > 1000000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
             {
+                clock_t endTime = clock();
                 t2 = std::chrono::high_resolution_clock::now();
                 time_span = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
                 cmdXY(0,0);  // Sets the cursor pos of the console
                 saveCounter = 0;
-                saves+=100; //spam the console in the beginning and later no more
+                //saves+=100; //spam the console in the beginning and later no more
                 printf("error: %.5f\n",averageError);   //Prints the error
                 printf("steps: %i\n",learningSteps);    //Prints the learn cyles
 
@@ -164,15 +251,83 @@ int main(int argc, char *argv[])
                 net->saveToNetFile();                        //Save the genom
 
                 logGenom(net->get_genom());
-                qDebug() << "Learning time: "<< time_span.count() << "sec.\t Average net calculation Time: "<<averageCalcTime<<"sec.";
+                qDebug() << "time: "<< time_span.count() << "sec\t" << QString::number(double(endTime-startTime)/CLOCKS_PER_SEC) << "\t calcTime: "<<averageCalcTime;
                 getchar();
                 netFinished(net);
             }
             averageError = 0;
 
         }
-    }
+    }*/
     return a.exec();
+}
+void runNet(unsigned int netID,unsigned long long &sycles,double &time)
+{
+    sycles  = 0;
+    time    = 0;
+    unsigned int inputNeurons = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
+    unsigned int outputNeuron = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
+
+
+    BackpropNet *net = new BackpropNet(0,inputNeurons,hiddenNeuronX,hiddenNeuronY,outputNeuron,enableBias,enableAverage,Activation::Gaussian); //Makes the Net object
+    net->set_seed(0);
+    net->set_mutationFactor(0.1);
+    net->updateNetConfiguration();
+    t1 = std::chrono::high_resolution_clock::now();
+    double averageError  = 0;
+    unsigned int counter = 0;
+    unsigned int logInterval = 100;
+    std::vector<double> output;
+    bool doLearn = true;
+    _genomCompareList.push_back(std::vector<std::vector<double> >());
+    _genomCompareList[_genomCompareList.size()-1].reserve(10000);
+   //system("cls");
+    while(doLearn)
+    {
+        net->set_input(trainingsSet[counter]);       // Sets the input of the net with the trainingset [counter]
+        net->run();
+        output = net->get_output();                  // Calculates the output std::vector and returns it
+        net->set_expected(outputSet[counter]);       // Tells the net the right results
+
+        averageError += abs(net->get_netError());    //The net calculates the error of netprediction and expected output
+                                                //Saving only the positive value of the error to stop the training later when the error is low enough
+        net->learn();                            //Improve the net
+        sycles++;                        //Adding one training cycle
+        if(isnan(averageError))
+        {
+            qDebug() << "nan";
+        }
+        counter++;                              //counts to the next trainingset
+        if(counter >= trainingsSet.size())
+        {
+
+            counter = 0;
+            averageError /= trainingsSet.size(); //takes the average error of the whole training set
+            if(averageError < 0.001 || sycles > 10000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
+            {
+                doLearn = false;
+            }
+            if(counter/trainingsSet.size() % logInterval == 0)
+            {
+                _genomCompareList[_genomCompareList.size()-1].push_back(net->get_genom());
+                //logGenom(netID,net->get_genom());
+                //logGenom(netID,net->get_genom());
+            }
+            averageError = 0;
+        }
+    }
+    t2 = std::chrono::high_resolution_clock::now();
+    time_span = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+    system("cls");
+    qDebug() << "Net:   "<<netID;
+    qDebug() << "time:  "<< time_span.count() << " sec";
+    qDebug() << "error: "<<averageError;   //Prints the error
+    qDebug() << "steps: "<<sycles;    //Prints the learn cyles
+    qDebug() << BackpropNet::__dbg_time1 << "\t"<< BackpropNet::__dbg_time2 << "\t"<< BackpropNet::__dbg_time3 << "\t"<< BackpropNet::__dbg_time4 << "\t"<< BackpropNet::__dbg_time5 << "\t";
+    qDebug() << BackpropNet::__dbg_time6 << "\t"<< BackpropNet::__dbg_time7 << "\t"<< BackpropNet::__dbg_time8 << "\t"<< BackpropNet::__dbg_time9 << "\t"<< BackpropNet::__dbg_time10 << "\t";
+
+    time = time_span.count();
+    delete net;
 }
 void printNet(Net *net)
 {
@@ -243,10 +398,14 @@ void netFinished(BackpropNet *net)
     std::vector<double*> *genom;
     std::vector<double> output;
 
+#ifndef XOR
+    generateTone();
+#endif
+
     genom = net->get_ptr_genom();
     system("cls");
     printf("Genom: \n | ");
-    for(unsigned int a=0; a<(*genom).size(); a++)
+    for(int a=0; a<(*genom).size(); a++)
     {
         printf("%.3f\t|\t",*(*genom)[a]);
         if((a+1)%5 == 0)
@@ -255,22 +414,37 @@ void netFinished(BackpropNet *net)
         }
     }
     printf("\n=================================================================================\n\n");
+    FILE *file;
+    file = fopen("toneOut.csv","w");
+    fprintf(file,"input1;input2;output;error;\n");
+    for(int counter=0; counter<trainingsSet.size(); counter++)
+    {
+        net->set_input(trainingsSet[counter]);
+        net->run();
+        output = net->get_output();
+        fprintf(file,"%.8f;%.8f;%.8f;%.8f;\n",trainingsSet[counter][0],trainingsSet[counter][1],output[0],output[0]-outputSet[counter][0]);
+    }
+    fclose(file);
     while(true)
     {
-        for(unsigned int counter=0; counter<trainingsSet.size(); counter++)
+        for(int counter=0; counter<trainingsSet.size(); counter++)
         {
+
+
+
+
             cmdXY(0,(*genom).size() / 5 +4);
             net->set_input(trainingsSet[counter]);
             net->run();
             output = net->get_output();
 
             printf("inputs are:\t");
-            for(unsigned int a=0; a<trainingsSet[counter].size(); a++)
+            for(int a=0; a<trainingsSet[counter].size(); a++)
             {
                 printf("%.3f | ",trainingsSet[counter][a]);
             }
             printf("\noutputs are:\t");
-            for(unsigned int a=0; a<output.size(); a++)
+            for(int a=0; a<output.size(); a++)
             {
                 printf("%.3f | ",output[a]);
             }
@@ -282,19 +456,34 @@ void netFinished(BackpropNet *net)
         }
     }
 }
-void cmdXY(unsigned int x,unsigned int y)
+void cmdXY(int x,int y)
 {
     HANDLE hConsole_c = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {static_cast<short>(x), static_cast<short>(y)};
     SetConsoleCursorPosition(hConsole_c,pos);
 }
-void logGenom(std::vector<double> genom)
+void logGenom(unsigned int net,std::vector<double> genom)
 {
-    genomlogFile = fopen("genom.csv","a");
-    for(unsigned int a=0; a<genom.size(); a++)
+    genomlogFile = fopen((QString::number(net)+"genom.csv").toStdString().c_str(),"a");
+    for(int a=0; a<genom.size(); a++)
     {
         fprintf(genomlogFile,"%.5f;",genom[a]);
     }
     fprintf(genomlogFile,"\n");
     fclose(genomlogFile);
 }
+/*class ErrorHandler : public QObject
+{
+    Q_OBJECT
+    public:
+        ErrorHandler(QObject *parent = nullptr):QObject(parent){}
+        ~ErrorHandler(){}
+
+    public slots:
+        void errorNet(unsigned int netID, Error &e){
+            qDebug() << "Error in Net ["<<netID<<"] : "<<e.toQString();
+        }
+        void errorNeuron(NeuronID ID,Error &e){
+            qDebug() << "Error in Neuron ["<<Neuron::toIDString(ID)<<"] : "<<e.toQString();
+        }
+};*/

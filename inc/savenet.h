@@ -1,13 +1,13 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "02.01.00"
-//              Datum   16.08.2019
+#define SAVENET_VERSION "02.02.01"
+//              Datum   09.02.2020
 
 #include <net.h>
 #include <time.h>
 
-
+#define _DEBUG_READ_TIMING
 
 class SaveNet
 {
@@ -15,52 +15,52 @@ class SaveNet
         SaveNet();
         ~SaveNet();
 
-        void filename(std::string filename);
-        std::string filename();
-        void fileEnding(std::string fileEnding);
-        std::string fileEnding();
-        void inputNeurons(unsigned int inputs);
-        unsigned int inputNeurons();
-        void hiddenNeuronsX(unsigned int hiddenX);
-        unsigned int hiddenNeuronsX();
-        void hiddenNeuronsY(unsigned int hiddenY);
-        unsigned int hiddenNeuronsY();
-        void outputNeurons(unsigned int outputs);
-        unsigned int neurons();
-        unsigned int outputNeurons();
-        unsigned int hiddenNeurons();
-        unsigned int costumNeurons();
-        unsigned int connections();
-        unsigned int costumConnections();
+        void            set_filename(QString filename);
+        QString         get_filename();
+        void            set_fileEnding(QString fileEnding);
+        QString         get_fileEnding();
+        void            set_inputNeurons(unsigned int inputs);
+        unsigned int    get_inputNeurons();
+        void            set_hiddenNeuronsX(unsigned int hiddenX);
+        unsigned int    get_hiddenNeuronsX();
+        void            set_hiddenNeuronsY(unsigned int hiddenY);
+        unsigned int    get_hiddenNeuronsY();
+        void            set_outputNeurons(unsigned int outputs);
+        unsigned int    get_neurons();
+        unsigned int    get_outputNeurons();
+        unsigned int    get_hiddenNeurons();
+        unsigned int    get_costumNeurons();
+        unsigned int    get_connections();
+        unsigned int    get_costumConnections();
 
 
-        void bias(bool bias);
-        bool bias();
-        void biasValue(float value);
-        float biasValue();
-        void enableAverage(bool average);
-        bool enableAverage();
-        void activationFunction(Activation func);
-        Activation activationFunction();
-        void setExtraParam(std::string name,float value);
-        void getExtraParam(std::string name, float &value);
-        void setExtraParam(std::vector<std::string> name,std::vector<float> value);
-        void getExtraParam(std::vector<std::string> &name,std::vector<float> &value);
+        void            set_bias(bool bias);
+        bool            get_bias();
+        void            set_biasValue(double value);
+        double          get_biasValue();
+        void            set_enableAverage(bool average);
+        bool            get_enableAverage();
+        void            set_activationFunction(Activation func);
+        Activation      get_activationFunction();
+        void            set_ExtraParam(QString name,double value);
+        void            get_ExtraParam(QString name, double &value);
+        void            set_ExtraParam(std::vector<QString> name,std::vector<double> value);
+        void            get_ExtraParam(std::vector<QString> &name,std::vector<double> &value);
 
 
-        void loadFile();
-        void loadFile(std::string filename);
-        void saveFile();
-        void saveFile(std::string filename);
+        bool            loadFile();
+        bool            loadFile(QString filename);
+        bool            saveFile();
+        bool            saveFile(QString filename);
 
-      //  void setGenom(std::vector<float>   genom);
-      //  void setGenom(unsigned int index,std::vector<float>   genom);
-      //  void setGenom(std::vector<std::vector<float>   > genomList);
-      //  void addGenom(std::vector<float>   genom);
-      //  void addGenom(std::vector<std::vector<float>   > genomList);
-        std::vector<float>  genom(unsigned int ID);
-        std::vector<std::vector<float>  > genom();
-        unsigned int animals();
+      //  void setGenom(std::vector<double>   genom);
+      //  void setGenom(unsigned int index,std::vector<double>   genom);
+      //  void setGenom(std::vector<std::vector<double>   > genomList);
+      //  void addGenom(std::vector<double>   genom);
+      //  void addGenom(std::vector<std::vector<double>   > genomList);
+        std::vector<double>           get_genom(unsigned int ID);
+        std::vector<std::vector<double>  >  get_genom();
+        unsigned int            get_animals();
 
         void clear();
         void set(unsigned int inputs,
@@ -70,34 +70,42 @@ class SaveNet
                  bool         bias,
                  bool         average,
                  Activation   activationFunction,
-                 float        biasValue);
-        void neuronsOfNet(unsigned int ID,std::vector<Neuron*> *neurons);
-        std::vector<Neuron*> neuronsOfNet(unsigned int ID);
+                 double        biasValue);
+        void            set_ptr_neuronsOfNet(unsigned int ID,std::vector<Neuron*> *neurons);
+        std::vector<Neuron*>  get_neuronsOfNet(unsigned int ID);
 
-        std::vector<Connection> *connectionList(unsigned int animal);
-        std::vector<std::vector<Connection> > *connectionList();
+        std::vector<Connection>           *get_ptr_connectionList(unsigned int animal);
+        std::vector<std::vector<Connection> >   *get_ptr_connectionList();
 
 
         void clearGenomList();
         void clearExternParam();
 
+        void            clearErrors();
+        Error           get_lastError() const;
+        Error           get_error(unsigned int index);
+        ErrorList       get_errorList() const;
+        unsigned int    get_errorAmount() const;
+
     private:
-        void checkParam();
-        unsigned int genomsize();
-        void saveGenomOfNet(unsigned int ID);
+        void            checkParam();
+        unsigned int    get_genomsize();
+        void            saveGenomOfNet(unsigned int ID);
 
-        //----------ERROR
-        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
-        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        std::string error_paramOutOfRange(unsigned int paramPos,float value,float min, float max);
-        void        error_general(std::string function, std::string cause);
-        void        error_general(std::string function, std::runtime_error &e);
-        void        error_general(std::string function, std::string cause, std::runtime_error &e);
+        void addError(const Error &e);
+
+     /*   //----------ERROR
+        QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
+        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        void        error_general(QString function, QString cause);
+        void        error_general(QString function, std::runtime_error &e);
+        void        error_general(QString function, QString cause, std::runtime_error &e);
         //---------------
-
-        std::string _filename;
-        std::string _fileEnding;
+*/
+        QString _filename;
+        QString _fileEnding;
         unsigned int _saves;
         FILE *_file;
 
@@ -108,7 +116,7 @@ class SaveNet
         unsigned int _outputs;
         bool         _bias;
         bool         _average;
-        float        _biasValue;
+        double        _biasValue;
         Activation   _activationFuncton;
         unsigned int _neurons;
         unsigned int  _hiddenNeurons;
@@ -116,10 +124,10 @@ class SaveNet
         unsigned int  _costumNeurons;
         unsigned int _connections;
         unsigned int  _costumConnections;
-        std::vector<std::string> _extraParamName;
-        std::vector<float>       _extraParamValue;
+        std::vector<QString> _extraParamName;
+        std::vector<double>       _extraParamValue;
 
-        std::vector<std::vector<float>  >_genomList;
+        std::vector<std::vector<double>  >_genomList;
         unsigned int _genomsize;
         // std::vector<std::vector<Net>    >_netList;
 
@@ -132,14 +140,26 @@ class SaveNet
         bool        _check_average;
         bool        _check_activationFunction;
         bool        _check_neurons;
-        bool         _check_hiddenNeurons;
-        bool         _check_outputNeurons;
-        bool         _check_costumNeuron;
+        bool        _check_hiddenNeurons;
+        bool        _check_outputNeurons;
+        bool        _check_costumNeuron;
         bool        _check_connections;
-        bool         _check_costumConnections;
+        bool        _check_costumConnections;
 
         std::vector<std::vector<Neuron*>    > _neuronList;
         std::vector<std::vector<Connection> > _connectionListFromFile;
         std::vector<unsigned int>             _ID_list;
+
+
+        ErrorList _errorList;
+
+#ifdef _DEBUG_READ_TIMING
+        std::chrono::high_resolution_clock::time_point __debug_timer1_start;
+        std::chrono::high_resolution_clock::time_point __debug_timer1_end;
+
+        std::chrono::duration<double> __debug_time_span;
+        double __debug_run_time;
+        const double debugInterval = 0.1; //sec
+#endif
 };
 #endif // SAVENET_H

@@ -4,7 +4,6 @@
 #include <QColor>
 #include <QPoint>
 #include <QSize>
-#include <vector>
 #include <QDebug>
 
 //#define GLOBAL_VIEW //enables global view control
@@ -21,7 +20,7 @@ enum Direction
 };
 struct Score
 {
-        float food;
+        double food;
         unsigned int steps;
 };
 
@@ -45,14 +44,14 @@ class Player : public QObject
         long int food();
         void addFood(int increment = 1);
 
-        void pos(vector<QPoint> pos);
+        void pos(std::vector<QPoint> pos);
         QPoint *pos(unsigned int index);
-        vector<QPoint> *pos();
+        std::vector<QPoint> *pos();
 
         void standardColor(QColor standard);
         QColor standardColor();
         QColor color(unsigned int index);
-        vector<QColor> color();
+        std::vector<QColor> color();
 
         void update();
 
@@ -71,19 +70,19 @@ class Player : public QObject
         bool killreward();
         unsigned int deathCount();
         void resetDeathCount();
-        vector<struct Score> score();
+        std::vector<struct Score> score();
         struct Score score(unsigned int index);
         struct Score lastScore();
         struct Score currentScore();
         struct Score averageScore();
-        struct Score averageScore(vector<Score> scoreList);
+        struct Score averageScore(std::vector<Score> scoreList);
         struct Score averageScoreOverTheLast(unsigned int lastAmount);
         struct Score addedUpScore();
         void resetScore();
 
 
     signals:
-        //void collision(unsigned int player,vector<QPoint>);
+        //void collision(unsigned int player,std::vector<QPoint>);
         //void starved(unsigned int player);
 
     private:
@@ -103,8 +102,8 @@ class Player : public QObject
 
         QSize _mapSize;
 
-        vector<QPoint> _playerPos;
-        vector<QColor> _playerColor;
+        std::vector<QPoint> _playerPos;
+        std::vector<QColor> _playerColor;
         QPoint _lastPos;
         QColor _lastColor;
         int _direction;
@@ -114,7 +113,7 @@ class Player : public QObject
         bool _killreward;
         unsigned int _deathCount;
 
-        vector<struct Score>_scoreList;
+        std::vector<struct Score>_scoreList;
 
 };
 #endif // PLAYER_H

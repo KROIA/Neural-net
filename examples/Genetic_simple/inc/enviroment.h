@@ -50,8 +50,8 @@ class Enviroment{
         vector<bool>            _animalAliveList;
         vector<int>             _animalBackCountList;
         int                     _animalStartFood;
-        vector<float>           _animalScoreList;
-        float                   _averageScore;
+        vector<double>           _animalScoreList;
+        double                   _averageScore;
         unsigned int            _stillAlive;
         unsigned int            _cycles;
         unsigned int            _cyclesCounter;

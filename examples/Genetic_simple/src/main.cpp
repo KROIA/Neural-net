@@ -31,43 +31,43 @@ void printNet(GeneticNet &net)
     printf("=================================================================================\n");
     printf("Input neurons:\n");
     printf("------------------\n");
-    for(unsigned int y=0; y<net.hiddenNeuronsY(); y++)
+    for(unsigned int y=0; y<net.get_hiddenNeuronsY(); y++)
     {
             printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int i=0; i<net.hiddenNeuron(animal,0,y)->inputs(); i++)
+        for(unsigned int i=0; i<net.get_ptr_hiddenNeuron(animal,0,y)->get_inputs(); i++)
         {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.hiddenNeuron(animal,0,y)->input(i),net.hiddenNeuron(animal,0,y)->weight(i));
+            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.get_ptr_hiddenNeuron(animal,0,y)->get_input(i),net.get_ptr_hiddenNeuron(animal,0,y)->get_weight(i));
         }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.hiddenNeuron(animal,0,y)->output());
+            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.get_ptr_hiddenNeuron(animal,0,y)->get_output());
             printf("---------------------------------------------------------------------------------\n");
     }
     printf("=================================================================================\n");
     printf("Hidden neurons:\n");
     printf("------------------\n");
-    for(unsigned int x=1; x<net.hiddenNeuronsX(); x++)
+    for(unsigned int x=1; x<net.get_hiddenNeuronsX(); x++)
     {
-        for(unsigned int y=0; y<net.hiddenNeuronsY(); y++)
+        for(unsigned int y=0; y<net.get_hiddenNeuronsY(); y++)
         {
                 printf("\tneuron x: %i y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",x,y);
-            for(unsigned int b=0; b<net.hiddenNeuron(animal,x,y)->inputs(); b++)
+            for(unsigned int b=0; b<net.get_ptr_hiddenNeuron(animal,x,y)->get_inputs(); b++)
             {
-                printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.hiddenNeuron(animal,x,y)->input(b),net.hiddenNeuron(animal,x,y)->weight(b));
+                printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.get_ptr_hiddenNeuron(animal,x,y)->get_input(b),net.get_ptr_hiddenNeuron(animal,x,y)->get_weight(b));
             }
-                printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.hiddenNeuron(animal,x,y)->output());
+                printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.get_ptr_hiddenNeuron(animal,x,y)->get_output());
                 printf("---------------------------------------------------------------------------------\n");
         }
     }
     printf("=================================================================================\n");
     printf("Output neurons:\n");
     printf("------------------\n");
-    for(unsigned int y=0; y<net.outputNeurons(); y++)
+    for(unsigned int y=0; y<net.get_outputNeurons(); y++)
     {
         printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int b=0; b<net.outputNeuron(animal,y)->inputs(); b++)
+        for(unsigned int b=0; b<net.get_ptr_outputNeuron(animal,y)->get_inputs(); b++)
         {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.outputNeuron(animal,y)->input(b),net.outputNeuron(animal,y)->weight(b));
+            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net.get_ptr_outputNeuron(animal,y)->get_input(b),net.get_ptr_outputNeuron(animal,y)->get_weight(b));
         }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.outputNeuron(animal,y)->output());
+            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net.get_ptr_outputNeuron(animal,y)->get_output());
             printf("---------------------------------------------------------------------------------\n");
     }
     printf("=================================================================================\n");

@@ -12,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "01.00.00";
-    QString datum   = "25.11.2019";
+    QString version = "01.01.00";
+    QString datum   = "02.02.2020";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -41,8 +41,8 @@ Snake::Snake(QWidget *parent) :
     int mapSizeX            = 100;
     int mapSizeY            = 100;
     QString netFileName     = "snake";
-    float net_mutationFactor = 0.05f;
-    float net_mutationChangeWeight = 0.1f;
+    double net_mutationFactor = 0.05;
+    double net_mutationChangeWeight = 0.1;
     unsigned int enviromentTileSize = 6;
     unsigned int enviromentTileSpace = 1;
 
@@ -54,8 +54,8 @@ Snake::Snake(QWidget *parent) :
     config.read();
     config.parameterUInt("net_hiddenX",hiddenX,"rw");
     config.parameterUInt("net_hiddenY",hiddenY,"rw");
-    config.parameterFloat("net_mutationFactor",net_mutationFactor,"rw");
-    config.parameterFloat("net_mutationChangeWeight",net_mutationChangeWeight,"rw");
+    config.parameterDouble("net_mutationFactor",net_mutationFactor,"rw");
+    config.parameterDouble("net_mutationChangeWeight",net_mutationChangeWeight,"rw");
     config.parameterUInt("animals",animals,"rw");
 
     config.parameterUInt("respawnAmountPerRound",_respawnAmount,"rw");
@@ -75,9 +75,9 @@ Snake::Snake(QWidget *parent) :
     config.parameter("net_Filename",netFileName,"rw");
     config.save();
 
-    _statsFilename      = netFileName.toStdString()+"_stats.csv";
-    _versusSaveFileName = netFileName.toStdString()+"_versusStats.csv";
-    _calcPerSecFileName = netFileName.toStdString()+"_calcPerSec.csv";
+    _statsFilename      = netFileName+"_stats.csv";
+    _versusSaveFileName = netFileName+"_versusStats.csv";
+    _calcPerSecFileName = netFileName+"_calcPerSec.csv";
 
     //config.parameter()
 
@@ -93,31 +93,32 @@ Snake::Snake(QWidget *parent) :
 #endif
 
     unsigned int outputs = 3;
-    net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
-    net->bias(true);
-    net->loadFromNetFile(netFileName.toStdString(),"net");
-    float gen = 0;
+    net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Gaussian);
+    net->set_bias(true);
+    net->loadFromNetFile(netFileName,"net");
+    double gen = 0;
     try {
-        net->saveNet()->getExtraParam("generation",gen);
+        net->get_ptr_saveNet()->get_ExtraParam("generation",gen);
     } catch (...) {
 
     }
 
     generation = (unsigned int) gen;
-    net->mutationFactor(net_mutationFactor);
-    net->mutationChangeWeight(net_mutationChangeWeight);
+    net->set_mutationFactor(net_mutationFactor);
+    net->set_mutationChangeWeight(net_mutationChangeWeight);
 
-    _backpropNet = new BackpropNet(0,
-                                   net->inputNeurons(),
-                                   net->hiddenNeuronsX(),
-                                   net->hiddenNeuronsY(),
-                                   net->outputNeurons(),
-                                   net->bias(),
-                                   net->enableAverage(),
-                                   net->activationFunction());
-    _backpropNet->netFileName("backPropNet");
-    _backpropNet->netFileEnding("net");
-    ui->selectedSnake_slider->setRange(0,net->animals()-1);
+    _backpropNet = new BackpropNet(animals+10,
+                                   net->get_inputNeurons(),
+                                   net->get_hiddenNeuronsX(),
+                                   net->get_hiddenNeuronsY(),
+                                   net->get_outputNeurons(),
+                                   net->get_bias(),
+                                   net->get_enableAverage(),
+                                   net->get_activationFunction(),
+                                   this);
+    _backpropNet->set_netFileName("backPropNet");
+    _backpropNet->set_netFileEnding("net");
+    ui->selectedSnake_slider->setRange(0,net->get_animals()-1);
     _selectedSnake = ui->selectedSnake_slider->value();
 
     net->updateNetConfiguration();
@@ -145,9 +146,9 @@ Snake::Snake(QWidget *parent) :
     }catch(std::runtime_error &e)
     {
         qDebug() << "can't connect: "<< e.what();
-        saveError(std::string("can't connect: ")+e.what());
+        saveError(QString("can't connect: ")+e.what());
     }*/
-    net->saveToNetFile();
+    //net->saveToNetFile();
 
 
 
@@ -181,7 +182,7 @@ Snake::Snake(QWidget *parent) :
 
     _versusSaveScoreCount = 0;
 //#else
-    _environment = new Environment(this,_painter,net->animals());
+    _environment = new Environment(this,_painter,net->get_animals());
     _environment->mapsize(mapsize);
     _environment->scale(1);
     _environment->tileSize(enviromentTileSize);
@@ -387,7 +388,7 @@ void Snake::timerEvent()
     //----------------SPEEDCONTROLL
     try{
         _fullSycleTimeEnd = std::chrono::high_resolution_clock::now();
-        _fullSycleTime_span = std::chrono::duration_cast<std::chrono::duration<double>>(_fullSycleTimeEnd - _fullSycleTimeStart);
+        _fullSycleTime_span = std::chrono::duration_cast<std::chrono::microseconds>(_fullSycleTimeEnd - _fullSycleTimeStart);
         _fullSycleTimeStart = _fullSycleTimeEnd;
         _fullSycleTime = 0.5*_fullSycleTime + 0.5*_fullSycleTime_span.count();
         if(_fullSycleTimeDebugCount > 1000)
@@ -405,11 +406,11 @@ void Snake::timerEvent()
     }catch(std::runtime_error &e)
     {
         qDebug() << "ERROR  sycletime "<< e.what();
-        saveError(std::string("ERROR  sycletime ")+e.what());
+        saveError("ERROR  sycletime "+QString(e.what()));
     }catch(...)
     {
-        qDebug() << "ERROR  sycletime -> unnkown "<<QString::fromStdString(GetLastErrorStdStr());
-        saveError(std::string("ERROR  sycletime -> unnkown ")+GetLastErrorStdStr());
+        qDebug() << "ERROR  sycletime -> unnkown "<<GetLastErrorStr();
+        saveError("ERROR  sycletime -> unnkown "+GetLastErrorStr());
     }
     //------------------------
     switch(_modus)
@@ -421,11 +422,11 @@ void Snake::timerEvent()
             }catch(std::runtime_error &e)
             {
                 qDebug() << "ERROR  _environment->update() "<< e.what();
-                saveError(std::string("ERROR  _environment->update() ")+e.what());
+                saveError("ERROR  _environment->update() "+QString(e.what()));
             }catch(...)
             {
-                qDebug() << "ERROR  _environment->update() -> unnkown "<<QString::fromStdString(GetLastErrorStdStr());
-                saveError(std::string("ERROR  _environment->update() -> unnkown ")+GetLastErrorStdStr());
+                qDebug() << "ERROR  _environment->update() -> unnkown "<<GetLastErrorStr();
+                saveError("ERROR  _environment->update() -> unnkown "+GetLastErrorStr());
             }
             break;
         }
@@ -477,20 +478,20 @@ void Snake::timerEvent()
     }catch(std::runtime_error &e)
     {
         //qDebug() << "ERROR  setSnakeOnMap("<<a<<") "<< e.what();
-        std::string errorMessage = "ERROR: handleNet())\n";
-        errorMessage+= std::string(e.what())+"\n";
+        QString errorMessage = "ERROR: handleNet())\n";
+        errorMessage+= QString(e.what())+"\n";
         //errorMessage+= "playersize: "+std::to_string(_environment->)+"\n";
-        qDebug() << QString::fromStdString(errorMessage);
+        qDebug() << errorMessage;
         FILE *file = fopen("error_e.txt","a");
         if(file)
         {
-            fprintf(file,"%s\n",errorMessage.c_str());
+            fprintf(file,"%s\n",errorMessage.toStdString().c_str());
             fclose(file);
         }
     }catch(...)
     {
-        qDebug() << "ERROR  this->update() -> unnkown "<<QString::fromStdString(GetLastErrorStdStr());
-        saveError(std::string("ERROR  this->update() -> unnkown ")+GetLastErrorStdStr());
+        qDebug() << "ERROR  this->update() -> unnkown "<<GetLastErrorStr();
+        saveError("ERROR  this->update() -> unnkown "+GetLastErrorStr());
     }
 
     switch(_modus)
@@ -517,9 +518,13 @@ void Snake::timerEvent()
 }
 void Snake::timerEvent2()
 {
-
-        float filter = 0.9;
-        _genPerSecond =(float)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(float)_updateTimer2->interval());
+        QStringList data = net->toStringList();
+        for(int a=0; a<data.size(); a++)
+        {
+            qDebug() << data[a];
+        }
+        double filter = 0.9;
+        _genPerSecond =(double)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(double)_updateTimer2->interval());
         ui->genPerSec_label->setText(QString::fromStdString(to_string(_genPerSecond)));
         _genPerSecCounter = 0;
         _stats_genPerSec_Lineseries->append(_stats_genPerSec_Lineseries->at(_stats_genPerSec_Lineseries->count()-1).x()+1,_genPerSecond);
@@ -542,14 +547,14 @@ void Snake::timerEvent2()
 
         }
 
-        _calcPerSecond =(float) /*_genPerSecond*0.9*/ + 1000*_calcPerSecCounter/(float)_updateTimer2->interval();
+        _calcPerSecond =(double) /*_genPerSecond*0.9*/ + 1000*_calcPerSecCounter/(double)_updateTimer2->interval();
         if(_fullSycleTime != 0)
             _averageCalcPerSec = filter*_averageCalcPerSec + (1-filter)* 1/_fullSycleTime;
 
         ui->calcPerSec_label->setText(QString::fromStdString(to_string(/*_calcPerSecond*/_averageCalcPerSec)));
         _averageCalcPerSec_List.push_back(_averageCalcPerSec);
         _averageEnviromentCycleTime.push_back(_environment->cycleTime());
-        _averageNetCycleTime.push_back(net->cycleTime());
+        _averageNetCycleTime.push_back(net->get_runtime());
         _averageSnakeCycleTime.push_back(_fullSycleTime);
         _calcPerSecCounter = 0;
         _stats_calcPerSec_Lineseries->append(_stats_calcPerSec_Lineseries->at(_stats_calcPerSec_Lineseries->count()-1).x()+1,_averageCalcPerSec);
@@ -640,7 +645,7 @@ void Snake::handleNet()
     {
         case Modus::geneticTraining:
         {
-            for(unsigned int animal=0; animal<net->animals(); animal++)
+            for(unsigned int animal=0; animal<net->get_animals(); animal++)
             {
                 if(!_environment->player(animal)->isAlive())
                 {
@@ -651,11 +656,11 @@ void Snake::handleNet()
                     deathCounter++;
                     continue;
                 }
-                //vector<vector<float>    > netInput = _environment->AI_mapData(animal,_fieldOfView);
+                //std::vector<std::vector<double>    > netInput = _environment->AI_mapData(animal,_fieldOfView);
 #ifdef GLOBALVIEW
-                vector<vector<float>    > netInput = _environment->AI_mapData(animal);
+                std::vector<std::vector<double>    > netInput = _environment->AI_mapData(animal);
 #else
-                vector<vector<float>    > netInput = _environment->AI_mapData_simple(animal);
+                std::vector<std::vector<double>    > netInput = _environment->AI_mapData_simple(animal);
 #endif
 
                 unsigned int inputIndex = 0;
@@ -663,7 +668,7 @@ void Snake::handleNet()
                 {
                     for(unsigned int c=0; c<netInput[b].size(); c++)
                     {
-                        net->input(animal,inputIndex,netInput[b][c]);
+                        net->set_input(animal,inputIndex,netInput[b][c]);
                         inputIndex++;
                     }
                 }
@@ -672,13 +677,13 @@ void Snake::handleNet()
             net->run();
 
             //_calcPerSecCounter++;
-            for(unsigned int animal=0; animal<net->animals(); animal++)
+            for(unsigned int animal=0; animal<net->get_animals(); animal++)
             {
                 if(!_environment->player(animal)->isAlive())
                 {
                     continue;
                 }
-                vector<float> output = net->output(animal);
+                std::vector<double> output = net->get_output(animal);
 
                 //----------------Control the Snakes-------------------
                /* if(animal == 0 && _selfControl)
@@ -705,7 +710,7 @@ void Snake::handleNet()
 
             }
 
-            if(deathCounter == net->animals())
+            if(deathCounter == net->get_animals())
             {
                 if(_record_enable)
                     savescreenshot();
@@ -713,12 +718,12 @@ void Snake::handleNet()
                 qDebug() << "all death";
 #endif
                 _snakeScore.clear();
-                float averageScore = 0;
-                float maxScore = 0;
-                float minScore = 0;
-                float averageFoodScore = 0;
-                float averageStepScore = 0;
-                for(unsigned int animal=0; animal<net->animals(); animal++)
+                double averageScore = 0;
+                double maxScore = 0;
+                double minScore = 0;
+                double averageFoodScore = 0;
+                double averageStepScore = 0;
+                for(unsigned int animal=0; animal<net->get_animals(); animal++)
                 {
 #ifdef DEBUG_PRINTS
                     if(animal == 0)
@@ -742,9 +747,9 @@ void Snake::handleNet()
                         if(_snakeScore[_snakeScore.size()-1] > maxScore)
                             maxScore = _snakeScore[_snakeScore.size()-1];
                     }
-                    averageScore        += _snakeScore[_snakeScore.size()-1] / net->animals();
-                    averageFoodScore    += _environment->player(animal)->averageScore().food / net->animals();
-                    averageStepScore    += (float)_environment->player(animal)->averageScore().steps / net->animals();
+                    averageScore        += _snakeScore[_snakeScore.size()-1] / net->get_animals();
+                    averageFoodScore    += _environment->player(animal)->averageScore().food / net->get_animals();
+                    averageStepScore    += (double)_environment->player(animal)->averageScore().steps / net->get_animals();
                 }
 #ifdef DEBUG_PRINTS
                 qDebug() << "average score: "<<averageScore;
@@ -821,7 +826,7 @@ void Snake::handleNet()
                 _genPerSecCounter++;
 
 
-                for(unsigned int animal=0; animal<net->animals(); animal++)
+                for(unsigned int animal=0; animal<net->get_animals(); animal++)
                 {
                     _environment->player(animal)->resetDeathCount();
                     _environment->player(animal)->resetScore();
@@ -875,22 +880,22 @@ void Snake::handleNet()
             }
             _versusEnvironment->AI_mapData_simple(0);
 #ifdef GLOBALVIEW
-                vector<vector<float>    > netInput = _environment->AI_mapData(1);
+                std::vector<std::vector<double>    > netInput = _environment->AI_mapData(1);
 #else
-           vector<vector<float>    > netInput = _versusEnvironment->AI_mapData_simple(1);
+           std::vector<std::vector<double>    > netInput = _versusEnvironment->AI_mapData_simple(1);
 #endif
             unsigned int inputIndex = 0;
             for(unsigned int b=0; b<netInput.size(); b++)
             {
                 for(unsigned int c=0; c<netInput[b].size(); c++)
                 {
-                    net->input(_selectedSnake,inputIndex,netInput[b][c]);
+                    net->set_input(_selectedSnake,inputIndex,netInput[b][c]);
                     inputIndex++;
                 }
             }
             net->run(_selectedSnake);
 
-            vector<float> output = net->output(_selectedSnake);
+            std::vector<double> output = net->get_output(_selectedSnake);
 #ifdef GLOBALVIEW
             _environment->controlSnakeDirection(1,getDirectionFromData(output,_environment->player(animal)->direction()));
 #else
@@ -930,8 +935,8 @@ void Snake::handleNet()
         case Modus::backpropTraining:
         {
             //_versusEnvironment->AI_mapData_simple(0);
-            vector<vector<float>    > netInput = _backpropTrainingEnvironment->AI_mapData_simple(0);
-            vector<float> inputVec;
+            std::vector<std::vector<double>    > netInput = _backpropTrainingEnvironment->AI_mapData_simple(0);
+            std::vector<double> inputVec;
             unsigned int inputIndex = 0;
             for(unsigned int b=0; b<netInput.size(); b++)
             {
@@ -942,15 +947,15 @@ void Snake::handleNet()
                 }
             }
             _backpropTrainingInputs.push_back(inputVec);
-            _backpropTrainingOutputs.push_back(vector<float>(2,0));
+            _backpropTrainingOutputs.push_back(std::vector<double>{2,0});
 
-            net->input(_selectedSnake,inputVec);
+            net->set_input(_selectedSnake,inputVec);
             net->run(_selectedSnake);
-            _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = net->output(_selectedSnake);
+            _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = net->get_output(_selectedSnake);
             _backpropTrainingEnvironment->controlSnakeDirection(0,getDirectionFromData(_backpropTrainingOutputs[_backpropTrainingOutputs.size()-1]));
             //net->run(0);
 
-            //vector<float> output = net->output(0);
+            //std::vector<double> output = net->output(0);
            /* if(output.size() != 2)
             {
                 qDebug() << "error: net outputSize wrong: "<< output.size();
@@ -1005,7 +1010,7 @@ void Snake::saveBackpropTrainingsData()
         qDebug() << "ERROR: saveBackpropTrainingsData size != size" << _backpropTrainingInputs.size() << " != " << _backpropTrainingOutputs.size();
     }
     //_backpropTrainingInputs.erase(_backpropTrainingInputs.begin());
-    FILE *_file = fopen(_backprobTrainingsDataFileName.c_str(),"a");
+    FILE *_file = fopen(_backprobTrainingsDataFileName.toStdString().c_str(),"a");
     if(_file)
     {
         for(unsigned int a=0; a<_backpropTrainingInputs.size(); a++)
@@ -1031,7 +1036,7 @@ void Snake::saveVersusData()
 {
     if(_versusPlayerScore.size() != _versusBotScore.size() || _versusBotScore.size() == 0 || _versusPlayerScore.size() == 0)
         return;
-    FILE *_versusSaveFile = fopen(_versusSaveFileName.c_str(),"w");
+    FILE *_versusSaveFile = fopen(_versusSaveFileName.toStdString().c_str(),"w");
     if(_versusSaveFile)
     {
         fprintf(_versusSaveFile,"PlayerFood;PlayerSteps;PlayerScore;PlayerAverageScore;PlayerAbsolutAverageScore;;BotFood;BotSteps;BotScore;BotAverageScore;BotAbsolutAverageScore;\n");
@@ -1048,15 +1053,15 @@ void Snake::saveVersusData()
         fclose(_versusSaveFile);
     }
 }
-void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs)
+void Snake::loadBackpropTrainignsData(std::vector<std::vector<double> > &inputs,std::vector<std::vector<double>  > &outputs)
 {
-    FILE *_file = fopen(_backprobTrainingsDataFileName.c_str(),"r");
+    FILE *_file = fopen(_backprobTrainingsDataFileName.toStdString().c_str(),"r");
     if(!_file)
     {
-        qDebug() << "File: "<<_backprobTrainingsDataFileName.c_str() << " not found";
+        qDebug() << "File: "<<_backprobTrainingsDataFileName << " not found";
         return;
     }
-    vector<string> fileBuffer;
+    std::vector<string> fileBuffer;
     while(!feof(_file))
     {
         char list[255];
@@ -1069,8 +1074,8 @@ void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vect
     {
         string inputList = fileBuffer[a].substr(0,fileBuffer[a].find(";;")+1);
         string outputList = fileBuffer[a].substr(fileBuffer[a].find(";;")+2,fileBuffer[a].size());
-        vector<float> tmpInput;
-        vector<float> tmpOutput;
+        std::vector<double> tmpInput;
+        std::vector<double> tmpOutput;
 
         do
         {
@@ -1091,10 +1096,10 @@ void Snake::loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vect
 
     fclose(_file);
 }
-Direction Snake::getDirectionFromData(vector<float> inputs)
+Direction Snake::getDirectionFromData(std::vector<double> inputs)
 {
     Direction dir = Direction::_up;
-    float maximum = inputs[0];
+    double maximum = inputs[0];
     unsigned int index = 0;
     for(unsigned int a=1; a<inputs.size(); a++)
     {
@@ -1123,7 +1128,7 @@ Direction Snake::getDirectionFromData(vector<float> inputs)
         }
         default:
         {
-            qDebug() << "getDirectionFromData(vector<float> inputs) " << index;
+            qDebug() << "getDirectionFromData(std::vector<double> inputs) " << index;
         }
     }
     /*if(inputs[0] > 0.2f || inputs[1] > 0.2f)
@@ -1138,22 +1143,22 @@ Direction Snake::getDirectionFromData(vector<float> inputs)
     }*/
     return dir;
 }
-Direction Snake::getDirectionFromData(vector<float> inputs,Direction moveDirection)
+Direction Snake::getDirectionFromData(std::vector<double> inputs,Direction moveDirection)
 {
     int dir = getDirectionFromData(inputs);
     //qDebug() << "dir: "<<dir<<" moving: "<<(int)moveDirection << " now: "<<(int)Direction((dir + moveDirection)%4);
     return Direction((dir + moveDirection)%4);
 }
-float Snake::getScore(Player *player)
+double Snake::getScore(Player *player)
 {
     if(player == nullptr)
         return 0.f;
     return getScore(player->averageScore());
 }
-float Snake::getScore(Score score)
+double Snake::getScore(Score score)
 {
-    float scoreFoodFactor = 0.2f;
-    float scoreStepFactor = 0.1f;
+    double scoreFoodFactor = 0.2f;
+    double scoreStepFactor = 0.1f;
     return score.food * scoreFoodFactor + score.food * scoreStepFactor;
 }
 
@@ -1180,7 +1185,7 @@ void Snake::keyPressEvent(QKeyEvent *e)
                 }
                 case Modus::backpropTraining:
                 {
-                    vector<float> tmpOutput;
+                    std::vector<double> tmpOutput;
                     tmpOutput.push_back(0);
                     tmpOutput.push_back(0);
                     _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = tmpOutput;
@@ -1202,7 +1207,7 @@ void Snake::keyPressEvent(QKeyEvent *e)
                 }
                 case Modus::backpropTraining:
                 {
-                    vector<float> tmpOutput;
+                    std::vector<double> tmpOutput;
                     tmpOutput.push_back(1);
                     tmpOutput.push_back(0);
                     _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = tmpOutput;
@@ -1224,7 +1229,7 @@ void Snake::keyPressEvent(QKeyEvent *e)
                 }
                 case Modus::backpropTraining:
                 {
-                    vector<float> tmpOutput;
+                    std::vector<double> tmpOutput;
                     tmpOutput.push_back(0);
                     tmpOutput.push_back(0);
                     _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = tmpOutput;
@@ -1246,7 +1251,7 @@ void Snake::keyPressEvent(QKeyEvent *e)
                 }
                 case Modus::backpropTraining:
                 {
-                    vector<float> tmpOutput;
+                    std::vector<double> tmpOutput;
                     tmpOutput.push_back(0);
                     tmpOutput.push_back(1);
                     _backpropTrainingOutputs[_backpropTrainingOutputs.size()-1] = tmpOutput;
@@ -1340,7 +1345,7 @@ void Snake::on_saveStats_pushbutton_clicked()
     qDebug() << "save";
     try{
         saveVersusData();
-        net->saveNet()->setExtraParam("generation",(float)generation);
+        net->get_ptr_saveNet()->set_ExtraParam("generation",(double)generation);
         net->saveToNetFile();
         savescreenshot();
     }catch(std::runtime_error &e)
@@ -1348,13 +1353,13 @@ void Snake::on_saveStats_pushbutton_clicked()
         qDebug() << "error: "<< e.what();
     }
     bool fileExists = false;
-    FILE *statsFile = fopen(_statsFilename.c_str(),"r");
+    FILE *statsFile = fopen(_statsFilename.toStdString().c_str(),"r");
     if(statsFile)
     {
         fileExists = true;
         fclose(statsFile);
     }
-    statsFile = fopen(_statsFilename.c_str(),"a");
+    statsFile = fopen(_statsFilename.toStdString().c_str(),"a");
     if(!statsFile)
         return;
 
@@ -1390,14 +1395,14 @@ void Snake::on_saveStats_pushbutton_clicked()
 }
 void Snake::savePeroformanceData()
 {
-    FILE *statsFile = fopen(_calcPerSecFileName.c_str(),"r");
+    FILE *statsFile = fopen(_calcPerSecFileName.toStdString().c_str(),"r");
     bool fileExists = false;
     if(statsFile)
     {
         fileExists = true;
         fclose(statsFile);
     }
-    statsFile = fopen(_calcPerSecFileName.c_str(),"a");
+    statsFile = fopen(_calcPerSecFileName.toStdString().c_str(),"a");
     if(!statsFile)
         return;
 
@@ -1421,7 +1426,7 @@ void Snake::on_kill_pushButton_clicked()
     {
         case Modus::geneticTraining:
         {
-            for(unsigned int a=0; a<net->animals(); a++)
+            for(unsigned int a=0; a<net->get_animals(); a++)
             {
                 _environment->player(a)->kill();
             }
@@ -1527,7 +1532,7 @@ void Snake::on_backpropTraining_radioButton_clicked(bool checked)
     modeReset();
     _backpropTrainingEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
 }
-void Snake::logGenom(vector<float> genom)
+void Snake::logGenom(std::vector<double> genom)
 {
     FILE *genomlogFile = fopen("genom.csv","a");
     for(unsigned int a=0; a<genom.size(); a++)
@@ -1540,25 +1545,25 @@ void Snake::logGenom(vector<float> genom)
 void Snake::on_backpropTraining_pushButton_clicked()
 {
     loadBackpropTrainignsData(_backpropTrainingInputs,_backpropTrainingOutputs);
-    vector<float> output;
+    std::vector<double> output;
     unsigned int trainingSteps = 0;
-    float minimalError = (float)ui->maxError_slider->value()/1000;
-    float averageError = 1;
-    float lastAverageError;
+    double minimalError = (double)ui->maxError_slider->value()/1000;
+    double averageError = 1;
+    double lastAverageError;
     unsigned int saveInterval = 10;
     FILE *_logfile;
 
-    vector<float>   averageErrorList;
+    std::vector<double>   averageErrorList;
     do{
         lastAverageError = averageError;
         averageError = 0;
         for(unsigned int a=0; a<_backpropTrainingInputs.size(); a++)
         {
-            _backpropNet->input(_backpropTrainingInputs[a]);
-            output = _backpropNet->output();
-            _backpropNet->expected(_backpropTrainingOutputs[a]);
+            _backpropNet->set_input(_backpropTrainingInputs[a]);
+            output = _backpropNet->get_output();
+            _backpropNet->set_expected(_backpropTrainingOutputs[a]);
 
-            averageError += abs(_backpropNet->netError());
+            averageError += abs(_backpropNet->get_netError());
 
             _backpropNet->learn();
 
@@ -1581,7 +1586,7 @@ void Snake::on_backpropTraining_pushButton_clicked()
             qDebug() << "averageNetError: "<< averageError;
 #endif
             _backpropNet->saveToNetFile();
-            logGenom(_backpropNet->genom());
+            logGenom(_backpropNet->get_genom());
         }
 
       /*  _logfile = fopen("backpropScore.csv","a");           //Saves the error in the file: score.csv
@@ -1695,7 +1700,7 @@ void Snake::closeEvent(QCloseEvent *event)
   //event->ignore();
 
 }
-string Snake::GetLastErrorStdStr()
+QString Snake::GetLastErrorStr()
 {
   DWORD error = GetLastError();
   if (error)
@@ -1713,22 +1718,22 @@ string Snake::GetLastErrorStdStr()
     if (bufLen)
     {
       LPCSTR lpMsgStr = (LPCSTR)lpMsgBuf;
-      std::string result(lpMsgStr, lpMsgStr+bufLen);
+      string result(lpMsgStr, lpMsgStr+bufLen);
 
       LocalFree(lpMsgBuf);
 
-      return result;
+      return QString::fromStdString(result);
     }
   }
-  return std::string();
+  return QString();
 }
 
-void Snake::saveError(std::string error)
+void Snake::saveError(QString error)
 {
     FILE *file = fopen("error.txt","a");
     if(file)
     {
-        fprintf(file,"%s\n",error.c_str());
+        fprintf(file,"%s\n",error.toStdString().c_str());
         fclose(file);
     }
     exit(-1);

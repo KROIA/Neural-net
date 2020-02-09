@@ -4,7 +4,6 @@
 #include <QSize>
 #include <QDebug>
 #include "rect.h"
-#include <vector>
 #include "geometry.h"
 #include <QTimer>
 #include <QLabel>
@@ -31,9 +30,9 @@ using namespace std::chrono;
 
 struct thread_data_player {
    int  thread_id;
-   vector<Player*> *player;
-   vector<Food*> *food;
-   vector<vector<int>  >*viewMap;
+   std::vector<Player*> *player;
+   std::vector<Food*> *food;
+   std::vector<std::vector<int>  >*viewMap;
    bool *exit;
    bool *pause;
    pthread_mutex_t *lock;
@@ -97,9 +96,9 @@ class Environment : public QObject
 
         Player *player(unsigned int player = 0);
         unsigned int playerAmount();
-        vector<vector<float>    >AI_mapData(unsigned int player);
-        vector<vector<float>    >AI_mapData_simple(unsigned int player);
-        vector<QPoint> rotate_90(vector<QPoint> data,QPoint rotPoint, int amount = 1);
+        std::vector<std::vector<double>    >AI_mapData(unsigned int player);
+        std::vector<std::vector<double>    >AI_mapData_simple(unsigned int player);
+        std::vector<QPoint> rotate_90(std::vector<QPoint> data,QPoint rotPoint, int amount = 1);
 
         void showInfoText(bool enable);
         bool showInfoText();
@@ -111,7 +110,7 @@ class Environment : public QObject
         void playerKill(unsigned int,unsigned int);
 
     public slots:
-        void snakeCollision(unsigned int player,vector<QPoint> pos);
+        void snakeCollision(unsigned int player,std::vector<QPoint> pos);
         void snakeStarved(unsigned int player);
         void obsticleReplace();
 
@@ -131,11 +130,11 @@ class Environment : public QObject
         unsigned int _playerAmount;
 
 
-        vector<vector<Rect*> > _map;
-        vector<vector<QLabel*> > _labelMap;
-        vector<vector<int>  >  _viewMap;
-        vector<Player*> _player;
-        vector<Food*> _food;
+        std::vector<std::vector<Rect*> > _map;
+        std::vector<std::vector<QLabel*> > _labelMap;
+        std::vector<std::vector<int>  >  _viewMap;
+        std::vector<Player*> _player;
+        std::vector<Food*> _food;
 
         unsigned int _foodAmount;
 

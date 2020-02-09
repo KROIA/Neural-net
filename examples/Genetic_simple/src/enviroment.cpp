@@ -33,8 +33,9 @@ Enviroment::Enviroment()
         qDebug() << e.what();
         _net->set(animals,inputs,hiddenX,hiddenY,outputs,bias,enableAverage,func);
     }
-    _net->mutationChangeWeight(0.1);
-    _net->mutationFactor(0.1);
+    _net->set_mutationChangeWeight(0.1);
+    _net->set_mutationFactor(0.1);
+    _net->updateNetConfiguration();
 //    _net->set(animals,inputs,hiddenX,hiddenY,outputs,bias,enableAverage,func);
 
     _net->saveToNetFile();
@@ -50,13 +51,13 @@ void Enviroment::restart()
 {
     _foodPositionList   = vector<Coord> (_foodAmount    ,Coord({0,0}));
     _poisonPositionList = vector<Coord> (_poisonAmount  ,Coord({0,0}));
-    _animalPositionList = vector<Coord> (_net->animals(),Coord({0,0}));
+    _animalPositionList = vector<Coord> (_net->get_animals(),Coord({0,0}));
 
-    _animalBackCountList = vector<int>(_net->animals(),0);
-    _animalCurrentFoodList = vector<int>(_net->animals(),_animalStartFood);
-    _animalRotationList = vector<unsigned short>(_net->animals(),0);
-    _animalAliveList = vector<bool> (_net->animals(),true);
-    _animalScoreList = vector<float> (_net->animals(),0);
+    _animalBackCountList = vector<int>(_net->get_animals(),0);
+    _animalCurrentFoodList = vector<int>(_net->get_animals(),_animalStartFood);
+    _animalRotationList = vector<unsigned short>(_net->get_animals(),0);
+    _animalAliveList = vector<bool> (_net->get_animals(),true);
+    _animalScoreList = vector<double> (_net->get_animals(),0);
     _ticks = 0;
 
     _map = vector<vector<int>   >(_enviromentSize.x,vector<int>(_enviromentSize.y,NOTHING));
@@ -176,7 +177,7 @@ void Enviroment::tick()
     walk();
 
     _stillAlive = 0;
-    for(unsigned int a=0; a<_net->animals(); a++)
+    for(unsigned int a=0; a<_net->get_animals(); a++)
     {
         if(_animalAliveList[a] == true)
         {
@@ -191,7 +192,7 @@ void Enviroment::tick()
     if(_ticks >= _maxTicks || _stillAlive == 0)
     {
 
-        vector<float>   tmpScore = _animalScoreList;
+        vector<double>   tmpScore = _animalScoreList;
 
 
 
@@ -211,10 +212,10 @@ void Enviroment::tick()
             _averageScore = 0;
             for(unsigned int a=0; a<tmpScore.size(); a++)
             {
-                tmpScore[a] += (float)_animalCurrentFoodList[a];
+                tmpScore[a] += (double)_animalCurrentFoodList[a];
                 _averageScore+=tmpScore[a];
             }
-            _averageScore /= (float)_net->animals();
+            _averageScore /= (double)_net->get_animals();
             if(_netSaveTicks >= _netSaveInterval)
             {
                 _netSaveTicks = 0;
@@ -358,18 +359,18 @@ int  Enviroment::checkAnimalCollision(unsigned int animal)
 }
 void Enviroment::logGenom()
 {
-    vector<float> averageList(_net->genomsize(),0);
-    for(unsigned int a=0; a<_net->animals(); a++)
+    vector<double> averageList(_net->get_genomsize(),0);
+    for(unsigned int a=0; a<_net->get_animals(); a++)
     {
-        for(unsigned int b=0; b<_net->genomsize(); b++)
+        for(unsigned int b=0; b<_net->get_genomsize(); b++)
         {
-            averageList[b] += _net->genom(a)[b];
+            averageList[b] += _net->get_genom(a)[b];
         }
     }
     _file = fopen("genom.csv","a");
-    for(unsigned int b=0; b<_net->genomsize(); b++)
+    for(unsigned int b=0; b<_net->get_genomsize(); b++)
     {
-        averageList[b] /= (float)_net->animals();
+        averageList[b] /= (double)_net->get_animals();
         fprintf(_file,"%8f;",averageList[b]);
     }
     fprintf(_file,"\n");
@@ -378,13 +379,13 @@ void Enviroment::logGenom()
 
 void Enviroment::setInputs()
 {
-    float net_otherAnimal = -0.5;
-    float net_food = 1.0;
-    float net_nothing = 0.0;
-    float net_poison = -1;
-    float net_boundry = -0.3;
+    double net_otherAnimal = -0.5;
+    double net_food = 1.0;
+    double net_nothing = 0.0;
+    double net_poison = -1;
+    double net_boundry = -0.3;
     vector<vector<int> > posOffset(7,vector<int>(7,0));
-    vector<float>   inputList(9,0);
+    vector<double>   inputList(9,0);
 
     posOffset[0] = {0,0,0,1,0,0,0};
     posOffset[1] = {0,0,0,1,0,0,0};
@@ -400,7 +401,7 @@ void Enviroment::setInputs()
     int local_b = 0;
     int local_c = 0;
     //printf("direction: B%i    %i\n",thread_direction[thread_animal],&thread_direction[thread_animal]);
-    for(unsigned int a=0; a<_net->animals(); a++)
+    for(unsigned int a=0; a<_net->get_animals(); a++)
     {
         if(_animalAliveList[a] == false)
         {
@@ -418,25 +419,25 @@ void Enviroment::setInputs()
                     {
                         case 0:
                         {
-                            inputList[local_c] = (float)_map[_animalPositionList[a].x-3 + local_a][_animalPositionList[a].y- 3 + local_b] / 10;
+                            inputList[local_c] = (double)_map[_animalPositionList[a].x-3 + local_a][_animalPositionList[a].y- 3 + local_b] / 10;
                             local_c++;
                             break;
                         }
                         case 1:
                         {
-                            inputList[local_c] = (float)_map[_animalPositionList[a].x-3 + 6-local_b][_animalPositionList[a].y- 3 + local_a] /10;
+                            inputList[local_c] = (double)_map[_animalPositionList[a].x-3 + 6-local_b][_animalPositionList[a].y- 3 + local_a] /10;
                             local_c++;
                             break;
                         }
                         case 2:
                         {
-                            inputList[local_c] = (float)_map[_animalPositionList[a].x-3 + 6-local_a][_animalPositionList[a].y- 3 + 6-local_b] /10;
+                            inputList[local_c] = (double)_map[_animalPositionList[a].x-3 + 6-local_a][_animalPositionList[a].y- 3 + 6-local_b] /10;
                             local_c++;
                             break;
                         }
                         case 3:
                         {
-                            inputList[local_c] = (float)_map[_animalPositionList[a].x-3 + local_b][_animalPositionList[a].y- 3 + 6-local_a] /10;
+                            inputList[local_c] = (double)_map[_animalPositionList[a].x-3 + local_b][_animalPositionList[a].y- 3 + 6-local_a] /10;
                             local_c++;
                             break;
                         }
@@ -444,205 +445,14 @@ void Enviroment::setInputs()
                 }
             }
         }
-        _net->input(a,inputList);
+        _net->set_input(a,inputList);
     }
-    /*
-    //up
-    posOffset[0][0] = Coord({-1,0});
-    posOffset[0][0] = Coord({-2,0});
-    posOffset[0][0] = Coord({-3,0});
-    posOffset[0][0] = Coord({0,-1});
-    posOffset[0][0] = Coord({0,-2});
-    posOffset[0][0] = Coord({0,-3});
-    posOffset[0][0] = Coord({1,0});
-    posOffset[0][0] = Coord({2,0});
-    posOffset[0][0] = Coord({3,0});
-    //right
-    posOffset[0][0] = Coord({0,-1});
-    posOffset[0][0] = Coord({0,-2});
-    posOffset[0][0] = Coord({0,-3});
-    posOffset[0][0] = Coord({-1,0});
-    posOffset[0][0] = Coord({-2,0});
-    posOffset[0][0] = Coord({-3,0});
-    posOffset[0][0] = Coord({0,-1});
-    posOffset[0][0] = Coord({0,-2});
-    posOffset[0][0] = Coord({0,-3});
-    //Down
-    posOffset[0][0] = Coord({1,0});
-    posOffset[0][0] = Coord({2,0});
-    posOffset[0][0] = Coord({3,0});
-    posOffset[0][0] = Coord({0,1});
-    posOffset[0][0] = Coord({0,2});
-    posOffset[0][0] = Coord({0,3});
-    posOffset[0][0] = Coord({-1,0});
-    posOffset[0][0] = Coord({-2,0});
-    posOffset[0][0] = Coord({-3,0});
-    //left
-    posOffset[0][0] = Coord({0,1});
-    posOffset[0][0] = Coord({0,2});
-    posOffset[0][0] = Coord({0,3});
-    posOffset[0][0] = Coord({-1,0});
-    posOffset[0][0] = Coord({-2,0});
-    posOffset[0][0] = Coord({-3,0});
-    posOffset[0][0] = Coord({0,-1});
-    posOffset[0][0] = Coord({0,-2});
-    posOffset[0][0] = Coord({0,-3});
 
-*/
-
-    /*
-    //UP
-    posOffset[0][0] = Coord({-3,0});
-    posOffset[0][1] = Coord({3,0});
-
-    posOffset[0][2] = Coord({-2,0});
-    posOffset[0][3] = Coord({-1,-2});
-    posOffset[0][4] = Coord({0,-2});
-    posOffset[0][5] = Coord({1,-2});
-    posOffset[0][6] = Coord({2,0});
-
-    posOffset[0][7] = Coord({-1,-1});
-    posOffset[0][8] = Coord({0,-1});
-    posOffset[0][9] = Coord({1,-1});
-    posOffset[0][10] = Coord({-1,0});
-    posOffset[0][11] = Coord({1,0});
-    posOffset[0][12] = Coord({-1,1});
-    posOffset[0][13] = Coord({0,1});
-    posOffset[0][14] = Coord({1,1});
-    //RIGHT
-    posOffset[1][0]  = Coord({0,-3});
-    posOffset[1][1]  = Coord({0,3});
-
-    posOffset[1][2]  = Coord({0,-2});
-    posOffset[1][3]  = Coord({2,-1});
-    posOffset[1][4]  = Coord({2,0});
-    posOffset[1][5]  = Coord({2,1});
-    posOffset[1][6]  = Coord({0,2});
-
-    posOffset[1][7]  = Coord({1,-1});
-    posOffset[1][8]  = Coord({1,0});
-    posOffset[1][9]  = Coord({1,1});
-    posOffset[1][10] = Coord({0,-1});
-    posOffset[1][11] = Coord({0,1});
-    posOffset[1][12] = Coord({-1,-1});
-    posOffset[1][13] = Coord({-1,0});
-    posOffset[1][14] = Coord({-1,1});
-    //DOWN
-    posOffset[2][0]  = Coord({3,0});
-    posOffset[2][1]  = Coord({-3,0});
-
-    posOffset[2][2]  = Coord({2,0});
-    posOffset[2][3]  = Coord({1,2});
-    posOffset[2][4]  = Coord({0,2});
-    posOffset[2][5]  = Coord({-1,2});
-    posOffset[2][6]  = Coord({-2,0});
-
-    posOffset[2][7]  = Coord({1,1});
-    posOffset[2][8]  = Coord({0,1});
-    posOffset[2][9]  = Coord({-1,1});
-    posOffset[2][10] = Coord({1,0});
-    posOffset[2][11] = Coord({-1,0});
-    posOffset[2][12] = Coord({1,-1});
-    posOffset[2][13] = Coord({0,-1});
-    posOffset[2][14] = Coord({-1,-1});
-    //LEFT
-    posOffset[3][0]  = Coord({0,3});
-    posOffset[3][1]  = Coord({0,-3});
-
-    posOffset[3][2]  = Coord({0,2});
-    posOffset[3][3]  = Coord({-2,1});
-    posOffset[3][4]  = Coord({-2,0});
-    posOffset[3][5]  = Coord({-2,-1});
-    posOffset[3][6]  = Coord({0,-2});
-
-    posOffset[3][7]  = Coord({-1,1});
-    posOffset[3][8]  = Coord({-1,0});
-    posOffset[3][9]  = Coord({-1,-1});
-    posOffset[3][10] = Coord({0,1});
-    posOffset[3][11] = Coord({0,-1});
-    posOffset[3][12] = Coord({1,1});
-    posOffset[3][13] = Coord({1,0});
-    posOffset[3][14] = Coord({1,-1});*/
-    /*
-    //UP
-    posOffset[0][0] = Coord({-1,-1});
-    posOffset[0][1] = Coord({0,-1});
-    posOffset[0][2] = Coord({1,-1});
-    posOffset[0][3] = Coord({-1,0});
-    posOffset[0][4] = Coord({1,0});
-    posOffset[0][5] = Coord({-1,1});
-    posOffset[0][6] = Coord({0,1});
-    posOffset[0][7] = Coord({1,1});
-    //RIGHT
-    posOffset[1][0] = Coord({1,-1});
-    posOffset[1][1] = Coord({1,0});
-    posOffset[1][2] = Coord({1,1});
-    posOffset[1][3] = Coord({0,-1});
-    posOffset[1][4] = Coord({0,1});
-    posOffset[1][5] = Coord({-1,-1});
-    posOffset[1][6] = Coord({-1,0});
-    posOffset[1][7] = Coord({-1,1});
-    //DOWN
-    posOffset[2][0] = Coord({1,1});
-    posOffset[2][1] = Coord({0,1});
-    posOffset[2][2] = Coord({-1,1});
-    posOffset[2][3] = Coord({1,0});
-    posOffset[2][4] = Coord({-1,0});
-    posOffset[2][5] = Coord({1,-1});
-    posOffset[2][6] = Coord({0,-1});
-    posOffset[2][7] = Coord({-1,-1});
-    //LEFT
-    posOffset[3][0] = Coord({-1,1});
-    posOffset[3][1] = Coord({-1,0});
-    posOffset[3][2] = Coord({-1,-1});
-    posOffset[3][3] = Coord({0,1});
-    posOffset[3][4] = Coord({0,-1});
-    posOffset[3][5] = Coord({1,1});
-    posOffset[3][6] = Coord({1,0});
-    posOffset[3][7] = Coord({1,-1});
-*/
- /*   for(unsigned int a=0; a<_animalPositionList.size(); a++)
-    {
-        if(_animalAliveList[a] == true)
-        {
-            for(unsigned int inp=0; inp<_net->inputNeurons(); inp++)
-            {
-                switch(checkCollision({_animalPositionList[a].x+posOffset[_animalRotationList[a]][inp].x,_animalPositionList[a].y+posOffset[_animalRotationList[a]][inp].y}))
-                {
-                    case 0:
-                    {
-                        _net->input(a,inp,net_nothing);
-                        break;
-                    }
-                    case 1:
-                    {
-                        _net->input(a,inp,net_otherAnimal);
-                        break;
-                    }
-                    case 2:
-                    {
-                        _net->input(a,inp,net_food);
-                        break;
-                    }
-                    case 3:
-                    {
-                        _net->input(a,inp,net_poison);
-                        break;
-                    }
-                    case 4:
-                    {
-                        _net->input(a,inp,net_boundry);
-                        break;
-                    }
-                }
-            }
-        }
-    }*/
 }
 void Enviroment::walk()
 {
     cmdXY(0,40);
-    for(unsigned int a=0; a<_net->animals(); a++)
+    for(unsigned int a=0; a<_net->get_animals(); a++)
     {
         if(_animalAliveList[a] == false)
         {
@@ -650,13 +460,13 @@ void Enviroment::walk()
         }
 
 
-        float highestOutputValue = _net->output(a,0);
+        double highestOutputValue = _net->get_output(a,0);
         unsigned short   highestOutput = 0;
-        for(unsigned short out=1; out<_net->outputNeurons(); out++)
+        for(unsigned short out=1; out<_net->get_outputNeurons(); out++)
         {
-            if(_net->output(a,(unsigned int)out) > highestOutputValue)
+            if(_net->get_output(a,(unsigned int)out) > highestOutputValue)
             {
-                highestOutputValue  = _net->output(a,(unsigned int)out);
+                highestOutputValue  = _net->get_output(a,(unsigned int)out);
                 highestOutput       = out;
             }
         }

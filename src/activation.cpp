@@ -1,15 +1,15 @@
 #include "neuron.h"
 
-float Neuron::activation_Linear(float netInput)
+double Neuron::activation_Linear(double netInput)
 {
     return netInput;
 }
-float Neuron::deriv_activation_Linear(float netInput)
+double Neuron::deriv_activation_Linear(double netInput)
 {
     return 1;
 }
 
-float Neuron::activation_ReLu(float netInput)
+double Neuron::activation_ReLu(double netInput)
 {
     if(netInput <= 0)
     {
@@ -17,7 +17,7 @@ float Neuron::activation_ReLu(float netInput)
     }
     return netInput;
 }
-float Neuron::deriv_activation_ReLu(float netInput)
+double Neuron::deriv_activation_ReLu(double netInput)
 {
     if(netInput < 0)
     {
@@ -26,36 +26,41 @@ float Neuron::deriv_activation_ReLu(float netInput)
     return 1;
 }
 
-float Neuron::activation_Binary(float netInput)
+double Neuron::activation_Binary(double netInput)
 {
     if(netInput < 0)
         return 0;
     else
         return 1;
 }
-/*float Neuron::deriv_activation_Binary(float netInput)
+/*double Neuron::deriv_activation_Binary(double netInput)
 {
     //Not possible
 }*/
 
 
-float Neuron::activation_Gaussian(float netInput)
+double Neuron::activation_Gaussian(double netInput)
 {
-    return 2*(float)exp(-(pow((double)netInput,2)) * 4)-1;
+    //https://www.wolframalpha.com/input/?i=exp%28-pow%28x%2C2%29%29*2-1
+    return 2*pow(EULER,-pow(netInput,2))-1;
+    //return exp(-pow(netInput,2))*2-1;
+    //return 2*double(exp(-(pow(netInput,2)) * 4)-1);
 }
-float Neuron::deriv_activation_Gaussian(float netInput)
+double Neuron::deriv_activation_Gaussian(double netInput)
 {
-    return netInput * (1+activation_Gaussian(netInput))/-0.43;
+    //https://www.wolframalpha.com/input/?i=derivative+of+exp%28-pow%28x%2C2%29%29*2-1
+    return -4*pow(EULER,-pow(netInput,2))*netInput;
+    //return netInput * (1+activation_Gaussian(netInput))/-0.43;
 }
 
 
-float Neuron::activation_Sigmoid(float netInput)
+double Neuron::activation_Sigmoid(double netInput)
 {
     // PI / 5 = 0.628318531
-    return atan((double)netInput)* 0.628318531
-;
+    return atan(netInput)* 0.628318531;
 }
-float Neuron::deriv_activation_Sigmoid(float netInput)
+double Neuron::deriv_activation_Sigmoid(double netInput)
 {
-    return (float)1 - (activation_Sigmoid(netInput) * activation_Sigmoid(netInput));
+    return 0.628318531/(pow(netInput,2)+1);
+    //return double(1) - (activation_Sigmoid(netInput) * activation_Sigmoid(netInput));
 }

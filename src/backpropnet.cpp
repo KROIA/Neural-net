@@ -1,13 +1,27 @@
 #include "backpropnet.h"
 
-BackpropNet::BackpropNet(unsigned int ID)
-    :   Net()
+
+double BackpropNet::__dbg_time1 = 0;
+double BackpropNet::__dbg_time2 = 0;
+double BackpropNet::__dbg_time3 = 0;
+double BackpropNet::__dbg_time4 = 0;
+double BackpropNet::__dbg_time5 = 0;
+double BackpropNet::__dbg_time6 = 0;
+double BackpropNet::__dbg_time7 = 0;
+double BackpropNet::__dbg_time8 = 0;
+double BackpropNet::__dbg_time9 = 0;
+double BackpropNet::__dbg_time10 = 0;
+
+BackpropNet::BackpropNet(unsigned int ID
+                         ,QObject *parent)
+    :   Net(ID,parent)
 {
     this->init();
     try {
-        mutationFactor(0.1);
+        this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-        error_general("BackpropNet()",e);
+        this->addError(Error("BackpropNet",QString(e.what())));
+        //error_general("BackpropNet()",e);
     }
 
 }
@@ -15,17 +29,23 @@ BackpropNet::BackpropNet(unsigned int ID,
                          unsigned int inputs,
                          unsigned int hiddenX,
                          unsigned int hiddenY,
-                         unsigned int outputs)
-    :   Net(ID,inputs,hiddenX,hiddenY,outputs)
+                         unsigned int outputs,
+                         QObject *parent)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs,parent)
 {
     this->init();
     try {
-        mutationFactor(0.1);
+        this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
-                              "] , unsigned int ["+std::to_string(hiddenX)+
-                              "] , unsigned int ["+std::to_string(hiddenY)+
-                              "] , unsigned int ["+std::to_string(outputs)+"])",e);
+        /*error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
+                              "] , unsigned int ["+QString::number(hiddenX)+
+                              "] , unsigned int ["+QString::number(hiddenY)+
+                              "] , unsigned int ["+QString::number(outputs)+"])",e);*/
+        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
+                             "] , unsigned int ["+QString::number(hiddenX)+
+                             "] , unsigned int ["+QString::number(hiddenY)+
+                             "] , unsigned int ["+QString::number(outputs)+"]",
+                             QString(e.what())));
     }
 }
 BackpropNet::BackpropNet(unsigned int ID,
@@ -35,39 +55,51 @@ BackpropNet::BackpropNet(unsigned int ID,
                          unsigned int outputs,
                          bool enableBias,
                          bool enableAverage,
-                         Activation func)
-    :   Net(ID,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
+                         Activation func,
+                         QObject *parent)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func,parent)
 {
     this->init();
     try {
-        mutationFactor(0.1);
+        this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
-                              "] , unsigned int ["+std::to_string(hiddenX)+
-                              "] , unsigned int ["+std::to_string(hiddenY)+
-                              "] , unsigned int ["+std::to_string(outputs)+
-                              "] , bool ["+std::to_string(enableBias)+
-                              "] , bool ["+std::to_string(enableAverage)+
-                              "] , Activation ["+std::to_string(func)+"])",e);
+       /* error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
+                              "] , unsigned int ["+QString::number(hiddenX)+
+                              "] , unsigned int ["+QString::number(hiddenY)+
+                              "] , unsigned int ["+QString::number(outputs)+
+                              "] , bool ["+QString::number(enableBias)+
+                              "] , bool ["+QString::number(enableAverage)+
+                              "] , Activation ["+QString::number(func)+"])",e);*/
+        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
+                             "] , unsigned int ["+QString::number(hiddenX)+
+                             "] , unsigned int ["+QString::number(hiddenY)+
+                             "] , unsigned int ["+QString::number(outputs)+
+                             "] , bool ["+QString::number(enableBias)+
+                             "] , bool ["+QString::number(enableAverage)+
+                             "] , Activation ["+QString::number(func)+"])",
+                             QString(e.what())));
     }
-    if(this->activationFunction() == Activation::Binary)
+    if(this->get_activationFunction() == Activation::Binary)
     {
-        error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
-                      "] , unsigned int ["+std::to_string(hiddenX)+
-                      "] , unsigned int ["+std::to_string(hiddenY)+
-                      "] , unsigned int ["+std::to_string(outputs)+
-                      "] , bool ["+std::to_string(enableBias)+
-                      "] , bool ["+std::to_string(enableAverage)+
-                      "] , Activation ["+std::to_string(func)+"])","you cant use this activation function: Binary for this learn algorithm");
+        /*error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
+                      "] , unsigned int ["+QString::number(hiddenX)+
+                      "] , unsigned int ["+QString::number(hiddenY)+
+                      "] , unsigned int ["+QString::number(outputs)+
+                      "] , bool ["+QString::number(enableBias)+
+                      "] , bool ["+QString::number(enableAverage)+
+                      "] , Activation ["+QString::number(func)+"])","you cant use this activation function: Binary for this learn algorithm");
+        */
+        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
+                             "] , unsigned int ["+QString::number(hiddenX)+
+                             "] , unsigned int ["+QString::number(hiddenY)+
+                             "] , unsigned int ["+QString::number(outputs)+
+                             "] , bool ["+QString::number(enableBias)+
+                             "] , bool ["+QString::number(enableAverage)+
+                             "] , Activation ["+QString::number(func)+"])",
+                             QString("you cant use this activation function: Binary for this learn algorithm")));
     }
 }
-void        BackpropNet::init()
-{
-    _netError = 0;
-    _update = true;
-    this->netFileName("netFile");
-    this->netFileEnding("bnet");
-}
+
 void        BackpropNet::set(unsigned int inputs,
                              unsigned int hiddenX,
                              unsigned int hiddenY,
@@ -76,299 +108,370 @@ void        BackpropNet::set(unsigned int inputs,
                              bool enableAverage,
                              Activation func)
 {
-    this->inputNeurons(inputs);
-    this->hiddenNeuronsX(hiddenX);
-    this->hiddenNeuronsY(hiddenY);
-    this->outputNeurons(outputs);
-    this->bias(enableBias);
-    this->enableAverage(enableAverage);
-    this->activationFunction(func);
+    this->set_inputNeurons(inputs);
+    this->set_hiddenNeuronsX(hiddenX);
+    this->set_hiddenNeuronsY(hiddenY);
+    this->set_outputNeurons(outputs);
+    this->set_bias(enableBias);
+    this->set_enableAverage(enableAverage);
+    this->set_activationFunction(func);
 }
-void                    BackpropNet::netFileName(std::string filename)
+void                    BackpropNet::set_netFileName(QString filename)
 {
-    _saveNet.filename(filename);
+    _saveNet.set_filename(filename);
 }
-std::string             BackpropNet::netFileName()
+QString                 BackpropNet::get_netFileName()
 {
-    return _saveNet.filename();
+    return _saveNet.get_filename();
 }
-void                    BackpropNet::netFileEnding(std::string fileEnding)
+void                    BackpropNet::set_netFileEnding(QString fileEnding)
 {
-    _saveNet.fileEnding(fileEnding);
+    _saveNet.set_fileEnding(fileEnding);
 }
-std::string             BackpropNet::netFileEnding()
+QString                 BackpropNet::get_netFileEnding()
 {
-    return _saveNet.fileEnding();
+    return _saveNet.get_fileEnding();
 }
 void                    BackpropNet::loadFromNetFile()
 {
     unsigned int genomSelection = 0;
+    bool loadSucceed = false;
     try {
-        _saveNet.loadFile();
+        loadSucceed = _saveNet.loadFile();
     } catch (std::runtime_error &e) {
-       __DEBUG_BACKPROPNET(this,"loadFromNetFile()"," Warning: "+std::string(e.what()));
+       __DEBUG_BACKPROPNET(this,"loadFromNetFile()"," Warning: "+QString(e.what()));
         return;
     }
-    try {
-        this->set(_saveNet.inputNeurons(),_saveNet.hiddenNeuronsX(),_saveNet.hiddenNeuronsY(),_saveNet.outputNeurons(),
-                  _saveNet.bias(),_saveNet.enableAverage(),_saveNet.activationFunction());
-        this->biasValue(_saveNet.biasValue());
-        this->connectionList(_saveNet.connectionList(genomSelection));
-        this->neurons(_saveNet.neurons(),_saveNet.hiddenNeurons(),_saveNet.outputNeurons(),_saveNet.costumNeurons());
-        this->updateNetConfiguration();
-        //this->genom(_saveNet.genom(genomSelection));
-    } catch (std::runtime_error &e) {
-        error_general("loadFromNetFile(std::string ["+_saveNet.filename()+"] , std::string ["+_saveNet.fileEnding()+"] )",
-                      "unable to apply the settings. Maybe the file is damaged.",e);
+    if(loadSucceed)
+    {
+        try {
+            this->set(_saveNet.get_inputNeurons(),
+                      _saveNet.get_hiddenNeuronsX(),
+                      _saveNet.get_hiddenNeuronsY(),
+                      _saveNet.get_outputNeurons(),
+                      _saveNet.get_bias(),
+                      _saveNet.get_enableAverage(),
+                      _saveNet.get_activationFunction());
+            this->set_biasValue(_saveNet.get_biasValue());
+            this->set_connectionList(*_saveNet.get_ptr_connectionList(genomSelection));
+            /*this->set_neurons(_saveNet.get_neurons(),
+                          _saveNet.get_hiddenNeurons(),
+                          _saveNet.get_outputNeurons(),
+                          _saveNet.get_costumNeurons());*/
+
+            //this->updateNetConfiguration();
+            //this->genom(_saveNet.genom(genomSelection));
+        } catch (std::runtime_error &e) {
+            addError(Error("loadFromNetFile(QString ["+_saveNet.get_filename()+"] , QString ["+_saveNet.get_fileEnding()+"] )",
+                          {"unable to apply the settings. Maybe the file is damaged.",
+                           e.what()}));
+        }
     }
 }
-void                    BackpropNet::loadFromNetFile(std::string filename)
+void                    BackpropNet::loadFromNetFile(QString filename)
 {
-    this->netFileName(filename);
+    this->set_netFileName(filename);
     this->loadFromNetFile();
 }
-void                    BackpropNet::loadFromNetFile(std::string filename,std::string fileEnding)
+void                    BackpropNet::loadFromNetFile(QString filename,QString fileEnding)
 {
-    this->netFileName(filename);
-    this->netFileEnding(fileEnding);
+    this->set_netFileName(filename);
+    this->set_netFileEnding(fileEnding);
     this->loadFromNetFile();
 }
 void                    BackpropNet::saveToNetFile()
 {
     try {
-        _saveNet.set(this->inputNeurons(),this->hiddenNeuronsX(),this->hiddenNeuronsY(),this->outputNeurons(),
-                     this->bias(),this->enableAverage(),this->activationFunction(),this->biasValue());
+        _saveNet.set(this->get_inputNeurons(),
+                     this->get_hiddenNeuronsX(),
+                     this->get_hiddenNeuronsY(),
+                     this->get_outputNeurons(),
+                     this->get_bias(),
+                     this->get_enableAverage(),
+                     this->get_activationFunction(),
+                     this->get_biasValue());
         //_saveNet.setGenom(this->genom());
-        _saveNet.neuronsOfNet(this->ID(),this->allNeurons());
+        _saveNet.set_ptr_neuronsOfNet(this->get_ID(),this->get_ptr_allNeurons());
         _saveNet.saveFile();
     } catch (std::runtime_error &e) {
-        error_general("saveToNetFile()",e);
+        addError(Error("saveToNetFile()",QString(e.what())));
+        //error_general("saveToNetFile()",e);
     }
 }
-void                    BackpropNet::saveToNetFile(std::string filename)
+void                    BackpropNet::saveToNetFile(QString filename)
 {
-    this->netFileName(filename);
+    this->set_netFileName(filename);
     this->saveToNetFile();
 }
-void                    BackpropNet::saveToNetFile(std::string filename,std::string fileEnding)
+void                    BackpropNet::saveToNetFile(QString filename,QString fileEnding)
 {
-    this->netFileName(filename);
-    this->netFileEnding(fileEnding);
+    this->set_netFileName(filename);
+    this->set_netFileEnding(fileEnding);
     this->saveToNetFile();
 }
 
 
 
-float               BackpropNet::netError()
+double                  BackpropNet::get_netError()
 {
+
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        error_general("netError()",e);
+        addError(Error("get_netError()",QString(e.what())));
     }
     return _netError;
 }
-std::vector<float>  BackpropNet::outputError()
+std::vector<double>     BackpropNet::get_outputError()
 {
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        error_general("outputError()",e);
+        addError(Error("get_outputError()",QString(e.what())));
     }
     return _outputError;
 }
-float               BackpropNet::outputError(unsigned int output)
+double                  BackpropNet::get_outputError(unsigned int output)
 {
-    if(output >= this->outputNeurons())
+    if(output >= this->get_outputNeurons())
     {
-        error_general("outputError(unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,this->outputNeurons()-1));
+        addError(Error("get_outputError(unsigned int ["+QString::number(output)+"] )",
+                       ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),output,this->get_outputNeurons()-1,']')));
+        //error_general("outputError(unsigned int ["+QString::number(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,this->outputNeurons()-1));
     }
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        error_general("outputError(unsigned int ["+std::to_string(output)+"] )",e);
+        addError(Error("get_outputError(unsigned int ["+QString::number(output)+"] )",
+                       QString(e.what())));
+        //error_general("outputError(unsigned int ["+QString::number(output)+"] )",e);
     }
     return _outputError[output];
 }
-void                BackpropNet::mutationFactor(float mutationFactor)
+void                    BackpropNet::set_mutationFactor(double mutationFactor)
 {
     if(mutationFactor <= 0)
     {
-        error_general("mutationFactor(float ["+std::to_string(mutationFactor)+"] )","parameter 0 is out of range. MutationFactor has to be greather than 0");
+        addError(Error("set_mutationFactor(double ["+QString::number(mutationFactor)+"] )",
+                       QString("parameter 0 is out of range. MutationFactor has to be greather than 0")));
+        //error_general("mutationFactor(double ["+QString::number(mutationFactor)+"] )","parameter 0 is out of range. MutationFactor has to be greather than 0");
     }
     _mutationFactor = mutationFactor;
 }
-float               BackpropNet::mutationFactor()
+double                  BackpropNet::get_mutationFactor()
 {
     return _mutationFactor;
 }
-void                BackpropNet::expected(std::vector<float> expected)
+void                    BackpropNet::set_expected(std::vector<double> expected)
 {
-    if(expected.size() != this->outputNeurons())
+    if(static_cast<unsigned int>(expected.size()) != this->get_outputNeurons())
     {
-        error_general("expected(std::vector<float>)","parameter 0 has the wrong size: "+std::to_string(expected.size())+" std::vector.size() should be: "+std::to_string(this->outputNeurons()));
+        addError(Error("get_outputNeurons()",
+                       QString("parameter 0 has the wrong size: "+
+                               QString::number(expected.size())+" std::vector.size() should be: "+
+                               QString::number(this->get_outputNeurons()))));
+        //error_general("expected(std::vector<double>)","parameter 0 has the wrong size: "+QString::number(expected.size())+" std::vector.size() should be: "+QString::number(this->outputNeurons()));
     }
-    _update   = true;
+    _needsCalculationUpdate   = true;
     _expected = expected;
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        error_general("expected(std::vector<float>)",e);
+        addError(Error("get_outputNeurons()",
+                       QString(e.what())));
+        //error_general("expected(std::vector<double>)",e);
     }
 }
-
-void                BackpropNet::learn()
+void                    BackpropNet::learn()
 {    
-    std::vector<float>  output_error(this->outputNeurons(),0);
-    std::vector<std::vector<float>  > hidden_error(this->hiddenNeuronsX(),std::vector<float>(this->hiddenNeuronsY(),0));
-    for(unsigned int y=0; y<this->outputNeurons(); y++)
+    double filter = 0.999;
+    std::chrono::high_resolution_clock::time_point __clock_end;
+    std::chrono::duration<double> __clock_time_span;
+    std::chrono::high_resolution_clock::time_point __clock_start = std::chrono::high_resolution_clock::now();
+
+    if(__output_error.size() == 0)
     {
-        output_error[y] = derivative(this->outputNeuron(y)->netInput()) * _outputError[y];
+        __output_error = std::vector<double>(this->get_outputNeurons());
     }
-    if(!this->noHiddenLayer())
+    //std::vector<double>  __output_error(this->get_outputNeurons());
+
+    if(__hidden_error.size() == 0)
     {
-        for(unsigned int x=this->hiddenNeuronsX(); x>0; x--)
+        __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
+    }
+    //std::vector<std::vector<double>  > __hidden_error(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
+
+    for(unsigned int y=0; y<this->get_outputNeurons(); y++)
+    {
+        __output_error[y] = derivative(this->get_ptr_outputNeuron(y)->get_netInput()) * _outputError[y];
+    }
+    double output   = 0;
+    __clock_end     = std::chrono::high_resolution_clock::now();
+    __clock_time_span = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+    __dbg_time1     = __dbg_time1*filter+(1-filter)*__clock_time_span.count()*1000;
+    __clock_start   = std::chrono::high_resolution_clock::now();
+    if(this->hasHiddenLayer())
+    {
+        for(unsigned int x=this->get_hiddenNeuronsX(); x>0; x--)
         {
-            for(unsigned int y=0; y<this->hiddenNeuronsY(); y++)
+            for(unsigned int y=0; y<this->get_hiddenNeuronsY(); y++)
             {
-                float weightError = 0;
-                if(x == this->hiddenNeuronsX())
+
+                double weightError = 0;
+                if(x == this->get_hiddenNeuronsX())
                 {
-                    for(unsigned int y2=0; y2<this->outputNeurons(); y2++)
+                    for(unsigned int y2=0; y2<this->get_outputNeurons(); y2++)
                     {
-                        weightError += output_error[y2] * this->outputNeuron(y2)->weight(y);
+                        weightError += __output_error[y2] * this->get_ptr_outputNeuron(y2)->get_weight(y);
                     }
                 }
                 else
                 {
-                    for(unsigned int y2=0; y2<this->hiddenNeuronsY(); y2++)
+                    for(unsigned int y2=0; y2<this->get_hiddenNeuronsY(); y2++)
                     {
-                        weightError += hidden_error[x][y2] * this->hiddenNeuron(x,y2)->weight(y);
+                        weightError += __hidden_error[x][y2] * this->get_ptr_hiddenNeuron(x,y2)->get_weight(y);
                     }
                 }
-                hidden_error[x-1][y] = derivative(this->hiddenNeuron(x-1,y)->netInput()) * weightError;
+                __hidden_error[x-1][y] = derivative(this->get_ptr_hiddenNeuron(x-1,y)->get_netInput()) * weightError;
             }
-            //qDebug() << "error: "<<hidden_error[x-1][0];
         }
-    }
+        __clock_end = std::chrono::high_resolution_clock::now();
+        __clock_time_span           = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+        __dbg_time2 = __dbg_time2*filter+(1-filter)*__clock_time_span.count()*1000;
+        __clock_start = std::chrono::high_resolution_clock::now();
     //----------INPUT CONNECTIONS
-    if(!this->noHiddenLayer())
-    {
-        for(unsigned int y=0; y<this->inputNeurons() + (unsigned int)this->bias(); y++)
+        for(unsigned int y=0; y<this->get_inputNeurons() + this->get_bias(); y++)
         {
-            for(unsigned int y2=0; y2<this->hiddenNeuronsY(); y2++)
+            for(unsigned int y2=0; y2<this->get_hiddenNeuronsY(); y2++)
             {
-                float output = 0;
-                if(y == this->inputNeurons() + (unsigned int)this->bias() -1)
+
+                if(y == this->get_inputNeurons() + this->get_bias() -1)
                 {
-                    output = this->biasValue();
+                    output = this->get_biasValue();
                 }
                 else
                 {
-                    output = this->input(y);
+                    output = this->get_input(y);
                 }
-                this->hiddenNeuron(0,y2)->weight(y,this->hiddenNeuron(0,y2)->weight(y) + (hidden_error[0][y2] * _mutationFactor * output));
+                if( std::isnan(this->get_ptr_hiddenNeuron(0,y2)->get_weight(y) + (__hidden_error[0][y2] * _mutationFactor * output)))
+                {
+                    qDebug() << "nan";
+                }
+                this->get_ptr_hiddenNeuron(0,y2)->set_weight(y,this->get_ptr_hiddenNeuron(0,y2)->get_weight(y) + (__hidden_error[0][y2] * _mutationFactor * output));
             }
         }
-    }
+        __clock_end = std::chrono::high_resolution_clock::now();
+        __clock_time_span           = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+        __dbg_time3 = __dbg_time3*filter+(1-filter)*__clock_time_span.count()*1000;
+        __clock_start = std::chrono::high_resolution_clock::now();
+    //}
     //----------HIDDEN CONNECTIONS
-    if(!this->noHiddenLayer())
-    {
-        for(unsigned int x=1; x<this->hiddenNeuronsX(); x++)
+    //if(this->hasHiddenLayer())
+    //{
+        for(unsigned int x=1; x<this->get_hiddenNeuronsX(); x++)
         {
-            for(unsigned int y=0; y<this->hiddenNeuronsY() + (unsigned int)this->bias(); y++)
+            for(unsigned int y=0; y<this->get_hiddenNeuronsY() + this->get_bias(); y++)
             {
-                for(unsigned int y2=0; y2<this->hiddenNeuronsY(); y2++)
+                for(unsigned int y2=0; y2<this->get_hiddenNeuronsY(); y2++)
                 {
-                    float output = 0;
-                    if(y == this->hiddenNeuronsY() + (unsigned int)this->bias() -1)
+                    if(y == this->get_hiddenNeuronsY() + this->get_bias() -1)
                     {
-                        output = this->biasValue();
+                        output = this->get_biasValue();
                     }
                     else
                     {
-                        output = this->hiddenNeuron(x-1,y)->output();
+                        output = this->get_ptr_hiddenNeuron(x-1,y)->get_output();
                     }
-                    this->hiddenNeuron(x,y2)->weight(y,this->hiddenNeuron(x,y2)->weight(y) + (hidden_error[x][y2] * _mutationFactor * output));
+                    this->get_ptr_hiddenNeuron(x,y2)->set_weight(y,this->get_ptr_hiddenNeuron(x,y2)->get_weight(y) + (__hidden_error[x][y2] * _mutationFactor * output));
                 }
             }
         }
+        __clock_end = std::chrono::high_resolution_clock::now();
+        __clock_time_span           = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+        __dbg_time4 = __dbg_time4*filter+(1-filter)*__clock_time_span.count()*1000;
+        __clock_start = std::chrono::high_resolution_clock::now();
     }
     //----------OUTPUT CONNECTIONS
-    if(this->noHiddenLayer())
+    if(!this->hasHiddenLayer())
     {
-        for(unsigned int y=0; y<this->inputNeurons() + (unsigned int)this->bias(); y++)
+        for(unsigned int y=0; y<this->get_inputNeurons() + this->get_bias(); y++)
         {
-            for(unsigned int y2=0; y2<this->outputNeurons(); y2++)
+            for(unsigned int y2=0; y2<this->get_outputNeurons(); y2++)
             {
-                float output = 0;
-                if(y == this->inputNeurons() + (unsigned int)this->bias() -1)
+                if(y == this->get_inputNeurons() + this->get_bias() -1)
                 {
-                    output = this->biasValue();
+                    output = this->get_biasValue();
                 }
                 else
                 {
-                    output = this->input(y);
+                    output = this->get_input(y);
                 }
-                this->outputNeuron(y2)->weight(y,this->outputNeuron(y2)->weight(y) + (output_error[y2] * _mutationFactor * output));
+                this->get_ptr_outputNeuron(y2)->set_weight(y,this->get_ptr_outputNeuron(y2)->get_weight(y) + (__output_error[y2] * _mutationFactor * output));
             }
         }
+        __clock_end = std::chrono::high_resolution_clock::now();
+        __clock_time_span           = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+        __dbg_time5 = __dbg_time5*filter+(1-filter)*__clock_time_span.count()*1000;
+        __clock_start = std::chrono::high_resolution_clock::now();
     }
     else
     {
-        for(unsigned int y=0; y<this->hiddenNeuronsY() + (unsigned int)this->bias(); y++)
+        for(unsigned int y=0; y<this->get_hiddenNeuronsY() + this->get_bias(); y++)
         {
-            for(unsigned int y2=0; y2<this->outputNeurons(); y2++)
+            for(unsigned int y2=0; y2<this->get_outputNeurons(); y2++)
             {
-                float output = 0;
-                if(y == this->hiddenNeuronsY() + (unsigned int)this->bias() -1)
+                double output = 0;
+                if(y == this->get_hiddenNeuronsY() + this->get_bias() -1)
                 {
-                    output = this->biasValue();
+                    output = this->get_biasValue();
                 }
                 else
                 {
-                    output = this->hiddenNeuron(this->hiddenNeuronsX()-1,y2)->output();
+                    output = this->get_ptr_hiddenNeuron(this->get_hiddenNeuronsX()-1,y2)->get_output();
                 }
-                this->outputNeuron(y2)->weight(y,this->outputNeuron(y2)->weight(y) + (output_error[y2] * _mutationFactor * output));
+                this->get_ptr_outputNeuron(y2)->set_weight(y,this->get_ptr_outputNeuron(y2)->get_weight(y) + (__output_error[y2] * _mutationFactor * output));
             }
         }
+        __clock_end = std::chrono::high_resolution_clock::now();
+        __clock_time_span           = std::chrono::duration_cast<std::chrono::microseconds>(__clock_end - __clock_start);
+        __dbg_time6 = __dbg_time6*filter+(1-filter)*__clock_time_span.count()*1000;
+        __clock_start = std::chrono::high_resolution_clock::now();
     }
 }
-void                BackpropNet::learn(std::vector<float> expected)
+void                    BackpropNet::learn(std::vector<double> expected)
 {
-    this->expected(expected);
+    this->set_expected(expected);
     this->learn();
 }
 
-void                BackpropNet::calc_netError()
+void                    BackpropNet::calc_netError()
 {
     if(_expected.size() == 0)
     {
-        error_general("calc_netError()","no expected output values defined. first set them by BackpropNet::expected(std::vector<float>)");
+        addError(Error("calc_netError()",QString("no expected output values defined. first set them by BackpropNet::set_expected(std::vector<double>)")));
+        return;
+        //error_general("calc_netError()","no expected output values defined. first set them by BackpropNet::expected(std::vector<double>)");
     }
-    _update = true;
-    if(_update)
-    {
-        _outputError = std::vector<float> (this->outputNeurons(),0);
-        _netError    = 0;
+    _outputError = std::vector<double> (this->get_outputNeurons(),0);
+    _netError    = 0;
 
-        for(unsigned int y=0; y<this->outputNeurons(); y++)
-        {
-            _outputError[y] = _expected[y] - this->output(y);
-            _netError      += _outputError[y];
-        }
-        _update = false;
+    for(unsigned int y=0; y<this->get_outputNeurons(); y++)
+    {
+        _outputError[y] =_expected[y] - this->get_output(y);
+        _netError      += _outputError[y];
     }
 }
-float               BackpropNet::derivative(float netinput)
+double                  BackpropNet::derivative(double netinput)
 {
-    float derivative = 0;
-    switch(this->activationFunction())
+    double derivative = 0;
+    switch(this->get_activationFunction())
     {
         case Activation::Binary:
         {
-            error_general("derivative(float ["+std::to_string(netinput)+"] )","you cant use this activation function: Binary for this learn algorithm");
-            break;
+            addError(Error("derivative(double ["+QString::number(netinput)+"])",
+                           "you cant use this activation function: Binary for this learn algorithm"));
+            return 0;
+            //error_general("derivative(double ["+QString::number(netinput)+"] )","you cant use this activation function: Binary for this learn algorithm");
         }
         case Activation::Gaussian:
         {
@@ -394,137 +497,168 @@ float               BackpropNet::derivative(float netinput)
     return derivative;
 }
 
-void         BackpropNet::costumNeurons(unsigned int costum)
+void                    BackpropNet::set_costumNeurons(unsigned int costum)
 {
-    printIllegalFunctionMessage("costumNeurons(unsigned int ["+std::to_string(costum)+"])");
+    printIllegalFunctionMessage("set_costumNeurons(unsigned int ["+QString::number(costum)+"])");
 }
-
-unsigned int BackpropNet::costumNeurons()
+unsigned int            BackpropNet::get_costumNeurons()
 {
-    printIllegalFunctionMessage("costumNeurons()");
+    printIllegalFunctionMessage("get_costumNeurons()");
     return 0;
 }
-
-unsigned int BackpropNet::costumConnections()
+unsigned int            BackpropNet::get_costumConnections()
 {
-    printIllegalFunctionMessage("costumConnections()");
+    printIllegalFunctionMessage("get_costumConnections()");
     return 0;
 }
-
-void         BackpropNet::costumConnections(unsigned int connections)
+void                    BackpropNet::set_costumConnections(unsigned int connections)
 {
-    printIllegalFunctionMessage("costumConnections(unsigned int ["+std::to_string(connections)+"])");
+    printIllegalFunctionMessage("set_costumConnections(unsigned int ["+QString::number(connections)+"])");
 }
-
-void         BackpropNet::neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
+/*void                 BackpropNet::set_neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
 {
-    printIllegalFunctionMessage("neurons(unsigned int ["+std::to_string(neurons)+"] ,unsigned int ["+std::to_string(hiddenNeurons)+"] ,unsigned int ["+std::to_string(outputNeurons)+"] ,unsigned int ["+std::to_string(costumNeurons)+"] )");
-}
-
-Neuron               *BackpropNet::costumNeuron(NeuronID ID)
+    printIllegalFunctionMessage("set_neurons(unsigned int ["+QString::number(neurons)+"] ,unsigned int ["+QString::number(hiddenNeurons)+"] ,unsigned int ["+QString::number(outputNeurons)+"] ,unsigned int ["+QString::number(costumNeurons)+"] )");
+}*/
+Neuron              *BackpropNet::get_ptr_costumNeuron(NeuronID ID)
 {
-    printIllegalFunctionMessage("costumNeuron(NeuronID ["+Neuron::neuronIDString(ID)+"])");
+    printIllegalFunctionMessage("get_ptr_costumNeuron(NeuronID ["+Neuron::toIDString(ID)+"])");
     return nullptr;
 }
-
-std::vector<Neuron*> *BackpropNet::costumNeuron()
+std::vector<Neuron*>      *BackpropNet::get_ptr_costumNeuron()
 {
-    printIllegalFunctionMessage("costumNeuron()");
+    printIllegalFunctionMessage("get_ptr_costumNeuron()");
     return nullptr;
 }
-
-bool                BackpropNet::connectNeuronViaID(unsigned int fromNeuron,unsigned int toNeuron,ConnectionDirection direction)
+void                 BackpropNet::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
 {
-    printIllegalFunctionMessage("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"],unsigned int ["+std::to_string(toNeuron)+"],ConnectionDirection ["+Neuron::directionSring(direction)+"])");
-    return false;
+    printIllegalFunctionMessage("addConnection(NeuronID ["+Neuron::toIDString(fromNeuron)+"],NeuronID ["+Neuron::toIDString(toNeuron)+"],ConnectionDirection ["+Neuron::toDirectionString(direction)+"])");
 }
-
-bool                BackpropNet::connectNeuron(Connection *connection)
+void                 BackpropNet::addConnection(Connection connection)
 {
-    printIllegalFunctionMessage("connectNeuron(Connection *connection)");
-    return false;
+    printIllegalFunctionMessage("addConnection(Connection connection)");
 }
-
-bool                BackpropNet::connectNeuron(std::vector<Connection> *connections)
+void                 BackpropNet::addConnection(std::vector<Connection> connections)
 {
-    printIllegalFunctionMessage("connectNeuron(std::vector<Connection> *connections)");
-    return false;
+    printIllegalFunctionMessage("addConnection(std::vector<Connection> connections)");
 }
-
-void                BackpropNet::connectionList(std::vector<Connection> *connections)
+/*void                 BackpropNet::set_ptr_connectionList(std::vector<Connection> *connections)
 {
-    printIllegalFunctionMessage("connectionList(std::vector<Connection> *connections)");
-}
-
-std::vector<Connection> *BackpropNet::connectionList()
+    printIllegalFunctionMessage("set_ptr_connectionList(std::vector<Connection> *connections)");
+}*/
+/*std::vector<Connection>  *BackpropNet::get_ptr_connectionList()
 {
-    printIllegalFunctionMessage("connectionList()");
+    printIllegalFunctionMessage("get_ptr_connectionList()");
     return nullptr;
-}
-
+}*/
 void                BackpropNet::clearConnectionList()
 {
     printIllegalFunctionMessage("clearConnectionList()");
 }
-
 NeuronID            BackpropNet::addNeuron()
 {
     printIllegalFunctionMessage("addNeuron()");
     return NeuronID();
 }
-
 NeuronID            BackpropNet::addNeuron(Neuron *neuron)
 {
     printIllegalFunctionMessage("addNeuron(Neuron *neuron)");
     return NeuronID();
 }
-
 NeuronID            BackpropNet::addNeuron(Connection connection)
 {
-    printIllegalFunctionMessage("addNeuron(Connection ["+Neuron::connectionString(connection)+"])");
+    printIllegalFunctionMessage("addNeuron(Connection ["+Neuron::toConnectionString(connection)+"])");
     return NeuronID();
 }
-
 NeuronID            BackpropNet::addNeuron(std::vector<Connection> inputConnections)
 {
     printIllegalFunctionMessage("addNeuron(std::vector<Connection> inputConnections)");
     return NeuronID();
 }
-
-void BackpropNet::printIllegalFunctionMessage(std::string func)
+void                BackpropNet::clearErrors()
 {
-    __DEBUG_BACKPROPNET(this,func,"THIS FUNCTION IS NOT ALLOWED IN THE BACKPROBNET");
+    _errorList.clear();
+}
+Error               BackpropNet::get_lastError() const
+{
+    if(static_cast<unsigned int>(_errorList.size()) == 0)
+    {
+        return Error("get_lastError",ErrorMessage::listIsEmpty("_errorList"));
+    }
+    return _errorList[_errorList.size()-1];
+}
+Error               BackpropNet::get_error(unsigned int index)
+{
+    if(static_cast<unsigned int>(_errorList.size()) == 0)
+    {
+        return Error("get_error",ErrorMessage::listIsEmpty("_errorList"));
+    }
+    if(index >= static_cast<unsigned int>(_errorList.size()))
+    {
+        return Error("get_error",ErrorMessage::outOfRange<unsigned int>('[',0,index,unsigned(_errorList.size()-1),']'));
+    }
+    return _errorList[signed(index)];
+}
+ErrorList           BackpropNet::get_errorList() const
+{
+    return _errorList;
+}
+unsigned int        BackpropNet::get_errorAmount() const
+{
+    return unsigned(_errorList.size());
 }
 
 
 
-std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
+void BackpropNet::printIllegalFunctionMessage(QString func)
 {
-    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
+    addError(Error(func,QString("THIS FUNCTION IS NOT SUPPORTED IN THE BACKPROBNET")));
+    __DEBUG_BACKPROPNET(this,func,"THIS FUNCTION IS NOT SUPPORTED IN THE BACKPROBNET");
 }
-std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+void        BackpropNet::init()
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    _netError = 0;
+    _needsCalculationUpdate = true;
+    _needsConfigurationUpdate = true;
+    this->set_netFileName("netFile");
+    this->set_netFileEnding("bnet");
 }
-std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+void        BackpropNet::addError(const Error &e)
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    _errorList.push_back(e);
+    _errorList[_errorList.size()-1].setNamespace("BackpropNet::"+_errorList[_errorList.size()-1].getNamespace());
+    Error::print(_errorList[_errorList.size()-1]);
+    emit errorOccured(this->get_ID(),_errorList[_errorList.size()-1]);
 }
-std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,float value,float min, float max)
+/*
+
+QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max)
 {
-    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
+    return " parameter "+QString::number(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
-void        BackpropNet::error_general(std::string function, std::string cause)
+QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
+{
+    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+}
+void        BackpropNet::error_general(QString function, QString cause)
 {
     throw std::runtime_error("ERROR: BackpropNet::" + function + "     " + cause);
 }
-void        BackpropNet::error_general(std::string function, std::runtime_error &e)
+void        BackpropNet::error_general(QString function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        BackpropNet::error_general(std::string function, std::string cause, std::runtime_error &e)
+void        BackpropNet::error_general(QString function, QString cause, std::runtime_error &e)
 {
-    std::string error = "ERROR: BackpropNet::" + function + "     " + cause;
-    error += "      --> "+std::string(e.what());
+    QString error = "ERROR: BackpropNet::" + function + "     " + cause;
+    error += "      --> "+QString(e.what());
     throw std::runtime_error(error);
 }
+*/

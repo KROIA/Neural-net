@@ -43,13 +43,13 @@ class Snake : public QMainWindow
         void setupFieldOfView();
         void saveBackpropTrainingsData();
         void saveVersusData();
-        void loadBackpropTrainignsData(vector<vector<float> > &inputs,vector<vector<float>  > &outputs);
+        void loadBackpropTrainignsData(std::vector<std::vector<double> > &inputs,std::vector<std::vector<double>  > &outputs);
         void modeReset();
-        Direction getDirectionFromData(vector<float> inputs);
-        Direction getDirectionFromData(vector<float> inputs,Direction moveDirection);
-        void logGenom(vector<float> genom);
-        float getScore(Player *player);
-        float getScore(Score score);
+        Direction getDirectionFromData(std::vector<double> inputs);
+        Direction getDirectionFromData(std::vector<double> inputs,Direction moveDirection);
+        void logGenom(std::vector<double> genom);
+        double getScore(Player *player);
+        double getScore(Score score);
     protected:
         void keyPressEvent(QKeyEvent *e);
         void keyReleaseEvent(QKeyEvent *e);
@@ -87,8 +87,8 @@ class Snake : public QMainWindow
         void on_toggleDisplay_pushbutton_clicked(bool checked);
 
     private:
-        string GetLastErrorStdStr();
-        void saveError(std::string error);
+        QString GetLastErrorStr();
+        void saveError(QString error);
         void savePeroformanceData();
         void takescreenshot();
         void savescreenshot();
@@ -98,50 +98,50 @@ class Snake : public QMainWindow
         QTimer     *_updateTimer;
         QTimer     *_updateTimer2;
 
-        vector<QPoint> _fieldOfView;
+        std::vector<QPoint> _fieldOfView;
 
         GeneticNet *net;
 
-        string _statsFilename;
-        vector<float> _snakeScore;
-        vector<float> _averageScoreList;
-        vector<float> _maxScoreList;
-        vector<float> _minScoreList;
-        vector<float> _foodScore;
-        vector<float> _stepScore;
+        QString _statsFilename;
+        std::vector<double> _snakeScore;
+        std::vector<double> _averageScoreList;
+        std::vector<double> _maxScoreList;
+        std::vector<double> _minScoreList;
+        std::vector<double> _foodScore;
+        std::vector<double> _stepScore;
 
-        vector<float> _averageScoreList_smoth;
-        vector<float> _maxScoreList_smoth;
-        vector<float> _minScoreList_smoth;
-        vector<float> _foodScore_smoth;
-        vector<float> _stepScore_smoth;
+        std::vector<double> _averageScoreList_smoth;
+        std::vector<double> _maxScoreList_smoth;
+        std::vector<double> _minScoreList_smoth;
+        std::vector<double> _foodScore_smoth;
+        std::vector<double> _stepScore_smoth;
 
-        vector<float> _averageScoreList_smoth_tmp;
-        vector<float> _maxScoreList_smoth_tmp;
-        vector<float> _minScoreList_smoth_tmp;
-        vector<float> _foodScore_smoth_tmp;
-        vector<float> _stepScore_smoth_tmp;
+        std::vector<double> _averageScoreList_smoth_tmp;
+        std::vector<double> _maxScoreList_smoth_tmp;
+        std::vector<double> _minScoreList_smoth_tmp;
+        std::vector<double> _foodScore_smoth_tmp;
+        std::vector<double> _stepScore_smoth_tmp;
 
         unsigned int _step;
         unsigned int generation;
-        float _averageScore_smoth;
+        double _averageScore_smoth;
 
         bool _pause;
 
 
         bool _selfControl;
         bool _enableDisplay;
-        float _genPerSecond;
+        double _genPerSecond;
         unsigned int _genPerSecCounter;
-        float _calcPerSecond;
+        double _calcPerSecond;
         long _calcPerSecCounter;
-        float        _averageCalcPerSec;        //Test case
-        std::vector<float>   _averageCalcPerSec_List;
+        double        _averageCalcPerSec;        //Test case
+        std::vector<double>   _averageCalcPerSec_List;
         std::vector<double>  _averageEnviromentCycleTime;
         std::vector<double>  _averageNetCycleTime;
         std::vector<double>  _averageSnakeCycleTime;
         unsigned int _saveCounter;
-        std::string _calcPerSecFileName;
+        QString _calcPerSecFileName;
 
 //#ifdef TESTMODE
         int _modus;
@@ -149,31 +149,31 @@ class Snake : public QMainWindow
         unsigned int _respawnAmount;
 
         Environment *_versusEnvironment;
-        vector<struct Score> _versusBotScore;
-        vector<struct Score> _versusBotAverageScore;
-        vector<struct Score> _versusBotAverageScore_tmpBuffer;
-        vector<struct Score> _versusBotAbsolutAverageScore;
-        vector<struct Score> _versusPlayerScore;
-        vector<struct Score> _versusPlayerAverageScore;
-        vector<struct Score> _versusPlayerAverageScore_tmpBuffer;
-        vector<struct Score> _versusPlayerAbsolutAverageScore;
-        string _versusSaveFileName;
+        std::vector<struct Score> _versusBotScore;
+        std::vector<struct Score> _versusBotAverageScore;
+        std::vector<struct Score> _versusBotAverageScore_tmpBuffer;
+        std::vector<struct Score> _versusBotAbsolutAverageScore;
+        std::vector<struct Score> _versusPlayerScore;
+        std::vector<struct Score> _versusPlayerAverageScore;
+        std::vector<struct Score> _versusPlayerAverageScore_tmpBuffer;
+        std::vector<struct Score> _versusPlayerAbsolutAverageScore;
+        QString _versusSaveFileName;
         unsigned int _versusSaveScoreInterval;
         unsigned int _versusSaveScoreCount;
 
         Environment *_backpropTrainingEnvironment;
         BackpropNet *_backpropNet;
-        vector<vector<float>    >_backpropTrainingInputs;
-        vector<vector<float>    >_backpropTrainingOutputs;
-        string       _backprobTrainingsDataFileName;
+        std::vector<std::vector<double>    >_backpropTrainingInputs;
+        std::vector<std::vector<double>    >_backpropTrainingOutputs;
+        QString       _backprobTrainingsDataFileName;
 
-        float        _botScore;
+        double        _botScore;
         unsigned int _botFood;
         unsigned int _botSteps;
         unsigned int _botDeaths;
         unsigned int _botKills;
 
-        float        _playerScore;
+        double        _playerScore;
         unsigned int _playerFood;
         unsigned int _playerSteps;
         unsigned int _playerDeaths;
@@ -185,9 +185,9 @@ class Snake : public QMainWindow
         //statistics
         unsigned int _maxChartSize;
 
-        float _stats_maxAverageScore;
-        float _stats_maxCalcPerSec;
-        float _stats_maxGenPerSec;
+        double _stats_maxAverageScore;
+        double _stats_maxCalcPerSec;
+        double _stats_maxGenPerSec;
         QLineSeries *_stats_averageScore_LineSeries;
         QLineSeries *_stats_Score_LineSeries;
         QLineSeries *_stats_calcPerSec_Lineseries;
@@ -212,7 +212,7 @@ class Snake : public QMainWindow
         bool         _record_enable;
         bool         _record_displayAutoEnabler;
         QString      _record_savePath;
-        vector<QPixmap>_record_imageList;
+        std::vector<QPixmap>_record_imageList;
 
 //#endif
 
