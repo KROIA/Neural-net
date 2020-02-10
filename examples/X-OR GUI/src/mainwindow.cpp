@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
     setupTrainingSet();
+    visu = new NetVisu(net);
 }
 
 MainWindow::~MainWindow()
@@ -261,7 +262,7 @@ void MainWindow::setupTrainingSet()
     for(unsigned int a=0; a<trainingsSet.size(); a++)
     {
 
-        outputSet.push_back({qFunc(trainingsSet[a][0])+qFunc(trainingsSet[a][1])});
+        outputSet.push_back({trainingsSet[a][0]*trainingsSet[a][1]/*qFunc(trainingsSet[a][0])+qFunc(trainingsSet[a][1])*/});
         sollImage->setPixelColor((int)mapD(trainingsSet[a][0],-2,2,0,200),(int)mapD(trainingsSet[a][1],-2,2,200,0),getValueColor(outputSet[a][0]));
     }
 

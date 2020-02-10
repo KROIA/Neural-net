@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <backpropnet.h>
 #include <QTimer>
-
+#include "netvisu.h"
 #include <QPixmap>
 #include <QPainter>
 #include <QLabel>
@@ -50,6 +50,8 @@ private slots:
     void setupNet();
     void setupTrainingSet();
     double qFunc(double x);
+
+    NetVisu *visu;
 
     Ui::MainWindow *ui;
     BackpropNet *net;
