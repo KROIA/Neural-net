@@ -8,4 +8,19 @@ Window{
     width: 640
     height: 480
     title: "Net Übersicht"
+    Connections {
+                     target: netVisu
+                     onIncreaseOne: txtCount.text =ms
+                     }
+    Text {
+    id:txtCount
+    text: "0 Hits"
+    x:200
+    y:200
+        }
+    Button{
+        id: btnUpdate
+        text: "Just Click Me"
+        onClicked: netVisu.callMeFromQml()
+    }
 }
