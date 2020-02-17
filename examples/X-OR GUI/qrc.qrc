@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>Main.qml</file>
+        <file>qml/Connection.qml</file>
+        <file>qml/Main.qml</file>
+        <file>qml/Net.qml</file>
+        <file>qml/Neuron.qml</file>
+        <file>qml/jsSource.js</file>
+        <file>qml/NetClassic.qml</file>
     </qresource>
 </RCC>
