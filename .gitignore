@@ -23,6 +23,7 @@ examples/Genetic_ausweichen/bin
 examples/Genetic_ausweichen/Tests
 examples/Snake/bin
 examples/Snake/Tests
+NnqmlUI/build-Nnqmlui
 *.8-pre1
 *.8-pre1
 NnqmlUi/Release/release/moc_mainwindow.cpp
