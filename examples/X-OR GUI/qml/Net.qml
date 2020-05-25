@@ -1,135 +1,156 @@
-import QtQuick.Controls 2.0
-import QtQuick 2.12
-import QtQuick.Controls 1.4
-import "jsSource.js" as Source
+import QtQuick 2.0
+
 Item {
-    id: netItem
-    anchors.fill: parent
-    ScrollView{
-        anchors.fill:parent
-        Rectangle{
-            id: net
-            x:50
-            y:50
-            property int zoom: 1
-            width: (net.hiddenX()+2)*distanceX
-            height: (net.hiddenY()+2)*distanceY
-            property bool newConStartSet: false
-            property int newConStart: 0
-            property int diameter: 100*zoom
-            property int distanceY: 200*zoom
-            property int distanceX: 400*zoom
-            property bool onNeuronClicked: false
-            property int choosenNeuron: 0
+    id:netItem
+    width: 600
+    height: 600
+    property int netID: 0
 
-            //property int hiddenX: netVisu.getHiddenX()
-            //property int hiddenY: netVisu.getHiddenY()
-            property int inputs: netVisu.getInputs()
-            property int outputs: netVisu.getOutputs()
-            /*
-
-            /*property variant getStartNeuron:{
-                var x= [0]
-                for(var i=0;i<netVisu.StartNeuron.length;++i){
-                    x[i]=netVisu.StartNeuron[i];
-                }
-                return x
-            }
-            property variant getEndNeuron:{
-                var x= [0]
-                for(var i=0;i<netVisu.EndNeuron.length;++i){
-                    x[i]=netVisu.EndNeuron[i];
-                }
-                return x
-            }
-
-            property variant neuronTyp:{
-                var x= [0]
-                for(var i=0;i<netVisu.NeuronTyp.length;++i){
-                    x[i]=netVisu.NeuronTyp[i];
-                }
-                return x
-            }
-            property variant connectionWeight:
-            {
-                            var x= [0]
-                            for(var i=0;i<netVisu.ConnectionWeight.length;++i){
-                                x[i]=netVisu.ConnectionWeight[i];
-                            }
-                            return x
-                        }
-            property variant  neuronValueVect:
-            {
-                            var x= [0]
-                            for(var i=0;i<netVisu.NeuronValueVect.length;++i){
-                                x[i]=netVisu.NeuronValueVect[i];
-                            }
-                            return x
-                        }
-
-
-            property variant neuronVisible:{
-                                            var x= [0]
-                                            for(var i=0;i<net.neurons;++i){
-                                                x[i]=1;
-                                            }
-                                            return x
-            }
-            property variant connectionVisible:{
-                var x= [0]
-                for(var i=0;i<net.connectionWeight.length;++i){
-                    x[i]=1;
-                }
-                return x
-            }*/
-                   /*
-            property variant layerPositionX: [0]
-            property variant layerPositionY: [0]
-            property variant connectionStartXPoint:[0]
-            property variant connectionStartYPoint:[0]
-            property variant connectionEndXPoint:[0]
-            property variant connectionEndYPoint:[0]
-            property int neurons: net.hiddenX*net.hiddenY+net.inputs+net.outputs
-           /* NetClassic{
-
-            }*/
-            /*function neuronClicked(index){
-                if(ui.setNewCon==true){
-                    net.neuronVisible=Source.showAllNeuron(net.neuronVisible);
-                    net.connectionVisible=Source.showAllCon(net.connectionVisible)
-                    if(net.newConStartSet==false&&index>ui.input){
-                        net.newConStart=index;
-                        net.newConStartSet=true;
-                    }
-                    if(net.newConStartSet==true&&index>ui.input){
-                        ui.addConnection(net.newConStart-ui.input,index-ui.input);
-                        ui.setNewCon=false;
-                        net.newConStartSet=false;
-                        net.connectionVisible[net.connectionVisible.length]=true
-                    }
-                }
-                else{
-                    if(index!==net.choosenNeuron){
-                        net.onNeuronClicked=true
-                        net.connectionVisible=Source.connectionClicked(net.connectionVisible,ui.endNeuron,index)
-                        net.neuronVisible=Source.neuronClicked(net.neuronVisible,index)
-                        net.choosenNeuron=index;
-                    }
-                    else{
-
-                        net.neuronVisible=Source.showAllNeuron(net.neuronVisible)
-                        net.connectionVisible=Source.showAllCon(net.connectionVisible)
-                        net.choosenNeuron=net.neurons+1
-                    }
-                }
-            }
-            function neuronReleased(index){
-                net.onNeuronClicked=false
-            }*/
-
+    property variant inputNeuron: [1]
+    property variant outputNeuron: [1]
+    property int hiddenNeuronX: 1
+    property int hiddenNeuronY: 1
+    property variant hiddenValue: [0]
+    property int maxYNeuron: {
+        if(hiddenNeuronY>outputNeuron.length&&hiddenNeuronY>inputNeuron.length){
+            return hiddenNeuronY
         }
+        if(hiddenNeuronY<outputNeuron.length&&outputNeuron.length>inputNeuron.length){
+            return outputNeuron.length
+        }
+        if(hiddenNeuronY<inputNeuron.length&&outputNeuron.length<inputNeuron.length){
+            return inputNeuron.length
+        }
+        return 0
+    }
+    property int xDistance: {
+        return width/(hiddenNeuronX+3)
+    }
+    property int yDistance: {
+        return height/(hiddenNeuronY+1+yOffSet-0.5)
+    }
+    property int d:
+        if(yDistance<xDistance) return yDistance*0.4
+        else return xDistance*0.4
+    property variant hiddenConXInput: [0]
+    property variant hiddenConYInput: [0]
 
+    property variant hiddenConXOutput: [0]
+    property variant hiddenConYOutput: [0]
 
+    property variant outputConXInput: [0]
+    property variant outputConYInput: [0]
 
+    property variant inputConXOutput: [0]
+    property variant inputConYOutput: [0]
+
+    property variant biasConXOutput: [0]
+    property variant biasConYOutput: [0]
+
+    property variant hiddenIDs: [0]
+    property variant outputIds: [0]
+
+    property variant conSourceID: [0]
+    property variant conDestinationID: [0]
+
+    property variant conSourceType: [0]
+    property variant conDestinationType: [0]
+
+    property int noneType: 1
+    property int inputType: 1
+    property int hiddenType: 2
+    property int outputType: 3
+    property int biasType: 5
+
+    property bool bias: false
+    property real biasValue: 0
+    property real yOffSet: if(bias) return 1.5
+                            else return 0.5
+    Repeater{
+        model: conSourceID.length
+        NeuronConnection{
+            conID: index
+        }
+    }
+    Repeater{
+        id:biasLayer
+        model: hiddenNeuronX+1
+        visible: bias
+        Neuron{
+            x:(0.5+index)*xDistance
+            y: 0.5*yDistance
+            d:netItem.d
+            neuronValue: biasValue
+            typeId: index
+            type:biasType
+        }
+    }
+
+    Repeater{
+        id:inputLayer
+        model:inputNeuron.length
+        Neuron{
+            x:0.5*xDistance
+            y:(index+yOffSet)*yDistance
+            d:netItem.d
+            neuronValue: if(inputNeuron.length) return inputNeuron[index]
+                            else return 0
+            typeId: index
+            type:inputType
+        }
+    }
+    Timer {
+            interval: 100; running: true; repeat: true
+            onTriggered: updateValue()
+        }
+    Repeater{
+        id:hiddenXLayer
+        model:hiddenNeuronX
+        Repeater{
+            id:hiddenYLayer
+            model:hiddenNeuronY
+            property int indexX: index
+            Neuron{
+                x:xDistance*(indexX+1.5)
+                y:(index+yOffSet)*yDistance
+                d:netItem.d
+                typeId: index+(indexX*hiddenNeuronY)
+                neuronID: hiddenIDs[typeId]
+                neuronValue: if(index+(indexX*hiddenNeuronY)<hiddenValue.length){
+                                         return hiddenValue[typeId]}
+                             else return 0
+                type:hiddenType
+            }
+        }
+    }
+    Repeater{
+        id:outputLayer
+        model:outputNeuron.length
+        Neuron{
+            x:(1.5+hiddenNeuronX)*xDistance
+            y:(index+yOffSet)*yDistance
+            d:netItem.d
+            typeId: index
+            neuronID: outputIds[typeId]
+            type:outputType
+            neuronValue: if(outputNeuron.length) outputNeuron[index]
+            else return 0
+        }
+    }
+
+    function updateValue(){
+        hiddenNeuronX=netVisu.getHiddenX()
+        hiddenNeuronY=netVisu.getHiddenY()
+        inputNeuron=netVisu.getInputsValue()
+        outputNeuron=netVisu.getOutputsValue()
+        hiddenValue=netVisu.getHiddenValue()
+        hiddenIDs=netVisu.getHiddenID()
+        outputIds=netVisu.getOutputID()
+        conSourceID=netVisu.getConSourceID()
+        conSourceType=netVisu.getConSourceType()
+        conDestinationID=netVisu.getConDestinationID()
+        conDestinationType=netVisu.getConDestinationType()
+        bias=netVisu.getBias()
+        biasValue=netVisu.getBiasValue()
     }
 }

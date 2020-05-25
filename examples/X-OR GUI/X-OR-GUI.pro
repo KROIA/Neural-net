@@ -40,7 +40,6 @@ SOURCES += \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
     $$netSrcPath/error.cpp \
-    $$netSrcPath/geneticnet.cpp \
     netvisu.cpp
 
 HEADERS += \

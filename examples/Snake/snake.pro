@@ -31,12 +31,18 @@ DLL_buildPath = bin/64bit/build-Release
 # geometry : https://github.com/KROIA/Geometry
 
 #change your PC-username
-username     = AlexKrieg
-QT_work_dir  = C:/Users/$$username/Documents/QT
-geometryPath = $$QT_work_dir/lib/Geometry
+#username     = AlexKrieg
+#QT_work_dir  = C:/Users/$$username/Documents/QT
+#geometryPath = $$QT_work_dir/lib/Geometry
+#rectPath     = $$QT_work_dir/DLL/Rect
+#configPath   = $$QT_work_dir/DLL/Config
+
+username     = SCHEH
+QT_work_dir  = C:/Users/$$username/Documents/AlexFormen/
+
+geometryPath = $$QT_work_dir/Rect-master\Rect-master
 rectPath     = $$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
-
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
       $$configPath//$$DLL_buildPath/Config.dll
 
@@ -47,8 +53,8 @@ netIncPath = ../../inc
 netSrcPath = ../../src
 INCLUDEPATH += $$netIncPath \
                $$incPath \
-               $$rectPath \
-               $$geometryPath \
+               #$$rectPath \
+               #$$geometryPath \
                $$configPath \
 
 

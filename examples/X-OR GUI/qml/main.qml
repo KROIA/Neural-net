@@ -1,32 +1,27 @@
-import QtQuick 2.5
-import QtQuick.Window 2.2
+import QtQuick 2.12
+import QtQuick.Window 2.12
 import QtQuick.Controls 1.4
-
-Window{
-    id: item
+Window {
+    id:window
+    width: 800
+    height: 600
     visible: true
-    width: 640
-    height: 480
-    title: "Net Übersicht"
-    Connections {
-                     target: netVisu
-                     onIncreaseOne: txtCount.text =ms
-                     }
-
     Net{
-        id: prenet
-
+        id:net
+        anchors.fill: parent
     }
 
-    /*Text {
-    id:txtCount
-    text: "0 Hits"
-    x:200
-    y:200
-        }
     Button{
-        id: btnUpdate
-        text: "Just Click Me"
-        onClicked: netVisu.callMeFromQml()
-    }*/
+        anchors.left: window.left
+        anchors.top: window.top
+        text: "aktualisieren"
+        onClicked:{
+            net.updateValue()
+        }
+    }
+
+    Connections {
+                     target: netVisu
+
+                     }
 }

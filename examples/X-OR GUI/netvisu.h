@@ -17,27 +17,33 @@ class NetVisu : public QObject
 public:
     explicit NetVisu(BackpropNet *backnet,QObject *parent = nullptr);
 
-    vector<int> StartNeuron;
-    vector<int> EndNeuron;
+    vector<int> SourceNeuron;
+    vector<int> DestinationNeuron;
     vector<int> NeuronTyp;
     vector<qreal> ConnectionWeight;
     vector<qreal> NeuronValueVect;
 signals:
-    void increaseOne(QString ms);
+    void newNetData();
 public slots:
     void callMeFromQml();
-    int getHiddenX();
-    int getHiddenY();
-    int getInputs();
-    int getOutputs();
+    Q_INVOKABLE int getHiddenX() const;
+    Q_INVOKABLE int getHiddenY() const;
+    Q_INVOKABLE int getInputs() const;
+    Q_INVOKABLE int getOutputs() const;
+    Q_INVOKABLE QVector<qreal> getHiddenValue()const;
+    Q_INVOKABLE QVector<qreal> getInputsValue() const;
+    Q_INVOKABLE QVector<qreal> getOutputsValue() const;
+    Q_INVOKABLE QVector<int> getHiddenID() const;
+    Q_INVOKABLE QVector<int> getOutputID() const;
 
+    Q_INVOKABLE QVector<int> getConSourceID() const;
+    Q_INVOKABLE QVector<int> getConDestinationID() const;
+    Q_INVOKABLE QVector<int> getConSourceType() const;
+    Q_INVOKABLE QVector<int> getConDestinationType() const;
 
-    vector<int> getStartNeuron();
-    vector<int> getEndNeuron();
-    vector<int> getNeuronTyp();
-    vector<qreal> getConnectionWeight();
-    vector<qreal> getNeuronValueVect();
-    int getActivFunc();
+    Q_INVOKABLE bool getBias() const;
+    Q_INVOKABLE qreal getBiasValue() const;
+
 private:
     QQmlApplicationEngine *engine;
     QQmlContext* context;
