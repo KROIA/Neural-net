@@ -25,7 +25,7 @@ Rectangle {
             inputConXOutput[typeId]=xOutput
             inputConYOutput[typeId]=yOutput
         }
-        if(type===biasType){
+        else if(type===biasType){
             biasConXOutput[typeId]=xOutput
             biasConYOutput[typeId]=yOutput
         }
@@ -35,7 +35,7 @@ Rectangle {
             hiddenConXOutput[typeId]=xOutput
             hiddenConYOutput[typeId]=yOutput
         }
-        if(type===outputType){
+        else if(type===outputType){
             outputConXInput[typeId]=xInput
             outputConYInput[typeId]=yInput
         }

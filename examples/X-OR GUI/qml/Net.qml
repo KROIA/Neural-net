@@ -47,7 +47,7 @@ Item {
     property variant biasConXOutput: [0]
     property variant biasConYOutput: [0]
 
-    property variant hiddenIDs: [0]
+    property variant hiddenIDs: [0,0]
     property variant outputIds: [0]
 
     property variant conSourceID: [0]
@@ -117,7 +117,8 @@ Item {
                 y:(index+yOffSet)*yDistance
                 d:netItem.d
                 typeId: index+(indexX*hiddenNeuronY)
-                neuronID: hiddenIDs[typeId]
+                neuronID:{ console.debug(typeId,hiddenIDs, hiddenIDs[typeId])
+                            return hiddenIDs[typeId]}
                 neuronValue: if(index+(indexX*hiddenNeuronY)<hiddenValue.length){
                                          return hiddenValue[typeId]}
                              else return 0

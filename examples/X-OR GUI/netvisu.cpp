@@ -31,15 +31,11 @@ int NetVisu::getOutputs() const{
 }
 
 QVector<qreal> NetVisu::getHiddenValue() const{
-    vector<qreal> vect;
-    vector<qreal> vectProf;
-            for(int i=0;i<net->get_hiddenNeuronsX();i++){
-                vectProf=net->get_hiddenY(i);
-                for(int j=0;j<vectProf.size();j++){
-                    vect.push_back(vectProf[j]);
-                }
+    QVector<qreal> vect;
+    for(unsigned int j=0;j<net->get_hiddenY(0).size();j++){
+        vect.push_back(qreal(net->get_hiddenY(0)[j]));
     }
-    return QVector<qreal>::fromStdVector(vect);
+    return vect;
 }
 QVector<qreal> NetVisu::getInputsValue() const {
     return QVector<qreal>::fromStdVector(net->get_input());
@@ -49,19 +45,19 @@ QVector<qreal> NetVisu::getOutputsValue() const{
 }
 
 QVector<int> NetVisu::getHiddenID() const{
+    qDebug()<<"get vect "<<net->get_hiddenNeuronY_ptr(1).size();
     QVector<int> vect;
-
-
-    for(int i=0;i<net->get_hiddenNeuronsX();i++){
-        for(int j=0;j<net->get_hiddenNeuronsY();j++){
-            vect.push_back(net->get_hiddenNeuronY_ptr(i)[j]->get_ID().ID);
+        for(unsigned int j=0;j<net->get_hiddenNeuronY_ptr(0).size();j++){
+            vect.push_back(j);
+            //vect.push_back(int(net->get_hiddenNeuronY_ptr(0)[j]->get_ID().ID));
+            qDebug()<<j;
         }
-    }
+        qDebug()<<vect;
     return vect;
 }
 QVector<int> NetVisu::getOutputID() const{
     QVector<int> vect;
-        for(int j=0;j<net->get_outputNeurons();j++){
+        for(unsigned int j=0;j<net->get_outputNeurons();j++){
             vect.push_back(net->get_ptr_outputNeuron(j)->get_ID().ID);
         }
     return vect;
@@ -103,7 +99,6 @@ QVector<qreal> NetVisu::getConWeight() const{
     for(unsigned int i=0;i<net->get_connections();i++){
         vect.push_back(net->get_connectionList()[i].weight);
     }
-    qDebug()<<vect;
     return vect;
 }
 

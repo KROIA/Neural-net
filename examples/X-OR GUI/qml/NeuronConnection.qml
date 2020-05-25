@@ -30,14 +30,14 @@ Shape {
                       return hiddenConYOutput[conSourceID[conID]]
                   }
                   if(biasType===conSourceType[conID]){
-                      return biasConYOutput[conDestinationID[conID]/hiddenNeuronX]
+                      return biasConYOutput[Math.floor(conDestinationID[conID]/hiddenNeuronX)]
                   }
                   return 0
                 }
            PathLine {
                x: {
                    if(outputType===conDestinationType[conID]){
-                       return outputConXInput[conDestinationID[conID]-hiddenIDs.length]
+                       return outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
                    }
                    else if(hiddenType===conDestinationType[conID]){
                        return hiddenConXInput[conDestinationID[conID]]
@@ -46,10 +46,10 @@ Shape {
                }
                y: {
                   if(outputType===conDestinationType[conID]){
-                      return outputConYInput[conDestinationID[conID]-hiddenIDs.length]
+                      return outputConYInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
                   }
                   else  if(hiddenType===conDestinationType[conID]){
-                      return outputConYInput[conDestinationID[conID]]
+                      return hiddenConYInput[conDestinationID[conID]]
                   }
                   return 0
               }
