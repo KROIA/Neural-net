@@ -40,7 +40,7 @@ public slots:
     Q_INVOKABLE QVector<int> getConDestinationID() const;
     Q_INVOKABLE QVector<int> getConSourceType() const;
     Q_INVOKABLE QVector<int> getConDestinationType() const;
-
+    Q_INVOKABLE QVector<qreal> getConWeight() const;
     Q_INVOKABLE bool getBias() const;
     Q_INVOKABLE qreal getBiasValue() const;
 

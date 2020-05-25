@@ -98,6 +98,15 @@ QVector<int> NetVisu::getConDestinationType() const{
     }
     return vect;
 }
+QVector<qreal> NetVisu::getConWeight() const{
+    QVector<qreal> vect;
+    for(unsigned int i=0;i<net->get_connections();i++){
+        vect.push_back(net->get_connectionList()[i].weight);
+    }
+    qDebug()<<vect;
+    return vect;
+}
+
 
 bool NetVisu::getBias() const{
     return net->get_bias();

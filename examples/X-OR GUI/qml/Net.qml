@@ -56,6 +56,7 @@ Item {
     property variant conSourceType: [0]
     property variant conDestinationType: [0]
 
+    property variant conWeight: [0]
     property int noneType: 1
     property int inputType: 1
     property int hiddenType: 2
@@ -67,9 +68,10 @@ Item {
     property real yOffSet: if(bias) return 1.5
                             else return 0.5
     Repeater{
-        model: conSourceID.length
+        model: conWeight.length
         NeuronConnection{
             conID: index
+            weight:conWeight[index]
         }
     }
     Repeater{
@@ -150,7 +152,9 @@ Item {
         conSourceType=netVisu.getConSourceType()
         conDestinationID=netVisu.getConDestinationID()
         conDestinationType=netVisu.getConDestinationType()
+        conWeight=netVisu.getConWeight()
         bias=netVisu.getBias()
         biasValue=netVisu.getBiasValue()
+
     }
 }

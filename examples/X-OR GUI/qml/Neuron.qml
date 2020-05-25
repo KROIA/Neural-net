@@ -36,8 +36,8 @@ Rectangle {
             hiddenConYOutput[typeId]=yOutput
         }
         if(type===outputType){
-            outputConXInput[typeId]=xOutput
-            outputConYInput[typeId]=yOutput
+            outputConXInput[typeId]=xInput
+            outputConYInput[typeId]=yInput
         }
     }
     property string neuronColor:if(neuronValue<0){

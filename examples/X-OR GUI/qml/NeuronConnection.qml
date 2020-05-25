@@ -2,10 +2,13 @@ import QtQuick 2.0
 import QtQuick.Shapes 1.14
 Shape {
     property int conID: 0
+    property real weight:1
     property int conWidth: 4
     ShapePath {
-           strokeColor: "green"
-           strokeWidth: conWidth
+           strokeColor: if(weight>0) return "green"
+                        else if(weight<0) return "red"
+                        else return "white"
+           strokeWidth: Math.abs(weight)*netItem.d*0.2
            startX:{
                    if(inputType===conSourceType[conID]){
                        return inputConXOutput[conSourceID[conID]]
@@ -14,7 +17,6 @@ Shape {
                        return hiddenConXOutput[conSourceID[conID]]
                    }
                    if(biasType===conSourceType[conID]){
-                       console.debug("connection to bias "+Math.floor(conDestinationID[conID]/hiddenNeuronX)+" From "+ conID)
                        return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronX)]
                    }
                    return 0
@@ -28,7 +30,6 @@ Shape {
                       return hiddenConYOutput[conSourceID[conID]]
                   }
                   if(biasType===conSourceType[conID]){
-
                       return biasConYOutput[conDestinationID[conID]/hiddenNeuronX]
                   }
                   return 0
