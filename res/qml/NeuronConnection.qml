@@ -5,55 +5,72 @@ Shape {
     property int conID: 0
     property real weight:1
     property int conWidth: 4
-    property int minWidth: 1
+    property real minWidth: 1
+    property real maxWidth: d*0.3
+    property real d: 0.2
     ShapePath {
            strokeColor: if(weight>0) return "green"
                         else if(weight<0) return "red"
                         else return "white"
-           strokeWidth: if(Math.abs(weight)*netItem.d*0.2>minWidth)return Math.abs(weight)*netItem.d*0.2
-                        else return minWidth
+           strokeWidth: if(Math.abs(weight)*d*0.2<minWidth) return minWidth
+                        else if(Math.abs(weight)*d*0.2>maxWidth) return maxWidth
+                        else return Math.abs(weight)*d*0.2
 
            startX:{
                    if(inputType===conSourceType[conID]){
-                       return inputConXOutput[conSourceID[conID]]
+                       if(0<=inputConXOutput[conSourceID[conID]]){
+                       return inputConXOutput[conSourceID[conID]]}
                    }
                    else if(hiddenType===conSourceType[conID]){
-                       return hiddenConXOutput[conSourceID[conID]]
+                       if(0<=hiddenConXOutput[conSourceID[conID]]){
+                       return hiddenConXOutput[conSourceID[conID]]}
                    }
                    else if(biasType===conSourceType[conID]){
-                       return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]
+                       if(0<=biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]){
+                       return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]}
                    }
                    return 0
                }
 
            startY:{
                   if(inputType===conSourceType[conID]){
-                      return inputConYOutput[conSourceID[conID]]
+                      if(0<=inputConYOutput[conSourceID[conID]]){
+                      return inputConYOutput[conSourceID[conID]]}
                   }
                   else if(hiddenType===conSourceType[conID]){
-                      return hiddenConYOutput[conSourceID[conID]]
+                      if(0<=hiddenConYOutput[conSourceID[conID]]){
+                      return hiddenConYOutput[conSourceID[conID]]}
                   }
                   else if(biasType===conSourceType[conID]){
-                      return biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]
+                      if(0<=biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]){
+                      return biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]}
                   }
                   return 0
                 }
            PathLine {
                x: {
                    if(outputType===conDestinationType[conID]){
-                       return outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                       if(0<=outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]){
+                            return outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                       }
                    }
                    else if(hiddenType===conDestinationType[conID]){
-                       return hiddenConXInput[conDestinationID[conID]]
+                       if(0<=hiddenConXInput[conDestinationID[conID]]){
+                            return hiddenConXInput[conDestinationID[conID]]
+                       }
                    }
                    return 0
                }
                y: {
                   if(outputType===conDestinationType[conID]){
-                      return outputConYInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                      if(0<=outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]){
+                            return outputConYInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                      }
                   }
                   else  if(hiddenType===conDestinationType[conID]){
-                      return hiddenConYInput[conDestinationID[conID]]
+                      if(0<=hiddenConYInput[conDestinationID[conID]]){
+                            return hiddenConYInput[conDestinationID[conID]]
+                      }
                   }
                   return 0
               }

@@ -5,32 +5,45 @@ Item {
     width: 600
     height: 600
     property int netID: 0
+    property int updateTime:100
     property variant inputNeuron: [0]
     property variant outputNeuron: [0]
     property int hiddenNeuronX: 1
     property int hiddenNeuronY: 1
     property variant hiddenValue: [0]
     property int maxYNeuron: {
-        if(hiddenNeuronY>outputNeuron.length&&hiddenNeuronY>inputNeuron.length){
-            return hiddenNeuronY
+        var b
+        if(bias===true)b=1
+        else b=0
+        if(hiddenNeuronY>=outputNeuron.length&&hiddenNeuronY>=inputNeuron.length){
+            return hiddenNeuronY+b
         }
-        if(hiddenNeuronY<outputNeuron.length&&outputNeuron.length>inputNeuron.length){
-            return outputNeuron.length
+        else if(hiddenNeuronY<=outputNeuron.length&&outputNeuron.length>=inputNeuron.length){
+            return outputNeuron.length+b
         }
-        if(hiddenNeuronY<inputNeuron.length&&outputNeuron.length<inputNeuron.length){
-            return inputNeuron.length
+        else if(hiddenNeuronY<=inputNeuron.length&&outputNeuron.length<=inputNeuron.length){
+            return inputNeuron.length+b
         }
         return 0
     }
+    property real dRelationship: 0.4
     property int xDistance: {
-        return width/(hiddenNeuronX+3)
+        var w
+        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship>((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
+            w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
+        else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
+        return (width-w)/(hiddenNeuronX+1+yOffSet*2)
     }
     property int yDistance: {
-        return height/(hiddenNeuronY+1+yOffSet-0.5)
+        var w
+        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship>((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
+            w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
+        else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
+        return (height-w)/(maxYNeuron-1+yOffSet*2)
     }
     property int d:
-        if(yDistance<xDistance) return yDistance*0.4
-        else return xDistance*0.4
+        if(yDistance<xDistance) return yDistance*dRelationship
+        else return xDistance*dRelationship
     property variant hiddenConXInput: [0]
     property variant hiddenConYInput: [0]
 
@@ -64,10 +77,12 @@ Item {
 
     property bool bias: false
     property real biasValue: 0
-    property real yOffSet: if(bias) return 1.5
-                            else return 0.5
+    property real yOffSet: 0.1
+    property real xOffSet: 0.1
+    property int yBiasPos: if(bias) return yDistance
+                        else return 0
     Timer {
-            interval: 100; running: true; repeat: true
+            interval: updateTime; running: true; repeat: true
             onTriggered: updateValue()
         }
     Repeater{
@@ -75,15 +90,17 @@ Item {
         NeuronConnection{
             conID: index
             weight:conWeight[index]
+            d:netItem.d
         }
     }
     Repeater{
         id:biasLayer
+
         model: hiddenNeuronX+1
         visible: bias
         Neuron{
-            x:(0.5+index)*xDistance
-            y: 0.5*yDistance
+            x:(xOffSet+index)*xDistance
+            y: yOffSet*yDistance
             d:netItem.d
             neuronValue: biasValue
             typeId: index
@@ -95,8 +112,8 @@ Item {
         id:inputLayer
         model:inputNeuron.length
         Neuron{
-            x:0.5*xDistance
-            y:(index+yOffSet)*yDistance
+            x:xOffSet*xDistance
+            y:(index+yOffSet)*yDistance+yBiasPos
             d:netItem.d
             neuronValue: if(inputNeuron.length>typeId) return inputNeuron[typeId]
                             else return 0
@@ -113,8 +130,8 @@ Item {
             model:hiddenNeuronY
             property int indexX: index
             Neuron{
-                x:xDistance*(indexX+1.5)
-                y:(index+yOffSet)*yDistance
+                x:xDistance*(indexX+xOffSet+1)
+                y:(index+yOffSet)*yDistance+yBiasPos
                 d:netItem.d
                 typeId: index+(indexX*hiddenNeuronY)
                 neuronID:if(0<hiddenIDs[typeId]) return 0<hiddenIDs[typeId]
@@ -130,8 +147,8 @@ Item {
         id:outputLayer
         model:outputNeuron.length
         Neuron{
-            x:(1.5+hiddenNeuronX)*xDistance
-            y:(index+yOffSet)*yDistance
+            x:(xOffSet+1+hiddenNeuronX)*xDistance
+            y:(index+yOffSet)*yDistance+yBiasPos
             d:netItem.d
             typeId: index
             neuronID: if(outputIds.length>typeId) return outputIds[typeId]
@@ -158,7 +175,5 @@ Item {
         conWeight=netVisu.getConWeight(netItem.netID)
         bias=netVisu.getBias(netItem.netID)
         biasValue=netVisu.getBiasValue(netItem.netID)
-        //console.debug("update")
-
     }
 }

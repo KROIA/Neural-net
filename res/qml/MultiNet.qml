@@ -8,8 +8,9 @@ Item{
     property int xNetPerTab: 3
     property int yNetPerTab: 3
     property int totalNet: 0
+    property int updateTime: 100
     Timer {
-            interval: 100; running: true; repeat: true
+            interval: updateTime; running: true; repeat: true
             onTriggered: updateMultiNet()
         }
     signal updateNet()
@@ -19,6 +20,7 @@ Item{
             model:Math.ceil(totalNet/(yNetPerTab*xNetPerTab))
             Tab{
                 id:tab
+                title:index
                 property int tabIndex:index
                 Repeater{
                     model:{
@@ -31,8 +33,8 @@ Item{
                         y: Math.floor(index/xNetPerTab)*height
                         width: tab.width/xNetPerTab
                         height: tab.height/yNetPerTab
-                        netID: index+tabIndex(yNetPerTab*xNetPerTab)
-
+                        netID: index+tabIndex*(yNetPerTab*xNetPerTab)
+                        updateTime:multiNet.updateTime
                         }
                     }
 

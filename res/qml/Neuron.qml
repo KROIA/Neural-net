@@ -12,15 +12,19 @@ Rectangle {
     onYChanged: {
         dockingPoint()
     }
+    onDChanged: {
+        dockingPoint()
+    }
+    property real xOffset: 0.2*d
     function dockingPoint(){
         var xInput
         var yInput
         var xOutput
         var yOutput
-        xInput=0+x
-        xOutput=d+x
-        yInput=d/2+y
-        yOutput=d/2+y
+        xInput=x+xOffset
+        xOutput=d+x-xOffset
+        yInput=(d/2)+y
+        yOutput=(d/2)+y
         if(type===inputType){
             inputConXOutput[typeId]=xOutput
             inputConYOutput[typeId]=yOutput
@@ -28,6 +32,8 @@ Rectangle {
         else if(type===biasType){
             biasConXOutput[typeId]=xOutput
             biasConYOutput[typeId]=yOutput
+            console.debug(d, x, xOutput)
+            console.debug(d,y,yOutput)
         }
         else if(type===hiddenType){
             hiddenConXInput[typeId]=xInput
@@ -61,12 +67,12 @@ Rectangle {
     Text {
         font.pixelSize: parent.d*0.2
         horizontalAlignment: Text.AlignHCenter
-        text: if(type>noneType) return  "ID:"+neuronID+"\nValue: "+Math.round(neuronValue*10000)/10000
-                else return "Value: "+Math.round(neuronValue*10000)/10000
+        text: if(type>noneType) return  "ID:"+neuronID+"\nValue: \n"+Math.round(neuronValue*10000)/10000
+                else return "Value: \n"+Math.round(neuronValue*10000)/10000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        color:if(Math.abs(neuronValue)>0.8){
+        color:if(Math.abs(neuronValue)>0.6){
                               return "white"
                           }
                           else{

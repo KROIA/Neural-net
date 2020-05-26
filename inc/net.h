@@ -185,6 +185,7 @@ class Net : public QObject
         unsigned int    get_errorAmount() const;
     signals:
         void errorOccured(unsigned int netID, Error &e);
+        void netConfigurationUpdate();
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
