@@ -1,6 +1,6 @@
-QT -= gui
-
-CONFIG += c++11 console
+#QT -= gui
+QT += qml quick widgets gui
+CONFIG += c++11 console qmltypes
 CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
@@ -19,7 +19,11 @@ srcPath = src
 
 netIncPath = ../../inc
 netSrcPath = ../../src
+visuInc = ../../incVisu
+visuSrc = ../../srcVisu
+resourcePath = ../../res
 INCLUDEPATH += $$netIncPath \
+               $$visuInc \
                $$incPath
 
 SOURCES += \
@@ -31,12 +35,12 @@ SOURCES += \
     $$netSrcPath/savenet.cpp \
     $$srcPath/enviroment.cpp \
     $$netSrcPath/error.cpp\
-
+    $$visuSrc/netvisu.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+!isEmpty(target.path): INSTALLS += target qml
 
 HEADERS += \
     $$incPath/enviroment.h \
@@ -45,4 +49,8 @@ HEADERS += \
     $$netIncPath/backpropnet.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
-    $$netIncPath/error.h
+    $$netIncPath/error.h \
+    $$visuInc/netvisu.h
+
+RESOURCES += \
+    $$resourcePath/qrc.qrc

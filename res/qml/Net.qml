@@ -5,9 +5,8 @@ Item {
     width: 600
     height: 600
     property int netID: 0
-
-    property variant inputNeuron: [1]
-    property variant outputNeuron: [1]
+    property variant inputNeuron: [0]
+    property variant outputNeuron: [0]
     property int hiddenNeuronX: 1
     property int hiddenNeuronY: 1
     property variant hiddenValue: [0]
@@ -47,7 +46,7 @@ Item {
     property variant biasConXOutput: [0]
     property variant biasConYOutput: [0]
 
-    property variant hiddenIDs: [0,0]
+    property variant hiddenIDs: [0,1,2,3]
     property variant outputIds: [0]
 
     property variant conSourceID: [0]
@@ -67,6 +66,10 @@ Item {
     property real biasValue: 0
     property real yOffSet: if(bias) return 1.5
                             else return 0.5
+    Timer {
+            interval: 100; running: true; repeat: true
+            onTriggered: updateValue()
+        }
     Repeater{
         model: conWeight.length
         NeuronConnection{
@@ -95,16 +98,13 @@ Item {
             x:0.5*xDistance
             y:(index+yOffSet)*yDistance
             d:netItem.d
-            neuronValue: if(inputNeuron.length) return inputNeuron[index]
+            neuronValue: if(inputNeuron.length>typeId) return inputNeuron[typeId]
                             else return 0
             typeId: index
             type:inputType
         }
     }
-    Timer {
-            interval: 100; running: true; repeat: true
-            onTriggered: updateValue()
-        }
+
     Repeater{
         id:hiddenXLayer
         model:hiddenNeuronX
@@ -117,8 +117,8 @@ Item {
                 y:(index+yOffSet)*yDistance
                 d:netItem.d
                 typeId: index+(indexX*hiddenNeuronY)
-                neuronID:{ console.debug(typeId,hiddenIDs, hiddenIDs[typeId])
-                            return hiddenIDs[typeId]}
+                neuronID:if(0<hiddenIDs[typeId]) return 0<hiddenIDs[typeId]
+                            else return typeId
                 neuronValue: if(index+(indexX*hiddenNeuronY)<hiddenValue.length){
                                          return hiddenValue[typeId]}
                              else return 0
@@ -134,7 +134,8 @@ Item {
             y:(index+yOffSet)*yDistance
             d:netItem.d
             typeId: index
-            neuronID: outputIds[typeId]
+            neuronID: if(outputIds.length>typeId) return outputIds[typeId]
+                        else return typeId+hiddenNeuronX*hiddenNeuronY
             type:outputType
             neuronValue: if(outputNeuron.length) outputNeuron[index]
             else return 0
@@ -142,20 +143,22 @@ Item {
     }
 
     function updateValue(){
-        hiddenNeuronX=netVisu.getHiddenX()
-        hiddenNeuronY=netVisu.getHiddenY()
-        inputNeuron=netVisu.getInputsValue()
-        outputNeuron=netVisu.getOutputsValue()
-        hiddenValue=netVisu.getHiddenValue()
-        hiddenIDs=netVisu.getHiddenID()
-        outputIds=netVisu.getOutputID()
-        conSourceID=netVisu.getConSourceID()
-        conSourceType=netVisu.getConSourceType()
-        conDestinationID=netVisu.getConDestinationID()
-        conDestinationType=netVisu.getConDestinationType()
-        conWeight=netVisu.getConWeight()
-        bias=netVisu.getBias()
-        biasValue=netVisu.getBiasValue()
+
+        hiddenNeuronX=netVisu.getHiddenX(netItem.netID)
+        hiddenNeuronY=netVisu.getHiddenY(netItem.netID)
+        inputNeuron=netVisu.getInputsValue(netItem.netID)
+        outputNeuron=netVisu.getOutputsValue(netItem.netID)
+        hiddenValue=netVisu.getHiddenValue(netItem.netID)
+        hiddenIDs=netVisu.getHiddenID(netItem.netID)
+        outputIds=netVisu.getOutputID(netItem.netID)
+        conSourceID=netVisu.getConSourceID(netItem.netID)
+        conSourceType=netVisu.getConSourceType(netItem.netID)
+        conDestinationID=netVisu.getConDestinationID(netItem.netID)
+        conDestinationType=netVisu.getConDestinationType(netItem.netID)
+        conWeight=netVisu.getConWeight(netItem.netID)
+        bias=netVisu.getBias(netItem.netID)
+        biasValue=netVisu.getBiasValue(netItem.netID)
+        //console.debug("update")
 
     }
 }

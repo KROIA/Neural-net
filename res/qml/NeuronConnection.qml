@@ -1,23 +1,27 @@
 import QtQuick 2.0
 import QtQuick.Shapes 1.14
+
 Shape {
     property int conID: 0
     property real weight:1
     property int conWidth: 4
+    property int minWidth: 1
     ShapePath {
            strokeColor: if(weight>0) return "green"
                         else if(weight<0) return "red"
                         else return "white"
-           strokeWidth: Math.abs(weight)*netItem.d*0.2
+           strokeWidth: if(Math.abs(weight)*netItem.d*0.2>minWidth)return Math.abs(weight)*netItem.d*0.2
+                        else return minWidth
+
            startX:{
                    if(inputType===conSourceType[conID]){
                        return inputConXOutput[conSourceID[conID]]
                    }
-                   if(hiddenType===conSourceType[conID]){
+                   else if(hiddenType===conSourceType[conID]){
                        return hiddenConXOutput[conSourceID[conID]]
                    }
-                   if(biasType===conSourceType[conID]){
-                       return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronX)]
+                   else if(biasType===conSourceType[conID]){
+                       return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]
                    }
                    return 0
                }
@@ -26,11 +30,11 @@ Shape {
                   if(inputType===conSourceType[conID]){
                       return inputConYOutput[conSourceID[conID]]
                   }
-                  if(hiddenType===conSourceType[conID]){
+                  else if(hiddenType===conSourceType[conID]){
                       return hiddenConYOutput[conSourceID[conID]]
                   }
-                  if(biasType===conSourceType[conID]){
-                      return biasConYOutput[Math.floor(conDestinationID[conID]/hiddenNeuronX)]
+                  else if(biasType===conSourceType[conID]){
+                      return biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]
                   }
                   return 0
                 }

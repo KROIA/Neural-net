@@ -28,7 +28,7 @@ class Enviroment{
         void cmdXY(int x,int y);
         void draw();
         void tick();
-
+        GeneticNet *_net;
         struct Coord getRandomPos();
         void randomFoodPos();
         void randomPoisonPos();
@@ -42,7 +42,7 @@ class Enviroment{
         void walk();
         void restart();
         void kill(unsigned int animal);
-        GeneticNet *_net;
+
         struct Coord _enviromentSize;
         vector<struct Coord>    _animalPositionList;
         vector<unsigned short>   _animalRotationList;

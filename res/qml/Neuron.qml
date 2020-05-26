@@ -59,8 +59,9 @@ Rectangle {
              return "white"
          }
     Text {
+        font.pixelSize: parent.d*0.2
         horizontalAlignment: Text.AlignHCenter
-        text: if(type>0) return  "ID:"+neuronID+"\nValue: "+Math.round(neuronValue*10000)/10000
+        text: if(type>noneType) return  "ID:"+neuronID+"\nValue: "+Math.round(neuronValue*10000)/10000
                 else return "Value: "+Math.round(neuronValue*10000)/10000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter

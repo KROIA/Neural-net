@@ -4,5 +4,8 @@
         <file>qml/Net.qml</file>
         <file>qml/Neuron.qml</file>
         <file>qml/NeuronConnection.qml</file>
+        <file>qml/MultiNet.qml</file>
+        <file>qml/MultiNetTopBar.qml</file>
+        <file>qml/MultiThreadWorkArea.qml</file>
     </qresource>
 </RCC>
