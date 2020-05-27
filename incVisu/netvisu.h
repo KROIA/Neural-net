@@ -27,9 +27,12 @@ public:
     vector<int> NeuronTyp;
     vector<qreal> ConnectionWeight;
     vector<qreal> NeuronValueVect;
+    void stopUpdateSlot1();
+    void startUpdateSlot1();
 signals:
     void newNetData();
 public slots:
+
     void callMeFromQml();
     int getHiddenX(const int &netId) ;
     int getHiddenY(const int &netId) ;
@@ -49,8 +52,7 @@ public slots:
     QVector<qreal> getConWeight(const int &netId) ;
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
-    void stopUpdateSlot();
-    void startUpdateSlot();
+
 
 
 private:

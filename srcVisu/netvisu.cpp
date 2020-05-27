@@ -17,15 +17,15 @@ NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
 
 void NetVisu::setupQml(){
     for(unsigned i=0;i<net.size();++i){
-        connect(net[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
-        connect(net[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
+        //connect(net[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot1()));
+        //connect(net[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot1()));
     }
     engine = new QQmlApplicationEngine;
     context= new QQmlContext(engine);
     context=engine->rootContext();
     context->setContextProperty ("netVisu", this);
     engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-    startUpdateSlot();*/
+    //startUpdateSlot();
 }
 
 void NetVisu::callMeFromQml(){
