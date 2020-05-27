@@ -49,7 +49,6 @@ Rectangle {
 
             biasConXOutput=tempBiasConXOutput
             biasConYOutput=tempBiasConYOutput
-
         }
         else if(type===hiddenType){
             var tempHiddenConXInput=[]

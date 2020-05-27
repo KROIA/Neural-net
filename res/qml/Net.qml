@@ -85,7 +85,6 @@ Item {
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
                         else return 0
-
     Connections {
                    target: netVisu
                    onStopUpdateSignal: timerNet.running=false
