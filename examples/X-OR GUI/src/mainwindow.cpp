@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     net = nullptr;
 
     input = 2;
-    hiddenX = 2;
+    hiddenX = 1;
     hiddenY = 2;
     output = 1;
     ui->hiddenX_spinBox->setValue(hiddenX);
@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->comboBox->setCurrentIndex(0);
     activation = Activation::Gaussian;
 
+    net = new BackpropNet(0,input,hiddenX,hiddenY,output,true,false,activation); //Makes the Net object
+    connect(net,&BackpropNet::errorOccured,this,&MainWindow::onError);
     setupNet();
 
     timer = new QTimer(this);
@@ -220,7 +222,7 @@ void MainWindow::on_hiddenY_spinBox_valueChanged(int arg1)
 }
 void MainWindow::setupNet()
 {
-    if(net != nullptr)
+   /* if(net != nullptr)
     {
         if(hiddenX == net->get_hiddenNeuronsX() &&
            hiddenY == net->get_hiddenNeuronsY() &&
@@ -229,13 +231,23 @@ void MainWindow::setupNet()
             return;
         }
         delete net;
-    }
+    }*/
+    if(net == nullptr)
+        return;
     sycles = 0;
     setPos = 0;
     averageError = 0;
-    net = new BackpropNet(0,input,hiddenX,hiddenY,output,true,false,activation); //Makes the Net object
-    connect(net,&BackpropNet::errorOccured,this,&MainWindow::onError);
+
     //net->set_seed(0);
+   // net = new BackpropNet(0,input,hiddenX,hiddenY,output,true,false,activation); //Makes the Net object
+    net->set_ID(0);
+    net->set_inputNeurons(input);
+    net->set_hiddenNeuronsX(hiddenX);
+    net->set_hiddenNeuronsY(hiddenY);
+    net->set_outputNeurons(output);
+    net->set_bias(true);
+    net->set_enableAverage(false);
+    net->set_activationFunction(activation);
     net->set_mutationFactor(0.01);
     ui->mutation_slider->setValue(net->get_mutationFactor()*1000);
     net->updateNetConfiguration();
@@ -262,7 +274,8 @@ void MainWindow::setupTrainingSet()
     for(unsigned int a=0; a<trainingsSet.size(); a++)
     {
 
-        outputSet.push_back({trainingsSet[a][0]*trainingsSet[a][1]/*qFunc(trainingsSet[a][0])+qFunc(trainingsSet[a][1])*/});
+        //outputSet.push_back({trainingsSet[a][0]*trainingsSet[a][1]/*qFunc(trainingsSet[a][0])+qFunc(trainingsSet[a][1])*/});
+        outputSet.push_back({qFunc(trainingsSet[a][0])+qFunc(trainingsSet[a][1])});
         sollImage->setPixelColor((int)mapD(trainingsSet[a][0],-2,2,0,200),(int)mapD(trainingsSet[a][1],-2,2,200,0),getValueColor(outputSet[a][0]));
     }
 

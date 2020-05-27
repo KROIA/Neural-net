@@ -321,6 +321,9 @@ Snake::Snake(QWidget *parent) :
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
 
+
+    visu = new NetVisu(net->get_netList_ptr());
+
     qDebug() << "Setup done";
 }
 
@@ -1467,7 +1470,7 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
         _versusEnvironment->showInfoText(false);
         _environment->showInfoText(false);
         _backpropTrainingEnvironment->showInfoText(false);
-
+        visu->stopUpdateSlot();
         return;
     }
 
@@ -1479,6 +1482,7 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
             _versusEnvironment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(false);
+            visu->startUpdateSlot();
             break;
         }
         case Modus::versusAI:

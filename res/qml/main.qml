@@ -10,6 +10,8 @@ Window {
 
     MultiNetWorkArea{
         anchors.fill:parent
-    }
-
+    }/*
+    UiIntegratableNet{
+        anchors.fill:parent
+    }*/
 }

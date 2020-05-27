@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts
+QT       += core gui charts qml quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -37,25 +37,31 @@ DLL_buildPath = bin/64bit/build-Release
 #rectPath     = $$QT_work_dir/DLL/Rect
 #configPath   = $$QT_work_dir/DLL/Config
 
-username     = SCHEH
-QT_work_dir  = C:/Users/$$username/Documents/AlexFormen/
-
-geometryPath = $$QT_work_dir/Rect-master\Rect-master
+username     = Hannes
+QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
+geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = $$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
+
+
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
-      $$configPath//$$DLL_buildPath/Config.dll
+      $$configPath/$$DLL_buildPath/Config.dll
 
 incPath = inc
 srcPath = src
 
 netIncPath = ../../inc
 netSrcPath = ../../src
+visuInc = ../../incVisu
+visuSrc = ../../srcVisu
+resourcePath = ../../res
+
 INCLUDEPATH += $$netIncPath \
                $$incPath \
-               #$$rectPath \
-               #$$geometryPath \
+               $$rectPath \
+               $$geometryPath \
                $$configPath \
+               $$visuInc
 
 
 SOURCES += \
@@ -72,7 +78,8 @@ SOURCES += \
     $$srcPath/player.cpp \
     $$srcPath/food.cpp \
     $$srcPath/maptile.cpp \
-    $$srcPath/environment.cpp
+    $$srcPath/environment.cpp \
+    $$visuSrc/netvisu.cpp
 
 HEADERS += \
     $$incPath/snake.h \
@@ -88,6 +95,7 @@ HEADERS += \
     $$netIncPath/error.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/backpropnet.h \
+    $$visuInc/netvisu.h
 
 FORMS += \
         snake.ui
@@ -96,3 +104,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    $$resourcePath/qrc.qrc

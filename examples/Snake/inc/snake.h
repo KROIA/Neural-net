@@ -9,6 +9,7 @@
 #include <geneticnet.h>
 #include <backpropnet.h>
 #include <config.h>
+#include "netvisu.h"
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -101,6 +102,7 @@ class Snake : public QMainWindow
         std::vector<QPoint> _fieldOfView;
 
         GeneticNet *net;
+        NetVisu *visu;
 
         QString _statsFilename;
         std::vector<double> _snakeScore;

@@ -9,8 +9,6 @@ Item{
     property int yNetPerTab: 3
     property int totalNet: 0
     property int updateTime: 100
-
-    property bool updateTimerEnable: false
     Connections {
                    target: netVisu
                    onStopUpdateSignal: timerMultiNet.running=false
