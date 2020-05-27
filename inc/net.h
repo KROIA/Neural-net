@@ -185,7 +185,10 @@ class Net : public QObject
         unsigned int    get_errorAmount() const;
     signals:
         void errorOccured(unsigned int netID, Error &e);
-        void netConfigurationUpdate();
+        void netConfigurationUpdateNeeded(); //Trigger, for updating the netConfiguration
+        void netConfigurationUpdated();      //Infosignal when the updating is finished
+        void accessLock();                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
+        void accessUnlock();                  //from now on you can access all functions again
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
@@ -287,7 +290,7 @@ inline void __DEBUG_NET_(Net *ptr_net,QString func,QString message)
     if(ptr_net->get_ID() != _DEBUG_NET_ONLY_ID)
         return;
 #endif
-    qDebug() << "["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message;
+    qDebug(QString("["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message+"\n").toStdString().c_str());
 }
 #define __DEBUG_NET(net,func,message)(__DEBUG_NET_(net,func,message));
 

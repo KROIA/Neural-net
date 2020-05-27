@@ -6,11 +6,9 @@ Window {
     width: 800
     height: 600
     visible: true
+
     MultiNetWorkArea{
         anchors.fill:parent
     }
-    Connections {
-                     target: netVisu
 
-                     }
 }

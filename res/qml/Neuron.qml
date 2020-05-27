@@ -32,8 +32,6 @@ Rectangle {
         else if(type===biasType){
             biasConXOutput[typeId]=xOutput
             biasConYOutput[typeId]=yOutput
-            console.debug(d, x, xOutput)
-            console.debug(d,y,yOutput)
         }
         else if(type===hiddenType){
             hiddenConXInput[typeId]=xInput

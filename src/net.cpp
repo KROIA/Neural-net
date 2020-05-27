@@ -82,7 +82,9 @@ void                Net::set_inputNeurons(unsigned int inputs)
     }
     if(inputs != _inputs)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
+        emit netConfigurationUpdateNeeded();
         _inputs                     = inputs;
     }
 }
@@ -101,8 +103,10 @@ void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
     }
     if(hiddenX != _hiddenX)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _hiddenX                    = hiddenX;
+        emit netConfigurationUpdateNeeded();
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
 }
@@ -121,8 +125,10 @@ void                Net::set_hiddenNeuronsY(unsigned int hiddenY)
     }
     if(hiddenY != _hiddenY)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _hiddenY                    = hiddenY;
+        emit netConfigurationUpdateNeeded();
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
 }
@@ -141,8 +147,10 @@ void                Net::set_outputNeurons(unsigned int outputs)
     }
     if(outputs != _outputs)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _outputs                    = outputs;
+        emit netConfigurationUpdateNeeded();
         //_outputNeurons          = outputs;
     }
 }
@@ -195,8 +203,10 @@ void                Net::set_bias(bool enableBias)
 {
     if(enableBias != _bias)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _bias                       = enableBias;
+        emit netConfigurationUpdateNeeded();
     }
 }
 bool                Net::get_bias()
@@ -207,8 +217,10 @@ void                Net::set_enableAverage(bool enableAverage)
 {
     if(enableAverage != _enableAverage)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _enableAverage              = enableAverage;
+        emit netConfigurationUpdateNeeded();
     }
 }
 bool                Net::get_enableAverage()
@@ -228,8 +240,10 @@ void                Net::set_activationFunction(Activation func)
 {
     if(func != _activationFunction)
     {
+        emit accessLock();
         _needsConfigurationUpdate   = true;
         _activationFunction         = func;
+        emit netConfigurationUpdateNeeded();
     }
 }
 Activation          Net::get_activationFunction()
@@ -1037,7 +1051,12 @@ void                Net::updateNetConfiguration()
     secCounter    = 0;
 #endif
     //- Connect the inputs
-
+#if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
+    for(unsigned int connection=0; connection<_connections; connection++)
+    {
+        __DEBUG_NET(this,"updateNetConfiguration()","connection["+QString::number(connection)+"] "+Neuron::toConnectionString(_connectionList[connection]));
+    }
+#endif
     for(unsigned int connection=0; connection<_connections; connection++)
     {
         if(connection < _connectionList.size())
@@ -1069,7 +1088,8 @@ void                Net::updateNetConfiguration()
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
     __DEBUG_NET(this,"updateNetConfiguration()","finish");
 #endif
-    netConfigurationUpdate();
+    emit netConfigurationUpdated();
+    emit accessUnlock();
 }
 void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
 {
@@ -1130,8 +1150,11 @@ void                Net::addConnection(Connection connection)
 {
     //bool ret = set_ptr_intern_connectNeuron(connection);
     //prepareCalculationOrderList();
+    emit accessLock();
     _costumConnectionList.push_back(connection);
     _needsConfigurationUpdate = true;
+    emit netConfigurationUpdateNeeded();
+
 }
 
 void                Net::addConnection(std::vector<Connection> connections)
@@ -1143,7 +1166,9 @@ void                Net::addConnection(std::vector<Connection> connections)
 }
 void                Net::set_connectionList(std::vector<Connection> connections)
 {
+    emit accessLock();
     _connectionList = connections;
+    emit netConfigurationUpdateNeeded();
     _needsConfigurationUpdate = true;
 }
 std::vector<Connection>  Net::get_connectionList()
@@ -1297,10 +1322,11 @@ void Net::init(unsigned int inputs,
           bool enableAverage,
           Activation func)
 {
+    emit accessLock();
     time_t now                  = time(nullptr);
     struct tm *currentTime      = localtime(&now);
     this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock()));
-    _needsConfigurationUpdate   = true;
+
     _activationFunction         = Activation::Sigmoid;
     _inputs                     = NET_MIN_INPUTNEURONS;
     _hiddenX                    = NET_MIN_HIDDENNEURONS_X;
@@ -1343,8 +1369,10 @@ void Net::init(unsigned int inputs,
     }
     this->set_biasValue(1.0);
    // this->updateNetConfiguration();
+    emit netConfigurationUpdateNeeded();
     _needsConfigurationUpdate = true;
     _needsCalculationUpdate = true;
+
 #ifdef _DEBUG_NET_TIMING
     __debug_run_time = 0;
     __debug_average_run_time = 0;
@@ -1465,7 +1493,7 @@ void                Net::prepareConnectionList()
                     _connectionList[_connectionList.size()-1].destination_ID.TYPE = NeuronType::hidden;
                     _connectionList[_connectionList.size()-1].netID = this->get_ID();
                     _connectionList[_connectionList.size()-1].weight = Neuron::get_calcRandWeight(_randEngine);
-                    _connectionList[_connectionList.size()-1].source_ID.ID = ID-(_hiddenY+hiddenNeuronY2)+hiddenNeuronY2;
+                    _connectionList[_connectionList.size()-1].source_ID.ID = ID-(_hiddenY+hiddenNeuronY)+hiddenNeuronY2;
                     _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::hidden;
                     _connectionList[_connectionList.size()-1].direction = ConnectionDirection::forward;
                 }

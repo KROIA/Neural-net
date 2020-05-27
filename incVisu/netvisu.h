@@ -29,6 +29,8 @@ public:
     vector<qreal> NeuronValueVect;
 signals:
     void newNetData();
+    void stopUpdateSignal();
+    void startUpdateSignal();
 public slots:
     void callMeFromQml();
     int getHiddenX(const int &netId) ;
@@ -50,10 +52,13 @@ public slots:
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
     void run();
+    void stopUpdateSlot();
+    void startUpdateSlot();
+
 private:
+    bool access=false;
     QQmlApplicationEngine *engine;
     QQmlContext* context;
-    int count;
     vector<Net*> net;
 };
 

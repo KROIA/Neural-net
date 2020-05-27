@@ -695,12 +695,12 @@ const QString Neuron::toConnectionString(Connection connection)
 {
     QString message;
     message  = "netID:  "+QString::number(connection.netID)+"\n"+
-               "SourceNeuron {\n"+
-               "ID:     "+QString::number(connection.source_ID.ID)+"\n"+
-               "TYPE:   "+Neuron::toTypeString(connection.source_ID.TYPE)+"}\n"+
-               "DestinationNeuron {\n"+
-               "ID:     "+QString::number(connection.destination_ID.ID)+"\n"+
-               "TYPE:   "+Neuron::toTypeString(connection.destination_ID.TYPE)+"}\n"+
+               "SourceNeuron \n{\n"+
+               "\tID:     "+QString::number(connection.source_ID.ID)+"\n"+
+               "\tTYPE:   "+Neuron::toTypeString(connection.source_ID.TYPE)+"\n}\n"+
+               "DestinationNeuron \n{\n"+
+               "\tID:     "+QString::number(connection.destination_ID.ID)+"\n"+
+               "\tTYPE:   "+Neuron::toTypeString(connection.destination_ID.TYPE)+"\n}\n"+
                "weight: "+QString::number(connection.weight)+"\n"+
                "direction: "+Neuron::toDirectionString(connection.direction);
     return message;
