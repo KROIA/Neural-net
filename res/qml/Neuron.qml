@@ -9,7 +9,7 @@ Rectangle {
     onXChanged: {
         dockingPoint()
     }
-    onYChanged: {
+    onYChanged: {      
         dockingPoint()
     }
     onDChanged: {
@@ -25,23 +25,64 @@ Rectangle {
         xOutput=d+x-xOffset
         yInput=(d/2)+y
         yOutput=(d/2)+y
+        //
         if(type===inputType){
-            inputConXOutput[typeId]=xOutput
-            inputConYOutput[typeId]=yOutput
+            var tempInputConXOutput=[]
+            var tempInputConYOutput=[]
+            tempInputConXOutput=inputConXOutput
+            tempInputConYOutput=inputConYOutput
+
+            tempInputConXOutput[typeId]=xOutput
+            tempInputConYOutput[typeId]=yOutput
+
+            inputConXOutput=tempInputConXOutput
+            inputConYOutput=tempInputConYOutput
         }
         else if(type===biasType){
-            biasConXOutput[typeId]=xOutput
-            biasConYOutput[typeId]=yOutput
+            var tempBiasConXOutput=[]
+            var tempBiasConYOutput=[]
+            tempBiasConXOutput=biasConXOutput
+            tempBiasConYOutput=biasConYOutput
+
+            tempBiasConXOutput[typeId]=xOutput
+            tempBiasConYOutput[typeId]=yOutput
+
+            biasConXOutput=tempBiasConXOutput
+            biasConYOutput=tempBiasConYOutput
         }
         else if(type===hiddenType){
-            hiddenConXInput[typeId]=xInput
-            hiddenConYInput[typeId]=yInput
-            hiddenConXOutput[typeId]=xOutput
-            hiddenConYOutput[typeId]=yOutput
+            var tempHiddenConXInput=[]
+            var tempHiddenConYInput=[]
+            tempHiddenConXInput=hiddenConXInput
+            tempHiddenConYInput=hiddenConYInput
+
+            tempHiddenConXInput[typeId]=xInput
+            tempHiddenConYInput[typeId]=yInput
+
+            hiddenConXInput=tempHiddenConXInput
+            hiddenConYInput=tempHiddenConYInput
+            var tempHiddenConXOutput=[]
+            var tempHiddenConYOutput=[]
+            tempHiddenConXOutput=hiddenConXOutput
+            tempHiddenConYOutput=hiddenConYOutput
+
+            tempHiddenConXOutput[typeId]=xOutput
+            tempHiddenConYOutput[typeId]=yOutput
+
+            hiddenConXOutput=tempHiddenConXOutput
+            hiddenConYOutput=tempHiddenConYOutput
         }
         else if(type===outputType){
-            outputConXInput[typeId]=xInput
-            outputConYInput[typeId]=yInput
+            var tempOutputConXInput=[]
+            var tempOutputConYInput=[]
+            tempOutputConXInput=outputConXInput
+            tempOutputConYInput=outputConYInput
+
+            tempOutputConXInput[typeId]=xInput
+            tempOutputConYInput[typeId]=yInput
+
+            outputConXInput=tempOutputConXInput
+            outputConYInput=tempOutputConYInput
         }
     }
     property string neuronColor:if(neuronValue<0){

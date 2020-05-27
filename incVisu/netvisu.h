@@ -51,7 +51,6 @@ public slots:
     QVector<qreal> getConWeight(const int &netId) ;
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
-    void run();
     void stopUpdateSlot();
     void startUpdateSlot();
 

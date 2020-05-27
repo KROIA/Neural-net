@@ -6,23 +6,26 @@ Item {
     height: 600
     property int netID: 0
     property int updateTime:100
-    property variant inputNeuron: [0]
-    property variant outputNeuron: [0]
-    property int hiddenNeuronX: 1
-    property int hiddenNeuronY: 1
-    property variant hiddenValue: [0]
+    property int hiddenNeuronX: netVisu.getHiddenX(netItem.netID)
+    property int hiddenNeuronY: netVisu.getHiddenY(netItem.netID)
+    property int inputNeuron: netVisu.getInputs(netItem.netID)
+    property int outputNeuron: netVisu.getOutputs(netItem.netID)
+
+    property variant hiddenValue: netVisu.getHiddenValue(netItem.netID)
+    property variant outputValue:netVisu.getOutputsValue(netItem.netID)
+    property variant inputValue:netVisu.getInputsValue(netItem.netID)
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
         else b=0
-        if(hiddenNeuronY>=outputNeuron.length&&hiddenNeuronY>=inputNeuron.length){
+        if(hiddenNeuronY>=outputNeuron&&hiddenNeuronY>=inputNeuron){
             return hiddenNeuronY+b
         }
-        else if(hiddenNeuronY<=outputNeuron.length&&outputNeuron.length>=inputNeuron.length){
-            return outputNeuron.length+b
+        else if(hiddenNeuronY<=outputNeuron&&outputNeuron>=inputNeuron){
+            return outputNeuron+b
         }
-        else if(hiddenNeuronY<=inputNeuron.length&&outputNeuron.length<=inputNeuron.length){
-            return inputNeuron.length+b
+        else if(hiddenNeuronY<=inputNeuron&&outputNeuron<=inputNeuron){
+            return inputNeuron+b
         }
         return 0
     }
@@ -59,24 +62,25 @@ Item {
     property variant biasConXOutput: [0]
     property variant biasConYOutput: [0]
 
-    property variant hiddenIDs: [0,1,2,3]
-    property variant outputIds: [0]
+    property variant hiddenIDs: netVisu.getHiddenID(netItem.netID)
+    property variant outputIds: netVisu.getOutputID(netItem.netID)
 
-    property variant conSourceID: [0]
-    property variant conDestinationID: [0]
+    property variant conSourceID: netVisu.getConSourceID(netItem.netID)
+    property variant conDestinationID: netVisu.getConDestinationID(netItem.netID)
 
-    property variant conSourceType: [0]
-    property variant conDestinationType: [0]
+    property variant conSourceType: netVisu.getConSourceType(netItem.netID)
+    property variant conDestinationType: netVisu.getConDestinationType(netItem.netID)
 
-    property variant conWeight: [0]
+    property variant conWeight: netVisu.getConWeight(netItem.netID)
+
     property int noneType: 1
     property int inputType: 1
     property int hiddenType: 2
     property int outputType: 3
     property int biasType: 5
 
-    property bool bias: false
-    property real biasValue: 0
+    property bool bias: netVisu.getBias(netItem.netID)
+    property real biasValue: netVisu.getBiasValue(netItem.netID)
     property real yOffSet: 0.1
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
@@ -84,11 +88,13 @@ Item {
     Connections {
                    target: netVisu
                    onStopUpdateSignal: timerNet.running=false
-                   onStartUpdateSignal:timerNet.running=true
+                   onStartUpdateSignal:{timerNet.running=true
+                       updateStructur()}
     }
     Timer {
         id:timerNet
-            interval: updateTime; running: true; repeat: true
+            interval: updateTime; running: true
+             repeat: true
             onTriggered: updateValue()
         }
     Repeater{
@@ -116,12 +122,12 @@ Item {
 
     Repeater{
         id:inputLayer
-        model:inputNeuron.length
+        model:inputNeuron
         Neuron{
             x:xOffSet*xDistance
             y:(index+yOffSet)*yDistance+yBiasPos
             d:netItem.d
-            neuronValue: if(inputNeuron.length>typeId) return inputNeuron[typeId]
+            neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
                             else return 0
             typeId: index
             type:inputType
@@ -151,7 +157,7 @@ Item {
     }
     Repeater{
         id:outputLayer
-        model:outputNeuron.length
+        model:outputNeuron
         Neuron{
             x:(xOffSet+1+hiddenNeuronX)*xDistance
             y:(index+yOffSet)*yDistance+yBiasPos
@@ -160,26 +166,37 @@ Item {
             neuronID: if(outputIds.length>typeId) return outputIds[typeId]
                         else return typeId+hiddenNeuronX*hiddenNeuronY
             type:outputType
-            neuronValue: if(outputNeuron.length) outputNeuron[index]
+            neuronValue: if(outputValue.length>typeId) outputValue[index]
             else return 0
         }
     }
 
     function updateValue(){
+        hiddenValue=netVisu.getHiddenValue(netItem.netID)
+        inputValue=netVisu.getInputsValue(netItem.netID)
+        outputValue=netVisu.getOutputsValue(netItem.netID)
+        biasValue=netVisu.getBiasValue(netItem.netID)
+        conWeight=netVisu.getConWeight(netItem.netID)
 
+
+
+        /*
+        */
+    }
+    function updateStructur(){
+        console.debug("update Struc")
+        inputNeuron=netVisu.getInputs(netItem.netID)
+        outputNeuron=netVisu.getOutputs(netItem.netID)
         hiddenNeuronX=netVisu.getHiddenX(netItem.netID)
         hiddenNeuronY=netVisu.getHiddenY(netItem.netID)
-        inputNeuron=netVisu.getInputsValue(netItem.netID)
-        outputNeuron=netVisu.getOutputsValue(netItem.netID)
-        hiddenValue=netVisu.getHiddenValue(netItem.netID)
+
         hiddenIDs=netVisu.getHiddenID(netItem.netID)
         outputIds=netVisu.getOutputID(netItem.netID)
         conSourceID=netVisu.getConSourceID(netItem.netID)
         conSourceType=netVisu.getConSourceType(netItem.netID)
         conDestinationID=netVisu.getConDestinationID(netItem.netID)
         conDestinationType=netVisu.getConDestinationType(netItem.netID)
-        conWeight=netVisu.getConWeight(netItem.netID)
+
         bias=netVisu.getBias(netItem.netID)
-        biasValue=netVisu.getBiasValue(netItem.netID)
     }
 }
