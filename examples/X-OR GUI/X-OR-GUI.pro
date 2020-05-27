@@ -26,10 +26,16 @@ CONFIG += c++11
 
 incPath = inc
 srcPath = src
+
 netIncPath = ../../inc
 netSrcPath = ../../src
+visuInc = ../../incVisu
+visuSrc = ../../srcVisu
+resourcePath = ../../res
 INCLUDEPATH += $$netIncPath \
+               $$visuInc \
                $$incPath
+
 
 SOURCES += \
     $$srcPath/main.cpp \
@@ -40,18 +46,16 @@ SOURCES += \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
     $$netSrcPath/error.cpp \
-    $$netSrcPath/geneticnet.cpp \
-    netvisu.cpp
+    $$visuSrc/netvisu.cpp
 
 HEADERS += \
     $$incPath/mainwindow.h \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
     $$netIncPath/backpropnet.h \
-    $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h \
-    netvisu.h
+    $$visuInc/netvisu.h
 
 FORMS += \
         mainwindow.ui
@@ -62,4 +66,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target qml
 
 RESOURCES += \
-    qrc.qrc
+    $$resourcePath/qrc.qrc

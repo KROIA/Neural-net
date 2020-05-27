@@ -2,7 +2,9 @@
 #include <enviroment.h>
 #include <iostream>
 #include <windows.h>
+#include <netvisu.h>
 
+#include <QGuiApplication>
 using namespace std;
 
 void printNet(Net &net);
@@ -10,19 +12,21 @@ void cmdXY(int x, int y);
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
-
+    //QCoreApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
     Enviroment enviroment;
 
+    NetVisu visu(enviroment._net->get_netList_ptr());
     system("cls");
-    while(true)
+    visu.start();
+    /*while(true)
     {
         //cmdXY(0,0);  // Sets the cursor pos of the console
         enviroment.tick();
         enviroment.draw();
        // getchar();
 
-    }
+    }*/
     return a.exec();
 }
 void printNet(GeneticNet &net)

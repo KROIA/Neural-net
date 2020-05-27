@@ -935,6 +935,10 @@ Net                    *GeneticNet::operator[](unsigned int animal)
     }
     return _netList[animal];
 }
+std::vector<Net*>       GeneticNet::get_netList_ptr()
+{
+    return _netList;
+}
 
 void                    GeneticNet::set_mutationFactor(double factor)
 {

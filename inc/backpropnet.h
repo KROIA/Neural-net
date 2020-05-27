@@ -102,6 +102,9 @@ class BackpropNet : public Net
     signals:
         void errorOccured(unsigned int netID, Error &e);
 
+    private slots:
+        void onNetConfigurationUpdate();
+        void onNetConfigurationUpdateFinished();
 
     private:
         void printIllegalFunctionMessage(QString func);

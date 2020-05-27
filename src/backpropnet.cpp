@@ -289,7 +289,7 @@ void                    BackpropNet::learn()
     std::chrono::duration<double> __clock_time_span;
     std::chrono::high_resolution_clock::time_point __clock_start = std::chrono::high_resolution_clock::now();
 
-    if(__output_error.size() == 0)
+   /* if(__output_error.size() == 0)
     {
         __output_error = std::vector<double>(this->get_outputNeurons());
     }
@@ -298,7 +298,7 @@ void                    BackpropNet::learn()
     if(__hidden_error.size() == 0)
     {
         __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
-    }
+    }*/
     //std::vector<std::vector<double>  > __hidden_error(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
 
     for(unsigned int y=0; y<this->get_outputNeurons(); y++)
@@ -607,6 +607,16 @@ unsigned int        BackpropNet::get_errorAmount() const
     return unsigned(_errorList.size());
 }
 
+void BackpropNet::onNetConfigurationUpdate()
+{
+    __hidden_error.clear();
+    __output_error.clear();
+}
+void BackpropNet::onNetConfigurationUpdateFinished()
+{
+    __output_error = std::vector<double>(this->get_outputNeurons());
+    __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
+}
 
 
 void BackpropNet::printIllegalFunctionMessage(QString func)
@@ -621,6 +631,8 @@ void        BackpropNet::init()
     _needsConfigurationUpdate = true;
     this->set_netFileName("netFile");
     this->set_netFileEnding("bnet");
+    connect(this,SIGNAL(netConfigurationUpdateStarted()),this,SLOT(onNetConfigurationUpdate()));
+    connect(this,SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationUpdateFinished()));
 }
 void        BackpropNet::addError(const Error &e)
 {

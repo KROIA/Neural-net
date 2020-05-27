@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/Net.qml</file>
+        <file>qml/Neuron.qml</file>
+        <file>qml/NeuronConnection.qml</file>
+        <file>qml/MultiNet.qml</file>
+        <file>qml/MultiNetWorkArea.qml</file>
+        <file>qml/SingelNetWorkArea.qml</file>
+        <file>qml/MultiNetTopBar.qml</file>
+    </qresource>
+</RCC>
