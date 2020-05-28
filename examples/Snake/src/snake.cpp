@@ -122,6 +122,7 @@ Snake::Snake(QWidget *parent) :
     _selectedSnake = ui->selectedSnake_slider->value();
 
     net->updateNetConfiguration();
+    net->saveToNetFile();
 
     _backpropNet->updateNetConfiguration();
 
