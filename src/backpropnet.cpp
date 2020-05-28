@@ -437,6 +437,7 @@ void                    BackpropNet::learn()
         __dbg_time6 = __dbg_time6*filter+(1-filter)*__clock_time_span.count()*1000;
         __clock_start = std::chrono::high_resolution_clock::now();
     }
+    emit weightValuesChanged(this);
 }
 void                    BackpropNet::learn(std::vector<double> expected)
 {

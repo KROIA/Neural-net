@@ -8,7 +8,7 @@ Item {
         anchors.top:multiNetArea.top
         anchors.left: multiNetArea.left
         anchors.right: multiNetArea.right
-        height:multiNetArea.height*0.1
+        height:multiNetArea.height*0.2
     }
     MultiNet{
         anchors.top:topBar.bottom
@@ -18,5 +18,6 @@ Item {
         xNetPerTab: topBar.netXAxis
         yNetPerTab: topBar.netYAxis
         updateTime: topBar.updateTimer
+        tabIndex: topBar.tabId
     }
 }

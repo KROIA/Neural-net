@@ -56,11 +56,25 @@ public slots:
     void stopUpdateSlot();
     void startUpdateSlot();
 
+    void onRunDone(Net *p_net);
+    void onBiasValueChanged(Net *p_net);
+    void onWeightsChanged(Net *p_net);
+
+    void onNetConfigurationChanged();
+
 private:
     bool access=false;
     QQmlApplicationEngine *engine;
     QQmlContext* context;
-    vector<Net*> net;
+    vector<Net*> netList;
+
+
+    vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
+    vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID
+    vector<vector<double>   > outputValueList; //Index depending on NetID, secondDimension: depending on the output
+    vector<vector<double>   > genomList;       //Index depending on NetID, secondDimension: depending on the connection
+
+    vector<double>  biasValueList; //Index depending on NetID
 };
 
 #endif // NETVISU_H

@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.05.00"
-//              Datum   02.02.2020
+#define    NET_VERSION "02.05.01"
+//              Datum   28.05.2020
 
 /*
  Some functions may throw errors.
@@ -99,6 +99,7 @@ class Net : public QObject
         unsigned int            get_hiddenNeuronsX();
         void                    set_hiddenNeuronsY(unsigned int hiddenY);   //update
         unsigned int            get_hiddenNeuronsY();
+        unsigned int            get_hiddenNeurons();
         void                    set_outputNeurons(unsigned int outputs);    //update
         unsigned int            get_outputNeurons();
         //void                    set_costumNeurons(unsigned int costum);
@@ -130,6 +131,7 @@ class Net : public QObject
         void                    set_input(std::vector<double> inputList);
         std::vector<double>     get_input();
 
+        std::vector<double>     get_hidden();// Alle outpus der Hiddenneuronen
         double                  get_hidden(unsigned int hiddenX, unsigned int hiddenY);
         std::vector<double>     get_hiddenX(unsigned int hiddenX);  // |    Alle in einer Spalte
         std::vector<double>     get_hiddenY(unsigned int hiddenY);  // --   Alle in einer Reihe
@@ -151,6 +153,8 @@ class Net : public QObject
         std::vector<double>     get_output();
 
         void                    run();
+
+        bool                    needsUpdate();
         void                    updateNetConfiguration();
         /*  Needed after every change in the Net-structure like
          *  inputNeurons()
@@ -190,6 +194,14 @@ class Net : public QObject
         void netConfigurationUpdated();      //Infosignal when the updating is finished
         void accessLock();                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
         void accessUnlock();                  //from now on you can access all functions again
+
+        //void inputsChanged(Net *net);
+        //void hiddenOutputsChanged(Net *net);
+        //void outputsChanged(Net *net);
+        void runDone(Net *net);
+        void biasValueChanged(Net *net);
+        void weightValuesChanged(Net *net);
+
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
