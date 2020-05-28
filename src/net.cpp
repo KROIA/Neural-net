@@ -136,6 +136,11 @@ unsigned int        Net::get_hiddenNeuronsY()
 {
     return _hiddenY;
 }
+unsigned int        Net::get_hiddenNeurons()
+{
+    return _hiddenNeurons;
+}
+
 void                Net::set_outputNeurons(unsigned int outputs)
 {
     if(outputs < NET_MIN_OUTPUTNEURONS || outputs > NET_MAX_OUTPUTNEURONS)
@@ -229,8 +234,12 @@ bool                Net::get_enableAverage()
 }
 void                Net::set_biasValue(double value)
 {
-    _needsCalculationUpdate         = true;
-    _biasValue                      = value;
+    if(_biasValue != value)
+    {
+        _needsCalculationUpdate         = true;
+        _biasValue                      = value;
+        emit biasValueChanged(this);
+    }
 }
 double              Net::get_biasValue()
 {
@@ -300,6 +309,7 @@ void                Net::set_genom(std::vector<double> genom)
             genIndex++;
         }
     }
+    emit weightValuesChanged(this);
 }
 std::vector<double>       Net::get_genom()
 {
@@ -367,6 +377,7 @@ void                Net::set_input(unsigned int input, double signal)
 
     _needsCalculationUpdate = true;
     _inputSignalList[input] = signal;
+    //emit inputsChanged(this);
 }
 double              Net::get_input(unsigned int input)
 {
@@ -404,10 +415,8 @@ void                Net::set_input(std::vector<double> inputList)
         //error_general("input(std::vector<double>) ","parameter 0 , size of the array is wrong: ["+QString::number(inputList.size()) + "] correct size is: ["+QString::number(_inputs)+"]");
     }
     _needsCalculationUpdate = true;
-    for(unsigned int a=0; a<_inputs; a++)
-    {
-        _inputSignalList[a] = inputList[a];
-    }
+    _inputSignalList = inputList;
+    //emit inputsChanged(this);
 }
 std::vector<double>       Net::get_input()
 {
@@ -421,6 +430,16 @@ std::vector<double>       Net::get_input()
     return _inputSignalList;
 }
 
+std::vector<double>     Net::get_hidden()
+{
+    std::vector<double> valueList;
+    valueList.reserve(_hiddenNeurons);
+    for(unsigned int ID=0; ID<_hiddenNeurons; ID++)
+    {
+        valueList.push_back(_hiddenNeuronList[ID]->get_output());
+    }
+    return valueList;
+}
 double              Net::get_hidden(unsigned int hiddenX, unsigned int hiddenY)
 {
     if(_needsConfigurationUpdate)
@@ -858,42 +877,6 @@ void                Net::run()
 #endif
         _allNeuronList[_calculationOrderList[neuron].ID]->run();
     }
-   /* while(!allUpdated)
-    {
-        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
-        {
-            bool readyToCalcCostumNeuron = true;
-            if(!_allNeuronList[neuron]->isUpdated())
-            {
-                for(unsigned int input=0; input<_allNeuronList[neuron]->inputs(); input++)
-                {
-                    if((_allNeuronList[neuron]->inputID(input).TYPE == NeuronType::costum ||
-                        _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::hidden ||
-                        _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::output) &&
-                        (!_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated() &&
-                         _allNeuronList[neuron]->inputConnectionDirection(_allNeuronList[neuron]->inputID(input)) == true))
-                    {
-                        readyToCalcCostumNeuron = false;
-                    }
-                }
-                if(readyToCalcCostumNeuron)
-                {
-#if defined(_DEBUG_NET_RUN)
-                    __DEBUG_NET(this,"run()","calculates neuron ID: "+QString::number(neuron));
-#endif
-                    _allNeuronList[neuron]->run();
-                }
-            }
-        }
-        allUpdated = true;
-        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
-        {
-            if(!_allNeuronList[neuron]->isUpdated())
-            {
-                allUpdated = false;
-            }
-        }
-    }*/
 
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer1_end          = std::chrono::high_resolution_clock::now();
@@ -909,8 +892,15 @@ void                Net::run()
 #endif
 #endif
     _needsCalculationUpdate = false;
+    //emit hiddenOutputsChanged(this);
+    //emit outputsChanged(this);
+    emit runDone(this);
 }
 
+bool                Net::needsUpdate()
+{
+    return _needsConfigurationUpdate;
+}
 void                Net::updateNetConfiguration()
 {
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
@@ -1090,6 +1080,7 @@ void                Net::updateNetConfiguration()
     __DEBUG_NET(this,"updateNetConfiguration()","finish");
 #endif
     emit netConfigurationUpdated();
+    emit weightValuesChanged(this);
     emit accessUnlock();
 }
 void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
