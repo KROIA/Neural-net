@@ -43,7 +43,7 @@ void NetVisu::setupQml(){
     engine = new QQmlApplicationEngine;
     context= new QQmlContext(engine);
     context=engine->rootContext();
-    context->setContextProperty ("netVisu", this);
+    context->setContextProperty ("netListVisu", this);
     engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     startUpdateSlot();
@@ -218,4 +218,31 @@ void NetVisu::startUpdateSlot(){
     qDebug()<<"start Update";
     access=true;
     emit startUpdateSignal();
+}
+void NetVisu::onRunDone(Net *p_net)
+{
+    if(!access)
+        return;
+    unsigned int netID      = p_net->get_ID();
+    inputValueList[netID]   = p_net->get_input();
+    hiddenValueList[netID]  = p_net->get_hidden();
+    outputValueList[netID]  = p_net->get_output();
+}
+void NetVisu::onBiasValueChanged(Net *p_net)
+{
+    if(!access)
+        return;
+    unsigned int netID      = p_net->get_ID();
+    biasValueList[netID]    = p_net->get_biasValue();
+}
+void NetVisu::onWeightsChanged(Net *p_net)
+{
+    if(!access)
+        return;
+    unsigned int netID      = p_net->get_ID();
+    genomList[netID]        = p_net->get_genom();
+}
+void NetVisu::onNetConfigurationChanged()
+{
+
 }

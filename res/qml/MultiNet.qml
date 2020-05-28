@@ -8,18 +8,22 @@ Item{
     property int xNetPerTab: 3
     property int yNetPerTab: 3
     property int totalNet: 0
+    property int tabIndex:0
     property int updateTime: 100
     Connections {
                    target: netListVisu
-                   onStartUpdateSignal:updateMultiNet
+                   onStartUpdateSignal:updateMultiNet()
     }
 
     signal updateNet()
 
-    property int tabIndex:0
+
                 Repeater{
                     model:{
-                        if(totalNet-tabIndex*(yNetPerTab*xNetPerTab)>=yNetPerTab*xNetPerTab) return yNetPerTab*xNetPerTab
+                        console.debug(totalNet,tabIndex*(yNetPerTab*xNetPerTab),yNetPerTab*xNetPerTab)
+                        if(totalNet-tabIndex*(yNetPerTab*xNetPerTab)>=yNetPerTab*xNetPerTab) {
+
+                            return yNetPerTab*xNetPerTab}
                         else return totalNet-tabIndex*(yNetPerTab*xNetPerTab)
                     }
                     Net{
@@ -28,7 +32,7 @@ Item{
                         y: Math.floor(index/xNetPerTab)*height
                         width: multiNet.width/xNetPerTab
                         height: multiNet.height/yNetPerTab
-                        netID: index+tabIndex*(yNetPerTab*xNetPerTab)
+                        netID: 0//index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
                         }
                     }

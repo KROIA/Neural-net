@@ -30,7 +30,7 @@ Item {
         to: maxNet-1
         editable:true
         inputMethodHints: Qt.ImhDigitsOnly
-        font.pixelSize: xAxis.height*0.4
+        font.pixelSize: height*0.4
         value:0
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

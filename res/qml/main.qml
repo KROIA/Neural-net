@@ -7,11 +7,11 @@ Window {
     height: 600
     visible: true
 
-/*
+
     MultiNetWorkArea{
         anchors.fill:parent
-    }*/
+    }/*
     UiIntegratableNet{
         anchors.fill:parent
-    }
+    }*/
 }
