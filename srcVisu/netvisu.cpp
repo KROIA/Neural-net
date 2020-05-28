@@ -33,6 +33,7 @@ void NetVisu::setupQml(){
     hiddenValueList = vector<vector<double>  >(netList.size(),vector<double>(0,0));
     outputValueList = vector<vector<double>  >(netList.size(),vector<double>(0,0));
     genomList       = vector<vector<double>  >(netList.size(),vector<double>(0,0));
+    biasValueList   = vector<double>          (netList.size(),0);
 
     for(unsigned i=0;i<netList.size();++i){
         connect(netList[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
