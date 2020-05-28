@@ -16,6 +16,26 @@ NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
 }
 
 void NetVisu::setupQml(){
+
+
+    if(netList.size() == 0)
+    {
+        qDebug() << "Error: NetVisu::setupQml(): netList.size() == 0 | No Nets defined";
+        return;
+    }
+    if(netList[0]->needsUpdate())
+    {
+        qDebug() << "Error: NetVisu::setupQml(): nets aren't updated, please call \"Net::updateNetConfiguration()\" before you create a Netvisu object";
+        return;
+    }
+
+    //Reserve the space for all nets
+    inputValueList  = vector<vector<double>  >(netList.size(),vector<double>(0,0));
+    hiddenValueList = vector<vector<double>  >(netList.size(),vector<double>(0,0));
+    outputValueList = vector<vector<double>  >(netList.size(),vector<double>(0,0));
+    genomList       = vector<vector<double>  >(netList.size(),vector<double>(0,0));
+    biasValueList   = vector<double>          (netList.size(),0);
+
     for(unsigned i=0;i<netList.size();++i){
         connect(netList[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
