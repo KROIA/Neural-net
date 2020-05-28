@@ -12,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "01.01.00";
-    QString datum   = "02.02.2020";
+    QString version = "01.01.01";
+    QString datum   = "25.05.2020";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -159,7 +159,7 @@ Snake::Snake(QWidget *parent) :
     _versusEnvironment->scale(1);
     _versusEnvironment->tileSize(versusEnviromentTileSize);
     _versusEnvironment->tileSpace(versusEnviromentTileSpace);
-    _versusEnvironment->drawPos(QPoint(300,15));
+    _versusEnvironment->drawPos(QPoint(450,15));
 
     _versusEnvironment->player(0)->globalView(true);
     _versusEnvironment->player(0)->standardColor(QColor(0,100,200));
@@ -188,14 +188,14 @@ Snake::Snake(QWidget *parent) :
     _environment->tileSize(enviromentTileSize);
     _environment->tileSpace(enviromentTileSpace);
 
-    _environment->drawPos(QPoint(300,15));
+    _environment->drawPos(_versusEnvironment->drawPos());
 
     _backpropTrainingEnvironment = new Environment(this,_painter,1);
     _backpropTrainingEnvironment->mapsize(QSize(30,30));
     _backpropTrainingEnvironment->tileSize(10);
     _backpropTrainingEnvironment->tileSpace(2);
     _backpropTrainingEnvironment->scale(3);
-    _backpropTrainingEnvironment->drawPos(QPoint(300,15));
+    _backpropTrainingEnvironment->drawPos(_environment->drawPos());
 
     _backprobTrainingsDataFileName = "backpropNetTrainigData.txt";
 //#endif
@@ -295,12 +295,12 @@ Snake::Snake(QWidget *parent) :
 
 
     _stats_performance_chartview->setParent(this);
-    _stats_performance_chartview->setGeometry(1100,20,400,200);
+    _stats_performance_chartview->setGeometry(10,480,400,200);
     _stats_performance_chartview->show();
 
 
     _stats_score_chartview->setParent(this);
-    _stats_score_chartview->setGeometry(1100,220,400,200);
+    _stats_score_chartview->setGeometry(10,680,400,200);
     _stats_score_chartview->show();
 
     _stats_score_Chart->axisX()->setRange(0,_maxChartSize);

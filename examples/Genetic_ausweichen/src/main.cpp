@@ -388,9 +388,10 @@ int main(int argc, char *argv[])
     calcNet = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,_bias,enableAverage,Activation::Sigmoid);
     calcNet->set_mutationFactor(mutation);
     calcNet->set_mutationChangeWeight(mutationChangeFactor);
-    calcNet->updateNetConfiguration();
+
 	printf("calcNet setup done\n");
     calcNet->loadFromNetFile();
+    calcNet->updateNetConfiguration();
     /*if(calcNet->loadData(xxa) == 1)
 	{
 		getchar();
@@ -673,8 +674,8 @@ thread_skip		           =vector<int>									(animals,0);                       
 			genPerSecondtimer.start(999999);
 			if(genPerSecondtimer.getRuntime() != 0)
 			{
-				genPerSecond = genPerSecondtimer.getRuntime();
-				genPerSecond = 1000/genPerSecond;
+                genPerSecond = 0.9*genPerSecond + 0.1*(double)1000/genPerSecondtimer.getRuntime();
+                //genPerSecond = (double)1000/genPerSecond;
 				genPerSecondtimer.stop();
 				genPerSecondtimer.start(999999);
 			}

@@ -1464,7 +1464,7 @@ void                Net::prepareConnectionList()
                     _connectionList[_connectionList.size()-1].destination_ID.TYPE = NeuronType::hidden;
                     _connectionList[_connectionList.size()-1].netID = this->get_ID();
                     _connectionList[_connectionList.size()-1].weight = Neuron::get_calcRandWeight(_randEngine);
-                    _connectionList[_connectionList.size()-1].source_ID.ID = ID-_hiddenY+hiddenNeuronY2;
+                    _connectionList[_connectionList.size()-1].source_ID.ID = ID-(_hiddenY+hiddenNeuronY)+hiddenNeuronY2;
                     _connectionList[_connectionList.size()-1].source_ID.TYPE = NeuronType::hidden;
                     _connectionList[_connectionList.size()-1].direction = ConnectionDirection::forward;
                 }
