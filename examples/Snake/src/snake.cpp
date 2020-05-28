@@ -524,7 +524,7 @@ void Snake::timerEvent2()
         QStringList data = net->toStringList();
         for(int a=0; a<data.size(); a++)
         {
-            qDebug() << data[a];
+            //qDebug() << data[a];
         }
         double filter = 0.9;
         _genPerSecond =(double)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(double)_updateTimer2->interval());

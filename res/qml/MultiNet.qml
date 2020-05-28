@@ -10,24 +10,13 @@ Item{
     property int totalNet: 0
     property int updateTime: 100
     Connections {
-                   target: netVisu
-                   onStopUpdateSignal: timerMultiNet.running=false
-                   onStartUpdateSignal:timerMultiNet.running=true
+                   target: netListVisu
+                   onStartUpdateSignal:updateMultiNet
     }
-    Timer {
-            id:timerMultiNet
-            interval: updateTime; running: false; repeat: true
-            onTriggered: updateMultiNet()
-        }
+
     signal updateNet()
-    TabView {
-        anchors.fill:parent
-        Repeater{
-            model:Math.ceil(totalNet/(yNetPerTab*xNetPerTab))
-            Tab{
-                id:tab
-                title:index
-                property int tabIndex:index
+
+    property int tabIndex:0
                 Repeater{
                     model:{
                         if(totalNet-tabIndex*(yNetPerTab*xNetPerTab)>=yNetPerTab*xNetPerTab) return yNetPerTab*xNetPerTab
@@ -37,19 +26,15 @@ Item{
                         id:net
                         x: (index%xNetPerTab)*width
                         y: Math.floor(index/xNetPerTab)*height
-                        width: tab.width/xNetPerTab
-                        height: tab.height/yNetPerTab
+                        width: multiNet.width/xNetPerTab
+                        height: multiNet.height/yNetPerTab
                         netID: index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
                         }
                     }
-
-                }
-            }
-        }
-
     function updateMultiNet(){
-               totalNet= netVisu.getNetCount()
+               totalNet= netListVisu.getNetCount()
+                console.debug(totalNet)
             }
 }
 

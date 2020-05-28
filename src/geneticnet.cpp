@@ -1165,6 +1165,7 @@ NeuronID                GeneticNet::addNeuron(Neuron *neuron)
 {
     return _timeInterval;
 }*/
+
 QString                 GeneticNet::toString()
 {
     return _netList[0]->toString();

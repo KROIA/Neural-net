@@ -4,10 +4,10 @@ Item {
     width: 100
     height: 100
     property real buttonBar: 0.1
-    property int maxNet: netVisu.getNetCount()
+    property int maxNet: netListVisu.getNetCount()
     property int netId: spinNetId.value
     Connections {
-                   target: netVisu
+                   target: netListVisu
                    onStopUpdateSignal: timerSingelNet.running=false
                    onStartUpdateSignal:timerSingelNet.running=true
     }
@@ -22,7 +22,7 @@ Item {
         y:0
         width:parent.width
         height: parent.height*(1-buttonBar)
-        netID: parent.netId
+        netID:  parent.netId
     }
     SpinBox{
         id:spinNetId
@@ -37,6 +37,6 @@ Item {
         anchors.top: net.bottom
     }
     function updateMultiNet(){
-               maxNet= netVisu.getNetCount()
+               maxNet= netListVisu.getNetCount()
             }
 }

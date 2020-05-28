@@ -25,7 +25,7 @@
 #define __enableGeneticNetThread
 //#define __DEBUG_TIMEINTERVAL
 //#define __DEBUG_TIMEINTERVAL_IN_THREAD
-#define __DEBUG_GENETICNET
+//#define __DEBUG_GENETICNET
 
 struct thread_data_geneticNet {
    int  thread_id;

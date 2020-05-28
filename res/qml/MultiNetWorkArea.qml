@@ -18,5 +18,6 @@ Item {
         xNetPerTab: topBar.netXAxis
         yNetPerTab: topBar.netYAxis
         updateTime: topBar.updateTimer
+        tabIndex: topBar.tabId
     }
 }
