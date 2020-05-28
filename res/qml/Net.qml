@@ -6,13 +6,13 @@ Item {
     height: 600
     property int netID: 0
     property int updateTime:100
-    property int hiddenNeuronX: netListVisu.getHiddenX(netItem.netID)
-    property int hiddenNeuronY: netListVisu.getHiddenY(netItem.netID)
-    property int inputNeuron: netListVisu.getInputs(netItem.netID)
-    property int outputNeuron: netListVisu.getOutputs(netItem.netID)
-    property variant hiddenValue: netListVisu.getHiddenValue(netItem.netID)
-    property variant outputValue:netListVisu.getOutputsValue(netItem.netID)
-    property variant inputValue:netListVisu.getInputsValue(netItem.netID)
+    property int hiddenNeuronX: netVisu.getHiddenX(netItem.netID)
+    property int hiddenNeuronY: netVisu.getHiddenY(netItem.netID)
+    property int inputNeuron: netVisu.getInputs(netItem.netID)
+    property int outputNeuron: netVisu.getOutputs(netItem.netID)
+    property variant hiddenValue: netVisu.getHiddenValue(netItem.netID)
+    property variant outputValue:netVisu.getOutputsValue(netItem.netID)
+    property variant inputValue:netVisu.getInputsValue(netItem.netID)
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -61,16 +61,16 @@ Item {
     property variant biasConXOutput: [0]
     property variant biasConYOutput: [0]
 
-    property variant hiddenIDs: netListVisu.getHiddenID(netItem.netID)
-    property variant outputIds: netListVisu.getOutputID(netItem.netID)
+    property variant hiddenIDs: netVisu.getHiddenID(netItem.netID)
+    property variant outputIds: netVisu.getOutputID(netItem.netID)
 
-    property variant conSourceID: netListVisu.getConSourceID(netItem.netID)
-    property variant conDestinationID: netListVisu.getConDestinationID(netItem.netID)
+    property variant conSourceID: netVisu.getConSourceID(netItem.netID)
+    property variant conDestinationID: netVisu.getConDestinationID(netItem.netID)
 
-    property variant conSourceType: netListVisu.getConSourceType(netItem.netID)
-    property variant conDestinationType: netListVisu.getConDestinationType(netItem.netID)
+    property variant conSourceType: netVisu.getConSourceType(netItem.netID)
+    property variant conDestinationType: netVisu.getConDestinationType(netItem.netID)
 
-    property variant conWeight: netListVisu.getConWeight(netItem.netID)
+    property variant conWeight: netVisu.getConWeight(netItem.netID)
 
     property int noneType: 1
     property int inputType: 1
@@ -78,14 +78,14 @@ Item {
     property int outputType: 3
     property int biasType: 5
 
-    property bool bias: netListVisu.getBias(netItem.netID)
-    property real biasValue: netListVisu.getBiasValue(netItem.netID)
+    property bool bias: netVisu.getBias(netItem.netID)
+    property real biasValue: netVisu.getBiasValue(netItem.netID)
     property real yOffSet: 0.1
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
                         else return 0
     Connections {
-                   target: netListVisu
+                   target: netVisu
                    onStopUpdateSignal: timerNet.running=false
                    onStartUpdateSignal:{timerNet.running=true
                        updateStructur()}
@@ -171,11 +171,11 @@ Item {
     }
 
     function updateValue(){
-        hiddenValue=netListVisu.getHiddenValue(netItem.netID)
-        inputValue=netListVisu.getInputsValue(netItem.netID)
-        outputValue=netListVisu.getOutputsValue(netItem.netID)
-        biasValue=netListVisu.getBiasValue(netItem.netID)
-        conWeight=netListVisu.getConWeight(netItem.netID)
+        hiddenValue=netVisu.getHiddenValue(netItem.netID)
+        inputValue=netVisu.getInputsValue(netItem.netID)
+        outputValue=netVisu.getOutputsValue(netItem.netID)
+        biasValue=netVisu.getBiasValue(netItem.netID)
+        conWeight=netVisu.getConWeight(netItem.netID)
 
 
 
@@ -184,18 +184,18 @@ Item {
     }
     function updateStructur(){
         console.debug("update Struc")
-        inputNeuron=netListVisu.getInputs(netItem.netID)
-        outputNeuron=netListVisu.getOutputs(netItem.netID)
-        hiddenNeuronX=netListVisu.getHiddenX(netItem.netID)
-        hiddenNeuronY=netListVisu.getHiddenY(netItem.netID)
+        inputNeuron=netVisu.getInputs(netItem.netID)
+        outputNeuron=netVisu.getOutputs(netItem.netID)
+        hiddenNeuronX=netVisu.getHiddenX(netItem.netID)
+        hiddenNeuronY=netVisu.getHiddenY(netItem.netID)
 
-        hiddenIDs=netListVisu.getHiddenID(netItem.netID)
-        outputIds=netListVisu.getOutputID(netItem.netID)
-        conSourceID=netListVisu.getConSourceID(netItem.netID)
-        conSourceType=netListVisu.getConSourceType(netItem.netID)
-        conDestinationID=netListVisu.getConDestinationID(netItem.netID)
-        conDestinationType=netListVisu.getConDestinationType(netItem.netID)
+        hiddenIDs=netVisu.getHiddenID(netItem.netID)
+        outputIds=netVisu.getOutputID(netItem.netID)
+        conSourceID=netVisu.getConSourceID(netItem.netID)
+        conSourceType=netVisu.getConSourceType(netItem.netID)
+        conDestinationID=netVisu.getConDestinationID(netItem.netID)
+        conDestinationType=netVisu.getConDestinationType(netItem.netID)
 
-        bias=netListVisu.getBias(netItem.netID)
+        bias=netVisu.getBias(netItem.netID)
     }
 }
