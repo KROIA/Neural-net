@@ -1,4 +1,4 @@
-#include <QCoreApplication>
+#include <QApplication>
 #include <iostream>
 #include <windows.h>
 #include <geneticnet.h>
@@ -18,7 +18,7 @@ void cmdXY(int x, int y);
 void logGenom(vector<double> genom,string name);
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
 
 
     printf("setup Net()\n");
@@ -50,12 +50,13 @@ int main(int argc, char *argv[])
 
     QQuickWidget widget;
     NetVisu visu(net.get_netList_ptr());
-
+    visu.loadNetInUi(&widget);
+    visu.showWindow();
 
    // saveNet.set(net.inputNeurons(),net.hiddenNeuronsX(),net.hiddenNeuronsY(),net.outputNeurons(),
    //             net.bias(),net.enableAverage(),net.activationFunction(),net.biasValue());
-    //saveNet.addGenom(net.genom());
-    //saveNet.saveFile();
+   //saveNet.addGenom(net.genom());
+   //saveNet.saveFile();
    // saveNet.loadFile();
    // saveNet.saveFile("newFile");
 
@@ -86,8 +87,10 @@ int main(int argc, char *argv[])
     unsigned long learningSteps = 0;
     logGenom(net.get_genom(0),"gen0.csv");
     logGenom(net.get_genom(1),"gen1.csv");
+
     while(true)
     {
+        QCoreApplication::processEvents();
         cmdXY(0,0);  // Sets the cursor pos of the console
 
         for(unsigned int a=0; a<animals; a++)

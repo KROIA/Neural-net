@@ -34,7 +34,7 @@ Snake::Snake(QWidget *parent) :
 
     // comfigParam
     bool enableKillreward   = false;
-    unsigned int hiddenX    = 2;
+    unsigned int hiddenX    = 1;
     unsigned int hiddenY    = 2;
     unsigned int animals    = 100;
     _respawnAmount          = 3;
@@ -44,9 +44,9 @@ Snake::Snake(QWidget *parent) :
     double net_mutationFactor = 0.05;
     double net_mutationChangeWeight = 0.1;
     unsigned int enviromentTileSize = 6;
-    unsigned int enviromentTileSpace = 1;
+    unsigned int enviromentTileSpace = 0;
 
-    unsigned int versusEnviromentTileSize = 30;
+    unsigned int versusEnviromentTileSize = 20;
     unsigned int versusEnviromentTileSpace = 2;
 
     //end comfigParam
@@ -159,7 +159,7 @@ Snake::Snake(QWidget *parent) :
     _versusEnvironment->scale(1);
     _versusEnvironment->tileSize(versusEnviromentTileSize);
     _versusEnvironment->tileSpace(versusEnviromentTileSpace);
-    _versusEnvironment->drawPos(QPoint(450,15));
+    _versusEnvironment->drawPos(QPoint(420,15));
 
     _versusEnvironment->player(0)->globalView(true);
     _versusEnvironment->player(0)->standardColor(QColor(0,100,200));
@@ -323,8 +323,8 @@ Snake::Snake(QWidget *parent) :
 
     visu = new NetVisu(net->get_netList_ptr());
 
-    //visu->loadNetInUi(ui->net);
-    visu->showWindow();
+    visu->loadNetInUi(ui->net_widget);
+    //visu->showWindow();
     qDebug() << "Setup done";
 }
 
