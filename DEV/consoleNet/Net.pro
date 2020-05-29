@@ -20,11 +20,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 incPath = inc
 srcPath = src
 
-netIncPath = ../inc
-netSrcPath = ../src
-visuInc = ../incVisu
-visuSrc = ../srcVisu
-resourcePath = ../res
+netIncPath = ../../inc
+netSrcPath = ../../src
+visuInc = ../../incVisu
+visuSrc = ../../srcVisu
+resourcePath = ../../res
 
 INCLUDEPATH += $$netIncPath \
                $$visuInc \
