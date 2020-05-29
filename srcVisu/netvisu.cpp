@@ -57,7 +57,6 @@ void NetVisu::showWindow(){
 void NetVisu::loadNetInUi(QQuickWidget* widget){
     widget->rootContext()->setContextProperty(QmlRootContext,this);
     widget->setSource((QUrl(QStringLiteral("qrc:/qml/UiIntegratableNet.qml"))));
-    widget->setProperty("")
 }
 
 int NetVisu::getHiddenX(const int &netId) {
