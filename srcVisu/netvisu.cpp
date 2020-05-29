@@ -28,6 +28,7 @@ void NetVisu::setupNetVisu(){
         qDebug() << "Error: NetVisu::setupQml(): nets aren't updated, please call \"Net::updateNetConfiguration()\" before you create a Netvisu object";
         return;
     }
+    netWidget = nullptr;
 
     //Reserve the space for all nets
     inputValueList  = vector<vector<double>  >(netList.size(),vector<double>(0,0));
@@ -43,8 +44,13 @@ void NetVisu::setupNetVisu(){
     startUpdateSlot();
 }
 void NetVisu::setUpdateTime(QQuickWidget* widget,unsigned int upDateTime){
+    if(widget == nullptr)
+    {
+        qDebug() << "Error: NetVisu::setUpdateTime(QQuickWidget* widget,unsigned int ["<<upDateTime<<"]): widged is a nullptr";
+        return;
+    }
     widget->setProperty("updateTime",upDateTime);
-   }
+}
 void NetVisu::setUpdateTime(unsigned int upDateTime){
     setUpdateTime(netWidget,upDateTime);
 }

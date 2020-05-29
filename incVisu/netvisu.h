@@ -26,7 +26,7 @@ public:
     void setupNetVisu();
     void showWindow();
     void loadNetInUi(QQuickWidget* widget);
-    void setUpdateTime(QQuickWidget* widget,unsigned int upDateTime);
+    static void setUpdateTime(QQuickWidget* widget,unsigned int upDateTime);
     void setUpdateTime(unsigned int upDateTime);
     vector<int> SourceNeuron;
     vector<int> DestinationNeuron;

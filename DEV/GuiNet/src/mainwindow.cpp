@@ -1,0 +1,93 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+    // Global Parameters
+    timer_loop_interval = 10; //100 ms for the loop
+    sinTest_weightIndex = 0;
+    sinTest_angle       = 0;
+
+
+    // Timers
+    ptr_timer_loop = new QTimer(this);
+    connect(ptr_timer_loop,&QTimer::timeout,this,&MainWindow::loop);
+    ptr_timer_loop->start(signed(timer_loop_interval));
+
+    // Neural net's
+    net_ID              = 0;
+    net_inputs          = 4;
+    net_hiddenX         = 1;
+    net_hiddenY         = 2;
+    net_outputs         = 1;
+    net_enableBias      = true;
+    net_enableAverage   = false;
+    net_activation      = Activation::Sigmoid;
+
+    ptr_net = new Net(  net_ID,net_inputs,net_hiddenX,net_hiddenY,net_outputs,
+                        net_enableBias,net_enableAverage,net_activation,this);
+
+    ptr_net->updateNetConfiguration();
+    ptr_net_visu = new NetVisu(ptr_net,this);
+    ptr_net_visu->loadNetInUi(ui->net_view_widget);
+    ptr_net_visu->setUpdateTime(timer_loop_interval);
+    ptr_net_genom = ptr_net->get_ptr_genom();
+
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+
+    ptr_net_visu->deleteLater();
+    delete ptr_net;
+    ptr_backpropNet_visu->deleteLater();
+    delete ptr_backpropNet;
+    ptr_geneticNet_visu->deleteLater();
+    delete ptr_geneticNet;
+
+    ptr_timer_loop->deleteLater();
+}
+
+
+void MainWindow::loop()
+{
+    qDebug() << "Loop start";
+
+    sinusTestForWeights(*ptr_net_genom);
+
+    qDebug() << "Loop end";
+}
+
+void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
+{
+    double angleIncrement = 6.283185307/20;
+
+    if(sinTest_weightIndex == 0)
+        *genom[genom.size()-1] = 0;
+    else
+        *genom[sinTest_weightIndex-1] = 0;
+
+
+    if(genom.size() <= sinTest_weightIndex)
+    {
+        sinTest_weightIndex = 0;
+    }
+
+    *genom[sinTest_weightIndex] = sin(sinTest_angle);
+    qDebug() << *genom[sinTest_weightIndex];
+
+
+
+    sinTest_angle = sinTest_angle+angleIncrement;
+    if(sinTest_angle > 6.283185307)
+    {
+        sinTest_angle = 0;
+        sinTest_weightIndex++;
+    }
+}
