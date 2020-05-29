@@ -37,12 +37,17 @@ DLL_buildPath = bin/64bit/build-Release
 #rectPath     = $$QT_work_dir/DLL/Rect
 #configPath   = $$QT_work_dir/DLL/Config
 
-username     = Hannes
-QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
+#username     = Hannes
+#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
+#geometryPath = $$QT_work_dir/lib/Geometry
+#rectPath     = $$QT_work_dir/DLL/Rect
+#configPath   = $$QT_work_dir/DLL/Config
+
+username     = SCHEH
+QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = $$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
-
 
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
       $$configPath/$$DLL_buildPath/Config.dll
@@ -103,7 +108,7 @@ FORMS += \
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+!isEmpty(target.path): INSTALLS += target qml
 
 RESOURCES += \
     $$resourcePath/qrc.qrc
