@@ -30,6 +30,7 @@ Shape {
                        return hiddenConXOutput[sourceId]}
                    }
                    else if(biasType===sourceType){
+                       console.debug(Math.floor(destinationId/hiddenNeuronY))
                        if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
                        return biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
                    }
@@ -46,8 +47,9 @@ Shape {
                       return hiddenConYOutput[sourceId]}
                   }
                   else if(biasType===sourceType){
-                      if(0<=biasConYOutput[Math.floor(sourceId/hiddenNeuronY)]){
-                      return biasConYOutput[Math.floor(sourceId/hiddenNeuronY)]}
+                      if(0<=biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]){
+
+                      return biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]}
                   }
                   return 0
                 }

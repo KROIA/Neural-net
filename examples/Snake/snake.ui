@@ -880,8 +880,8 @@
    <widget class="QQuickWidget" name="net">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>490</y>
+      <x>1160</x>
+      <y>510</y>
       <width>351</width>
       <height>331</height>
      </rect>

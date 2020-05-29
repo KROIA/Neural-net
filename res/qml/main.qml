@@ -5,7 +5,10 @@ Window {
     id:window
     width: 1500
     height: 900
-    visible: true
+    visible: true/*
+    SingelNetWorkArea{
+        anchors.fill: parent
+    }*/
 
 
     MultiNetWorkArea{

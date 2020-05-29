@@ -119,7 +119,7 @@ Item {
             neuronValue: biasValue
             typeId: index
             type:biasType
-            lastNeuron: (index<(biasLayer.model-1))
+            lastNeuron: (index==(biasLayer.model-1))
         }
     }
 

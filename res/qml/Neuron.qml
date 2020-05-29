@@ -86,8 +86,9 @@ Rectangle {
                     }
                 }
                 else if(type===biasType){
-                    biasConYOutput[typeId]=yOutput
 
+                    biasConYOutput[typeId]=yOutput
+                    console.debug( biasConYOutput[0], biasConYOutput[1])
                     if(lastNeuron){
                         var tempBiasConYOutput=[]
                         tempBiasConYOutput=biasConYOutput
@@ -138,7 +139,7 @@ Rectangle {
     border.width: d*0.05
     border.color: "black"
     radius: d/2
-    color: if(neuronValue!=0){
+    color:if(neuronValue!=0){
                 return Qt.lighter(neuronColor,(1-Math.abs(neuronValue))*4);
          }
          else{
