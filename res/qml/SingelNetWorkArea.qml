@@ -4,6 +4,7 @@ Item {
     id:singelWorkArea
     width: 100
     height: 100
+    property int updateTime: 200
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
@@ -29,7 +30,7 @@ Item {
             height: singelWorkArea.height*0.3*totalNet
             xNetPerTab:1
             yNetPerTab:totalNet
-            updateTime: 1000
+            updateTime: singelWorkArea.updateTime
             clickedNetId:{
                 clickedNetId=0
             }
