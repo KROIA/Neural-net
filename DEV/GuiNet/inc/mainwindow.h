@@ -29,6 +29,8 @@ class MainWindow : public QMainWindow
     private slots:
         void loop();
 
+        void netErrorOccured(unsigned int netID, Error &e);
+
     private:
 
         //Global Params

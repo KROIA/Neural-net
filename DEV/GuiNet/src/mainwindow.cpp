@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     net_ID              = 0;
     net_inputs          = 4;
     net_hiddenX         = 1;
-    net_hiddenY         = 2;
+    net_hiddenY         = 1;
     net_outputs         = 1;
     net_enableBias      = true;
     net_enableAverage   = false;
@@ -30,6 +30,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ptr_net = new Net(  net_ID,net_inputs,net_hiddenX,net_hiddenY,net_outputs,
                         net_enableBias,net_enableAverage,net_activation,this);
+
+    connect(ptr_net,&Net::errorOccured,this,&MainWindow::netErrorOccured);
+
+    Connection con;
+    con.netID = 0;
+    con.direction = ConnectionDirection::forward;
+
+    con.source_ID.ID = 0;
+    con.source_ID.TYPE = NeuronType::input;
+
+    con.destination_ID.ID = 1;
+    con.destination_ID.TYPE = NeuronType::output;
+
+    con.weight = 0.5;
+
+    ptr_net->addConnection(con);
 
     ptr_net->updateNetConfiguration();
     ptr_net_visu = new NetVisu(ptr_net,this);
@@ -92,4 +108,9 @@ void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
         sinTest_angle = 0;
         sinTest_weightIndex++;
     }
+}
+void MainWindow::netErrorOccured(unsigned int netID, Error &e)
+{
+    qDebug() << "Error in Net ID: "<<netID;
+    e.print();
 }

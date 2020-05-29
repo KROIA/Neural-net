@@ -942,7 +942,7 @@ void                Net::updateNetConfiguration()
     //_connectionList.clear();
     if(_connectionList.size() == 0)
         prepareConnectionList();
-    else {
+
         _outputNeurons  = 0;
         _hiddenNeurons  = 0;
         _neurons        = 0;
@@ -1079,7 +1079,7 @@ void                Net::updateNetConfiguration()
         _costumNeurons  = __filtered_costumIDs.size();
         _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
 
-    }
+
 
 
 
@@ -1189,7 +1189,7 @@ void                Net::updateNetConfiguration()
         if(connection < _connectionList.size())
             set_ptr_intern_connectNeuron(&_connectionList[connection]);
         else
-            set_ptr_intern_connectNeuron(&_costumConnectionList[connection]);
+            set_ptr_intern_connectNeuron(&_costumConnectionList[connection-_connectionList.size()]);
 #if defined(_DEBUG_NET_TIMING)
         __debug_timer1_end  = std::chrono::high_resolution_clock::now();
         __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer1_end - __debug_timer1_start);
