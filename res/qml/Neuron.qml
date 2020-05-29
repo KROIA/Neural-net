@@ -31,7 +31,6 @@ Rectangle {
 
                     inputConXOutput[typeId]=xOutput
                     if(lastNeuron){
-                        console.debug(typeId,neuron.x)
                         var tempInputConXOutput=[]
                         tempInputConXOutput=inputConXOutput
                         inputConXOutput=tempInputConXOutput

@@ -15,7 +15,8 @@ Rectangle {
     property int fontSize: itemTopBar.height*0.2
     property int spinBoxSize: 150//if(width*0.2<150) return width*0.2
                                // else return 150
-    Flow {
+    Row {
+
         anchors.fill:parent
         TopbarSpinBox{
             id:xAxisItem

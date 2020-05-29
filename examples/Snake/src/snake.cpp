@@ -323,8 +323,8 @@ Snake::Snake(QWidget *parent) :
 
     visu = new NetVisu(net->get_netList_ptr());
 
-    visu->loadNetInUi(ui->net);
-    //visu->showWindow();
+    //visu->loadNetInUi(ui->net);
+    visu->showWindow();
     qDebug() << "Setup done";
 }
 
@@ -525,7 +525,7 @@ void Snake::timerEvent2()
         QStringList data = net->toStringList();
         for(int a=0; a<data.size(); a++)
         {
-            qDebug() << data[a];
+            //qDebug() << data[a];
         }
         double filter = 0.9;
         _genPerSecond =(double)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(double)_updateTimer2->interval());
