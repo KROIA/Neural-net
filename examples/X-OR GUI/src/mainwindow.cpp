@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     net = nullptr;
 
     input = 2;
-    hiddenX = 1;
+    hiddenX = 2;
     hiddenY = 2;
     output = 1;
     ui->hiddenX_spinBox->setValue(hiddenX);

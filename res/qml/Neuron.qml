@@ -6,85 +6,123 @@ Rectangle {
     property int neuronID: 0
     property int typeId:0
     property int type: 0
+    property bool lastNeuron: false
     onXChanged: {
-        dockingPoint()
+        dockingXPoint()
     }
     onYChanged: {      
-        dockingPoint()
+        dockingYPoint()
     }
     onDChanged: {
         dockingPoint()
     }
     property real xOffset: 0.2*d
     function dockingPoint(){
+        dockingYPoint()
+        dockingXPoint()
+    }
+    function dockingXPoint(){
         var xInput
-        var yInput
         var xOutput
-        var yOutput
         xInput=x+xOffset
         xOutput=d+x-xOffset
+        if(type===inputType){
+                    inputConXOutput[typeId]=xOutput
+                    if(lastNeuron){
+                        var tempInputConXOutput=[]
+                        tempInputConXOutput=inputConXOutput
+                        inputConXOutput=tempInputConXOutput
+                    }
+                }
+                else if(type===biasType){
+                    biasConXOutput[typeId]=xOutput
+
+                    if(lastNeuron){
+                        var tempBiasConXOutput=[]
+                        tempBiasConXOutput=biasConXOutput
+                        biasConXOutput=tempBiasConXOutput
+                   }
+
+                }
+                else if(type===hiddenType){
+                    hiddenConXInput[typeId]=xInput
+                    hiddenConXOutput[typeId]=xOutput
+                    //console.debug(hiddenConXOutput)
+
+                    if(lastNeuron){
+                        var tempHiddenConXOutput=[]
+                        var tempHiddenConXInput=[]
+                        tempHiddenConXInput=hiddenConXInput
+                        tempHiddenConXOutput=hiddenConXOutput
+                        hiddenConXInput=tempHiddenConXInput
+                        hiddenConXOutput=tempHiddenConXOutput
+                    }
+                }
+                    else if(type===outputType){
+                        outputConXInput[typeId]=xInput
+                        if(lastNeuron){
+                            var tempOutputConXInput=[]
+                            tempOutputConXInput=outputConXInput
+                            outputConXInput=tempOutputConXInput
+                    }
+                }
+
+    }
+
+    function dockingYPoint(){
+        var yInput
+        var yOutput
         yInput=(d/2)+y
         yOutput=(d/2)+y
-        //
         if(type===inputType){
-            var tempInputConXOutput=[]
-            var tempInputConYOutput=[]
-            tempInputConXOutput=inputConXOutput
-            tempInputConYOutput=inputConYOutput
+                    inputConYOutput[typeId]=yOutput
+                    if(lastNeuron){
+                        var tempInputConYOutput=[]
+                        tempInputConYOutput=inputConYOutput
+                        inputConYOutput=tempInputConYOutput
+                    }
+                }
+                else if(type===biasType){
+                    biasConYOutput[typeId]=yOutput
 
-            tempInputConXOutput[typeId]=xOutput
-            tempInputConYOutput[typeId]=yOutput
+                    if(lastNeuron){
+                        var tempBiasConYOutput=[]
+                        tempBiasConYOutput=biasConYOutput
+                        biasConYOutput=tempBiasConYOutput
+                   }
 
-            inputConXOutput=tempInputConXOutput
-            inputConYOutput=tempInputConYOutput
-        }
-        else if(type===biasType){
-            var tempBiasConXOutput=[]
-            var tempBiasConYOutput=[]
-            tempBiasConXOutput=biasConXOutput
-            tempBiasConYOutput=biasConYOutput
+                }
+                else if(type===hiddenType){
+                    hiddenConYInput[typeId]=yInput
+                    hiddenConYOutput[typeId]=yOutput
+                    //console.debug(hiddenConYOutput)
 
-            tempBiasConXOutput[typeId]=xOutput
-            tempBiasConYOutput[typeId]=yOutput
-
-            biasConXOutput=tempBiasConXOutput
-            biasConYOutput=tempBiasConYOutput
-        }
-        else if(type===hiddenType){
-            var tempHiddenConXInput=[]
-            var tempHiddenConYInput=[]
-            tempHiddenConXInput=hiddenConXInput
-            tempHiddenConYInput=hiddenConYInput
-
-            tempHiddenConXInput[typeId]=xInput
-            tempHiddenConYInput[typeId]=yInput
-
-            hiddenConXInput=tempHiddenConXInput
-            hiddenConYInput=tempHiddenConYInput
-            var tempHiddenConXOutput=[]
-            var tempHiddenConYOutput=[]
-            tempHiddenConXOutput=hiddenConXOutput
-            tempHiddenConYOutput=hiddenConYOutput
-
-            tempHiddenConXOutput[typeId]=xOutput
-            tempHiddenConYOutput[typeId]=yOutput
-
-            hiddenConXOutput=tempHiddenConXOutput
-            hiddenConYOutput=tempHiddenConYOutput
-        }
-        else if(type===outputType){
-            var tempOutputConXInput=[]
-            var tempOutputConYInput=[]
-            tempOutputConXInput=outputConXInput
-            tempOutputConYInput=outputConYInput
-
-            tempOutputConXInput[typeId]=xInput
-            tempOutputConYInput[typeId]=yInput
-
-            outputConXInput=tempOutputConXInput
-            outputConYInput=tempOutputConYInput
-        }
+                    if(lastNeuron){
+                        var tempHiddenConYOutput=[]
+                        var tempHiddenConYInput=[]
+                        tempHiddenConYInput=hiddenConYInput
+                        tempHiddenConYOutput=hiddenConYOutput
+                        hiddenConYInput=tempHiddenConYInput
+                        hiddenConYOutput=tempHiddenConYOutput
+                    }
+                }
+                    else if(type===outputType){
+                        outputConYInput[typeId]=yInput
+                        if(lastNeuron){
+                            var tempOutputConYInput=[]
+                            tempOutputConYInput=outputConYInput
+                            outputConYInput=tempOutputConYInput
+                    }
+                }
     }
+
+
+
+
+
+
+        //
+
     property string neuronColor:if(neuronValue<0){
                                           return"darkred";
                                             }

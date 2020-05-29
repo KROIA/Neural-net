@@ -99,7 +99,5 @@ Rectangle {
     }
     function updateMultiNet(){
                totalNet= netListVisu.getNetCount()
-                console.debug("new totalNet " +totalNet)
-
             }
 }
