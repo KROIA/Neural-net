@@ -937,14 +937,149 @@ void                Net::updateNetConfiguration()
             //error_general("updateNetConfiguration()",e.what());
         }
     }
-    _outputNeurons  = _outputs;
-    _hiddenNeurons  = _hiddenX * _hiddenY;
 
-    _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
 
     //_connectionList.clear();
     if(_connectionList.size() == 0)
         prepareConnectionList();
+    else {
+        _outputNeurons  = 0;
+        _hiddenNeurons  = 0;
+        _neurons        = 0;
+
+        std::vector<Connection>   __allConnectionList = _connectionList;
+        for(unsigned int pos=0; pos<_costumConnectionList.size(); pos++)
+            __allConnectionList.push_back(_costumConnectionList[pos]);
+
+        std::vector<unsigned int> __inputIDs;
+        std::vector<unsigned int> __hiddenIDs;
+        std::vector<unsigned int> __outputIDs;
+        std::vector<unsigned int> __costumIDs;
+
+
+        for(unsigned int connection=0; connection<__allConnectionList.size(); connection++)
+        {
+            switch(__allConnectionList[connection].source_ID.TYPE)
+            {
+                case NeuronType::bias:
+                {
+                    break;
+                }
+                case NeuronType::input:
+                {
+                    __inputIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                    break;
+                }
+                case NeuronType::hidden:
+                {
+                    __hiddenIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                    break;
+                }
+                case NeuronType::output:
+                {
+                    __outputIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                    break;
+                }
+                case NeuronType::costum:
+                {
+                    __costumIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                    break;
+                }
+            }
+            switch(__allConnectionList[connection].destination_ID.TYPE)
+            {
+                case NeuronType::bias:
+                {
+                    break;
+                }
+                case NeuronType::input:
+                {
+                    __inputIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                    break;
+                }
+                case NeuronType::hidden:
+                {
+                    __hiddenIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                    break;
+                }
+                case NeuronType::output:
+                {
+                    __outputIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                    break;
+                }
+                case NeuronType::costum:
+                {
+                    __costumIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                    break;
+                }
+            }
+        }
+        // __inputIDs kann mehrfach die gleiche ID enthalten.
+        // __filtered_inputIDs enthällt jede ID nur noch ein mal.
+        std::vector<unsigned int> __filtered_inputIDs;
+        std::vector<unsigned int> __filtered_hiddenIDs;
+        std::vector<unsigned int> __filtered_outputIDs;
+        std::vector<unsigned int> __filtered_costumIDs;
+
+        for(unsigned int pos=0; pos<__inputIDs.size(); pos++)
+        {
+            bool alreadyExists = false;
+            for(unsigned int new_pos=0; new_pos<__filtered_inputIDs.size(); new_pos++)
+            {
+                if(__filtered_inputIDs[new_pos] == __inputIDs[pos])
+                {
+                    alreadyExists = true;
+                }
+            }
+            if(!alreadyExists)
+                __filtered_inputIDs.push_back(__inputIDs[pos]);
+        }
+        for(unsigned int pos=0; pos<__hiddenIDs.size(); pos++)
+        {
+            bool alreadyExists = false;
+            for(unsigned int new_pos=0; new_pos<__filtered_hiddenIDs.size(); new_pos++)
+            {
+                if(__filtered_hiddenIDs[new_pos] == __hiddenIDs[pos])
+                {
+                    alreadyExists = true;
+                }
+            }
+            if(!alreadyExists)
+                __filtered_hiddenIDs.push_back(__hiddenIDs[pos]);
+        }
+        for(unsigned int pos=0; pos<__outputIDs.size(); pos++)
+        {
+            bool alreadyExists = false;
+            for(unsigned int new_pos=0; new_pos<__filtered_outputIDs.size(); new_pos++)
+            {
+                if(__filtered_outputIDs[new_pos] == __outputIDs[pos])
+                {
+                    alreadyExists = true;
+                }
+            }
+            if(!alreadyExists)
+                __filtered_outputIDs.push_back(__outputIDs[pos]);
+        }
+        for(unsigned int pos=0; pos<__costumIDs.size(); pos++)
+        {
+            bool alreadyExists = false;
+            for(unsigned int new_pos=0; new_pos<__filtered_costumIDs.size(); new_pos++)
+            {
+                if(__filtered_costumIDs[new_pos] == __costumIDs[pos])
+                {
+                    alreadyExists = true;
+                }
+            }
+            if(!alreadyExists)
+                __filtered_costumIDs.push_back(__costumIDs[pos]);
+        }
+
+        _outputNeurons  = __filtered_outputIDs.size();
+        _hiddenNeurons  = __filtered_hiddenIDs.size();
+        _costumNeurons  = __filtered_costumIDs.size();
+        _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
+
+    }
 
 
 
@@ -1459,6 +1594,11 @@ void                Net::prepareConnectionList()
     __debug_timer1_start      = std::chrono::high_resolution_clock::now();
 #endif
     _connectionList.clear();
+
+    _outputNeurons  = _outputs;
+    _hiddenNeurons  = _hiddenX * _hiddenY;
+    _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
+
     unsigned int ID = 0;
     for(unsigned int hiddenNeuronX=0; hiddenNeuronX<_hiddenX; hiddenNeuronX++)
     {
