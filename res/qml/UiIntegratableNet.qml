@@ -7,7 +7,7 @@ Item {
     property real buttonBar: 0.1
     property int maxNet: netListVisu.getNetCount()
     property int netId: spinNetId.value
-    property int updateTime: 200
+    property int updateTime: 10
     Component.onCompleted: updateNet();
     Connections {
                    target: netListVisu

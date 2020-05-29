@@ -59,19 +59,21 @@ void MainWindow::loop()
 {
     qDebug() << "Loop start";
 
+    ptr_net->set_input({1,1,1,1});
     sinusTestForWeights(*ptr_net_genom);
+    ptr_net->run();
 
     qDebug() << "Loop end";
 }
 
 void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
 {
-    double angleIncrement = 6.283185307/20;
+    double angleIncrement = 6.283185307/40;
 
     if(sinTest_weightIndex == 0)
-        *genom[genom.size()-1] = 0;
+        *genom[genom.size()-1] = 1;
     else
-        *genom[sinTest_weightIndex-1] = 0;
+        *genom[sinTest_weightIndex-1] = 1;
 
 
     if(genom.size() <= sinTest_weightIndex)
@@ -79,7 +81,7 @@ void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
         sinTest_weightIndex = 0;
     }
 
-    *genom[sinTest_weightIndex] = sin(sinTest_angle);
+    *genom[sinTest_weightIndex] = sin(sinTest_angle+6.283185307/4);
     qDebug() << *genom[sinTest_weightIndex];
 
 
