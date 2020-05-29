@@ -12,12 +12,16 @@ Rectangle {
     property int updateTimer: timer.value
     property int totalNet: 0
     property int tabId: tab.value
+    property int fontSize: itemTopBar.height*0.2
+
+
+
     Flow {
         anchors.fill:parent
         Text {
             leftPadding: itemTopBar.width*0.02
             text: "max nets\n row  "
-            font.pixelSize: itemTopBar.height*0.1
+            font.pixelSize: fontSize
             rightPadding: itemTopBar.width*0.02
         }
         SpinBox{
@@ -27,14 +31,15 @@ Rectangle {
             editable:true
             inputMethodHints: Qt.ImhDigitsOnly
             font.pixelSize: xAxis.height*0.3
-            value:3
+            value:1
+            height: parent.height*0.4
             width:parent.width*0.2
 
         }
         Text {
             leftPadding: itemTopBar.width*0.02
             text: "max nets\n column  "
-            font.pixelSize: itemTopBar.height*0.1
+            font.pixelSize: fontSize
             rightPadding: itemTopBar.width*0.02
         }
 
@@ -42,16 +47,17 @@ Rectangle {
             id:yAxis
             from: 1
             editable:true
+            height: parent.height*0.4
             inputMethodHints: Qt.ImhDigitsOnly
             font.pixelSize: height*0.3
             to: 10
-            value:3
+            value:1
             width:parent.width*0.2
         }
         Text {
             leftPadding: itemTopBar.width*0.02
             text: "update\n Timer  "
-            font.pixelSize: itemTopBar.height*0.1
+            font.pixelSize: fontSize
             rightPadding: itemTopBar.width*0.02
         }
 
@@ -60,6 +66,7 @@ Rectangle {
             editable:true
             from: 10
             to: 10000
+            height: parent.height*0.4
             inputMethodHints: Qt.ImhDigitsOnly
             font.pixelSize: height*0.3
             stepSize: 50
@@ -69,7 +76,7 @@ Rectangle {
         Text {
             leftPadding: itemTopBar.width*0.02
             text: "side:  "
-            font.pixelSize: itemTopBar.height*0.1
+            font.pixelSize: fontSize
             rightPadding: itemTopBar.width*0.02
         }
 
@@ -77,6 +84,7 @@ Rectangle {
             id:tab
             from: 0
             editable:true
+            height: parent.height*0.4
             inputMethodHints: Qt.ImhDigitsOnly
             font.pixelSize: height*0.3
             to: Math.floor(totalNet/(yAxis.value*xAxis.value))
@@ -84,6 +92,7 @@ Rectangle {
             width:parent.width*0.2
         }
     }
+
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()

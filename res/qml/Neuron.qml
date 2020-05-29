@@ -104,6 +104,7 @@ Rectangle {
              return "white"
          }
     Text {
+        visible: (parent.d>10)
         font.pixelSize: parent.d*0.2
         horizontalAlignment: Text.AlignHCenter
         text: if(type>noneType) return  "ID:"+neuronID+"\nValue: \n"+Math.round(neuronValue*10000)/10000

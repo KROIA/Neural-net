@@ -219,6 +219,7 @@ void NetVisu::startUpdateSlot(){
     access=true;
     emit startUpdateSignal();
 }
+
 void NetVisu::onRunDone(Net *p_net)
 {
     if(!access)
@@ -246,3 +247,4 @@ void NetVisu::onNetConfigurationChanged()
 {
 
 }
+

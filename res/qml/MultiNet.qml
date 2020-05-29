@@ -20,9 +20,7 @@ Item{
 
                 Repeater{
                     model:{
-                        console.debug(totalNet,tabIndex*(yNetPerTab*xNetPerTab),yNetPerTab*xNetPerTab)
                         if(totalNet-tabIndex*(yNetPerTab*xNetPerTab)>=yNetPerTab*xNetPerTab) {
-
                             return yNetPerTab*xNetPerTab}
                         else return totalNet-tabIndex*(yNetPerTab*xNetPerTab)
                     }

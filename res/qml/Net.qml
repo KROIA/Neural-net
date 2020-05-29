@@ -28,24 +28,29 @@ Item {
         }
         return 0
     }
-    property real dRelationship: 0.4
+    property real dRelationship: 0.8
     property int xDistance: {
         var w
-        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship>((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
+        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship<((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
             w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
         else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
         return (width-w)/(hiddenNeuronX+1+yOffSet*2)
     }
     property int yDistance: {
         var w
-        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship>((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
+        if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship<((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
             w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
         else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
+        console.debug(((height)/(maxYNeuron-1+yOffSet*2))+" w ="+w)
         return (height-w)/(maxYNeuron-1+yOffSet*2)
     }
-    property int d:
-        if(yDistance<xDistance) return yDistance*dRelationship
-        else return xDistance*dRelationship
+    property int d:{
+        var dP
+        if(yDistance<xDistance) dP =yDistance*dRelationship
+        else dP= xDistance*dRelationship
+        console.debug(" dP ="+dP)
+        return dP
+    }
     property variant hiddenConXInput: [0]
     property variant hiddenConYInput: [0]
 
