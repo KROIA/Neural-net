@@ -11,8 +11,10 @@
 #include <QTimer>
 #include <QDebug>
 #include <QQmlProperty>
+#include <QQuickWidget>
 
-#include <QGuiApplication>
+#define QmlRootContext "netListVisu"
+#define QmlRootUiContext "netListUiVisu"
 using namespace std;
 
 class NetVisu : public QThread
@@ -21,7 +23,9 @@ class NetVisu : public QThread
 public:
     explicit NetVisu(Net* _net,QObject *parent = nullptr);
     explicit NetVisu(vector<Net*> _net,QObject *parent = nullptr);
-    void setupQml();
+    void setupNetVisu();
+    void showWindow();
+    void loadNetInUi(QQuickWidget* widget);
     vector<int> SourceNeuron;
     vector<int> DestinationNeuron;
     vector<int> NeuronTyp;
@@ -33,7 +37,7 @@ signals:
     void stopUpdateSignal();
     void startUpdateSignal();
 public slots:
-    void callMeFromQml();
+
     int getHiddenX(const int &netId) ;
     int getHiddenY(const int &netId) ;
     int getInputs(const int &netId) ;

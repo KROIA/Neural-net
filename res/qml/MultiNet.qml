@@ -30,7 +30,7 @@ Item{
                         y: Math.floor(index/xNetPerTab)*height
                         width: multiNet.width/xNetPerTab
                         height: multiNet.height/yNetPerTab
-                        netID: 0//index+tabIndex*(yNetPerTab*xNetPerTab)
+                        netID: index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
                         }
                     }

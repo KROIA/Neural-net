@@ -34,8 +34,8 @@ Snake::Snake(QWidget *parent) :
 
     // comfigParam
     bool enableKillreward   = false;
-    unsigned int hiddenX    = 1;
-    unsigned int hiddenY    = 5;
+    unsigned int hiddenX    = 2;
+    unsigned int hiddenY    = 2;
     unsigned int animals    = 100;
     _respawnAmount          = 3;
     int mapSizeX            = 100;
@@ -325,6 +325,8 @@ Snake::Snake(QWidget *parent) :
 
     visu = new NetVisu(net->get_netList_ptr());
 
+    visu->loadNetInUi(ui->net);
+    //visu->showWindow();
     qDebug() << "Setup done";
 }
 

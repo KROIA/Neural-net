@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Rectangle {
+    id:neuron
     property int d: 20
     property real neuronValue: 0
     property int neuronID: 0
@@ -27,11 +28,14 @@ Rectangle {
         xInput=x+xOffset
         xOutput=d+x-xOffset
         if(type===inputType){
+
                     inputConXOutput[typeId]=xOutput
                     if(lastNeuron){
+                        console.debug(typeId,neuron.x)
                         var tempInputConXOutput=[]
                         tempInputConXOutput=inputConXOutput
                         inputConXOutput=tempInputConXOutput
+                        //console.debug(inputConXOutput)
                     }
                 }
                 else if(type===biasType){
@@ -139,7 +143,7 @@ Rectangle {
                 return Qt.lighter(neuronColor,(1-Math.abs(neuronValue))*4);
          }
          else{
-             return "white"
+             return "whitesmoke"
          }
     Text {
         visible: (parent.d>10)

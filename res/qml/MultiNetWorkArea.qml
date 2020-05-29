@@ -10,8 +10,8 @@ Item {
         anchors.top:multiNetArea.top
         anchors.left: multiNetArea.left
         anchors.right: multiNetArea.right
-        height:if(multiNetArea.height*0.2<100) return multiNetArea.height*0.2
-                else return 100
+        height:100//if(multiNetArea.height*0.2<100) return multiNetArea.height*0.2
+                //else return 100
     }
     MultiNet{
         anchors.top:topBar.bottom

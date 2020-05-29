@@ -5,17 +5,17 @@ NetVisu::NetVisu(Net* _net,QObject *parent):
     QThread(parent)
 {
     netList.push_back(_net);
-    setupQml();
+    setupNetVisu();
 }
 
 NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
     QThread(parent)
 {
     netList=_net;
-    setupQml();
+    setupNetVisu();
 }
 
-void NetVisu::setupQml(){
+void NetVisu::setupNetVisu(){
 
 
     if(netList.size() == 0)
@@ -40,19 +40,21 @@ void NetVisu::setupQml(){
         connect(netList[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
-    engine = new QQmlApplicationEngine;
-    context= new QQmlContext(engine);
-    context=engine->rootContext();
-    context->setContextProperty ("netListVisu", this);
-    engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-
     startUpdateSlot();
 }
 
-void NetVisu::callMeFromQml(){
-    emit newNetData();
+void NetVisu::showWindow(){
+    engine = new QQmlApplicationEngine;
+    context= new QQmlContext(engine);
+    context=engine->rootContext();
+    context->setContextProperty (QmlRootContext, this);
+    engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 }
 
+void NetVisu::loadNetInUi(QQuickWidget* widget){
+    widget->rootContext()->setContextProperty(QmlRootContext,this);
+    widget->setSource((QUrl(QStringLiteral("qrc:/qml/UiIntegratableNet.qml"))));
+}
 int NetVisu::getHiddenX(const int &netId) {
     if(unsigned(netId)<netList.size()&&access){
         return int(netList[unsigned(netId)]->get_hiddenNeuronsX());

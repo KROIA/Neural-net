@@ -134,7 +134,7 @@ Item {
                             else return 0
             typeId: index
             type:inputType
-            lastNeuron: (index==(biasLayer.model-1))
+            lastNeuron: (index==(inputLayer.model-1))
         }
     }
 
@@ -173,7 +173,7 @@ Item {
                         else return typeId+hiddenNeuronX*hiddenNeuronY
             type:outputType
             neuronValue: if(outputValue.length>typeId) outputValue[index]
-            else return 0
+                            else return 0
             lastNeuron: (index==(outputLayer.model-1))
         }
     }
@@ -184,9 +184,6 @@ Item {
         outputValue=netListVisu.getOutputsValue(netItem.netID)
         biasValue=netListVisu.getBiasValue(netItem.netID)
         conWeight=netListVisu.getConWeight(netItem.netID)
-
-
-
         /*
         */
     }
