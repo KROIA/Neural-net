@@ -1,4 +1,7 @@
-QT -= gui
+
+QT += core gui qml quick
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -19,8 +22,14 @@ srcPath = src
 
 netIncPath = ../inc
 netSrcPath = ../src
+visuInc = ../incVisu
+visuSrc = ../srcVisu
+resourcePath = ../res
+
 INCLUDEPATH += $$netIncPath \
+               $$visuInc \
                $$inc
+
 
 SOURCES += \
     $$srcPath/main.cpp \
@@ -29,8 +38,9 @@ SOURCES += \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/geneticnet.cpp \
-    $$netSrcPath/savenet.cpp
-
+    $$netSrcPath/savenet.cpp \
+    $$netSrcPath/error.cpp \
+    $$visuSrc/netvisu.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -42,4 +52,11 @@ HEADERS += \
     $$netIncPath/neuron.h \
     $$netIncPath/backpropnet.h \
     $$netIncPath/geneticnet.h \
-    $$netIncPath/savenet.h
+    $$netIncPath/savenet.h \
+    $$netIncPath/error.h \
+    $$visuInc/netvisu.h
+
+
+RESOURCES += \
+    $$resourcePath/qrc.qrc
+

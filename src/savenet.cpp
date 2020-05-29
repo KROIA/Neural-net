@@ -835,7 +835,7 @@ void                    SaveNet::set_ptr_neuronsOfNet(unsigned int ID,std::vecto
         }
         _check_connections       = true;
         _check_costumConnections = true;
-        //_genomList.push_back(std::vector<double>());
+        _genomList.push_back(std::vector<double>());
         saveGenomOfNet(static_cast<unsigned int>(_neuronList.size()-1));
     }
 }

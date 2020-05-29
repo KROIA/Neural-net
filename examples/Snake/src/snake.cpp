@@ -1481,6 +1481,7 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
             _versusEnvironment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(false);
+            visu->startUpdateSlot();
             break;
         }
         case Modus::versusAI:
@@ -1496,6 +1497,7 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
             _versusEnvironment->showInfoText(false);
+            visu->startUpdateSlot();
             break;
         }
     }
