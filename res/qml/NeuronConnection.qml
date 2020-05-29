@@ -30,7 +30,7 @@ Shape {
                        return hiddenConXOutput[sourceId]}
                    }
                    else if(biasType===sourceType){
-                       console.debug(Math.floor(destinationId/hiddenNeuronY))
+
                        if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
                        return biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
                    }

@@ -26,6 +26,7 @@ Rectangle {
             from: 1
             to: 10
             spinBoxWidth: spinBoxSize
+            onValueChanged: updateMultiNet()
         }
         TopbarSpinBox{
             id:yAxisItem
@@ -35,6 +36,7 @@ Rectangle {
             from: 1
             to: 10
             spinBoxWidth: spinBoxSize
+            onValueChanged: updateMultiNet()
         }
         TopbarSpinBox{
             id:timerItem

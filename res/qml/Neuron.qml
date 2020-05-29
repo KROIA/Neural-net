@@ -88,7 +88,6 @@ Rectangle {
                 else if(type===biasType){
 
                     biasConYOutput[typeId]=yOutput
-                    console.debug( biasConYOutput[0], biasConYOutput[1])
                     if(lastNeuron){
                         var tempBiasConYOutput=[]
                         tempBiasConYOutput=biasConYOutput
