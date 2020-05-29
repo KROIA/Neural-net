@@ -27,6 +27,7 @@ public:
     void showWindow();
     void loadNetInUi(QQuickWidget* widget);
     void setUpdateTime(QQuickWidget* widget,unsigned int upDateTime);
+    void setUpdateTime(unsigned int upDateTime);
     vector<int> SourceNeuron;
     vector<int> DestinationNeuron;
     vector<int> NeuronTyp;
@@ -72,7 +73,7 @@ private:
     QQmlApplicationEngine *engine;
     QQmlContext* context;
     vector<Net*> netList;
-
+    QQuickWidget* netWidget;
 
     vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
     vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID

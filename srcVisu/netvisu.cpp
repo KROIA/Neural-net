@@ -45,7 +45,9 @@ void NetVisu::setupNetVisu(){
 void NetVisu::setUpdateTime(QQuickWidget* widget,unsigned int upDateTime){
     widget->setProperty("updateTime",upDateTime);
    }
-
+void NetVisu::setUpdateTime(unsigned int upDateTime){
+    setUpdateTime(netWidget,upDateTime);
+}
 void NetVisu::showWindow(){
     engine = new QQmlApplicationEngine;
     context= new QQmlContext(engine);
@@ -57,6 +59,7 @@ void NetVisu::showWindow(){
 void NetVisu::loadNetInUi(QQuickWidget* widget){
     widget->rootContext()->setContextProperty(QmlRootContext,this);
     widget->setSource((QUrl(QStringLiteral("qrc:/qml/UiIntegratableNet.qml"))));
+    netWidget=widget;
 }
 
 int NetVisu::getHiddenX(const int &netId) {
