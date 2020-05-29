@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts qml quick
-
+QT       += core gui charts qml quick quickwidgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = snake

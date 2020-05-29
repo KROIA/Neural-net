@@ -1,21 +1,18 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.4
 Item {
+    id:uiIntegratableNet
     width: 100
     height: 100
     property real buttonBar: 0.1
     property int maxNet: netListVisu.getNetCount()
     property int netId: spinNetId.value
+    property int updateTime: 200
+    Component.onCompleted: updateNet();
     Connections {
                    target: netListVisu
-                   onStopUpdateSignal: timerSingelNet.running=false
-                   onStartUpdateSignal:timerSingelNet.running=true
+                   onStartUpdateSignal:updateNet()
     }
-    Timer {
-            id:timerSingelNet
-            interval: updateTime; running: false; repeat: true
-            onTriggered: updateMultiNet()
-        }
     Net{
         id:net
         x:0
@@ -23,6 +20,7 @@ Item {
         width:parent.width
         height: parent.height*(1-buttonBar)
         netID:  parent.netId
+        updateTime:uiIntegratableNet.updateTime
     }
     SpinBox{
         id:spinNetId
@@ -36,7 +34,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.top: net.bottom
     }
-    function updateMultiNet(){
+    function updateNet(){
                maxNet= netListVisu.getNetCount()
             }
 }

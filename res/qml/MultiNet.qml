@@ -10,14 +10,11 @@ Item{
     property int totalNet: 0
     property int tabIndex:0
     property int updateTime: 100
+    Component.onCompleted: updateMultiNet()
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
     }
-
-    signal updateNet()
-
-
                 Repeater{
                     model:{
                         if(totalNet-tabIndex*(yNetPerTab*xNetPerTab)>=yNetPerTab*xNetPerTab) {
@@ -30,13 +27,12 @@ Item{
                         y: Math.floor(index/xNetPerTab)*height
                         width: multiNet.width/xNetPerTab
                         height: multiNet.height/yNetPerTab
-                        netID: 0//index+tabIndex*(yNetPerTab*xNetPerTab)
+                        netID: index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
                         }
                     }
     function updateMultiNet(){
                totalNet= netListVisu.getNetCount()
-                console.debug(totalNet)
             }
 }
 

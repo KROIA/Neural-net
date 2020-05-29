@@ -5,71 +5,75 @@ Shape {
     property int conID: 0
     property real weight:1
     property int conWidth: 4
-    property real minWidth: 1
+    property real minWidth: 0.2
     property real maxWidth: d*0.3
+    property int destinationId: conDestinationID[conID]
+    property int destinationType: conDestinationType[conID]
+    property int sourceId: conSourceID[conID]
+    property int sourceType:conSourceType[conID]
     property real d: 0.2
+    visible: (Math.abs(weight)*d*0.2)>minWidth
     ShapePath {
            strokeColor: if(weight>0) return "green"
                         else if(weight<0) return "red"
                         else return "white"
-           strokeWidth: if(Math.abs(weight)*d*0.2<minWidth) return minWidth
-                        else if(Math.abs(weight)*d*0.2>maxWidth) return maxWidth
+           strokeWidth:if(Math.abs(weight)*d*0.2>maxWidth) return maxWidth
                         else return Math.abs(weight)*d*0.2
 
            startX:{
-                   if(inputType===conSourceType[conID]){
-                       if(0<=inputConXOutput[conSourceID[conID]]){
-                       return inputConXOutput[conSourceID[conID]]}
+                   if(inputType===sourceType){
+                       if(0<=inputConXOutput[sourceId]){
+                       return inputConXOutput[sourceId]}
                    }
-                   else if(hiddenType===conSourceType[conID]){
-                       if(0<=hiddenConXOutput[conSourceID[conID]]){
-                       return hiddenConXOutput[conSourceID[conID]]}
+                   else if(hiddenType===sourceType){
+                       if(0<=hiddenConXOutput[sourceId]){
+                       return hiddenConXOutput[sourceId]}
                    }
-                   else if(biasType===conSourceType[conID]){
-                       if(0<=biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]){
-                       return biasConXOutput[Math.floor(conDestinationID[conID]/hiddenNeuronY)]}
+                   else if(biasType===sourceType){
+                       if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
+                       return biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
                    }
                    return 0
                }
 
            startY:{
-                  if(inputType===conSourceType[conID]){
-                      if(0<=inputConYOutput[conSourceID[conID]]){
-                      return inputConYOutput[conSourceID[conID]]}
+                  if(inputType===sourceType){
+                      if(0<=inputConYOutput[sourceId]){
+                      return inputConYOutput[sourceId]}
                   }
-                  else if(hiddenType===conSourceType[conID]){
-                      if(0<=hiddenConYOutput[conSourceID[conID]]){
-                      return hiddenConYOutput[conSourceID[conID]]}
+                  else if(hiddenType===sourceType){
+                      if(0<=hiddenConYOutput[sourceId]){
+                      return hiddenConYOutput[sourceId]}
                   }
-                  else if(biasType===conSourceType[conID]){
-                      if(0<=biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]){
-                      return biasConYOutput[Math.floor(conSourceID[conID]/hiddenNeuronY)]}
+                  else if(biasType===sourceType){
+                      if(0<=biasConYOutput[Math.floor(sourceId/hiddenNeuronY)]){
+                      return biasConYOutput[Math.floor(sourceId/hiddenNeuronY)]}
                   }
                   return 0
                 }
            PathLine {
                x: {
-                   if(outputType===conDestinationType[conID]){
-                       if(0<=outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]){
-                            return outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                   if(outputType===destinationType){
+                       if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
+                            return outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                        }
                    }
-                   else if(hiddenType===conDestinationType[conID]){
-                       if(0<=hiddenConXInput[conDestinationID[conID]]){
-                            return hiddenConXInput[conDestinationID[conID]]
+                   else if(hiddenType===destinationType){
+                       if(0<=hiddenConXInput[destinationId]){
+                            return hiddenConXInput[destinationId]
                        }
                    }
                    return 0
                }
                y: {
-                  if(outputType===conDestinationType[conID]){
-                      if(0<=outputConXInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]){
-                            return outputConYInput[conDestinationID[conID]-hiddenNeuronX*hiddenNeuronY]
+                  if(outputType===destinationType){
+                      if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
+                            return outputConYInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                       }
                   }
-                  else  if(hiddenType===conDestinationType[conID]){
-                      if(0<=hiddenConYInput[conDestinationID[conID]]){
-                            return hiddenConYInput[conDestinationID[conID]]
+                  else  if(hiddenType===destinationType){
+                      if(0<=hiddenConYInput[destinationId]){
+                            return hiddenConYInput[destinationId]
                       }
                   }
                   return 0
