@@ -11,6 +11,7 @@ Item{
     property int tabIndex:0
     property int updateTime: 100
     Component.onCompleted: updateMultiNet()
+    property int clickedNetId: 0
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
@@ -29,6 +30,8 @@ Item{
                         height: multiNet.height/yNetPerTab
                         netID: index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
+                        enableMousArea: true
+                        onClickedNet: clickedNetId=id
                         }
                     }
     function updateMultiNet(){

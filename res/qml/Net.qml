@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.14
+import QtQuick.Controls 2.4
 
 Item {
     id:netItem
@@ -13,6 +14,7 @@ Item {
     property variant hiddenValue: netListVisu.getHiddenValue(netItem.netID)
     property variant outputValue:netListVisu.getOutputsValue(netItem.netID)
     property variant inputValue:netListVisu.getInputsValue(netItem.netID)
+    property bool enableMousArea: false
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -81,12 +83,16 @@ Item {
     property int outputType: 3
     property int biasType: 5
 
+
     property bool bias: netListVisu.getBias(netItem.netID)
     property real biasValue: netListVisu.getBiasValue(netItem.netID)
     property real yOffSet: 0.1
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
                         else return 0
+
+    property bool showId: true
+    signal clickedNet(var id)
     Connections {
                    target: netListVisu
                    onStopUpdateSignal: timerNet.running=false
@@ -202,5 +208,22 @@ Item {
         conDestinationType=netListVisu.getConDestinationType(netItem.netID)
 
         bias=netListVisu.getBias(netItem.netID)
+    }
+    Text {
+        anchors.top:parent.top
+        anchors.right: parent.right
+        anchors.rightMargin: xOffSet*2
+        anchors.topMargin: yOffSet
+        topPadding: yOffSet
+        text: "net Id: "+netID
+        font.pixelSize: parent.d*0.8
+
+        visible:showId
+        horizontalAlignment: Text.AlignRight
+    }
+    MouseArea{
+        anchors.fill: parent
+        enabled: enableMousArea
+        onClicked: clickedNet(netID)
     }
 }
