@@ -76,6 +76,11 @@ private:
     vector<Net*> netList;
     QQuickWidget* netWidget;
 
+
+    vector<bool> disableNeuronSignalUpdateEvent;
+    vector<bool> disableNetGenomUpdateEvent;
+    vector<bool> disableNetBiasValueUpdateEvent;
+
     vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
     vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID
     vector<vector<double>   > outputValueList; //Index depending on NetID, secondDimension: depending on the output

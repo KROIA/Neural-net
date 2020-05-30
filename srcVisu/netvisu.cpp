@@ -30,6 +30,9 @@ void NetVisu::setupNetVisu(){
     }
     netWidget = nullptr;
 
+    disableNeuronSignalUpdateEvent  = vector<bool>(netList.size(),false);
+    disableNetGenomUpdateEvent      = vector<bool>(netList.size(),false);
+    disableNetBiasValueUpdateEvent  = vector<bool>(netList.size(),false);
     //Reserve the space for all nets
     inputValueList  = vector<vector<double>  >(netList.size(),vector<double>(0,0));
     hiddenValueList = vector<vector<double>  >(netList.size(),vector<double>(0,0));
@@ -63,7 +66,14 @@ void NetVisu::loadNetInUi(QQuickWidget* widget){
 }
 
 void NetVisu::displayUpdatNetTimer(const int &netId){
-
+    if(netId >= netList.size())
+    {
+        qDebug() << "Error: NetVisu::displayUpdatNetTimer(const int &netId ["<<netId<<"]) : netId out of range";
+        return;
+    }
+    disableNeuronSignalUpdateEvent[unsigned(netId)]  = false;
+    disableNetGenomUpdateEvent[unsigned(netId)]      = false;
+    disableNetBiasValueUpdateEvent[unsigned(netId)]  = false;
 }
 
 int NetVisu::getHiddenX(const int &netId) {
@@ -235,26 +245,29 @@ void NetVisu::startUpdateSlot(){
 
 void NetVisu::onRunDone(Net *p_net)
 {
-    if(!access)
+    if(!access || disableNeuronSignalUpdateEvent[p_net->get_ID()])
         return;
-    unsigned int netID      = p_net->get_ID();
-    inputValueList[netID]   = p_net->get_input();
-    hiddenValueList[netID]  = p_net->get_hidden();
-    outputValueList[netID]  = p_net->get_output();
+    unsigned int netID              = p_net->get_ID();
+    inputValueList[netID]           = p_net->get_input();
+    hiddenValueList[netID]          = p_net->get_hidden();
+    outputValueList[netID]          = p_net->get_output();
+    disableNeuronSignalUpdateEvent[p_net->get_ID()]  = true;
 }
 void NetVisu::onBiasValueChanged(Net *p_net)
 {
-    if(!access)
+    if(!access || disableNetBiasValueUpdateEvent[p_net->get_ID()])
         return;
-    unsigned int netID      = p_net->get_ID();
-    biasValueList[netID]    = p_net->get_biasValue();
+    unsigned int netID              = p_net->get_ID();
+    biasValueList[netID]            = p_net->get_biasValue();
+    disableNetBiasValueUpdateEvent[p_net->get_ID()]  = true;
 }
 void NetVisu::onWeightsChanged(Net *p_net)
 {
-    if(!access)
+    if(!access || disableNetGenomUpdateEvent[p_net->get_ID()])
         return;
-    unsigned int netID      = p_net->get_ID();
-    genomList[netID]        = p_net->get_genom();
+    unsigned int netID          = p_net->get_ID();
+    genomList[netID]            = p_net->get_genom();
+    disableNetGenomUpdateEvent[p_net->get_ID()]  = true;
 }
 void NetVisu::onNetConfigurationChanged()
 {
