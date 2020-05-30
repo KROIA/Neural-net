@@ -324,7 +324,7 @@ Snake::Snake(QWidget *parent) :
     visu = new NetVisu(net->get_netList_ptr());
 
     visu->loadNetInUi(ui->net_widget);
-    //visu->showWindow();
+    visu->showWindow();
     qDebug() << "Setup done";
 }
 

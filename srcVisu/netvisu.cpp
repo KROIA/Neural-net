@@ -62,6 +62,10 @@ void NetVisu::loadNetInUi(QQuickWidget* widget){
     netWidget=widget;
 }
 
+void NetVisu::displayUpdatNetTimer(const int &netId){
+
+}
+
 int NetVisu::getHiddenX(const int &netId) {
     if(unsigned(netId)<netList.size()&&access){
         return int(netList[unsigned(netId)]->get_hiddenNeuronsX());

@@ -105,7 +105,9 @@ Item {
         id:timerNet
             interval: updateTime; running: true
              repeat: true
-            onTriggered: updateValue()
+            onTriggered: {netListVisu.displayUpdatNetTimer(netID)
+                updateValue()
+            }
         }
     Repeater{
         model: conWeight.length

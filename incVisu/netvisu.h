@@ -40,7 +40,7 @@ signals:
     void setUpdateTimeSignal(unsigned int time);
 public slots:
     void setUpdateTime(unsigned int upDateTime);
-
+    void displayUpdatNetTimer(const int &netId);
     int getHiddenX(const int &netId) ;
     int getHiddenY(const int &netId) ;
     int getInputs(const int &netId) ;
