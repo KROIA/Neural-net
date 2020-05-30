@@ -12,7 +12,7 @@ Item {
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateNet()
-    }
+                   }
     Net{
         id:net
         x:0

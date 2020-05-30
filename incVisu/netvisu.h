@@ -26,8 +26,7 @@ public:
     void setupNetVisu();
     void showWindow();
     void loadNetInUi(QQuickWidget* widget);
-    static void setUpdateTime(QQuickWidget* widget,unsigned int upDateTime);
-    void setUpdateTime(unsigned int upDateTime);
+
     vector<int> SourceNeuron;
     vector<int> DestinationNeuron;
     vector<int> NeuronTyp;
@@ -38,7 +37,9 @@ signals:
     void newNetData();
     void stopUpdateSignal();
     void startUpdateSignal();
+    void setUpdateTimeSignal(unsigned int time);
 public slots:
+    void setUpdateTime(unsigned int upDateTime);
 
     int getHiddenX(const int &netId) ;
     int getHiddenY(const int &netId) ;

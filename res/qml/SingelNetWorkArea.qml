@@ -8,6 +8,7 @@ Item {
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
+
     }
     Net{
         id:mainNet

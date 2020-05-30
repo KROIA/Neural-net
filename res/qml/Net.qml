@@ -98,6 +98,8 @@ Item {
                    onStopUpdateSignal: timerNet.running=false
                    onStartUpdateSignal:{timerNet.running=true
                        updateStructur()}
+                   onSetUpdateTimeSignal:updateTime=time
+
     }
     Timer {
         id:timerNet

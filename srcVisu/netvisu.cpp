@@ -43,17 +43,11 @@ void NetVisu::setupNetVisu(){
     }
     startUpdateSlot();
 }
-void NetVisu::setUpdateTime(QQuickWidget* widget,unsigned int upDateTime){
-    if(widget == nullptr)
-    {
-        qDebug() << "Error: NetVisu::setUpdateTime(QQuickWidget* widget,unsigned int ["<<upDateTime<<"]): widged is a nullptr";
-        return;
-    }
-    widget->setProperty("updateTime",upDateTime);
-}
+
 void NetVisu::setUpdateTime(unsigned int upDateTime){
-    setUpdateTime(netWidget,upDateTime);
+    emit setUpdateTimeSignal(upDateTime);
 }
+
 void NetVisu::showWindow(){
     engine = new QQmlApplicationEngine;
     context= new QQmlContext(engine);
