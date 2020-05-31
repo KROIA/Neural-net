@@ -16,6 +16,7 @@ Item {
     property variant inputValue:netListVisu.getInputsValue(netItem.netID)
     property bool enableMousArea: false
     property bool enableUpdateTimer: true
+    property bool forceTimer: false
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -93,13 +94,14 @@ Item {
                         else return 0
 
     property bool showId: true
+
     signal clickedNet(var id)
     Connections {
                    target: netListVisu
                    onStopUpdateSignal: timerNet.running=false
                    onStartUpdateSignal:{timerNet.running=true
                        updateStructur()}
-                   onSetUpdateTimeSignal:updateTime=time
+                   onSetUpdateTimeSignal:if(!forceTimer) updateTime=time
 
     }
     Timer {
@@ -218,12 +220,12 @@ Item {
     Text {
         anchors.top:parent.top
         anchors.right: parent.right
-        anchors.rightMargin: netItem.width*0.2
+        anchors.rightMargin: netItem.width*xOffSet
 
         anchors.topMargin: yOffSet
         topPadding: yOffSet
         text: "net Id: "+netID
-        font.pixelSize: parent.d*0.8
+        font.pixelSize: parent.d*0.8<20 ? parent.d*0.8:20
 
         visible:showId
         horizontalAlignment: Text.AlignRight

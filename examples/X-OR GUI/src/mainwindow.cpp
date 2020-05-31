@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     setupTrainingSet();
     visu = new NetVisu(net);
+    visu->showWindow();
 }
 
 MainWindow::~MainWindow()
