@@ -160,4 +160,9 @@ Rectangle {
                               return "black"
                           }
     }
+    signal clickedNeuron(var id,var type)
+    MouseArea{
+        anchors.fill: parent
+        onClicked: clickedNeuron(typeId,type)
+    }
 }

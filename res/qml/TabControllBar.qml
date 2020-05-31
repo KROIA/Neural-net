@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Extras 1.4
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.5
 import QtQuick.Controls 2.13
 Rectangle {
     id:tabControllBar
@@ -8,6 +8,7 @@ Rectangle {
     property variant texts: ["",""]
     width: 800
     height: 25
+    color: "black"
     property int show: hideButton.checked
     Row{
         x:0
@@ -25,6 +26,8 @@ Rectangle {
         TabBar{
             contentHeight:tabControllBar.height
             height: tabControllBar.height
+            contentWidth:100
+            width: tabControllBar.width
             Repeater{
                 model:texts.length
                 TabButton{
@@ -34,19 +37,29 @@ Rectangle {
                         hideButton.checked=true
                     }
                     height: tabControllBar.height
-                    width: 100
+                    width: 110
                     contentItem: Text{
                         color: "black"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         text: texts[index]
+                        font.pixelSize: 13
+
                     }
 
                     background:
                         Rectangle{
+                            Rectangle{
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                width: 2
+
+                            }
                             anchors.fill: parent
                             color: parent.checked ? "silver" : "darkgrey"
-                        }
+                            border.width: 0
+                    }
 
 
                 }

@@ -7,6 +7,8 @@ Rectangle{
     width: 0
     property int showWidth: 100
     property variant showContent: [false,false]
+    property int clickedNeuronID: -1
+    property int clickedNeuronType:0
     states: [
             State {
                 name: "show"
@@ -51,6 +53,8 @@ Rectangle{
             anchors.fill: parent
             visible: tabBar.showContent[1]
             netID: mainNet.netID
+            clickedNeuronID:sidebar.clickedNeuronID
+            clickedNeuronType: sidebar.clickedNeuronType
         }
     }
 

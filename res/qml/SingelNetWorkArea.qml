@@ -24,6 +24,7 @@ Item {
         anchors.top: singelWorkArea.top
         showWidth: singelWorkArea.width*0.2
         height: singelWorkArea.height
-
+        clickedNeuronID: mainNet.clickedNeuronID
+        clickedNeuronType: mainNet.clickedNeuronType
     }
 }

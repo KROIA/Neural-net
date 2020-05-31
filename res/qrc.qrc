@@ -14,5 +14,7 @@
         <file>qml/TabBarSideButton.qml</file>
         <file>qml/TabControllBar.qml</file>
         <file>qml/NetInfo.qml</file>
+        <file>qml/NetData.qml</file>
+        <file>qml/ConnectionList.qml</file>
     </qresource>
 </RCC>

@@ -1,22 +1,13 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.4
 
-Item {
+NetData {
     id:netItem
     width: 600
     height: 600
-    property int netID: 0
-    property int updateTime:100
-    property int hiddenNeuronX: netListVisu.getHiddenX(netItem.netID)
-    property int hiddenNeuronY: netListVisu.getHiddenY(netItem.netID)
-    property int inputNeuron: netListVisu.getInputs(netItem.netID)
-    property int outputNeuron: netListVisu.getOutputs(netItem.netID)
-    property variant hiddenValue: netListVisu.getHiddenValue(netItem.netID)
-    property variant outputValue:netListVisu.getOutputsValue(netItem.netID)
-    property variant inputValue:netListVisu.getInputsValue(netItem.netID)
     property bool enableMousArea: false
-    property bool enableUpdateTimer: true
-    property bool forceTimer: false
+    property int clickedNeuronID: -1
+    property int clickedNeuronType: 0
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -68,50 +59,21 @@ Item {
     property variant biasConXOutput: []
     property variant biasConYOutput: []
 
-    property variant hiddenIDs: netListVisu.getHiddenID(netItem.netID)
-    property variant outputIds: netListVisu.getOutputID(netItem.netID)
 
-    property variant conSourceID: netListVisu.getConSourceID(netItem.netID)
-    property variant conDestinationID: netListVisu.getConDestinationID(netItem.netID)
-
-    property variant conSourceType: netListVisu.getConSourceType(netItem.netID)
-    property variant conDestinationType: netListVisu.getConDestinationType(netItem.netID)
-
-    property variant conWeight: netListVisu.getConWeight(netItem.netID)
-
-    property int noneType: 1
-    property int inputType: 1
-    property int hiddenType: 2
-    property int outputType: 3
-    property int biasType: 5
-
-
-    property bool bias: netListVisu.getBias(netItem.netID)
-    property real biasValue: netListVisu.getBiasValue(netItem.netID)
     property real yOffSet: 0.1
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
                         else return 0
 
     property bool showId: true
-
     signal clickedNet(var id)
-    Connections {
-                   target: netListVisu
-                   onStopUpdateSignal: timerNet.running=false
-                   onStartUpdateSignal:{timerNet.running=true
-                       updateStructur()}
-                   onSetUpdateTimeSignal:if(!forceTimer) updateTime=time
 
+    MouseArea{
+        anchors.fill: parent
+        enabled: enableMousArea
+        onClicked: clickedNet(netID)
     }
-    Timer {
-        id:timerNet
-            interval: updateTime; running: enableUpdateTimer
-             repeat: true
-            onTriggered: {netListVisu.displayUpdatNetTimer(netID)
-                updateValue()
-            }
-        }
+
     Repeater{
         model: conWeight.length
         NeuronConnection{
@@ -122,7 +84,6 @@ Item {
     }
     Repeater{
         id:biasLayer
-
         model: hiddenNeuronX+1
         visible: bias
         Neuron{
@@ -133,6 +94,10 @@ Item {
             typeId: index
             type:biasType
             lastNeuron: (index==(biasLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
         }
     }
 
@@ -149,6 +114,10 @@ Item {
             typeId: index
             type:inputType
             lastNeuron: (index==(inputLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
         }
     }
 
@@ -172,6 +141,10 @@ Item {
                              else return 0
                 type:hiddenType
                 lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
+                onClickedNeuron: {
+                    clickedNeuronID= typeId
+                    clickedNeuronType= type
+                }
             }
         }
     }
@@ -189,34 +162,14 @@ Item {
             neuronValue: if(outputValue.length>typeId) outputValue[index]
                             else return 0
             lastNeuron: (index==(outputLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
         }
     }
 
-    function updateValue(){
-        hiddenValue=netListVisu.getHiddenValue(netItem.netID)
-        inputValue=netListVisu.getInputsValue(netItem.netID)
-        outputValue=netListVisu.getOutputsValue(netItem.netID)
-        biasValue=netListVisu.getBiasValue(netItem.netID)
-        conWeight=netListVisu.getConWeight(netItem.netID)
-        /*
-        */
-    }
-    function updateStructur(){
-        //console.debug("update Struc")
-        inputNeuron=netListVisu.getInputs(netItem.netID)
-        outputNeuron=netListVisu.getOutputs(netItem.netID)
-        hiddenNeuronX=netListVisu.getHiddenX(netItem.netID)
-        hiddenNeuronY=netListVisu.getHiddenY(netItem.netID)
 
-        hiddenIDs=netListVisu.getHiddenID(netItem.netID)
-        outputIds=netListVisu.getOutputID(netItem.netID)
-        conSourceID=netListVisu.getConSourceID(netItem.netID)
-        conSourceType=netListVisu.getConSourceType(netItem.netID)
-        conDestinationID=netListVisu.getConDestinationID(netItem.netID)
-        conDestinationType=netListVisu.getConDestinationType(netItem.netID)
-
-        bias=netListVisu.getBias(netItem.netID)
-    }
     Text {
         anchors.top:parent.top
         anchors.right: parent.right
@@ -230,9 +183,5 @@ Item {
         visible:showId
         horizontalAlignment: Text.AlignRight
     }
-    MouseArea{
-        anchors.fill: parent
-        enabled: enableMousArea
-        onClicked: clickedNet(netID)
-    }
+
 }
