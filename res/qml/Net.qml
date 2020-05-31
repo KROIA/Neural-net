@@ -15,6 +15,7 @@ Item {
     property variant outputValue:netListVisu.getOutputsValue(netItem.netID)
     property variant inputValue:netListVisu.getInputsValue(netItem.netID)
     property bool enableMousArea: false
+    property bool enableUpdateTimer: true
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -103,7 +104,7 @@ Item {
     }
     Timer {
         id:timerNet
-            interval: updateTime; running: true
+            interval: updateTime; running: enableUpdateTimer
              repeat: true
             onTriggered: {netListVisu.displayUpdatNetTimer(netID)
                 updateValue()
@@ -140,6 +141,7 @@ Item {
             x:xOffSet*xDistance
             y:(index+yOffSet)*yDistance+yBiasPos
             d:netItem.d
+
             neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
                             else return 0
             typeId: index
@@ -216,7 +218,8 @@ Item {
     Text {
         anchors.top:parent.top
         anchors.right: parent.right
-        anchors.rightMargin: xOffSet*2
+        anchors.rightMargin: netItem.width*0.2
+
         anchors.topMargin: yOffSet
         topPadding: yOffSet
         text: "net Id: "+netID

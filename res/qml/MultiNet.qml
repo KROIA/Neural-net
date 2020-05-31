@@ -10,8 +10,27 @@ Item{
     property int totalNet: 0
     property int tabIndex:0
     property int updateTime: 100
+    property bool enableUpdateTimer: true
+    property int maxTab: Math.ceil(totalNet/(xNetPerTab*yNetPerTab))
+    property int minTab: 0
     Component.onCompleted: updateMultiNet()
     property int clickedNetId: 0
+
+    MouseArea{
+        anchors.fill: parent
+        onWheel: {
+                if (wheel.angleDelta.y > 0)
+                {
+                    if(multiNet.tabIndex>multiNet.minTab)
+                        multiNet.tabIndex--
+                }
+                else
+                {
+                    if(multiNet.tabIndex<multiNet.maxTab-1) multiNet.tabIndex++
+
+                }
+        }
+    }
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
@@ -32,11 +51,13 @@ Item{
                         updateTime:multiNet.updateTime
                         enableMousArea: true
                         onClickedNet: clickedNetId=id
+                        enableUpdateTimer:multiNet.enableUpdateTimer
                         }
                     }
     function updateMultiNet(){
                totalNet= netListVisu.getNetCount()
             }
+
 }
 
 

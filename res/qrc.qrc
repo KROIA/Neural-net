@@ -10,5 +10,7 @@
         <file>qml/MultiNetTopBar.qml</file>
         <file>qml/UiIntegratableNet.qml</file>
         <file>qml/TopbarSpinBox.qml</file>
+        <file>qml/SingelNetSideBar.qml</file>
+        <file>qml/LeftSideButton.qml</file>
     </qresource>
 </RCC>
