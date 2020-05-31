@@ -21,7 +21,5 @@ ToggleButtonStyle  {
         transformOrigin:Item.Center
         horizontalAlignment: Text.AlignHCenter
     }
-
-
-    }
+}
 

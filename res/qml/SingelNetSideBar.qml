@@ -22,10 +22,10 @@ Rectangle{
         anchors.right: sidebarContent.left
         ToggleButton{
             id:hideButton
+
             text:hideButton.checked ? "<" : ">"
             onCheckedChanged: checked ? sidebar.state= 'show':sidebar.state='*'
             height: width
-            onPressedChanged: checked=true
             style: LeftSideButton{
 
             }
