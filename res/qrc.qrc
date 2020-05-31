@@ -11,6 +11,8 @@
         <file>qml/UiIntegratableNet.qml</file>
         <file>qml/TopbarSpinBox.qml</file>
         <file>qml/SingelNetSideBar.qml</file>
-        <file>qml/LeftSideButton.qml</file>
+        <file>qml/TabBarSideButton.qml</file>
+        <file>qml/TabControllBar.qml</file>
+        <file>qml/NetInfo.qml</file>
     </qresource>
 </RCC>

@@ -11,6 +11,7 @@ Item{
     property int tabIndex:0
     property int updateTime: 100
     property bool enableUpdateTimer: true
+    property bool forceTimer: false
     property int maxTab: Math.ceil(totalNet/(xNetPerTab*yNetPerTab))
     property int minTab: 0
     Component.onCompleted: updateMultiNet()
@@ -52,6 +53,7 @@ Item{
                         enableMousArea: true
                         onClickedNet: clickedNetId=id
                         enableUpdateTimer:multiNet.enableUpdateTimer
+                        forceTimer:multiNet.forceTimer
                         }
                     }
     function updateMultiNet(){

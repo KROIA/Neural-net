@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Extras 1.4
-
+import QtQuick.Controls 2.13
 Rectangle{
     id:sidebar
     color: "silver"
@@ -16,39 +16,19 @@ Rectangle{
 
             }
         ]
-    Column{
-        anchors.top: sidebar.top
-        anchors.bottom: sidebar.bottom
+    TabControllBar{
+        id:tabBar
+        onShowChanged: show ? sidebar.state= 'show':sidebar.state='*'
+        width:sidebar.height
         anchors.right: sidebarContent.left
-        ToggleButton{
-            id:hideButton
 
-            text:hideButton.checked ? "<" : ">"
-            onCheckedChanged: checked ? sidebar.state= 'show':sidebar.state='*'
-            height: width
-            style: LeftSideButton{
-
-            }
-        }
-        ToggleButton{
-            id:multiNetButton
-            checked: showContent[0]
-            onPressedChanged: showContent=[true,false]
-            style: LeftSideButton{
-
-            }
-            text: "all Nets"
-        }
-        ToggleButton{
-            id:netInfoButton
-            checked: showContent[1]
-            onPressedChanged: showContent=[false,true]
-            style: LeftSideButton{
-
-            }
-            text: "Net info"
-        }
+        anchors.top: sidebar.bottom
+        transformOrigin: Item.BottomRight
+        anchors.rightMargin: height
+        rotation: 90
+        texts: ["All nets","Net Info"]
     }
+
     Item{
         id:sidebarContent
         anchors.top: parent.top
@@ -61,14 +41,19 @@ Rectangle{
             anchors.fill: parent
             xNetPerTab:1
             yNetPerTab:3
-            visible: multiNetButton.checked
-            updateTime: singelWorkArea.updateTime
-            clickedNetId:{
-                clickedNetId=0
-            }
-            enableUpdateTimer: false
+            visible: tabBar.showContent[0]
+            updateTime: 1000//singelWorkArea.updateTime
+            forceTimer: true
+            clickedNetId:0
             onClickedNetIdChanged: mainNet.netID=clickedNetId
         }
+        NetInfo{
+            anchors.fill: parent
+            visible: tabBar.showContent[1]
+            netID: mainNet.netID
+        }
     }
+
+
 }
 
