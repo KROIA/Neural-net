@@ -16,5 +16,6 @@
         <file>qml/NetInfo.qml</file>
         <file>qml/NetData.qml</file>
         <file>qml/ConnectionList.qml</file>
+        <file>js/VisuFunction.js</file>
     </qresource>
 </RCC>

@@ -33,7 +33,7 @@ NetData {
                 Text {font.pointSize: fontSize;text: "BiasValue "; visible: bias}
                 Text {font.pointSize: fontSize;text: biasValue; visible: bias}
                 Text {font.pointSize: fontSize;text: "\nInputs "}
-                Text {font.pointSize: fontSize;text: inputNeuron}
+                Text {font.pointSize: fontSize;text: "\n"+inputNeuron}
                 Text {font.pointSize: fontSize;text: "Outputs "}
                 Text {font.pointSize: fontSize;text: outputNeuron}
                 Text {font.pointSize: fontSize;text: "HiddenX "}

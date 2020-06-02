@@ -1,5 +1,5 @@
 import QtQuick 2.0
-
+import "../js/VisuFunction.js" as VisuFunction
 Item {
     property int netID: 0
     property int updateTime:100
@@ -9,6 +9,7 @@ Item {
 
     property int hiddenNeuronX: netListVisu.getHiddenX(netID)
     property int hiddenNeuronY: netListVisu.getHiddenY(netID)
+    property int totalHidden: hiddenNeuronY*hiddenNeuronX
     property int inputNeuron: netListVisu.getInputs(netID)
     property int outputNeuron: netListVisu.getOutputs(netID)
     property variant hiddenValue: netListVisu.getHiddenValue(netID)
@@ -25,7 +26,7 @@ Item {
     property variant hiddenIDs: netListVisu.getHiddenID(netID)
     property variant outputIds: netListVisu.getOutputID(netID)
 
-    property variant conSourceID: netListVisu.getConSourceID(netID)
+    property variant conSourceID:netListVisu.getConSourceID(netID)
     property variant conDestinationID: netListVisu.getConDestinationID(netID)
 
     property variant conSourceType: netListVisu.getConSourceType(netID)
@@ -78,15 +79,15 @@ Item {
         bias=netListVisu.getBias(netID)
     }
     function getTypeString(type){
-        if(clickedNeuronType===noneType){
+        if(type===noneType){
             return "noneType"}
-        else if(clickedNeuronType===inputType){
+        else if(type===inputType){
             return "inputType"}
-        else if(clickedNeuronType===hiddenType){
+        else if(type===hiddenType){
             return "hiddenType"}
-        else if(clickedNeuronType===outputType){
+        else if(type===outputType){
             return "outputType"}
-        else if(clickedNeuronType===biasType){
+        else if(type===biasType){
             return "biasType"}
         else return ""
     }
@@ -102,7 +103,7 @@ Item {
         var orgId
         orgId=id
         if(type===outputType){
-            id +=hiddenNeuronX*hiddenNeuronY
+            id +=totalHidden
         }
         else if(type===biasType){
             id=0
