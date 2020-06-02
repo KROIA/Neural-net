@@ -161,10 +161,9 @@ NetData {
                     clickedNeuronID= typeId
                     clickedNeuronType= type
                 }
-                transparent: hiddenTransparent[index]
-
-            }
+                transparent: hiddenTransparent[typeId]
         }
+    }
     }
     Repeater{
         id:outputLayer
@@ -220,12 +219,11 @@ NetData {
     }
 
     function setHighlight(id,type,highlightValue){
-        //console.debug("set Highlight "+id+" "+getTypeString(type))
         if(type===hiddenType){
             hiddenTransparent[id]=highlightValue
         }
         else if(type===outputType){
-            outputTransparent[id]=highlightValue
+            outputTransparent[id-totalHidden]=highlightValue
         }
         else if(type===inputType){
             inputTransparent[id]=highlightValue
@@ -239,13 +237,12 @@ NetData {
         var highlightValue=100
         setTransparancy(20)
         setHighlight(id,type,highlightValue)
-
         var arrConId=[]
-
+        var sType
+        var sId
         arrConId=getConSource(id,type)
         for(var i=0;i<arrConId.length;i++){
-            var sType
-            var sId
+
             sId=conDestinationID[arrConId[i]]
             sType=conDestinationType[arrConId[i]]
             conTransparent[arrConId[i]]=highlightValue
@@ -262,6 +259,7 @@ NetData {
             conTransparent[arrConId[i]]=highlightValue
             setHighlight(sId,sType,highlightValue)
         }
+        console.debug(hiddenTransparent)
         updateTransparancy()
     }
 }

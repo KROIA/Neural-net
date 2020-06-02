@@ -36,7 +36,7 @@ Column {
             Repeater{
             model: conArr.length
             Text {
-                text: conWeight[conArr[index]]
+                text: Math.round(conWeight[conArr[index]]*1000)/1000
                 font.pointSize:fontSize
                 }
             }
