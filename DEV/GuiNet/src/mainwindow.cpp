@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Global Parameters
-    timer_loop_interval = 10; //100 ms for the loop
+    timer_loop_interval = 100; //100 ms for the loop
     sinTest_weightIndex = 0;
     sinTest_angle       = 0;
 

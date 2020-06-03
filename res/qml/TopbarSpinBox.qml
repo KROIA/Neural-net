@@ -8,6 +8,7 @@ Item {
     property string text: ""
     property int spinBoxWidth: 200
     property int defaultValue: from
+
     width: 300
     height: 100
     Text {

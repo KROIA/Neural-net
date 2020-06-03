@@ -6,14 +6,14 @@ Window {
     width: 1500
     height: 900
     visible: true
-    /*
+
     SingelNetWorkArea{
         anchors.fill: parent
     }
-    */
+    /*
     MultiNetWorkArea{
         anchors.fill:parent
-    }/*
+    }
     UiIntegratableNet{
         anchors.fill:parent
     }*/

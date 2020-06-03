@@ -1,5 +1,5 @@
 import QtQuick 2.0
-
+import "../js/VisuFunction.js" as VisuFunction
 Rectangle {
     id:neuron
     property int d: 20
@@ -8,15 +8,11 @@ Rectangle {
     property int typeId:0
     property int type: 0
     property bool lastNeuron: false
-    onXChanged: {
-        dockingXPoint()
-    }
-    onYChanged: {      
-        dockingYPoint()
-    }
-    onDChanged: {
-        dockingPoint()
-    }
+
+    onXChanged:dockingXPoint()
+    onYChanged:dockingYPoint()
+    onDChanged:dockingPoint()
+
     property real xOffset: 0.2*d
     function dockingPoint(){
         dockingYPoint()
@@ -118,32 +114,16 @@ Rectangle {
                     }
                 }
     }
-
-
-
-
-
-
-        //
-
-    property string neuronColor:if(neuronValue<0){
-                                          return"darkred";
-                                            }
-                                      else
-                                            {
-                                          return"darkgreen";
-                                            }
+    property int transparent: 100
+    property string neuronColor: if(neuronValue<0) return VisuFunction.color(transparent,"8b0000")
+                                    else return VisuFunction.color(transparent,"006400")
     width: d
     height: d
     border.width: d*0.05
-    border.color: "black"
+    border.color: VisuFunction.color(transparent,"000000")
     radius: d/2
-    color:if(neuronValue!=0){
-                return Qt.lighter(neuronColor,(1-Math.abs(neuronValue))*4);
-         }
-         else{
-             return "whitesmoke"
-         }
+    color:neuronValue===0 ? VisuFunction.color(transparent,"f5f5f5"):Qt.lighter(neuronColor,(1-Math.abs(neuronValue-0.1))*5)
+
     Text {
         visible: (parent.d>10)
         font.pixelSize: parent.d*0.2
@@ -152,12 +132,14 @@ Rectangle {
                 else return "Value: \n"+Math.round(neuronValue*10000)/10000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        color:Math.abs(neuronValue)>0.75? "white":"black"
+    }
+    signal clickedNeuron(var id,var type)
 
-        color:if(Math.abs(neuronValue)>0.6){
-                              return "white"
-                          }
-                          else{
-                              return "black"
-                          }
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {clickedNeuron(typeId,type)
+        setNetHighlight(typeId,type)
+        }
     }
 }

@@ -1,20 +1,14 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.4
-
-Item {
+import "../js/VisuFunction.js" as VisuFunction
+NetData {
     id:netItem
     width: 600
     height: 600
-    property int netID: 0
-    property int updateTime:100
-    property int hiddenNeuronX: netListVisu.getHiddenX(netItem.netID)
-    property int hiddenNeuronY: netListVisu.getHiddenY(netItem.netID)
-    property int inputNeuron: netListVisu.getInputs(netItem.netID)
-    property int outputNeuron: netListVisu.getOutputs(netItem.netID)
-    property variant hiddenValue: netListVisu.getHiddenValue(netItem.netID)
-    property variant outputValue:netListVisu.getOutputsValue(netItem.netID)
-    property variant inputValue:netListVisu.getInputsValue(netItem.netID)
     property bool enableMousArea: false
+    property int clickedNeuronID: -1
+    property int clickedNeuronType: 0
+
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -66,26 +60,12 @@ Item {
     property variant biasConXOutput: []
     property variant biasConYOutput: []
 
-    property variant hiddenIDs: netListVisu.getHiddenID(netItem.netID)
-    property variant outputIds: netListVisu.getOutputID(netItem.netID)
+    property variant hiddenTransparent: new Array(totalHidden).fill(100)
+    property variant biasTransparent: new Array(hiddenNeuronX+1).fill(100)
+    property variant inputTransparent: new Array(inputNeuron).fill(100)
+    property variant outputTransparent: new Array(outputNeuron).fill(100)
+    property variant conTransparent: new Array(conSourceID.length).fill(100)
 
-    property variant conSourceID: netListVisu.getConSourceID(netItem.netID)
-    property variant conDestinationID: netListVisu.getConDestinationID(netItem.netID)
-
-    property variant conSourceType: netListVisu.getConSourceType(netItem.netID)
-    property variant conDestinationType: netListVisu.getConDestinationType(netItem.netID)
-
-    property variant conWeight: netListVisu.getConWeight(netItem.netID)
-
-    property int noneType: 1
-    property int inputType: 1
-    property int hiddenType: 2
-    property int outputType: 3
-    property int biasType: 5
-
-
-    property bool bias: netListVisu.getBias(netItem.netID)
-    property real biasValue: netListVisu.getBiasValue(netItem.netID)
     property real yOffSet: 0.1
     property real xOffSet: 0.1
     property int yBiasPos: if(bias) return yDistance
@@ -93,33 +73,29 @@ Item {
 
     property bool showId: true
     signal clickedNet(var id)
-    Connections {
-                   target: netListVisu
-                   onStopUpdateSignal: timerNet.running=false
-                   onStartUpdateSignal:{timerNet.running=true
-                       updateStructur()}
-                   onSetUpdateTimeSignal:updateTime=time
 
+    MouseArea{
+        anchors.fill: parent
+        enabled: enableMousArea
+        onClicked: {
+            console.debug("click")
+            clickedNet(netID)}
     }
-    Timer {
-        id:timerNet
-            interval: updateTime; running: true
-             repeat: true
-            onTriggered: {netListVisu.displayUpdatNetTimer(netID)
-                updateValue()
-            }
-        }
+    MouseArea{
+        anchors.fill: parent
+        onClicked: setTransparancy(100)
+    }
     Repeater{
-        model: conWeight.length
+        model: conSourceID.length
         NeuronConnection{
             conID: index
             weight:conWeight[index]
+            transparent:conTransparent[index]
             d:netItem.d
         }
     }
     Repeater{
         id:biasLayer
-
         model: hiddenNeuronX+1
         visible: bias
         Neuron{
@@ -130,6 +106,12 @@ Item {
             typeId: index
             type:biasType
             lastNeuron: (index==(biasLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
+            transparent: biasTransparent[index]
+
         }
     }
 
@@ -140,11 +122,18 @@ Item {
             x:xOffSet*xDistance
             y:(index+yOffSet)*yDistance+yBiasPos
             d:netItem.d
+
             neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
                             else return 0
             typeId: index
             type:inputType
             lastNeuron: (index==(inputLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
+            transparent: inputTransparent[index]
+
         }
     }
 
@@ -168,8 +157,13 @@ Item {
                              else return 0
                 type:hiddenType
                 lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
-            }
+                onClickedNeuron: {
+                    clickedNeuronID= typeId
+                    clickedNeuronType= type
+                }
+                transparent: hiddenTransparent[typeId]
         }
+    }
     }
     Repeater{
         id:outputLayer
@@ -180,54 +174,92 @@ Item {
             d:netItem.d
             typeId: index
             neuronID: if(outputIds.length>typeId) return outputIds[typeId]
-                        else return typeId+hiddenNeuronX*hiddenNeuronY
+                        else return typeId+totalHidden
             type:outputType
             neuronValue: if(outputValue.length>typeId) outputValue[index]
                             else return 0
             lastNeuron: (index==(outputLayer.model-1))
+            onClickedNeuron: {
+                clickedNeuronID= typeId
+                clickedNeuronType= type
+            }
+            transparent: outputTransparent[index]
+
         }
     }
 
-    function updateValue(){
-        hiddenValue=netListVisu.getHiddenValue(netItem.netID)
-        inputValue=netListVisu.getInputsValue(netItem.netID)
-        outputValue=netListVisu.getOutputsValue(netItem.netID)
-        biasValue=netListVisu.getBiasValue(netItem.netID)
-        conWeight=netListVisu.getConWeight(netItem.netID)
-        /*
-        */
-    }
-    function updateStructur(){
-        //console.debug("update Struc")
-        inputNeuron=netListVisu.getInputs(netItem.netID)
-        outputNeuron=netListVisu.getOutputs(netItem.netID)
-        hiddenNeuronX=netListVisu.getHiddenX(netItem.netID)
-        hiddenNeuronY=netListVisu.getHiddenY(netItem.netID)
 
-        hiddenIDs=netListVisu.getHiddenID(netItem.netID)
-        outputIds=netListVisu.getOutputID(netItem.netID)
-        conSourceID=netListVisu.getConSourceID(netItem.netID)
-        conSourceType=netListVisu.getConSourceType(netItem.netID)
-        conDestinationID=netListVisu.getConDestinationID(netItem.netID)
-        conDestinationType=netListVisu.getConDestinationType(netItem.netID)
-
-        bias=netListVisu.getBias(netItem.netID)
-    }
     Text {
         anchors.top:parent.top
         anchors.right: parent.right
-        anchors.rightMargin: xOffSet*2
+        anchors.rightMargin: netItem.width*xOffSet
+
         anchors.topMargin: yOffSet
         topPadding: yOffSet
         text: "net Id: "+netID
-        font.pixelSize: parent.d*0.8
+        font.pixelSize: parent.d*0.8<20 ? parent.d*0.8:20
 
         visible:showId
         horizontalAlignment: Text.AlignRight
     }
-    MouseArea{
-        anchors.fill: parent
-        enabled: enableMousArea
-        onClicked: clickedNet(netID)
+    function setTransparancy(trans){
+        hiddenTransparent= new Array(totalHidden).fill(trans)
+        biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
+        inputTransparent= new Array(inputNeuron).fill(trans)
+        outputTransparent= new Array(outputNeuron).fill(trans)
+        conTransparent= new Array(conSourceID.length).fill(trans)
+
+    }
+    function updateTransparancy(){
+        hiddenTransparent=VisuFunction.updateArray(hiddenTransparent)
+        outputTransparent=VisuFunction.updateArray(outputTransparent)
+        inputTransparent=VisuFunction.updateArray(inputTransparent)
+        biasTransparent=VisuFunction.updateArray(biasTransparent)
+        conTransparent=VisuFunction.updateArray(conTransparent)
+    }
+
+    function setHighlight(id,type,highlightValue){
+        if(type===hiddenType){
+            hiddenTransparent[id]=highlightValue
+        }
+        else if(type===outputType){
+            outputTransparent[id-totalHidden]=highlightValue
+        }
+        else if(type===inputType){
+            inputTransparent[id]=highlightValue
+        }
+        else if(type===biasType){
+            biasTransparent[id]=highlightValue
+        }
+    }
+
+    function setNetHighlight(id,type){
+        var highlightValue=100
+        setTransparancy(20)
+        setHighlight(id,type,highlightValue)
+        var arrConId=[]
+        var sType
+        var sId
+        arrConId=getConSource(id,type)
+        for(var i=0;i<arrConId.length;i++){
+
+            sId=conDestinationID[arrConId[i]]
+            sType=conDestinationType[arrConId[i]]
+            conTransparent[arrConId[i]]=highlightValue
+            setHighlight(sId,sType,highlightValue)
+        }
+        arrConId=getConDestination(id,type)
+        for(i=0;i<arrConId.length;i++){
+            sId=conSourceID[arrConId[i]]
+            sType=conSourceType[arrConId[i]]
+            if(sType===biasType){
+                if(type===outputType)sId=hiddenNeuronX
+                else sId=Math.floor(id/hiddenNeuronY)
+            }
+            conTransparent[arrConId[i]]=highlightValue
+            setHighlight(sId,sType,highlightValue)
+        }
+        console.debug(hiddenTransparent)
+        updateTransparancy()
     }
 }

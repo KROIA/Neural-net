@@ -12,32 +12,19 @@ Item {
     }
     Net{
         id:mainNet
-        anchors.right: leftbar.left
+        anchors.right: sidebar.left
         anchors.left: singelWorkArea.left
         anchors.top: singelWorkArea.top
         anchors.bottom: singelWorkArea.bottom
     }
-    ScrollView{
-        id:leftbar
+
+    SingelNetSideBar{
+        id:sidebar
         anchors.right:singelWorkArea.right
         anchors.top: singelWorkArea.top
-        width: singelWorkArea.width*0.3
+        showWidth: singelWorkArea.width*0.2
         height: singelWorkArea.height
-        clip: true
-        MultiNet{
-            x:0
-            y:0
-            width: leftbar.width
-            height: singelWorkArea.height*0.3*totalNet
-            xNetPerTab:1
-            yNetPerTab:totalNet
-            updateTime: singelWorkArea.updateTime
-            clickedNetId:{
-                clickedNetId=0
-            }
-
-            onClickedNetIdChanged: mainNet.netID=clickedNetId
-        }
+        clickedNeuronID: mainNet.clickedNeuronID
+        clickedNeuronType: mainNet.clickedNeuronType
     }
-
 }
