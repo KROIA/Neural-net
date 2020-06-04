@@ -29,17 +29,17 @@ DLL_buildPath = bin/64bit/build-Release
 # Qect.dll : https://github.com/KROIA/Rect
 # geometry : https://github.com/KROIA/Geometry
 
+username     = Hannes
+QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #change your PC-username
-username     = SCHEH
-QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
+#username     = SCHEH
+#QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
 geometryPath = $$QT_work_dir/lib/Geometry
-rectPath     = $$QT_work_dir/DLL/Rect
+rectPath     = C:/Users/Hannes/Documents/Programme/GitHub/DLL/Rect#$$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
 
-#username     = Hannes
-#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #geometryPath = $$QT_work_dir/lib/Geometry
 #rectPath     = $$QT_work_dir/DLL/Rect
 #configPath   = $$QT_work_dir/DLL/Config
@@ -49,9 +49,9 @@ configPath   = $$QT_work_dir/DLL/Config
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
 
-geometryPath = $$QT_work_dir/lib/Geometry
-rectPath     = $$QT_work_dir/DLL/Rect
-configPath   = $$QT_work_dir/DLL/Config
+#geometryPath = $$QT_work_dir/lib/Geometry
+#rectPath     = $$QT_work_dir/DLL/Rect
+#configPath   = $$QT_work_dir/DLL/Config
 
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
       $$configPath/$$DLL_buildPath/Config.dll
