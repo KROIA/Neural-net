@@ -8,6 +8,10 @@ Rectangle {
     property int typeId:0
     property int type: 0
     property bool lastNeuron: false
+    property real xRel: 0
+    property real yRel: 0
+    x: xRel*netItem.xDistance
+    y: yRel*netItem.yDistance
 
     onXChanged:{dockingXPoint()
         if(Drag.active) updateXPos()
@@ -178,9 +182,11 @@ Rectangle {
     }
     signal clickedNeuron(var id,var type)
     property bool movable: netItem.moveable
+
     MouseArea{
         id:mouseArea
         anchors.fill: parent
+        enabled: netItem.neuronClickEnable
         onClicked: {clickedNeuron(typeId,type)
         setNetHighlight(typeId,type)
         }
@@ -192,6 +198,10 @@ Rectangle {
                 minimumY: 0
 
             }
+        onDragActiveChanged: if(drag){
+                                 xRel=parent.x/xDistance
+                                 yRel=parent.y/yDistance}
+
         property bool dragActive: drag.active
     }
 }

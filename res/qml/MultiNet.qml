@@ -54,6 +54,7 @@ Item{
                         onClickedNet: clickedNetId=id
                         enableUpdateTimer:multiNet.enableUpdateTimer
                         forceTimer:multiNet.forceTimer
+                        neuronClickEnable:false
                         }
                     }
     function updateMultiNet(){

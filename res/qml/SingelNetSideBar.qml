@@ -33,14 +33,14 @@ Rectangle{
 
     Item{
         id:sidebarContent
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: parent.right
+        anchors.top: sidebar.top
+        anchors.bottom: sidebar.bottom
+        anchors.left: sidebar.right
         anchors.leftMargin: 0
         width: showWidth
         MultiNet{
             id:multiNet
-            anchors.fill: parent
+            anchors.fill: sidebarContent
             xNetPerTab:1
             yNetPerTab:3
             visible: tabBar.showContent[0]
@@ -50,7 +50,7 @@ Rectangle{
             onClickedNetIdChanged: mainNet.netID=clickedNetId
         }
         NetInfo{
-            anchors.fill: parent
+            anchors.fill: sidebarContent
             visible: tabBar.showContent[1]
             netID: mainNet.netID
             clickedNeuronID:sidebar.clickedNeuronID

@@ -68,10 +68,10 @@ NetData {
     property variant inputTransparent: new Array(inputNeuron).fill(100)
     property variant outputTransparent: new Array(outputNeuron).fill(100)
     property variant conTransparent: new Array(conSourceID.length).fill(100)
-
+    property bool neuronClickEnable: true
     property real yOffSet: 0.1
     property real xOffSet: 0.1
-    property int yBiasPos: if(bias) return yDistance
+    property int yBiasPos: if(bias) return 1
                         else return 0
 
     property bool showId: true
@@ -105,8 +105,8 @@ NetData {
         model: hiddenNeuronX+1
         visible: bias
         Neuron{
-            x:(xOffSet+index)*xDistance
-            y: yOffSet*yDistance
+            xRel:(xOffSet+index)//*xDistance
+            yRel: yOffSet//t*yDistance
             d:netItem.d
             neuronValue: biasValue
             typeId: index
@@ -125,8 +125,8 @@ NetData {
         id:inputLayer
         model:inputNeuron
         Neuron{
-            x:xOffSet*xDistance
-            y:(index+yOffSet)*yDistance+yBiasPos
+            xRel:xOffSet//*xDistance
+            yRel:index+yOffSet+yBiasPos//*yDistance+yBiasPos
             d:netItem.d
 
             neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
@@ -152,8 +152,8 @@ NetData {
             model:hiddenNeuronY
             property int indexX: index
             Neuron{
-                x:xDistance*(indexX+xOffSet+1)
-                y:(index+yOffSet)*yDistance+yBiasPos
+                xRel:(indexX+xOffSet+1)//*xDistance
+                yRel:index+yOffSet+yBiasPos//*yDistance
                 d:netItem.d
                 typeId: index+(indexX*hiddenNeuronY)
                 neuronID:if(0<hiddenIDs[typeId]){
@@ -176,8 +176,8 @@ NetData {
         id:outputLayer
         model:outputNeuron
         Neuron{
-            x:(xOffSet+1+hiddenNeuronX)*xDistance
-            y:(index+yOffSet)*yDistance+yBiasPos
+            xRel:(xOffSet+1+hiddenNeuronX)//xDistance
+            yRel:(index+yOffSet)//yDistance+yBiasPos
             d:netItem.d
             typeId: index
             neuronID: if(outputIds.length>typeId) return outputIds[typeId]
@@ -204,7 +204,7 @@ NetData {
         anchors.topMargin: yOffSet
         topPadding: yOffSet
         text: "net Id: "+netID
-        font.pixelSize: parent.d*0.8<20 ? parent.d*0.8:20
+        font.pixelSize: yOffSet
 
         visible:showId
         horizontalAlignment: Text.AlignRight

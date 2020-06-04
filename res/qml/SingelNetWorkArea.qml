@@ -34,7 +34,7 @@ Item {
         anchors.right:singelWorkArea.right
         anchors.top: singelTopBar.bottom
         showWidth: singelWorkArea.width*0.2
-        height: singelWorkArea.height
+        anchors.bottom: singelWorkArea.bottom
         clickedNeuronID: mainNet.clickedNeuronID
         clickedNeuronType: mainNet.clickedNeuronType
     }

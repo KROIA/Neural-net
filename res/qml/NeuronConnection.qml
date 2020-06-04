@@ -3,24 +3,28 @@ import QtQuick.Shapes 1.14
 import "../js/VisuFunction.js" as VisuFunction
 
 Shape {
+    id:con
     property int conID: 0
     property real weight:1
     property int conWidth: 4
     property real minWidth: 0.2
-    property real maxWidth: d*0.3
+    property real maxWidth: con.d*0.3
     property int destinationId: conDestinationID[conID]
     property int destinationType: conDestinationType[conID]
     property int sourceId: conSourceID[conID]
     property int sourceType:conSourceType[conID]
-    property real d: 0.2
+    property real d: 0.5//0.00001
     property int transparent: 100
     visible: (Math.abs(weight)*d*0.2)>minWidth
     ShapePath {
-           strokeColor: if(weight<0) return VisuFunction.color(transparent,"ff0000")
+           strokeColor: if(netItem.visuNeuronModus===def.functionVisu) return VisuFunction.color(transparent,"#daa520")
+                        else if(weight<0) return VisuFunction.color(transparent,"ff0000")
                         else if(weight>0) return VisuFunction.color(transparent,"008000")
                         else return "white"
-           strokeWidth:if(Math.abs(weight)*d*0.2>maxWidth) return maxWidth
-                        else return Math.abs(weight)*d*0.2
+
+           strokeWidth: if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.1
+                        else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
+                        else return Math.abs(weight)*con.d*0.1
 
            startX:{
                    if(def.inputType===sourceType){

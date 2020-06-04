@@ -6,7 +6,7 @@ Item {
     id:tabControllBar
     property variant showContent: chooseTab(0)
     property variant texts: ["",""]
-    width: 800
+    //width: 800
     height: 25
     property int show: hideButton.checked
     Row{
