@@ -14,20 +14,26 @@ Rectangle {
     y: yRel*netItem.yDistance
 
     onXChanged:{dockingXPoint()
-        if(Drag.active) updateXPos()
-        }
+        if(Drag.active||lastNeuron){ updateXPos()
+        }}
     onYChanged:{dockingYPoint()
-        if(Drag.active) updateYPos()
+        if(Drag.active||lastNeuron) {updateYPos()
+        }}
+    onDChanged:{
+            dockingPoint()
+        if(lastNeuron) updatePos()
         }
-    onDChanged:dockingPoint()
+
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
 
     function updatePos(){
+
         updateXPos()
         updateYPos()
     }
     function updateXPos(){
+
         if(type===def.inputType){
             inputConXOutput=VisuFunction.updateArray(inputConXOutput)
         }
@@ -66,6 +72,7 @@ Rectangle {
         var xOutput
         xInput=x+xOffset
         xOutput=d+x-xOffset
+        console.debug(xInput-x)
         if(type===def.inputType){
 
                     inputConXOutput[typeId]=xOutput
@@ -98,9 +105,6 @@ Rectangle {
                     else if(type===def.outputType){
                         outputConXInput[typeId]=xInput
                 }
-        if(lastNeuron){
-                updateXPos()
-        }
 
     }
 
@@ -149,9 +153,6 @@ Rectangle {
                             outputConYInput=tempOutputConYInput
                     }
                 }
-        if(lastNeuron){
-                updateYPos()
-        }
     }
     property int transparent: 100
     property string neuronColor: {
