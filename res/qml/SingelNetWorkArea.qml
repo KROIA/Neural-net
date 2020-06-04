@@ -5,6 +5,7 @@ Item {
     width: 100
     height: 100
     property int updateTime: 200
+    visible:!singelTopBar.multiView
     Connections {
                    target: netListVisu
                    onStartUpdateSignal:updateMultiNet()
@@ -14,14 +15,24 @@ Item {
         id:mainNet
         anchors.right: sidebar.left
         anchors.left: singelWorkArea.left
-        anchors.top: singelWorkArea.top
+        anchors.top: singelTopBar.bottom
         anchors.bottom: singelWorkArea.bottom
+        visuNeuronModus:singelTopBar.visuNeuronModus
+        moveable:singelTopBar.moveable
+
+    }
+    SingelNetTopBar{
+        id:singelTopBar
+        anchors.top: singelWorkArea.top
+        anchors.right:singelWorkArea.right
+        anchors.left:singelWorkArea.left
+        height: 100
     }
 
     SingelNetSideBar{
         id:sidebar
         anchors.right:singelWorkArea.right
-        anchors.top: singelWorkArea.top
+        anchors.top: singelTopBar.bottom
         showWidth: singelWorkArea.width*0.2
         height: singelWorkArea.height
         clickedNeuronID: mainNet.clickedNeuronID

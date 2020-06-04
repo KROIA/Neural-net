@@ -36,6 +36,9 @@ QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
+
+username     = Hannes
+QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = C:/Users/Hannes/Documents/Programme/GitHub/DLL/Rect#$$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config

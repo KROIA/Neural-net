@@ -5,10 +5,13 @@ NetData {
     id:netItem
     width: 600
     height: 600
+    property int visuNeuronModus: 0
+    property bool enableUpdateTimer: visuNeuronModus===def.functionVisu? false:true
+    property int visu: 0
     property bool enableMousArea: false
     property int clickedNeuronID: -1
     property int clickedNeuronType: 0
-
+    property bool moveable: false
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -73,10 +76,13 @@ NetData {
 
     property bool showId: true
     signal clickedNet(var id)
+    DropArea {
+        anchors.fill: parent
+    }
 
     MouseArea{
         anchors.fill: parent
-        enabled: enableMousArea
+        enabled: false//enableMousArea
         onClicked: {
             console.debug("click")
             clickedNet(netID)}
@@ -104,7 +110,7 @@ NetData {
             d:netItem.d
             neuronValue: biasValue
             typeId: index
-            type:biasType
+            type:def.biasType
             lastNeuron: (index==(biasLayer.model-1))
             onClickedNeuron: {
                 clickedNeuronID= typeId
@@ -126,7 +132,8 @@ NetData {
             neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
                             else return 0
             typeId: index
-            type:inputType
+            type:def.inputType
+            neuronID:index
             lastNeuron: (index==(inputLayer.model-1))
             onClickedNeuron: {
                 clickedNeuronID= typeId
@@ -155,7 +162,7 @@ NetData {
                 neuronValue: if(index+(indexX*hiddenNeuronY)<hiddenValue.length){
                                          return hiddenValue[typeId]}
                              else return 0
-                type:hiddenType
+                type:def.hiddenType
                 lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
                 onClickedNeuron: {
                     clickedNeuronID= typeId
@@ -175,7 +182,7 @@ NetData {
             typeId: index
             neuronID: if(outputIds.length>typeId) return outputIds[typeId]
                         else return typeId+totalHidden
-            type:outputType
+            type:def.outputType
             neuronValue: if(outputValue.length>typeId) outputValue[index]
                             else return 0
             lastNeuron: (index==(outputLayer.model-1))
@@ -219,16 +226,16 @@ NetData {
     }
 
     function setHighlight(id,type,highlightValue){
-        if(type===hiddenType){
+        if(type===def.hiddenType){
             hiddenTransparent[id]=highlightValue
         }
-        else if(type===outputType){
+        else if(type===def.outputType){
             outputTransparent[id-totalHidden]=highlightValue
         }
-        else if(type===inputType){
+        else if(type===def.inputType){
             inputTransparent[id]=highlightValue
         }
-        else if(type===biasType){
+        else if(type===def.biasType){
             biasTransparent[id]=highlightValue
         }
     }
@@ -236,7 +243,9 @@ NetData {
     function setNetHighlight(id,type){
         var highlightValue=100
         setTransparancy(20)
+        if(type===def.outputType) id+=totalHidden
         setHighlight(id,type,highlightValue)
+        if(type===def.outputType) id-=totalHidden
         var arrConId=[]
         var sType
         var sId
@@ -252,14 +261,13 @@ NetData {
         for(i=0;i<arrConId.length;i++){
             sId=conSourceID[arrConId[i]]
             sType=conSourceType[arrConId[i]]
-            if(sType===biasType){
-                if(type===outputType)sId=hiddenNeuronX
+            if(sType===def.biasType){
+                if(type===def.outputType)sId=hiddenNeuronX
                 else sId=Math.floor(id/hiddenNeuronY)
             }
             conTransparent[arrConId[i]]=highlightValue
             setHighlight(sId,sType,highlightValue)
         }
-        console.debug(hiddenTransparent)
         updateTransparancy()
     }
 }

@@ -37,4 +37,7 @@ Item {
     function updateNet(){
                maxNet= netListVisu.getNetCount()
             }
+    Definition{
+        id:def
+    }
 }

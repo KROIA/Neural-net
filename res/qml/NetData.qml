@@ -32,11 +32,8 @@ Item {
     property variant conSourceType: netListVisu.getConSourceType(netID)
     property variant conDestinationType: netListVisu.getConDestinationType(netID)
 
-    property int noneType: 0
-    property int inputType: 1
-    property int hiddenType: 2
-    property int outputType: 3
-    property int biasType: 5
+
+
     Connections {
                    target: netListVisu
                    onStopUpdateSignal: timerNet.running=false
@@ -79,15 +76,15 @@ Item {
         bias=netListVisu.getBias(netID)
     }
     function getTypeString(type){
-        if(type===noneType){
+        if(type===def.noneType){
             return "noneType"}
-        else if(type===inputType){
+        else if(type===def.inputType){
             return "inputType"}
-        else if(type===hiddenType){
+        else if(type===def.hiddenType){
             return "hiddenType"}
-        else if(type===outputType){
+        else if(type===def.outputType){
             return "outputType"}
-        else if(type===biasType){
+        else if(type===def.biasType){
             return "biasType"}
         else return ""
     }
@@ -102,17 +99,17 @@ Item {
     function chekArrayForValues(idArr,typeArr,id,type,conIdArr){
         var orgId
         orgId=id
-        if(type===outputType){
+        if(type===def.outputType){
             id +=totalHidden
         }
-        else if(type===biasType){
+        else if(type===def.biasType){
             id=0
         }
         var res=[]
         //console.debug(arr1,arr2,val1,val2)
         for(var i=0;i<idArr.length;i++){
             if(idArr[i]===id&&typeArr[i]===type){
-                if(type!==biasType||Math.floor(conIdArr[i]/hiddenNeuronY)===orgId){
+                if(type!==def.biasType||Math.floor(conIdArr[i]/hiddenNeuronY)===orgId){
                     res.push(i)}
             }
 

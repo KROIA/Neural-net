@@ -39,7 +39,7 @@ NetData {
                 Text {font.pointSize: fontSize;text: "HiddenX "}
                 Text {font.pointSize: fontSize;text: hiddenNeuronX}
                 Text {font.pointSize: fontSize;text: "HiddenY "}
-                Text {font.pointSize: fontSize;text: hiddenNeuronX}
+                Text {font.pointSize: fontSize;text: hiddenNeuronY}
 
 
             }
@@ -51,7 +51,7 @@ NetData {
                     spacing:5
                     columns:2
                     Text {font.pointSize: fontSize;text: "Neuron Id "}
-                    Text {font.pointSize: fontSize;text: clickedNeuronID}
+                    Text {font.pointSize: fontSize;text: clickedNeuronType===def.outputType ?clickedNeuronID:clickedNeuronID+totalHidden}
                     Text {font.pointSize: fontSize;text: "Neuron Type "}
                     Text {font.pointSize: fontSize;text: getTypeString(clickedNeuronType)}
                 }
