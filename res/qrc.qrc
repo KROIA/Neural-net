@@ -17,5 +17,8 @@
         <file>qml/NetData.qml</file>
         <file>qml/ConnectionList.qml</file>
         <file>js/VisuFunction.js</file>
+        <file>qml/TopBar.qml</file>
+        <file>qml/SingelNetTopBar.qml</file>
+        <file>qml/Definition.qml</file>
     </qresource>
 </RCC>

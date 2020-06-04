@@ -2,11 +2,11 @@ import QtQuick 2.14
 import QtQuick.Controls 2.4
 
 
-Rectangle {
+TopBar {
     id:itemTopBar
     width: 100
     height: 100
-    color: "lightgrey"
+
     property int netXAxis: xAxisItem.value
     property int netYAxis: yAxisItem.value
     property int updateTimer: timerItem.value
@@ -16,7 +16,7 @@ Rectangle {
     property int spinBoxSize: 150//if(width*0.2<150) return width*0.2
                                // else return 150
     Row {
-
+        visible: multiView
         anchors.fill:parent
         TopbarSpinBox{
             id:xAxisItem
@@ -54,7 +54,7 @@ Rectangle {
             width:spinBoxSize*2
             text: "side:  "
             from: 0
-            to: Math.floor(totalNet/(yAxisItem.value*xAxisItem.value))
+            to: 100//Math.floor(itemTopBar.totalNet/(yAxisItem.value*xAxisItem.value))
             spinBoxWidth: spinBoxSize
         }
     }

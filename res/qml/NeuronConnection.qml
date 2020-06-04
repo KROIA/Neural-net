@@ -23,15 +23,15 @@ Shape {
                         else return Math.abs(weight)*d*0.2
 
            startX:{
-                   if(inputType===sourceType){
+                   if(def.inputType===sourceType){
                        if(0<=inputConXOutput[sourceId]){
                        return inputConXOutput[sourceId]}
                    }
-                   else if(hiddenType===sourceType){
+                   else if(def.hiddenType===sourceType){
                        if(0<=hiddenConXOutput[sourceId]){
                        return hiddenConXOutput[sourceId]}
                    }
-                   else if(biasType===sourceType){
+                   else if(def.biasType===sourceType){
 
                        if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
                        return biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
@@ -40,15 +40,15 @@ Shape {
                }
 
            startY:{
-                  if(inputType===sourceType){
+                  if(def.inputType===sourceType){
                       if(0<=inputConYOutput[sourceId]){
                       return inputConYOutput[sourceId]}
                   }
-                  else if(hiddenType===sourceType){
+                  else if(def.hiddenType===sourceType){
                       if(0<=hiddenConYOutput[sourceId]){
                       return hiddenConYOutput[sourceId]}
                   }
-                  else if(biasType===sourceType){
+                  else if(def.biasType===sourceType){
                       if(0<=biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]){
 
                       return biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]}
@@ -57,12 +57,12 @@ Shape {
                 }
            PathLine {
                x: {
-                   if(outputType===destinationType){
+                   if(def.outputType===destinationType){
                        if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
                             return outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                        }
                    }
-                   else if(hiddenType===destinationType){
+                   else if(def.hiddenType===destinationType){
                        if(0<=hiddenConXInput[destinationId]){
                             return hiddenConXInput[destinationId]
                        }
@@ -70,12 +70,12 @@ Shape {
                    return 0
                }
                y: {
-                  if(outputType===destinationType){
+                  if(def.outputType===destinationType){
                       if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
                             return outputConYInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                       }
                   }
-                  else  if(hiddenType===destinationType){
+                  else  if(def.hiddenType===destinationType){
                       if(0<=hiddenConYInput[destinationId]){
                             return hiddenConYInput[destinationId]
                       }
