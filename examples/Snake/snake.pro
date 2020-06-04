@@ -30,16 +30,17 @@ DLL_buildPath = bin/64bit/build-Release
 # geometry : https://github.com/KROIA/Geometry
 
 #change your PC-username
-username     = SCHEH
-QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
+#username     = SCHEH
+#QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
+
+username     = Hannes
+QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = $$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
 
-#username     = Hannes
-#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #geometryPath = $$QT_work_dir/lib/Geometry
 #rectPath     = $$QT_work_dir/DLL/Rect
 #configPath   = $$QT_work_dir/DLL/Config

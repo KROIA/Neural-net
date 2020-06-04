@@ -1,10 +1,11 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
 TopBar {
-    property int neuronModus: modus.currentIndex
+    property int visuNeuronModus: modus.currentIndex
+    property bool moveable: moveSwitch.checked
     Row{
-    Switch{
-        text: "movable"
+    Switch{id:moveSwitch
+        text: "moveable"
     }
     ComboBox {
         id:modus

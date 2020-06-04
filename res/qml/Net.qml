@@ -5,10 +5,13 @@ NetData {
     id:netItem
     width: 600
     height: 600
+    property int visuNeuronModus: 0
+    property bool enableUpdateTimer: visuNeuronModus===def.functionVisu? false:true
+    property int visu: 0
     property bool enableMousArea: false
     property int clickedNeuronID: -1
     property int clickedNeuronType: 0
-
+    property bool moveable: false
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -223,16 +226,16 @@ NetData {
     }
 
     function setHighlight(id,type,highlightValue){
-        if(type===hiddenType){
+        if(type===def.hiddenType){
             hiddenTransparent[id]=highlightValue
         }
-        else if(type===outputType){
+        else if(type===def.outputType){
             outputTransparent[id-totalHidden]=highlightValue
         }
-        else if(type===inputType){
+        else if(type===def.inputType){
             inputTransparent[id]=highlightValue
         }
-        else if(type===biasType){
+        else if(type===def.biasType){
             biasTransparent[id]=highlightValue
         }
     }
@@ -240,7 +243,9 @@ NetData {
     function setNetHighlight(id,type){
         var highlightValue=100
         setTransparancy(20)
+        if(type===def.outputType) id+=totalHidden
         setHighlight(id,type,highlightValue)
+        if(type===def.outputType) id-=totalHidden
         var arrConId=[]
         var sType
         var sId
@@ -256,14 +261,13 @@ NetData {
         for(i=0;i<arrConId.length;i++){
             sId=conSourceID[arrConId[i]]
             sType=conSourceType[arrConId[i]]
-            if(sType===biasType){
-                if(type===outputType)sId=hiddenNeuronX
+            if(sType===def.biasType){
+                if(type===def.outputType)sId=hiddenNeuronX
                 else sId=Math.floor(id/hiddenNeuronY)
             }
             conTransparent[arrConId[i]]=highlightValue
             setHighlight(sId,sType,highlightValue)
         }
-        console.debug(hiddenTransparent)
         updateTransparancy()
     }
 }

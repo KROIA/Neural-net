@@ -2,13 +2,12 @@ import QtQuick 2.2
 import QtQuick.Extras 1.4
 import QtQuick.Controls 2.5
 import QtQuick.Controls 2.13
-Rectangle {
+Item {
     id:tabControllBar
     property variant showContent: chooseTab(0)
     property variant texts: ["",""]
     width: 800
     height: 25
-    color: "black"
     property int show: hideButton.checked
     Row{
         x:0
@@ -24,6 +23,11 @@ Rectangle {
             }
         }
         TabBar{
+            background: Rectangle{
+                color: "transparent"
+                anchors.fill: parent
+            }
+
             contentHeight:tabControllBar.height
             height: tabControllBar.height
             contentWidth:100

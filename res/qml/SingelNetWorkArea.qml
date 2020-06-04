@@ -17,6 +17,9 @@ Item {
         anchors.left: singelWorkArea.left
         anchors.top: singelTopBar.bottom
         anchors.bottom: singelWorkArea.bottom
+        visuNeuronModus:singelTopBar.visuNeuronModus
+        moveable:singelTopBar.moveable
+
     }
     SingelNetTopBar{
         id:singelTopBar

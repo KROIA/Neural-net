@@ -9,11 +9,16 @@ Rectangle {
     property int type: 0
     property bool lastNeuron: false
 
-    onXChanged:dockingXPoint()
-    onYChanged:dockingYPoint()
+    onXChanged:{dockingXPoint()
+        if(Drag.active) updateXPos()
+        }
+    onYChanged:{dockingYPoint()
+        if(Drag.active) updateYPos()
+        }
     onDChanged:dockingPoint()
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
+
     function updatePos(){
         updateXPos()
         updateYPos()
@@ -145,14 +150,21 @@ Rectangle {
         }
     }
     property int transparent: 100
-    property string neuronColor: if(neuronValue<0) return VisuFunction.color(transparent,"8b0000")
-                                    else return VisuFunction.color(transparent,"006400")
+    property string neuronColor: {
+                if(netItem.visuNeuronModus===def.functionVisu) return VisuFunction.color(transparent,def.getTypeColor(type))
+                else{
+                    if(neuronValue<0) return VisuFunction.color(transparent,"8b0000")
+                    else return VisuFunction.color(transparent,"006400")}
+                }
     width: d
     height: d
-    border.width: d*0.05
-    border.color: VisuFunction.color(transparent,"000000")
+    border.width: netItem.visuNeuronModus===def.combinedVisu ?  d*0.1:d*0.05
+    border.color: if(netItem.visuNeuronModus===def.combinedVisu) return VisuFunction.color(transparent,def.getTypeColor(type))
+                      else return VisuFunction.color(transparent,"000000")
     radius: d/2
-    color:neuronValue===0 ? VisuFunction.color(transparent,"f5f5f5"):Qt.lighter(neuronColor,(1-Math.abs(neuronValue-0.1))*5)
+    color:
+        if(netItem.visuNeuronModus===def.functionVisu) return neuronColor
+        else neuronValue===0 ? VisuFunction.color(transparent,"f5f5f5"):Qt.lighter(neuronColor,(1-Math.abs(neuronValue-0.1))*5)
 
     Text {
         visible: (parent.d>10)
@@ -162,17 +174,24 @@ Rectangle {
                 else return "Value: \n"+Math.round(neuronValue*10000)/10000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        color:Math.abs(neuronValue)>0.75? "white":"black"
+        color:Math.abs(neuronValue)>0.75&&netItem.visuIndex!=def.functionVisu ? "white":"black"
     }
     signal clickedNeuron(var id,var type)
-
+    property bool movable: netItem.moveable
     MouseArea{
         id:mouseArea
         anchors.fill: parent
         onClicked: {clickedNeuron(typeId,type)
         setNetHighlight(typeId,type)
         }
-        drag.target: parent
-        drag.onDragFinished: updatePos()
+        drag {
+                target: if(movable) return parent
+                maximumX: netItem.width-d
+                maximumY: netItem.height-d
+                minimumX: 0
+                minimumY: 0
+
+            }
+        property bool dragActive: drag.active
     }
 }
