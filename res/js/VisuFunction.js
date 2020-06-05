@@ -7,8 +7,8 @@ function color(transparent,color) {
 }
 
 function updateArray(arr){
-    var temp=[]
+    /*var temp=[]
     temp=arr
-    arr=temp
+    arr=temp*/
     return arr
 }

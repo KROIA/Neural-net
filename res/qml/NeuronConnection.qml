@@ -15,7 +15,9 @@ Shape {
     property int sourceType:conSourceType[conID]
     property real d: 0.5//0.00001
     property int transparent: 100
-    visible: (Math.abs(weight)*d*0.2)>minWidth
+    visible:netItem.visuNeuronModus===def.functionVisu||(Math.abs(weight)*d*0.2)>minWidth
+
+
     ShapePath {
            strokeColor: if(netItem.visuNeuronModus===def.functionVisu) return VisuFunction.color(transparent,"#daa520")
                         else if(weight<0) return VisuFunction.color(transparent,"ff0000")
@@ -27,20 +29,22 @@ Shape {
                         else return Math.abs(weight)*con.d*0.1
 
            startX:{
+                    var xtemp=0
                    if(def.inputType===sourceType){
                        if(0<=inputConXOutput[sourceId]){
-                       return inputConXOutput[sourceId]}
+                       xtemp= inputConXOutput[sourceId]}
                    }
                    else if(def.hiddenType===sourceType){
                        if(0<=hiddenConXOutput[sourceId]){
-                       return hiddenConXOutput[sourceId]}
+                       xtemp= hiddenConXOutput[sourceId]}
                    }
                    else if(def.biasType===sourceType){
 
                        if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
-                       return biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
+                       xtemp= biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
                    }
-                   return 0
+
+                   return xtemp
                }
 
            startY:{
@@ -60,18 +64,22 @@ Shape {
                   return 0
                 }
            PathLine {
+               id:path
                x: {
+                   var xtemp=0
                    if(def.outputType===destinationType){
                        if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
-                            return outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]
+                            xtemp= outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                        }
                    }
                    else if(def.hiddenType===destinationType){
                        if(0<=hiddenConXInput[destinationId]){
-                            return hiddenConXInput[destinationId]
+                            xtemp= hiddenConXInput[destinationId]
+                           //console.debug("con",xtemp)
                        }
                    }
-                   return 0
+
+                   return xtemp
                }
                y: {
                   if(def.outputType===destinationType){
@@ -88,4 +96,12 @@ Shape {
               }
            }
          }
+        Rectangle{
+            color: "blue"
+            width: 10
+            height: 10
+            x:path.x-5
+            y:path.y-5
+            onXChanged: "new X Pos"+x
+        }
 }

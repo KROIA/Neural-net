@@ -33,6 +33,7 @@ NetData {
         if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship<((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
             w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
         else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
+        //console.debug("distantX"+"("+width+"-"+w+")/("+hiddenNeuronX+"+"+1+"+"+yOffSet+"*2)="+(width-w)/(hiddenNeuronX+1+yOffSet*2))
         return (width-w)/(hiddenNeuronX+1+yOffSet*2)
     }
     property int yDistance: {
@@ -44,8 +45,9 @@ NetData {
     }
     property int d:{
         var dP
-        if(yDistance<xDistance) dP =yDistance*dRelationship
-        else dP= xDistance*dRelationship
+        if(yDistance<xDistance) {dP =yDistance*dRelationship}
+        else {dP= xDistance*dRelationship}
+        //console.debug("set d to "+dP)
         return dP
     }
     property variant hiddenConXInput: []

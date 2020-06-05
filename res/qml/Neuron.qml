@@ -10,18 +10,26 @@ Rectangle {
     property bool lastNeuron: false
     property real xRel: 0
     property real yRel: 0
-    x: xRel*netItem.xDistance
+    x: {
+        //if(type===def.hiddenType) //console.debug(xRel+" * "+netItem.xDistance+" = "+xRel*netItem.xDistance)
+        return xRel*netItem.xDistance}
     y: yRel*netItem.yDistance
 
-    onXChanged:{dockingXPoint()
+    onXChanged:{
+        //if(type===def.hiddenType) console.debug("hiddenx changed: "+x)
+        dockingXPoint()
         if(Drag.active||lastNeuron){ updateXPos()
         }}
     onYChanged:{dockingYPoint()
         if(Drag.active||lastNeuron) {updateYPos()
         }}
     onDChanged:{
-            dockingPoint()
-        if(lastNeuron) updatePos()
+        dockingPoint()
+        if(lastNeuron) {
+            updateXPos()
+            updateYPos()
+        }
+        xOffset=0.2*d
         }
 
     Drag.active: mouseArea.drag.active
@@ -41,6 +49,7 @@ Rectangle {
             outputConXInput=VisuFunction.updateArray(outputConXInput)
         }
         else if(type===def.hiddenType){
+            console.debug("update X")
             hiddenConXInput=VisuFunction.updateArray(hiddenConXInput)
             hiddenConXOutput=VisuFunction.updateArray(hiddenConXOutput)
         }
@@ -49,6 +58,7 @@ Rectangle {
         }
     }
     function updateYPos(){
+            //console.debug("update Y")
             if(type===def.inputType){
                 inputConYOutput=VisuFunction.updateArray(inputConYOutput)
             }
@@ -70,13 +80,14 @@ Rectangle {
     function dockingXPoint(){
         var xInput
         var xOutput
-        xInput=x+xOffset
-        xOutput=d+x-xOffset
-        console.debug(xInput-x)
+        //console.debug(neuron.dockingPointOffset)
+        var offSet=neuron.dockingPointOffset
+        //console.debug(offSet)
+        xInput=x+(0.2*d)
+        xOutput=d+x-(0.2*d)
+
         if(type===def.inputType){
-
                     inputConXOutput[typeId]=xOutput
-
                 }
                 else if(type===def.biasType){
                     biasConXOutput[typeId]=xOutput
