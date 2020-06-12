@@ -38,7 +38,7 @@ Rectangle{
         anchors.left: sidebar.right
         anchors.leftMargin: 0
         width: showWidth
-        /*MultiNet{
+        MultiNet{
             id:multiNet
             anchors.fill: sidebarContent
             xNetPerTab:1
@@ -48,7 +48,7 @@ Rectangle{
             forceTimer: true
             clickedNetId:0
             onClickedNetIdChanged: mainNet.netID=clickedNetId
-        }*/
+        }
         NetInfo{
             anchors.fill: sidebarContent
             visible: tabBar.showContent[1]

@@ -24,7 +24,7 @@ Shape {
                         else if(weight>0) return VisuFunction.color(transparent,"008000")
                         else return "white"
 
-           strokeWidth: if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.1
+           strokeWidth: if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.05
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
 
@@ -96,12 +96,4 @@ Shape {
               }
            }
          }
-        Rectangle{
-            color: "blue"
-            width: 10
-            height: 10
-            x:path.x-5
-            y:path.y-5
-            onXChanged: "new X Pos"+x
-        }
 }

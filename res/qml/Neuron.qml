@@ -12,8 +12,8 @@ Rectangle {
     property real yRel: 0
     x: {
         //if(type===def.hiddenType) //console.debug(xRel+" * "+netItem.xDistance+" = "+xRel*netItem.xDistance)
-        return xRel*netItem.xDistance}
-    y: yRel*netItem.yDistance
+        return xRel*totalNet.xDistance}
+    y: yRel*totalNet.yDistance
 
     onXChanged:{
         //if(type===def.hiddenType) console.debug("hiddenx changed: "+x)
@@ -49,7 +49,6 @@ Rectangle {
             outputConXInput=VisuFunction.updateArray(outputConXInput)
         }
         else if(type===def.hiddenType){
-            console.debug("update X")
             hiddenConXInput=VisuFunction.updateArray(hiddenConXInput)
             hiddenConXOutput=VisuFunction.updateArray(hiddenConXOutput)
         }
@@ -184,6 +183,8 @@ Rectangle {
 
     Text {
         visible: (parent.d>10)
+
+
         font.pixelSize: parent.d*0.2
         horizontalAlignment: Text.AlignHCenter
         text: if(type>def.noneType) return  "ID:"+neuronID+"\nValue: \n"+Math.round(neuronValue*10000)/10000
@@ -204,8 +205,8 @@ Rectangle {
         }
         drag {
                 target: if(movable) return parent
-                maximumX: netItem.width-d
-                maximumY: netItem.height-d
+                maximumX: totalNet.width-d
+                maximumY: totalNet.height-d
                 minimumX: 0
                 minimumY: 0
 

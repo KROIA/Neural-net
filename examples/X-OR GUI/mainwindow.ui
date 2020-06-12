@@ -397,7 +397,7 @@
       </rect>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>1000</number>
      </property>
     </widget>
     <widget class="QSpinBox" name="hiddenX_spinBox">
@@ -410,7 +410,7 @@
       </rect>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>1000</number>
      </property>
     </widget>
    </widget>
