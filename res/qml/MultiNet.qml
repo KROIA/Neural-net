@@ -55,7 +55,8 @@ Item{
                         enableUpdateTimer:multiNet.enableUpdateTimer
                         forceTimer:multiNet.forceTimer
                         neuronClickEnable:false
-                        }
+                        zoomEnable: false
+                    }
                     }
     function updateMultiNet(){
                totalNet= netListVisu.getNetCount()

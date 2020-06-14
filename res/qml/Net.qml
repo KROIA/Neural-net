@@ -41,7 +41,8 @@ NetData {
     property bool neuronClickEnable: true
     property real yOffSet: 0.1
     property real xOffSet: 0.1
-    property real zoom: 2
+    property real zoom: 1
+
     property bool zoomEnable: false
     property int yBiasPos: if(bias) return 1
                         else return 0
@@ -61,7 +62,7 @@ NetData {
             anchors.fill: parent
             contentHeight: scroll.height*zoom
             contentWidth: scroll.width*zoom
-            ScrollBar.vertical.position:0.5
+            ScrollBar.vertical.position:0.8
             /*ScrollBar.horizontal: ScrollBar{
                 id:horBar
                 position: 0.5
@@ -87,6 +88,8 @@ NetData {
                     hoverEnabled:true
                     property bool zoomActiv: true
                     onWheel: {
+                        if(zoomEnable){
+                        //console.debug(zoom)
                                 if(zoomActiv) {
                                 //console.debug("scroll")
 
@@ -110,6 +113,7 @@ NetData {
                                  //scroll.ScrollBar.horizontal.position=0.5//mouseX/scroll.width
                                  //totalNet.x:mouseX
                                  //console.debug(zoom)
+                        }
                     }
 
                 }

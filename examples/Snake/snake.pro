@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts qml quick quickwidgets
+QT       += core gui charts qml quick quickwidgets sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = snake
@@ -91,7 +91,8 @@ SOURCES += \
     $$srcPath/food.cpp \
     $$srcPath/maptile.cpp \
     $$srcPath/environment.cpp \
-    $$visuSrc/netvisu.cpp
+    $$visuSrc/netvisu.cpp\
+    $$visuSrc/savenetsql.cpp
 
 HEADERS += \
     $$incPath/snake.h \
@@ -107,7 +108,8 @@ HEADERS += \
     $$netIncPath/error.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/backpropnet.h \
-    $$visuInc/netvisu.h
+    $$visuInc/netvisu.h\
+    $$visuInc/savenetsql.h
 
 FORMS += \
         snake.ui

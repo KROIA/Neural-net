@@ -1,5 +1,5 @@
 #QT -= gui
-QT += qml quick widgets gui
+QT += qml quick widgets gui sql quickwidgets
 CONFIG += c++11 console qmltypes
 CONFIG -= app_bundle
 
@@ -35,7 +35,8 @@ SOURCES += \
     $$netSrcPath/savenet.cpp \
     $$srcPath/enviroment.cpp \
     $$netSrcPath/error.cpp\
-    $$visuSrc/netvisu.cpp
+    $$visuSrc/netvisu.cpp\
+    $$visuSrc/savenetsql.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -50,7 +51,8 @@ HEADERS += \
     $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h \
-    $$visuInc/netvisu.h
+    $$visuInc/netvisu.h\
+    $$visuInc/savenetsql.h
 
 RESOURCES += \
     $$resourcePath/qrc.qrc

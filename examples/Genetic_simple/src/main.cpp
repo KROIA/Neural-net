@@ -16,9 +16,9 @@ int main(int argc, char *argv[])
     QGuiApplication a(argc, argv);
     Enviroment enviroment;
 
-    NetVisu visu(enviroment._net->get_netList_ptr());
+
     system("cls");
-    visu.start();
+    //visu.start();
     /*while(true)
     {
         //cmdXY(0,0);  // Sets the cursor pos of the console
@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
        // getchar();
 
     }*/
+    NetVisu visu(enviroment._net->get_netList_ptr());
+    visu.showWindow();
     return a.exec();
 }
 void printNet(GeneticNet &net)

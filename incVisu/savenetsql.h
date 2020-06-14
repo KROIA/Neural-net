@@ -2,11 +2,15 @@
 #define SAVENETSQL_H
 
 #define Net_Table_Name "Net"
+
 #define Net_Table_ID_Column "NetID"
 #define Inputs_Column "InputsColumn"
 #define HiddenXs_Column "HiddenXsColumn"
 #define HiddenYs_Column "HiddenYsColumn"
 #define Outputs_Column "OutputsColumn"
+#define Bias_Column "BiasColumn"
+#define Bias_Value_Column "BiasValueColumn"
+#define Activation_Function_Column "ActivationFunction"
 
 #define Neuron_Table_Name "Neuron"
 
@@ -15,6 +19,7 @@
 #define Sql_Type_INT "INT"
 #define Sql_Type_TEXT "TEXT"
 #define Sql_Type_BOOL "BOOL"
+#define Sql_Type_REAL "REAL"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -33,6 +38,7 @@ public:
     void connClose();
     QString dbPath;
     void saveNet(Net* saveNet);
+    void saveNetId(Net* saveNet,int id);
     void saveNetVec(vector<Net*> saveNet);
     void createDb();
 private:
@@ -43,6 +49,7 @@ private:
     void sqlcommand(QString command);
     bool createTable(QString tableName,vector<QString> columns,vector<QString> type);
     bool isertIntoTable(QString tableName,vector<QString> columns,vector<QString> valuesName);
+    int findFreeId(QString tableName,QString columnId);
 };
 
 #endif // SAVENETSQL_H

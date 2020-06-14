@@ -50,6 +50,7 @@ void NetVisu::setupNetVisu(){
     for(unsigned long long i=0;i<netList.size();i++){
         db.saveNet(netList[i]);
     }
+
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){
