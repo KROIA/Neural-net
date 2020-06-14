@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QQmlProperty>
 #include <QQuickWidget>
-
+#include <savenetsql.h>
 #define QmlRootContext "netListVisu"
 #define QmlRootUiContext "netListUiVisu"
 using namespace std;
@@ -33,6 +33,7 @@ public:
     vector<qreal> ConnectionWeight;
     vector<qreal> NeuronValueVect;
 
+    SaveNetSql db;
 signals:
     void newNetData();
     void stopUpdateSignal();

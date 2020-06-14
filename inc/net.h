@@ -13,21 +13,21 @@
 //#define _DEBUG_NET_ONLY_ID 0
 //#define _DEBUG_NET_ALL
 //#define _DEBUG_NET_RUN
-#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
 #define _DEBUG_NET_TIMING
 //#define _DEBUG_NET_CONNECT
 
 
-#ifdef _DEBUG_NET_ALL
-#ifndef _DEBUG_NET_RUN
-#define _DEBUG_NET_RUN
-#endif
-#ifndef _DEBUG_NET_UPDATE_NET_CONFIGURATION
-#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
-#endif
+//#ifdef _DEBUG_NET_ALL
+//#ifndef _DEBUG_NET_RUN
+//#define _DEBUG_NET_RUN
+//#endif
+//#ifndef _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#endif
 #ifndef _DEBUG_NET_TIMING
 #define _DEBUG_NET_TIMING
-#endif
+//#endif
 #ifndef _DEBUG_NET_CONNECT
 #define _DEBUG_NET_CONNECT
 #endif

@@ -6,6 +6,8 @@ NetVisu::NetVisu(Net* _net,QObject *parent):
 {
     netList.push_back(_net);
     setupNetVisu();
+
+    //db();
 }
 
 NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
@@ -45,6 +47,9 @@ void NetVisu::setupNetVisu(){
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
     startUpdateSlot();
+    for(unsigned long long i=0;i<netList.size();i++){
+        db.saveNet(netList[i]);
+    }
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){

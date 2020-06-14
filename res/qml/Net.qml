@@ -62,7 +62,7 @@ NetData {
             contentHeight: scroll.height*zoom
             contentWidth: scroll.width*zoom
             ScrollBar.vertical.position:0.5
-            ScrollBar.horizontal: ScrollBar{
+            /*ScrollBar.horizontal: ScrollBar{
                 id:horBar
                 position: 0.5
             }
@@ -73,7 +73,7 @@ NetData {
                 width: 10
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-            }
+            }*/
             Item{
 
                 id:totalNet
