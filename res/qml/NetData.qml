@@ -36,10 +36,10 @@ Item {
 
     Connections {
                    target: netListVisu
-                   onStopUpdateSignal: timerNet.running=false
-                   onStartUpdateSignal:{timerNet.running=true
+                   function onStopUpdateSignal(){ timerNet.running=false}
+                   function onStartUpdateSignal(){timerNet.running=true
                        updateStructur()}
-                   onSetUpdateTimeSignal:if(!forceTimer) updateTime=time
+                   function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=time}
 
     }
     Timer {

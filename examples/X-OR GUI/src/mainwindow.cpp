@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     input = 2;
     hiddenX = 1;
-    hiddenY = 10;
+    hiddenY = 1;
     output = 1;
     ui->hiddenX_spinBox->setValue(hiddenX);
     ui->hiddenY_spinBox->setValue(hiddenY);
@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setupTrainingSet();
     visu = new NetVisu(net);
     visu->showWindow();
+
 }
 
 MainWindow::~MainWindow()

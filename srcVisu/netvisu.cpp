@@ -47,10 +47,11 @@ void NetVisu::setupNetVisu(){
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
     startUpdateSlot();
-    for(unsigned long long i=0;i<netList.size();i++){
-        db.saveNet(netList[i]);
-    }
-
+    //for(unsigned long long i=0;i<netList.size();i++){
+    db.saveNet(netList[0]);
+    //}
+    Net* testNet;
+    testNet=db.loadNet(0);
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){

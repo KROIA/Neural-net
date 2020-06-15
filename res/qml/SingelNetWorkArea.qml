@@ -8,7 +8,7 @@ FocusScope {
     visible:!singelTopBar.multiView
     Connections {
                    target: netListVisu
-                   onStartUpdateSignal:updateMultiNet()
+                   function onStartUpdateSignal(){updateMultiNet()}
 
     }
     Net{

@@ -34,7 +34,7 @@ Item{
     }
     Connections {
                    target: netListVisu
-                   onStartUpdateSignal:updateMultiNet()
+                   function onStartUpdateSignal(){updateMultiNet()}
     }
                 Repeater{
                     model:{
