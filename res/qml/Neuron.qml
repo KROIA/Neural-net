@@ -212,8 +212,8 @@ Rectangle {
 
             }
         onDragActiveChanged: if(drag){
-                                 xRel=parent.x/xDistance
-                                 yRel=parent.y/yDistance}
+                                 xRel=parent.x/totalNet.xDistance
+                                 yRel=parent.y/totalNet.yDistance}
 
         property bool dragActive: drag.active
     }

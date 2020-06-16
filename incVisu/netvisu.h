@@ -5,7 +5,7 @@
 //#include <backpropnet.h>
 //#include <geneticnet.h>
 #include <QThread>
-#include <net.h>
+
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QTimer>
@@ -13,6 +13,7 @@
 #include <QQmlProperty>
 #include <QQuickWidget>
 #include <savenetsql.h>
+
 #define QmlRootContext "netListVisu"
 #define QmlRootUiContext "netListUiVisu"
 using namespace std;

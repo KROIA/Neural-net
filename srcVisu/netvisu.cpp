@@ -47,9 +47,12 @@ void NetVisu::setupNetVisu(){
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
     startUpdateSlot();
-    //for(unsigned long long i=0;i<netList.size();i++){
-    //db.saveNet(netList[0]);
-    //}
+    QElapsedTimer tim;
+    tim.start();
+    for(unsigned long long i=0;i<1;i++){
+        db.saveNet(netList[0]);
+    }
+    qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
     Net* testNet;
     //testNet=db.loadNet(0);
     //qDebug("fertig");
