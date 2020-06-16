@@ -48,10 +48,11 @@ void NetVisu::setupNetVisu(){
     }
     startUpdateSlot();
     //for(unsigned long long i=0;i<netList.size();i++){
-    db.saveNet(netList[0]);
+    //db.saveNet(netList[0]);
     //}
     Net* testNet;
-    testNet=db.loadNet(0);
+    //testNet=db.loadNet(0);
+    //qDebug("fertig");
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){
