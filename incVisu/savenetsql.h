@@ -56,7 +56,7 @@ public:
     QString dbPath;
     Net* loadNet(int id);
     void saveNet(Net* saveNet);
-    void saveNetId(vector<Net*> saveNet,int id);
+    void saveNet(vector<Net*> saveNet);
     void saveConnection(Connection saveConnection,int netID);
     void saveConnection(vector<Connection> saveConnection,int netID);
 
@@ -75,13 +75,13 @@ private:
     void saveNetOpen(vector<Net*> saveNet,int id);
     void saveNetOpen(Net* saveNet);
     void saveConnectionOpen(Connection saveConnection,int netID);
-    void saveConnectionOpenVec(vector<Connection> saveConnection,int netID);
+    void saveConnectionOpen(vector<Connection> saveConnection,int netID);
     void saveNeuronOpen(Neuron* saveNeuron,int netID);
-    void saveNeuronOpenVec(vector<Neuron*> saveNeuron,int netID);
+    void saveNeuronOpen(vector<Neuron*> saveNeuron,int netID);
     bool createTable(string tableName,vector<string> columns,vector<string> type);
     void isertIntoTable(string tableName,vector<string> columns,
                         vector<string> valuesName);
-    void isertIntoTableVec(string tableName,vector<string> columns,
+    void isertIntoTable(string tableName,vector<string> columns,
                         vector<vector<string>> valuesName);
     int findFreeId(string tableName,string columnId);
     int findNeuron(Neuron *n, unsigned netID);

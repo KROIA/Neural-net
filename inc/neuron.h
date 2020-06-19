@@ -16,20 +16,20 @@
 //#define _DEBUG_NEURON_CONNECT
 //#define _DEBUG_NEURON_DELETE_INPUT
 
-#ifdef _DEBUG_NEURON_ALL
-#ifndef _DEBUG_NEURON_RUN
-#define _DEBUG_NEURON_RUN
-#endif
-#ifndef _DEBUG_NEURON_TIMING
-#define _DEBUG_NEURON_TIMING
-#endif
-#ifndef _DEBUG_NEURON_CONNECT
-#define _DEBUG_NEURON_CONNECT
-#endif
-#ifndef _DEBUG_NEURON_DELETE_INPUT
-#define _DEBUG_NEURON_DELETE_INPUT
-#endif
-#endif
+//#ifdef _DEBUG_NEURON_ALL
+//#ifndef _DEBUG_NEURON_RUN
+//#define _DEBUG_NEURON_RUN
+//#endif
+//#ifndef _DEBUG_NEURON_TIMING
+//#define _DEBUG_NEURON_TIMING
+//#endif
+//#ifndef _DEBUG_NEURON_CONNECT
+//#define _DEBUG_NEURON_CONNECT
+//#endif
+//#ifndef _DEBUG_NEURON_DELETE_INPUT
+//#define _DEBUG_NEURON_DELETE_INPUT
+//#endif
+//#endif
 
 #include <vector>
 #include <math.h>

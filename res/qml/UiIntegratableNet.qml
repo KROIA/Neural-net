@@ -11,7 +11,7 @@ Item {
     Component.onCompleted: updateNet();
     Connections {
                    target: netListVisu
-                   onStartUpdateSignal:updateNet()
+                   function onStartUpdateSignal(){updateNet()}
                    }
     Net{
         id:net
