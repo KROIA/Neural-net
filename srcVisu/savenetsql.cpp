@@ -343,11 +343,11 @@ void SaveNetSql::isertIntoTable(string tableName,vector<string> columns,
                 command += " , ";
             }
         }
-        command += ") VALUES(: ";
+        command += ") VALUES ";/*;
         for(unsigned long long i=0;i<columns.size();i++){
             command +=columns[i];
             if(i<columns.size()-1){
-                command += " , :";
+                command += " , ";
             }
         }
         command += ");";
@@ -358,8 +358,8 @@ void SaveNetSql::isertIntoTable(string tableName,vector<string> columns,
                          query.bindValue(QString::fromStdString(valuesName[j][i]),":"+QString::fromStdString(columns[i]));
                     }
                     query.exec();
-            }
-        /*for(unsigned j=0;j<valuesName.size();j++){
+            }*/
+        for(unsigned j=0;j<valuesName.size();j++){
             command +="(";
             for(unsigned long long i=0;i<valuesName[j].size();i++){
                 command +=valuesName[j][i];
@@ -373,7 +373,7 @@ void SaveNetSql::isertIntoTable(string tableName,vector<string> columns,
     }
     command += ");";
 
-    sqlcommandOpen(command);*/
+    sqlcommandOpen(command);
 }
 
 int SaveNetSql::findFreeId(string tableName,string columnId){
