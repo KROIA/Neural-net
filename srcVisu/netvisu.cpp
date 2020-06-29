@@ -47,13 +47,21 @@ void NetVisu::setupNetVisu(){
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
     startUpdateSlot();
+
+    vector<Net*> saveVec=netList;
+    /*for(int i=0;i<100;i++){
+        saveVec.push_back(saveVec[0]);
+    }*/
+#ifdef sqlsave
     QElapsedTimer tim;
     tim.start();
-    db.saveNet(netList);
+
+    db.saveNet(saveVec);
     qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
     Net* testNet;
     //testNet=db.loadNet(0);
     //qDebug("fertig");
+#endif
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){
@@ -173,8 +181,13 @@ QVector<int> NetVisu::getOutputID(const int &netId) {
 QVector<int> NetVisu::getConSourceID(const int &netId) {
     QVector<int> vect;
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;i<netList[unsigned(netId)]->get_connections();i++){
+        for(unsigned  int i=0;
+            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
+            i++){
             vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].source_ID.ID);
+        }
+        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
+            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].source_ID.ID);
         }
     }
     //qDebug()<<"Source \t"<<vect;
@@ -183,9 +196,18 @@ QVector<int> NetVisu::getConSourceID(const int &netId) {
 
 QVector<int> NetVisu::getConDestinationID(const int &netId) {
     QVector<int> vect;
+    qDebug()<<" list size"<<netList[unsigned(netId)]->get_connectionList().size();
+    qDebug()<<netList[unsigned(netId)]->get_connections();
+    qDebug()<<netList[unsigned(netId)]->get_costumConnections();
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;i<netList[unsigned(netId)]->get_connections();i++){
+        for(unsigned  int i=0;
+            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
+            i++){
             vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].destination_ID.ID);
+        }
+
+        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
+            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].destination_ID.ID);
         }
     }
     //qDebug()<<"\t"<<vect;
@@ -195,8 +217,13 @@ QVector<int> NetVisu::getConDestinationID(const int &netId) {
 QVector<int> NetVisu::getConSourceType(const int &netId) {
     QVector<int> vect;
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;i<netList[unsigned(netId)]->get_connections();i++){
+        for(unsigned  int i=0;
+            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
+            i++){
             vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].source_ID.TYPE);
+        }
+        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
+            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].source_ID.TYPE);
         }
     }
     return vect;
@@ -205,8 +232,13 @@ QVector<int> NetVisu::getConSourceType(const int &netId) {
 QVector<int> NetVisu::getConDestinationType(const int &netId) {
     QVector<int> vect;
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;i<netList[unsigned(netId)]->get_connections();i++){
+        for(unsigned  int i=0;
+            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
+            i++){
             vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].destination_ID.TYPE);
+        }
+        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
+            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].destination_ID.TYPE);
         }
     }
     return vect;

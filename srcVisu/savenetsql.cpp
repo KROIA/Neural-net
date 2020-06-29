@@ -19,46 +19,22 @@ SaveNetSql::SaveNetSql(string _path )
     //connOpen();
 
 }
-
-void SaveNetSql::connOpen(){
-
-    mydb = QSqlDatabase::addDatabase("QSQLITE","connction1");
-    //mydb = QSqlDatabase::database("connction1");
-    mydb.setDatabaseName(dbPath);
-
-        if (!mydb.open())
-        {
-        mydb.setDatabaseName(dbPath);
-          if (!mydb.open()){
-          qDebug()<<"DB is not connected.";
-        }
-    }
-    else
-    {
-        string command;
-        command ="BEGIN TRANSACTION;";
-        sqlcommandOpen(command);
-        //qDebug()<<" ";
-       //qDebug()<<"DB is connected.";
-       //qDebug()<<"BEGIN TRANSACTION;";
-    }
+void SaveNetSql::createDb(){
+    vector<string> types;
+    types={ Sql_Type_INT,Sql_Type_INT,
+            Sql_Type_INT,Sql_Type_INT,
+            Sql_Type_BOOL,Sql_Type_REAL,Sql_Type_BOOL,
+            Sql_Type_INT};
+    connOpen();
+    createTable(Net_Table_Name,netTable,types);
+    types.clear();
+    types={ Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
+    createTable(Neuron_Table_Name,neuronTable,types);
+    types.clear();
+    types={Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
+    createTable(Connection_Table_Name,connectionTable,types);
+    connClose();
 }
-
-void SaveNetSql::connClose(){
-    QElapsedTimer tim;
-    tim.start();
-    sqlcommandOpen("END TRANSACTION;");
-    qDebug()<<"commit Timer "<<tim.elapsed()<<" millis";
-    QString connection;
-    connection = mydb.connectionName();
-    mydb.close();
-    //qDebug()<<"COMMIT;";
-    //qDebug()<<" DB closed";
-    //qDebug()<<" ";
-    mydb = QSqlDatabase();
-    mydb.removeDatabase(connection);
-}
-
 void SaveNetSql::saveNet(Net* saveNet){
     //int next=findFreeId(Net_Table_Name,ID_Column);
 
@@ -68,31 +44,33 @@ void SaveNetSql::saveNet(Net* saveNet){
 }
 
 void SaveNetSql::saveNet(vector<Net*> saveNet){
+    //QElapsedTimer tim;
+    //tim.start();
     QElapsedTimer tim;
     tim.start();
     connOpen();
     //qDebug()<<"open Timer "<<tim.elapsed()<<" millis";
     //qDebug()<<"Start saving net";
     string command;
-    //tim.restart();
+    tim.restart();
     for(unsigned j=0;j<saveNet.size();j++){
         string tableName=Net_Table_Name;
         vector<string> values;
-        values.push_back(std::to_string(saveNet[j]->get_inputNeurons()));
-        values.push_back(std::to_string(saveNet[j]->get_hiddenNeuronsX()));
-        values.push_back(std::to_string(saveNet[j]->get_hiddenNeuronsY()));
-        values.push_back(std::to_string(saveNet[j]->get_outputNeurons()));
-        values.push_back(std::to_string(saveNet[j]->get_bias()));
-        values.push_back(std::to_string(saveNet[j]->get_biasValue()));
-        values.push_back(std::to_string(saveNet[j]->get_enableAverage()));
-        values.push_back(std::to_string(saveNet[j]->get_activationFunction()));
+        values.push_back(to_string(saveNet[j]->get_inputNeurons()));
+        values.push_back(to_string(saveNet[j]->get_hiddenNeuronsX()));
+        values.push_back(to_string(saveNet[j]->get_hiddenNeuronsY()));
+        values.push_back(to_string(saveNet[j]->get_outputNeurons()));
+        values.push_back(to_string(saveNet[j]->get_bias()));
+        values.push_back(to_string(saveNet[j]->get_biasValue()));
+        values.push_back(to_string(saveNet[j]->get_enableAverage()));
+        values.push_back(to_string(saveNet[j]->get_activationFunction()));
         isertIntoTable(tableName,netTable,values);
         //sqlcommandOpen("COMMIT;");
         //sqlcommandOpen("select last_insert_rowid()");
 
         int netId=query.lastInsertId().toInt();
         //qDebug()<<"net Timer "<<tim.elapsed()<<" millis";
-        //tim.restart();
+        tim.restart();
         Neuron input[saveNet[j]->get_inputNeurons()];
         vector<Neuron*> neuronVec;
         neuronVec=*saveNet[j]->get_ptr_allNeurons();
@@ -102,11 +80,6 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
             input[i].set_TYPE(NeuronType::input);
             neuronVec.push_back(&input[i]);
         }
-
-        /*
-        for(unsigned i=0;i<inputVec.size();i++){
-
-        }*/
         Neuron bias;
         if(saveNet[j]->get_bias()){
 
@@ -116,17 +89,17 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
         }
         saveNeuronOpen(neuronVec,netId);
         //qDebug()<<"neuron Timer "<<tim.elapsed()<<" millis";
-        //tim.restart();
+        tim.restart();
         //for(unsigned i=0;i<connectionList.size();i++){
         saveConnectionOpen(saveNet[j]->get_connectionList(),netId);
         //qDebug()<<"connection Timer "<<tim.elapsed()<<" millis";
        //}
     }
 
-    //qDebug()<<"End saving net";
+    ////qDebug()<<"End saving net";
     tim.restart();
     connClose();
-    qDebug()<<"close Timer "<<tim.elapsed()<<" millis";
+    //qDebug()<<"close Timer "<<tim.elapsed()<<" millis";
 }
 
 Net* SaveNetSql::loadNet(int id){
@@ -141,7 +114,7 @@ Net* SaveNetSql::loadNet(int id){
     Activation activationFunction;
     string command;
     command = "Select * FROM "+string(Net_Table_Name)+" WHERE ";
-    command += string(ID_Column)+" = "+std::to_string(id);
+    command += string(ID_Column)+" = "+to_string(id);
     //connOpen();
     sqlcommandOpen(command);
 
@@ -194,62 +167,7 @@ void SaveNetSql::saveNeuron(Neuron* saveNeuron,int netID){
     connClose();
 }
 
-void SaveNetSql::createDb(){
-    vector<string> types;
-    types={ Sql_Type_INT,Sql_Type_INT,
-            Sql_Type_INT,Sql_Type_INT,
-            Sql_Type_BOOL,Sql_Type_REAL,Sql_Type_BOOL,
-            Sql_Type_INT};
-    connOpen();
-    createTable(Net_Table_Name,netTable,types);
-    types.clear();
-    types={ Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
-    createTable(Neuron_Table_Name,neuronTable,types);
-    types.clear();
-    types={Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
-    createTable(Connection_Table_Name,connectionTable,types);
-    connClose();
-}
 
-int SaveNetSql::countEnteries(QSqlQuery* _q){
-    _q->first();
-    int entries=0;
-    if( _q->first()==true){
-    do {
-        ++entries;
-    }while (_q->next());
-    _q->first();
-    }
-    qDebug()<<"ENTERIES"<<entries<<" "<<_q->first();
-    return entries;
-}
-
-void SaveNetSql::sqlcommandOpen(string command){
-    //connClose();
-    //connOpen();
-    QSqlQuery _query(mydb);
-    if(!_query.exec(QString::fromStdString(command))){
-        qDebug()<<"SQL ERROR command not working";
-        qDebug()<<QString::fromStdString(command);
-        qDebug()<<"";
-    }
-    query=_query;
-    _query.clear();
-    query.first();
-    //qDebug()<<"This command took "<<t.elapsed();
-    //qDebug()<< QString::fromStdString(command);
-    //qDebug()<<"";
-}
-
-void SaveNetSql::sqlcommand(string command){
-    connOpen();
-    sqlcommandOpen(command);
-    connClose();
-}
-
-void SaveNetSql::saveNetOpen(vector<Net*> saveNet,int id){
-
-}
 
 void SaveNetSql::saveConnectionOpen(Connection saveConnection,int netID){
     vector<Connection> vec;
@@ -261,11 +179,11 @@ void SaveNetSql::saveConnectionOpen(vector<Connection> saveConnection,int netID)
     vector<vector<string>> valuesVec;
     for(unsigned i=0;i<saveConnection.size();i++){
             vector<string> values;
-            values.push_back(std::to_string(netID));
-            values.push_back(std::to_string(findNeuron(&saveConnection[i].source_ID,netID)));
-            values.push_back(std::to_string(findNeuron(&saveConnection[i].destination_ID,netID)));
-            values.push_back(std::to_string(saveConnection[i].weight));
-            values.push_back(std::to_string(saveConnection[i].direction));
+            values.push_back(to_string(netID));
+            values.push_back(to_string(findNeuron(&saveConnection[i].source_ID,netID)));
+            values.push_back(to_string(findNeuron(&saveConnection[i].destination_ID,netID)));
+            values.push_back(to_string(saveConnection[i].weight));
+            values.push_back(to_string(saveConnection[i].direction));
             valuesVec.push_back(values);
     }
     isertIntoTable(tableName,connectionTable,valuesVec);
@@ -282,16 +200,16 @@ void SaveNetSql::saveNeuronOpen(vector<Neuron*> saveNeuron,int netID){
     vector<vector<string>> valuesVec;
     for(unsigned i=0;i<saveNeuron.size();i++){
             vector<string> values;
-            values.push_back(std::to_string(netID));
-            values.push_back(std::to_string(saveNeuron[i]->get_ID().ID));
-            values.push_back(std::to_string(saveNeuron[i]->get_ID().TYPE));
+            values.push_back(to_string(netID));
+            values.push_back(to_string(saveNeuron[i]->get_ID().ID));
+            values.push_back(to_string(saveNeuron[i]->get_ID().TYPE));
             valuesVec.push_back(values);
     }
     isertIntoTable(tableName,neuronTable,valuesVec);
 }
 bool SaveNetSql::createTable(string tableName,vector<string> columns,vector<string> type){
     if(columns.size()!=type.size()){
-        qDebug()<<"ERROR SQL: column size "<<columns.size()<<" and  type size "<<type.size()<<" don't match";
+        //qDebug()<<"ERROR SQL: column size "<<columns.size()<<" and  type size "<<type.size()<<" don't match";
         return false;
     }
     string command;
@@ -307,7 +225,7 @@ bool SaveNetSql::createTable(string tableName,vector<string> columns,vector<stri
             }
         }
         else{
-           qDebug()<<" sql Type "+QString::fromStdString(type[i])+" unknown";
+           //qDebug()<<" sql Type "+type[i]+" unknown";
            return false;
         }
     }
@@ -315,98 +233,20 @@ bool SaveNetSql::createTable(string tableName,vector<string> columns,vector<stri
     sqlcommandOpen(command);
     return true;
 }
-void SaveNetSql::isertIntoTable(string tableName,vector<string> columns,
-                       vector<string> valuesName){
-    vector<vector<string>> vec;
-    vec.push_back(valuesName);
-    isertIntoTable(tableName,columns,vec);
-}
-
-void SaveNetSql::isertIntoTable(string tableName,vector<string> columns,
-    //query.clear();
-    vector<vector<string>> valuesName){
-    if(columns.size()!=valuesName[0].size()){
-        qDebug()<<"ERROR SQL: column size "<<columns.size()<<" and  values size "<<valuesName[0].size()<<" don't match";
-    }
-    string command;
-
-    //command="SELECT "+idColumn+" FROM "+tableName+" WHERE "+idColumn+" ";
-    //sqlcommandOpen(command);
-
-    command ="INSERT INTO "+tableName;
 
 
-        command +=" (";
-        for(unsigned long long i=0;i<columns.size();i++){
-            command +=columns[i];
-            if(i<columns.size()-1){
-                command += " , ";
-            }
-        }
-        command += ") VALUES ";/*;
-        for(unsigned long long i=0;i<columns.size();i++){
-            command +=columns[i];
-            if(i<columns.size()-1){
-                command += " , ";
-            }
-        }
-        command += ");";
-        query.prepare(QString::fromStdString(command));
 
-        for(unsigned j=0;j<valuesName.size();j++){
-                    for(unsigned long long i=0;i<valuesName[j].size();i++){
-                         query.bindValue(QString::fromStdString(valuesName[j][i]),":"+QString::fromStdString(columns[i]));
-                    }
-                    query.exec();
-            }*/
-        for(unsigned j=0;j<valuesName.size();j++){
-            command +="(";
-            for(unsigned long long i=0;i<valuesName[j].size();i++){
-                command +=valuesName[j][i];
-                if(i<valuesName[j].size()-1){
-                    command += " , ";
-                }
-            }
-        if(j<valuesName.size()-1){
-            command += "),";
-        }
-    }
-    command += ");";
-
-    sqlcommandOpen(command);
-}
-
-int SaveNetSql::findFreeId(string tableName,string columnId){
-    string command;
-    command += "Select "+columnId+" FROM "+tableName;
-    command += " ORDER BY "+columnId+" ASC";
-    sqlcommandOpen(command);
-    int value=0;
-    int qV;
-    if(countEnteries(&query)>0){
-        do{
-            qDebug()<<query.value(QString::fromStdString(columnId)).toInt()<<" "<<value;
-            qV=query.value(QString::fromStdString(columnId)).toInt();
-            if(qV==value){
-                value=qV+1;
-            }
-        }while (query.next());
-    }
-    qDebug()<<"new Value"<<value;
-    //connClose();
-    return value;
-}
 int SaveNetSql::findNeuron(NeuronID *n, unsigned netID){
     string command;
     string placeholder=ID_Column;
     command="SELECT "+placeholder+" FROM "+Neuron_Table_Name+
-            " WHERE "+Neuron_Table_Net_ID_Column+" = "+std::to_string(netID)+
-            " AND "+Neuron_ID_Column+" = "+std::to_string(n->ID)+
-            " AND "+Neuron_TYPE_Column" = "+std::to_string(n->TYPE);
+            " WHERE "+Neuron_Table_Net_ID_Column+" = "+to_string(netID)+
+            " AND "+Neuron_ID_Column+" = "+to_string(n->ID)+
+            " AND "+Neuron_TYPE_Column" = "+to_string(n->TYPE);
     sqlcommandOpen(command);
     if(query.first()){
         if(query.next()){
-            qDebug()<<"Found multiple identical Neurons";
+            //qDebug()<<"Found multiple identical Neurons";
             return -1;
         }
         else{
@@ -418,12 +258,13 @@ int SaveNetSql::findNeuron(NeuronID *n, unsigned netID){
 
     }
     else{
-        qDebug()<<QString::fromStdString(command);
-        qDebug()<<"No such Neuron found ID: "<<n->ID<<" Type: "<<n->TYPE+" NetID :"+netID;
+        //qDebug()<<command;
+        //qDebug()<<"No such Neuron found ID: "<<n->ID<<" Type: "<<n->TYPE+" NetID :"+netID;
         return -1;
     }
     return 1;
 }
+
 int SaveNetSql::findNeuron(Neuron *n, unsigned netID){
     NeuronID id=n->get_ID();
     return findNeuron(&id,netID);

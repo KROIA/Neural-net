@@ -1303,7 +1303,10 @@ std::vector<Connection>  Net::get_connectionList()
 {
     return _connectionList;
 }
-
+std::vector<Connection>  Net::get_costumConnectionList()
+{
+    return _costumConnectionList;
+}
 
 NeuronID            Net::addNeuron()
 {

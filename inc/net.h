@@ -165,6 +165,7 @@ class Net : public QObject
         void                    addConnection(std::vector<Connection> connections);                //update
         void                    set_connectionList(std::vector<Connection> connections);           //update
         std::vector<Connection> get_connectionList();
+        std::vector<Connection> get_costumConnectionList();
 
         NeuronID                addNeuron();                                                        //update
         NeuronID                addNeuron(Neuron *neuron);                                          //update

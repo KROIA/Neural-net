@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    /*delete ui;
 
     ptr_net_visu->deleteLater();
     delete ptr_net;
@@ -67,19 +67,19 @@ MainWindow::~MainWindow()
     ptr_geneticNet_visu->deleteLater();
     delete ptr_geneticNet;
 
-    ptr_timer_loop->deleteLater();
+    ptr_timer_loop->deleteLater();*/
 }
 
 
 void MainWindow::loop()
 {
-    qDebug() << "Loop start";
+    //qDebug() << "Loop start";
 
     ptr_net->set_input({1,1,1,1});
     sinusTestForWeights(*ptr_net_genom);
     ptr_net->run();
 
-    qDebug() << "Loop end";
+    //qDebug() << "Loop end";
 }
 
 void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
@@ -98,7 +98,7 @@ void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
     }
 
     *genom[sinTest_weightIndex] = sin(sinTest_angle+6.283185307/4);
-    qDebug() << *genom[sinTest_weightIndex];
+    //qDebug() << *genom[sinTest_weightIndex];
 
 
 
@@ -111,6 +111,6 @@ void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
 }
 void MainWindow::netErrorOccured(unsigned int netID, Error &e)
 {
-    qDebug() << "Error in Net ID: "<<netID;
+    //qDebug() << "Error in Net ID: "<<netID;
     e.print();
 }

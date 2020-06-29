@@ -47,7 +47,8 @@ SOURCES += \
     $$netSrcPath/savenet.cpp \
     $$netSrcPath/error.cpp \
     $$visuSrc/netvisu.cpp \
-    $$visuSrc/savenetsql.cpp
+    $$visuSrc/savenetsql.cpp \
+    $$visuSrc/sql.cpp
 
 HEADERS += \
     $$incPath/mainwindow.h \
@@ -57,7 +58,8 @@ HEADERS += \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h \
     $$visuInc/netvisu.h \
-    $$visuInc/savenetsql.h
+    $$visuInc/savenetsql.h \
+    $$visuInc/sql.h
 
 FORMS += \
         mainwindow.ui

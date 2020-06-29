@@ -39,7 +39,7 @@ Item {
                    function onStopUpdateSignal(){ timerNet.running=false}
                    function onStartUpdateSignal(){timerNet.running=true
                        updateStructur()}
-                   function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=time}
+                   function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
 
     }
     Timer {
