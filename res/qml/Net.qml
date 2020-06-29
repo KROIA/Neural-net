@@ -140,7 +140,7 @@ NetData {
                         else{
                             w=(totalNet.width-(xOffSet*2*totalNet.width))/(hiddenNeuronX+2)
                         }
-                        return w*0.8
+                        return w*0.7
                     }
                 function calculateYDistance(maxYNeuronRow){
                     if(netAlignment===Net.NetAlignment.Center){

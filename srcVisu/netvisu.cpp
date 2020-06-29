@@ -16,6 +16,10 @@ NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
     netList=_net;
     setupNetVisu();
 }
+NetVisu::~NetVisu(){
+    delete context;
+    delete engine;
+}
 
 void NetVisu::setupNetVisu(){
 

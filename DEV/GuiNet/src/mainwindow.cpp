@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ptr_net_visu->loadNetInUi(ui->net_view_widget);
     ptr_net_visu->setUpdateTime(timer_loop_interval);
     ptr_net_genom = ptr_net->get_ptr_genom();
-
+    ptr_net_visu->showWindow();
 
 }
 

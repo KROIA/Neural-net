@@ -52,13 +52,10 @@ Item{
         onWheel: {
                 if (wheel.angleDelta.y > 0)
                 {
-                    if(multiNet.tabIndex>multiNet.minTab)
-                        console.debug("up");
-                        multiNet.tabIndex--
+                    if(multiNet.tabIndex>multiNet.minTab) multiNet.tabIndex--
                 }
                 else
                 {
-                    console.debug("up");
                     if(multiNet.tabIndex<multiNet.maxTab-1) multiNet.tabIndex++
 
                 }

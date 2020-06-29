@@ -2,13 +2,18 @@
 
 SaveNetSql::SaveNetSql(string _path )
 {
-    netTable={  Net_Inputs_Column,Net_HiddenXs_Column,
+    netLayoutTable={  Net_Inputs_Column,Net_HiddenXs_Column,
                 Net_HiddenYs_Column,Net_Outputs_Column,
                 Net_Bias_Column,Net_Bias_Value_Column,Net_Average_Column,
                 Net_Activation_Function_Column};
-
+    netTable={Net_Layout_Column};
     neuronTable={Neuron_Table_Net_ID_Column,
                   Neuron_ID_Column,Neuron_TYPE_Column};
+
+    neuronLayoutTable={NeuronLayout_LayoutID,
+                       NeuronLayout_NeuronPosition_XRel_Column,
+                      NeuronLayout_NeuronPosition_YRel_Column};
+
     connectionTable={Connection_Table_Net_ID_Column,
                      Connection_Source_ID_Column,
                      Connection_Destination_ID_Column,Connection_Weight_Column,
@@ -27,11 +32,21 @@ void SaveNetSql::createDb(){
             Sql_Type_BOOL,Sql_Type_REAL,Sql_Type_BOOL,
             Sql_Type_INT};
     connOpen();
+    createTable(Net_Layout_Table_Name,netLayoutTable,types);
+
+    types.clear();
+    types={Sql_Type_INT};
     createTable(Net_Table_Name,netTable,types);
     types.clear();
+    types={Sql_Type_INT,Sql_Type_REAL,Sql_Type_REAL};
+    createTable(NeuronLayout_Table_Name,neuronLayoutTable,types);
+
+    types.clear();
+
     types={ Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
     createTable(Neuron_Table_Name,neuronTable,types);
     types.clear();
+
     types={Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT,Sql_Type_INT};
     createTable(Connection_Table_Name,connectionTable,types);
     connClose();
@@ -54,23 +69,19 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
     //qDebug()<<"Start saving net";
     string command;
     tim.restart();
+    int layoutId=checkLayout(saveNet[0]);
+    if(layoutId<0){
+           layoutId=saveNetLayout(saveNet[0]);
+    }
+    int netId;
     for(unsigned j=0;j<saveNet.size();j++){
-        string tableName=Net_Table_Name;
-        vector<string> values;
-        values.push_back(to_string(saveNet[j]->get_inputNeurons()));
-        values.push_back(to_string(saveNet[j]->get_hiddenNeuronsX()));
-        values.push_back(to_string(saveNet[j]->get_hiddenNeuronsY()));
-        values.push_back(to_string(saveNet[j]->get_outputNeurons()));
-        values.push_back(to_string(saveNet[j]->get_bias()));
-        values.push_back(to_string(saveNet[j]->get_biasValue()));
-        values.push_back(to_string(saveNet[j]->get_enableAverage()));
-        values.push_back(to_string(saveNet[j]->get_activationFunction()));
-        isertIntoTable(tableName,netTable,values);
-        //sqlcommandOpen("COMMIT;");
-        //sqlcommandOpen("select last_insert_rowid()");
-
-        int netId=query.lastInsertId().toInt();
-        //qDebug()<<"net Timer "<<tim.elapsed()<<" millis";
+        command="Insert INTO ";
+        command+=Net_Table_Name;
+        command+=" ( ";
+        command+=Net_Layout_Column;
+        command+=") VALUES("+to_string(layoutId)+") ";
+        sqlcommandOpen(command);
+        netId=query.lastInsertId().toInt();
         tim.restart();
         Neuron input[saveNet[j]->get_inputNeurons()];
         vector<Neuron*> neuronVec;
@@ -101,6 +112,21 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
     tim.restart();
     connClose();
     //qDebug()<<"close Timer "<<tim.elapsed()<<" millis";
+}
+
+int SaveNetSql::saveNetLayout(Net* net){
+    string tableName=Net_Layout_Table_Name;
+    vector<string> values;
+    values.push_back(to_string(net->get_inputNeurons()));
+    values.push_back(to_string(net->get_hiddenNeuronsX()));
+    values.push_back(to_string(net->get_hiddenNeuronsY()));
+    values.push_back(to_string(net->get_outputNeurons()));
+    values.push_back(to_string(net->get_bias()));
+    values.push_back(to_string(net->get_biasValue()));
+    values.push_back(to_string(net->get_enableAverage()));
+    values.push_back(to_string(net->get_activationFunction()));
+    isertIntoTable(tableName,netLayoutTable,values);
+    return query.lastInsertId().toInt();
 }
 
 Net* SaveNetSql::loadNet(int id){
@@ -190,6 +216,37 @@ void SaveNetSql::saveConnectionOpen(vector<Connection> saveConnection,int netID)
     isertIntoTable(tableName,connectionTable,valuesVec);
 }
 
+void SaveNetSql::saveRelPos(vector<float> relX,vector<float> relY,Net *net){
+    connOpen();
+    int netID;
+    netID=saveNetLayout(net);
+
+    string command;
+
+    command="INSERT INTO ";
+    command+=NeuronLayout_Table_Name;
+    command+=" ( ";
+    command+=NeuronLayout_LayoutID;
+    command+=" , ";
+    command+=NeuronLayout_NeuronPosition_XRel_Column;
+    command+=" , ";
+    command+=NeuronLayout_NeuronPosition_YRel_Column;
+    command+=") VALUES (:";
+    command+=NeuronLayout_LayoutID;
+    command+=" , :";
+    command+=NeuronLayout_NeuronPosition_XRel_Column;
+    command+=" , :";
+    command+=NeuronLayout_NeuronPosition_YRel_Column;
+    query.prepare(QString::fromStdString(command));
+    for(unsigned int i=0;i<relX.size();i++){
+        query.bindValue(0,netID);
+        query.bindValue(1,relX[i]);
+        query.bindValue(2,relY[i]);
+        query.exec();
+    }
+    connClose();
+}
+
 void SaveNetSql::saveNeuronOpen(Neuron* saveNeuron,int netID){
     vector<Neuron*> vec;
     vec.push_back(saveNeuron);
@@ -269,5 +326,30 @@ int SaveNetSql::findNeuron(NeuronID *n, unsigned netID){
 int SaveNetSql::findNeuron(Neuron *n, unsigned netID){
     NeuronID id=n->get_ID();
     return findNeuron(&id,netID);
+}
+
+int SaveNetSql::checkLayout(Net* net){
+    string command;
+    command= "SELECT ";
+    command+=ID_Column ;
+    command+=" FROM ";
+    command+= Net_Layout_Table_Name;
+    command+= " WHERE ";
+    command+=to_string(net->get_inputNeurons())+" ="+ Net_Inputs_Column+" AND ";
+    command+=to_string(net->get_hiddenNeuronsX())+" = "+Net_HiddenXs_Column+" AND ";
+    command+=to_string(net->get_hiddenNeuronsY())+" = "+Net_HiddenYs_Column+" AND ";
+    command+=to_string(net->get_outputNeurons())+" = "+Net_Outputs_Column+" AND ";
+    command+=to_string(net->get_bias())+" = "+Net_Bias_Column+" AND ";
+    command+=to_string(net->get_biasValue())+" = "+Net_Bias_Value_Column+" AND ";
+    command+=to_string(net->get_enableAverage())+" = "+Net_Average_Column+" AND ";
+    command+=to_string(net->get_activationFunction())+" = "+Net_Activation_Function_Column+" ; ";
+    qDebug()<<QString::fromStdString(command);
+    sqlcommandOpen(command);
+    if(query.last()){
+        return query.value(ID_Column).toInt();
+    }
+    else{
+        return -1;
+    }
 }
 

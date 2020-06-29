@@ -1,6 +1,8 @@
 #ifndef SQL_H
 #define SQL_H
 
+#define ID_Column "rowid"
+
 #define Sql_Type_INT "INT"
 #define Sql_Type_TEXT "TEXT"
 #define Sql_Type_BOOL "BOOL"

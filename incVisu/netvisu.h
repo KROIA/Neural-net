@@ -13,7 +13,7 @@
 #include <QQmlProperty>
 #include <QQuickWidget>
 #include "net.h"
-//#define sqlsave
+#define sqlsave
 
 #ifdef sqlsave
 #include <savenetsql.h>
@@ -29,6 +29,7 @@ class NetVisu : public QThread
 public:
     explicit NetVisu(Net* _net,QObject *parent = nullptr);
     explicit NetVisu(vector<Net*> _net,QObject *parent = nullptr);
+    ~NetVisu();
     void setupNetVisu();
     void showWindow();
     void loadNetInUi(QQuickWidget* widget);
