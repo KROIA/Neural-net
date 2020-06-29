@@ -10,10 +10,8 @@ Rectangle {
     property bool lastNeuron: false
     property real xRel: 0
     property real yRel: 0
-    x: {
-        //if(type===def.hiddenType) //console.debug(xRel+" * "+netItem.xDistance+" = "+xRel*netItem.xDistance)
-        return xRel*totalNet.xDistance}
-    y: yRel*totalNet.yDistance
+    x: xRel*totalNet.width-(d/2)
+    y: yRel*totalNet.height-(d/2)
 
     onXChanged:{
         //if(type===def.hiddenType) console.debug("hiddenx changed: "+x)
@@ -40,6 +38,7 @@ Rectangle {
         updateXPos()
         updateYPos()
     }
+
     function updateXPos(){
 
         if(type===def.inputType){
@@ -90,13 +89,11 @@ Rectangle {
                 }
                 else if(type===def.biasType){
                     biasConXOutput[typeId]=xOutput
-
                     if(lastNeuron){
                         var tempBiasConXOutput=[]
                         tempBiasConXOutput=biasConXOutput
                         biasConXOutput=tempBiasConXOutput
                    }
-
                 }
                 else if(type===def.hiddenType){
                     hiddenConXInput[typeId]=xInput
@@ -212,8 +209,8 @@ Rectangle {
 
             }
         onDragActiveChanged: if(drag){
-                                 xRel=parent.x/totalNet.xDistance
-                                 yRel=parent.y/totalNet.yDistance}
+                                 xRel=totalNet.heigt/parent.x
+                                 yRel=totalNet.heigt/parent.y}
 
         property bool dragActive: drag.active
     }

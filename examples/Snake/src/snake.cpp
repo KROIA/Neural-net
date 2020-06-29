@@ -126,7 +126,7 @@ Snake::Snake(QWidget *parent) :
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
-    try{
+    /*try{
     net->connectNeuronViaID(0,0,false);
     net->connectNeuronViaID(20,1,false);
     net->connectNeuronViaID(21,2,false);
@@ -147,7 +147,7 @@ Snake::Snake(QWidget *parent) :
     {
         qDebug() << "can't connect: "<< e.what();
         saveError(QString("can't connect: ")+e.what());
-    }
+    }*/
     //net->saveToNetFile();
 
 
@@ -320,7 +320,7 @@ Snake::Snake(QWidget *parent) :
     _record_stepInterval = ui->record_stepInterval_spinbox->value();
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
-
+    //qDebug() << "begin Visu setup done";
     visu = new NetVisu(net->get_netList_ptr());
 
     visu->loadNetInUi(ui->net_widget);

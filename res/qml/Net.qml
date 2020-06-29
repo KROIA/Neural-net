@@ -10,6 +10,13 @@ NetData {
     width: 600
     height: 600
 
+    enum NetAlignment{
+        Top=0,
+        Bottom,
+        Center
+    }
+
+    property int netAlignment: Net.NetAlignment.Top
     property int visuNeuronModus: 0
     property bool enableUpdateTimer: visuNeuronModus===def.functionVisu? false:true
     property int visu: 0
@@ -44,79 +51,65 @@ NetData {
     property real zoom: 1
 
     property bool zoomEnable: false
-    property int yBiasPos: if(bias) return 1
+    property int yBiasPos: if(bias) return 0.1
                         else return 0
     property bool showId: true
     signal clickedNet(var id)
-
 
     MouseArea{
         id:mous
         anchors.fill: parent
         enabled: enableMousArea
         onClicked: {clickedNet(netID)}
-    ScrollView{
-            id:scroll
-            ScrollBar.vertical.policy:Qt.ScrollBarAlwaysOn
-            ScrollBar.horizontal.policy:Qt.ScrollBarAlwaysOn
-            anchors.fill: parent
-            contentHeight: scroll.height*zoom
-            contentWidth: scroll.width*zoom
-            ScrollBar.vertical.position:0.8
-            /*ScrollBar.horizontal: ScrollBar{
-                id:horBar
-                position: 0.5
-            }
-            ScrollBar.vertical: ScrollBar{
-                id:verBar
-                position: 0.5
-                anchors.left: parent.left
-                width: 10
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-            }*/
-            Item{
+        ScrollView{
+                id:scroll
+                ScrollBar.vertical.policy:Qt.ScrollBarAlwaysOn
+                ScrollBar.horizontal.policy:Qt.ScrollBarAlwaysOn
+                anchors.fill: parent
+                contentHeight: scroll.height*zoom
+                contentWidth: scroll.width*zoom
+                ScrollBar.vertical.position:0.8
+                Item{
+                    id:totalNet
+                    width: scroll.contentWidth
+                    height:scroll.contentHeight
+                    x:0
+                    y:0
+                    MouseArea{
+                            anchors.fill: parent
+                            onClicked: setTransparancy(100)
+                            hoverEnabled:true
+                            property bool zoomActiv: true
+                            onWheel: {
+                                if(zoomEnable){
+                                //console.debug(zoom)
+                                        if(zoomActiv) {
+                                        //console.debug("scroll")
 
-                id:totalNet
-                width: scroll.contentWidth
-                height: scroll.contentHeight
-                x:0
-                y:0
-            MouseArea{
-                    anchors.fill: parent
-                    onClicked: setTransparancy(100)
-                    hoverEnabled:true
-                    property bool zoomActiv: true
-                    onWheel: {
-                        if(zoomEnable){
-                        //console.debug(zoom)
-                                if(zoomActiv) {
-                                //console.debug("scroll")
+                                         if (wheel.angleDelta.y < 0)
+                                         {
+                                             //console.debug("DOWN")
+                                             zoom =0.95*zoom
 
-                                 if (wheel.angleDelta.y < 0)
-                                 {
-                                     //console.debug("DOWN")
-                                     zoom =0.95*zoom
+                                         }
+                                         else
+                                         {
+                                             //console.debug("UP")
+                                             zoom=1.05*zoom
 
-                                 }
-                                 else
-                                 {
-                                     //console.debug("UP")
-                                     zoom=1.05*zoom
+                                         }
 
-                                 }
-
-                                 //console.debug(mouseY,scroll.height)
-                                  //  console.debug(mouseY/scroll.height)
+                                         //console.debug(mouseY,scroll.height)
+                                          //  console.debug(mouseY/scroll.height)
+                                        }
+                                         //scroll.ScrollBar.vertical.position=0.5//mouseY/scroll.height
+                                         //scroll.ScrollBar.horizontal.position=0.5//mouseX/scroll.width
+                                         //totalNet.x:mouseX
+                                         //console.debug(zoom)
                                 }
-                                 //scroll.ScrollBar.vertical.position=0.5//mouseY/scroll.height
-                                 //scroll.ScrollBar.horizontal.position=0.5//mouseX/scroll.width
-                                 //totalNet.x:mouseX
-                                 //console.debug(zoom)
-                        }
-                    }
+                            }
 
-                }
+                        }
 
 
                 property int maxYNeuron: {
@@ -135,37 +128,30 @@ NetData {
                     return 0
                 }
                 property real dRelationship: 0.8
-                property int xDistance: {
-                    var w
-                    if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship<((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
-                        w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
-                    else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
-                    //console.debug("distantX"+"("+width+"-"+w+")/("+hiddenNeuronX+"+"+1+"+"+yOffSet+"*2)="+(width-w)/(hiddenNeuronX+1+yOffSet*2))
-
-                    return (width-w)/(hiddenNeuronX+1+yOffSet*2)
-                }
-                property int yDistance: {
-                    var w
-                    if(((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship<((height)/(maxYNeuron-1+yOffSet*2))*dRelationship){
-                        w= ((width)-xOffSet*2)/(hiddenNeuronX+1)*dRelationship}
-                    else w= ((height)/(maxYNeuron-1+yOffSet*2))*dRelationship
-                    return (height-w)/(maxYNeuron-1+yOffSet*2)
-                }
+                property variant yRelInput: []
+                property variant yRelHidden: []
+                property variant yRelOutput: []
                 property int d:{
-                    var dP
-                    //console.debug(yDistance,xDistance)
-                    if(yDistance<xDistance) {dP =yDistance*dRelationship}
-                    else {dP= xDistance*dRelationship}
-                    //console.debug("set d to "+dP)
-                    return dP
+                        var w
+                        if((totalNet.width-(xOffSet*2*totalNet.width))/(hiddenNeuronX+2)>
+                            (totalNet.height-(yOffSet*2*totalNet.height))/totalNet.maxYNeuron){
+                            w=(totalNet.height-(yOffSet*2*totalNet.height))/totalNet.maxYNeuron
+                        }
+                        else{
+                            w=(totalNet.width-(xOffSet*2*totalNet.width))/(hiddenNeuronX+2)
+                        }
+                        return w*0.8
+                    }
+                function calculateYDistance(maxYNeuronRow){
+                    if(netAlignment===Net.NetAlignment.Center){
+                        return (height-(netItem.yOffSet*height))/(maxYNeuronRow) }//-1+yOffSet*2
+                    else{
+                        return (height-(xOffset*height))/(maxYNeuron-1+yOffSet*2) }
                 }
-                /*x:0
-                y:0*/
+
                 DropArea {
                     anchors.fill: parent
                 }
-
-
                 Repeater{
                     model: conSourceID.length
                     NeuronConnection{
@@ -180,8 +166,10 @@ NetData {
                     model: hiddenNeuronX+1
                     visible: bias
                     Neuron{
-                        xRel:(xOffSet+index)//*xDistance
-                        yRel: yOffSet//t*yDistance
+                        xRel:{
+                            var i=index
+                            calculateXRelPos(i,type)}
+                        yRel: yOffSet+yBiasPos
                         d:totalNet.d
                         neuronValue: biasValue
                         typeId: index
@@ -200,10 +188,14 @@ NetData {
                     id:inputLayer
                     model:inputNeuron
                     Neuron{
-                        xRel:xOffSet//*xDistance
-                        yRel:index+yOffSet+yBiasPos//*yDistance+yBiasPos
+                        xRel:{
+                            var i=0
+                            calculateXRelPos(i,type)}
+                        yRel:{
+                            var i=inputNeuron
+                            return calculateYRelPos(index,i)
+                        }
                         d:totalNet.d
-
                         neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
                                         else return 0
                         typeId: index
@@ -224,11 +216,16 @@ NetData {
                     model:hiddenNeuronX
                     Repeater{
                         id:hiddenYLayer
-                        model:hiddenNeuronY
+                        model:netItem.hiddenNeuronY
                         property int indexX: index
                         Neuron{
-                            xRel:(indexX+xOffSet+1)//*xDistance
-                            yRel:index+yOffSet+yBiasPos//*yDistance
+                            xRel:{
+                                var i=indexX
+                                calculateXRelPos(i,type)}
+                            yRel:{
+                                var i=hiddenNeuronY
+                                return calculateYRelPos(index,i)
+                            }
                             d:totalNet.d
                             typeId: index+(indexX*hiddenNeuronY)
                             neuronID:if(0<hiddenIDs[typeId]){
@@ -244,15 +241,20 @@ NetData {
                                 clickedNeuronType= type
                             }
                             transparent: hiddenTransparent[typeId]
+                        }
                     }
-                }
                 }
                 Repeater{
                     id:outputLayer
                     model:outputNeuron
                     Neuron{
-                        xRel:(xOffSet+1+hiddenNeuronX)//xDistance
-                        yRel:(index+yOffSet)//yDistance+yBiasPos
+                        xRel:{
+                            var i=0
+                            calculateXRelPos(i,type)}
+                        yRel:{
+                            var i=outputNeuron
+                            return calculateYRelPos(index,i)
+                        }
                         d:totalNet.d
                         typeId: index
                         neuronID: if(outputIds.length>typeId) return outputIds[typeId]
@@ -287,65 +289,89 @@ NetData {
         }
 
     }
-        function setTransparancy(trans){
-            hiddenTransparent= new Array(totalHidden).fill(trans)
-            biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
-            inputTransparent= new Array(inputNeuron).fill(trans)
-            outputTransparent= new Array(outputNeuron).fill(trans)
-            conTransparent= new Array(conSourceID.length).fill(trans)
-
+    function calculateXRelPos(pos,type){
+        if(type===def.hiddenType){
+            pos+=1
         }
-        function updateTransparancy(){
-            hiddenTransparent=VisuFunction.updateArray(hiddenTransparent)
-            outputTransparent=VisuFunction.updateArray(outputTransparent)
-            inputTransparent=VisuFunction.updateArray(inputTransparent)
-            biasTransparent=VisuFunction.updateArray(biasTransparent)
-            conTransparent=VisuFunction.updateArray(conTransparent)
+        if(type===def.outputType){
+            pos+=hiddenNeuronX
+            pos+=1
         }
+        return (((1-(xOffSet*2))/(hiddenNeuronX+1))*(pos))+xOffSet
+    }
 
-        function setHighlight(id,type,highlightValue){
-            if(type===def.hiddenType){
-                hiddenTransparent[id]=highlightValue
-            }
-            else if(type===def.outputType){
-                outputTransparent[id-totalHidden]=highlightValue
-            }
-            else if(type===def.inputType){
-                inputTransparent[id]=highlightValue
-            }
-            else if(type===def.biasType){
-                biasTransparent[id]=highlightValue
-            }
+    function calculateYRelPos(pos,inARow){
+        if(netAlignment===Net.NetAlignment.Center){
+            //console.debug((1-yOffSet-(yBiasPos*2)))
+            return (((1-yOffSet-(yBiasPos))/(inARow+1))*(pos+1))+yOffSet+(yBiasPos)
         }
-
-        function setNetHighlight(id,type){
-            var highlightValue=100
-            setTransparancy(20)
-            if(type===def.outputType) id+=totalHidden
-            setHighlight(id,type,highlightValue)
-            if(type===def.outputType) id-=totalHidden
-            var arrConId=[]
-            var sType
-            var sId
-            arrConId=getConSource(id,type)
-            for(var i=0;i<arrConId.length;i++){
-
-                sId=conDestinationID[arrConId[i]]
-                sType=conDestinationType[arrConId[i]]
-                conTransparent[arrConId[i]]=highlightValue
-                setHighlight(sId,sType,highlightValue)
-            }
-            arrConId=getConDestination(id,type)
-            for(i=0;i<arrConId.length;i++){
-                sId=conSourceID[arrConId[i]]
-                sType=conSourceType[arrConId[i]]
-                if(sType===def.biasType){
-                    if(type===def.outputType)sId=hiddenNeuronX
-                    else sId=Math.floor(id/hiddenNeuronY)
-                }
-                conTransparent[arrConId[i]]=highlightValue
-                setHighlight(sId,sType,highlightValue)
-            }
-            updateTransparancy()
+        else if(netAlignment===Net.NetAlignment.Top){
+            return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos
         }
+        else if(netAlignment===Net.NetAlignment.Bottom){
+            return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron+1))*(totalNet.maxYNeuron-pos))+yOffSet
+        }
+        return 0
+    }
+    function setTransparancy(trans){
+        hiddenTransparent= new Array(totalHidden).fill(trans)
+        biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
+        inputTransparent= new Array(inputNeuron).fill(trans)
+        outputTransparent= new Array(outputNeuron).fill(trans)
+        conTransparent= new Array(conSourceID.length).fill(trans)
+
+    }
+    function updateTransparancy(){
+        hiddenTransparent=VisuFunction.updateArray(hiddenTransparent)
+        outputTransparent=VisuFunction.updateArray(outputTransparent)
+        inputTransparent=VisuFunction.updateArray(inputTransparent)
+        biasTransparent=VisuFunction.updateArray(biasTransparent)
+        conTransparent=VisuFunction.updateArray(conTransparent)
+    }
+
+    function setHighlight(id,type,highlightValue){
+        if(type===def.hiddenType){
+            hiddenTransparent[id]=highlightValue
+        }
+        else if(type===def.outputType){
+            outputTransparent[id-totalHidden]=highlightValue
+        }
+        else if(type===def.inputType){
+            inputTransparent[id]=highlightValue
+        }
+        else if(type===def.biasType){
+            biasTransparent[id]=highlightValue
+        }
+    }
+
+    function setNetHighlight(id,type){
+        var highlightValue=100
+        setTransparancy(20)
+        if(type===def.outputType) id+=totalHidden
+        setHighlight(id,type,highlightValue)
+        if(type===def.outputType) id-=totalHidden
+        var arrConId=[]
+        var sType
+        var sId
+        arrConId=getConSource(id,type)
+        for(var i=0;i<arrConId.length;i++){
+
+            sId=conDestinationID[arrConId[i]]
+            sType=conDestinationType[arrConId[i]]
+            conTransparent[arrConId[i]]=highlightValue
+            setHighlight(sId,sType,highlightValue)
+        }
+        arrConId=getConDestination(id,type)
+        for(i=0;i<arrConId.length;i++){
+            sId=conSourceID[arrConId[i]]
+            sType=conSourceType[arrConId[i]]
+            if(sType===def.biasType){
+                if(type===def.outputType)sId=hiddenNeuronX
+                else sId=Math.floor(id/hiddenNeuronY)
+            }
+            conTransparent[arrConId[i]]=highlightValue
+            setHighlight(sId,sType,highlightValue)
+        }
+        updateTransparancy()
+    }
 }

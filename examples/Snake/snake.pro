@@ -92,6 +92,7 @@ SOURCES += \
     $$srcPath/maptile.cpp \
     $$srcPath/environment.cpp \
     $$visuSrc/netvisu.cpp\
+    $$visuSrc/sql.cpp
     $$visuSrc/savenetsql.cpp
 
 HEADERS += \
@@ -109,6 +110,7 @@ HEADERS += \
     $$netIncPath/geneticnet.h \
     $$netIncPath/backpropnet.h \
     $$visuInc/netvisu.h\
+    $$visuInc/sql.h\
     $$visuInc/savenetsql.h
 
 FORMS += \

@@ -19,6 +19,7 @@ SaveNetSql::SaveNetSql(string _path )
     //connOpen();
 
 }
+
 void SaveNetSql::createDb(){
     vector<string> types;
     types={ Sql_Type_INT,Sql_Type_INT,

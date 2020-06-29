@@ -29,6 +29,7 @@ Shape {
                         else return Math.abs(weight)*con.d*0.1
 
            startX:{
+
                     var xtemp=0
                    if(def.inputType===sourceType){
                        if(0<=inputConXOutput[sourceId]){
@@ -39,29 +40,39 @@ Shape {
                        xtemp= hiddenConXOutput[sourceId]}
                    }
                    else if(def.biasType===sourceType){
+                       if(Math.floor(destinationId/hiddenNeuronY)<biasConXOutput.length){
+                            if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
+                                xtemp= biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
+                       }
+                       else{
+                           xtemp= biasConXOutput[biasConXOutput.length-1]
+                       }
 
-                       if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
-                       xtemp= biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]}
                    }
 
                    return xtemp
                }
 
            startY:{
+               var ytemp=0
                   if(def.inputType===sourceType){
                       if(0<=inputConYOutput[sourceId]){
-                      return inputConYOutput[sourceId]}
+                      ytemp= inputConYOutput[sourceId]}
                   }
                   else if(def.hiddenType===sourceType){
                       if(0<=hiddenConYOutput[sourceId]){
-                      return hiddenConYOutput[sourceId]}
+                      ytemp= hiddenConYOutput[sourceId]}
                   }
                   else if(def.biasType===sourceType){
-                      if(0<=biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]){
-
-                      return biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]}
+                      if(Math.floor(destinationId/hiddenNeuronY)<biasConYOutput.length){
+                            if(0<=biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]){
+                                ytemp= biasConYOutput[Math.floor(destinationId/hiddenNeuronY)]}
+                      }
+                      else{
+                          ytemp= biasConYOutput[biasConYOutput.length-1]
+                      }
                   }
-                  return 0
+                  return ytemp
                 }
            PathLine {
                id:path

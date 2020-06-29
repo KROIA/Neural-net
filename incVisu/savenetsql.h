@@ -35,6 +35,7 @@
 #include <stdio.h>
 
 using namespace std;
+
 class SaveNetSql : Sql
 {
 public:
