@@ -65,7 +65,12 @@ public slots:
     QVector<int> getConDestinationID(const int &netId) ;
     QVector<int> getConSourceType(const int &netId) ;
     QVector<int> getConDestinationType(const int &netId) ;
+
     QVector<qreal> getConWeight(const int &netId) ;
+
+    QVector<qreal> getRelX(const int &netId);
+    QVector<qreal> getRelY(const int &netId);
+
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
 
@@ -77,6 +82,7 @@ public slots:
     void onWeightsChanged(Net *p_net);
 
     void onNetConfigurationChanged();
+    void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
 private:
     bool access=false;

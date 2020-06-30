@@ -15,9 +15,11 @@
 
 #define NeuronLayout_Table_Name "NeuronLayout"
 
+#define NeuronLayout_ABSPos "ABSPos"
 #define NeuronLayout_LayoutID "NetLayoutID"
 #define NeuronLayout_NeuronPosition_XRel_Column "XRelPos"
 #define NeuronLayout_NeuronPosition_YRel_Column "YRelPos"
+
 
 #define Net_Table_Name "Net"
 #define Net_Layout_Column "NetLayout"
@@ -54,10 +56,14 @@ public:
     void saveNet(vector<Net*> saveNet);
     void saveConnection(Connection saveConnection,int netID);
     void saveConnection(vector<Connection> saveConnection,int netID);
-    void saveRelPos(vector<float> relX,vector<float> relY,Net *net);
+    void saveRelPos(QVector<qreal> relX,QVector<qreal> relY,Net *net);
+    QVector<qreal> loadRelXPos(Net *net);
+    QVector<qreal> loadRelYPos(Net *net);
+    QVector<int> getNeuronLayout(Net *net);
     void saveNeuron(Neuron* saveNeuron,int netID);
     void saveNetVec(vector<Net*> saveNet,int netID);
     void createDb();
+    bool checkLayout(int layoutId,Net* net);
 
 private:
 
@@ -78,8 +84,10 @@ private:
 
     int findNeuron(Neuron *n, unsigned netID);
     int findNeuron(NeuronID *n, unsigned netID);
-    int checkLayout(Net* net);
 
+    QVector<int> checkLayout(Net* net);
+    int checkLatestLayout(Net* net);
+    QVector<qreal> getRelVec(string column,Net* net);
 };
 
 #endif // SAVENETSQL_H

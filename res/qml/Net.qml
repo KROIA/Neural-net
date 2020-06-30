@@ -13,9 +13,10 @@ NetData {
     enum NetAlignment{
         Top=0,
         Bottom,
-        Center
+        Center,
+        Costum
     }
-
+    signal loadRelPos();
     property int netAlignment: Net.NetAlignment.Top
     property int visuNeuronModus: 0
     property bool enableUpdateTimer: visuNeuronModus===def.functionVisu? false:true
@@ -25,6 +26,8 @@ NetData {
     property int clickedNeuronType: 0
     property bool moveable: false
 
+    property variant yRel: []
+    property variant xRel: []
     property variant hiddenConXInput: []
     property variant hiddenConYInput: []
 
@@ -150,6 +153,7 @@ NetData {
                 }
 
                 DropArea {
+                    id:dropArea
                     anchors.fill: parent
                 }
                 Repeater{
@@ -180,7 +184,7 @@ NetData {
                             clickedNeuronType= type
                         }
                         transparent: biasTransparent[index]
-
+                        absId: index+inputNeuron+totalHidden+outputNeuron
                     }
                 }
 
@@ -201,6 +205,7 @@ NetData {
                         typeId: index
                         type:def.inputType
                         neuronID:index
+                        absId: index
                         lastNeuron: (index==(inputLayer.model-1))
                         onClickedNeuron: {
                             clickedNeuronID= typeId
@@ -228,6 +233,7 @@ NetData {
                             }
                             d:totalNet.d
                             typeId: index+(indexX*hiddenNeuronY)
+                            absId: index+inputNeuron
                             neuronID:if(0<hiddenIDs[typeId]){
                                          return hiddenIDs[typeId]}
                                         else return typeId
@@ -257,6 +263,7 @@ NetData {
                         }
                         d:totalNet.d
                         typeId: index
+                        absId: index+inputNeuron+totalHidden
                         neuronID: if(outputIds.length>typeId) return outputIds[typeId]
                                     else return typeId+totalHidden
                         type:def.outputType

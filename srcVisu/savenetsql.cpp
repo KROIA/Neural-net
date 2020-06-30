@@ -10,7 +10,8 @@ SaveNetSql::SaveNetSql(string _path )
     neuronTable={Neuron_Table_Net_ID_Column,
                   Neuron_ID_Column,Neuron_TYPE_Column};
 
-    neuronLayoutTable={NeuronLayout_LayoutID,
+    neuronLayoutTable={NeuronLayout_ABSPos,
+                        NeuronLayout_LayoutID,
                        NeuronLayout_NeuronPosition_XRel_Column,
                       NeuronLayout_NeuronPosition_YRel_Column};
 
@@ -22,7 +23,7 @@ SaveNetSql::SaveNetSql(string _path )
     //query=QSqlQuery(mydb);
     createDb();
     //connOpen();
-
+    dontClose=false;
 }
 
 void SaveNetSql::createDb(){
@@ -38,7 +39,7 @@ void SaveNetSql::createDb(){
     types={Sql_Type_INT};
     createTable(Net_Table_Name,netTable,types);
     types.clear();
-    types={Sql_Type_INT,Sql_Type_REAL,Sql_Type_REAL};
+    types={Sql_Type_INT,Sql_Type_INT,Sql_Type_REAL,Sql_Type_REAL};
     createTable(NeuronLayout_Table_Name,neuronLayoutTable,types);
 
     types.clear();
@@ -65,11 +66,11 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
     QElapsedTimer tim;
     tim.start();
     connOpen();
+    dontClose=true;
     //qDebug()<<"open Timer "<<tim.elapsed()<<" millis";
-    //qDebug()<<"Start saving net";
     string command;
     tim.restart();
-    int layoutId=checkLayout(saveNet[0]);
+    int layoutId=checkLatestLayout(saveNet[0]);
     if(layoutId<0){
            layoutId=saveNetLayout(saveNet[0]);
     }
@@ -110,11 +111,14 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
 
     ////qDebug()<<"End saving net";
     tim.restart();
+    dontClose=false;
     connClose();
     //qDebug()<<"close Timer "<<tim.elapsed()<<" millis";
 }
 
 int SaveNetSql::saveNetLayout(Net* net){
+    if(!dontClose)
+        connOpen();
     string tableName=Net_Layout_Table_Name;
     vector<string> values;
     values.push_back(to_string(net->get_inputNeurons()));
@@ -126,7 +130,11 @@ int SaveNetSql::saveNetLayout(Net* net){
     values.push_back(to_string(net->get_enableAverage()));
     values.push_back(to_string(net->get_activationFunction()));
     isertIntoTable(tableName,netLayoutTable,values);
-    return query.lastInsertId().toInt();
+    int res;
+    res= query.lastInsertId().toInt();
+    if(!dontClose)
+        connClose();
+    return res;
 }
 
 Net* SaveNetSql::loadNet(int id){
@@ -137,14 +145,13 @@ Net* SaveNetSql::loadNet(int id){
     bool bias=0;
     bool average=0;
     float biasValue=0;
-    int activationFunctionId=0;
-    Activation activationFunction;
+    Activation activationFunction=Linear;
     string command;
     command = "Select * FROM "+string(Net_Table_Name)+" WHERE ";
     command += string(ID_Column)+" = "+to_string(id);
-    //connOpen();
+    if(!dontClose)
+        connOpen();
     sqlcommandOpen(command);
-
     if(countEnteries(&query)==1){
         query.first();
         input=query.value(Net_Inputs_Column).toInt();
@@ -154,44 +161,29 @@ Net* SaveNetSql::loadNet(int id){
         bias=query.value(Net_Bias_Column).toBool();
         average=query.value(Net_Average_Column).toBool();
         biasValue=query.value(Net_Bias_Value_Column).toFloat();
-        activationFunctionId=query.value(Net_Activation_Function_Column).toInt();
+        activationFunction=Activation(query.value(Net_Activation_Function_Column).toInt());
     }
-    switch (activationFunctionId) {
-        case Linear:
-            activationFunction=Linear;
-            break;
-        case ReLu:
-            activationFunction=ReLu;
-            break;
-        case Binary:
-            activationFunction=Binary;
-            break;
-        case Gaussian:
-            activationFunction=Gaussian;
-            break;
-        case Sigmoid:
-            activationFunction=Sigmoid;
-            break;
-        default:
-            activationFunction=Gaussian;
-            break;
-    }
-    connClose();
+    if(!dontClose)
+        connClose();
     Net *net;
     net= new Net(0,input,hiddenX,hiddenY,output,bias,average,activationFunction);
     //Net net(get);
     return net;
 }
 void SaveNetSql::saveConnection(Connection saveConnection,int netID){
-    connOpen();
+    if(!dontClose)
+        connOpen();
     saveConnectionOpen(saveConnection,netID);
-    connClose();
+    if(!dontClose)
+        connClose();
 }
 
 void SaveNetSql::saveNeuron(Neuron* saveNeuron,int netID){
-    connOpen();
+    if(!dontClose)
+        connOpen();
         saveNeuronOpen(saveNeuron,netID);
-    connClose();
+    if(!dontClose)
+        connClose();
 }
 
 
@@ -216,35 +208,43 @@ void SaveNetSql::saveConnectionOpen(vector<Connection> saveConnection,int netID)
     isertIntoTable(tableName,connectionTable,valuesVec);
 }
 
-void SaveNetSql::saveRelPos(vector<float> relX,vector<float> relY,Net *net){
+void SaveNetSql::saveRelPos(QVector<qreal> relX,QVector<qreal> relY,Net *net){
     connOpen();
+    dontClose=true;
     int netID;
+    //netID=checkLayout(net);
+    string tableName=NeuronLayout_Table_Name;
+    //if(netID<0){
+
     netID=saveNetLayout(net);
+    //}
+    qDebug()<<netID;
+    vector<vector<string>> data;
+    vector<string> dataRow;
+    qDebug()<<relX.size();
+    for(int i=0;i<relX.size();i++){
+        dataRow.clear();
 
-    string command;
-
-    command="INSERT INTO ";
-    command+=NeuronLayout_Table_Name;
-    command+=" ( ";
-    command+=NeuronLayout_LayoutID;
-    command+=" , ";
-    command+=NeuronLayout_NeuronPosition_XRel_Column;
-    command+=" , ";
-    command+=NeuronLayout_NeuronPosition_YRel_Column;
-    command+=") VALUES (:";
-    command+=NeuronLayout_LayoutID;
-    command+=" , :";
-    command+=NeuronLayout_NeuronPosition_XRel_Column;
-    command+=" , :";
-    command+=NeuronLayout_NeuronPosition_YRel_Column;
-    query.prepare(QString::fromStdString(command));
-    for(unsigned int i=0;i<relX.size();i++){
-        query.bindValue(0,netID);
-        query.bindValue(1,relX[i]);
-        query.bindValue(2,relY[i]);
-        query.exec();
+        dataRow.push_back(to_string(i));
+        dataRow.push_back(to_string(netID));
+        dataRow.push_back(to_string(relX[i]));
+        dataRow.push_back(to_string(relY[i]));
+        data.push_back(dataRow);
     }
+    //qDebug()<<"3";
+    //qDebug()<<neuronLayoutTable.size()<<data.size()<<data[0].size();
+    isertIntoTable(tableName,neuronLayoutTable,data);
+    //qDebug()<<"4";
+    dontClose=false;
     connClose();
+}
+
+QVector<qreal> SaveNetSql::loadRelXPos(Net *net){
+    return getRelVec(NeuronLayout_NeuronPosition_XRel_Column,net);
+}
+
+QVector<qreal> SaveNetSql::loadRelYPos(Net *net){
+    return getRelVec(NeuronLayout_NeuronPosition_YRel_Column,net);
 }
 
 void SaveNetSql::saveNeuronOpen(Neuron* saveNeuron,int netID){
@@ -328,8 +328,42 @@ int SaveNetSql::findNeuron(Neuron *n, unsigned netID){
     return findNeuron(&id,netID);
 }
 
-int SaveNetSql::checkLayout(Net* net){
+bool SaveNetSql::checkLayout(int layoutId,Net* net){
+    if(!dontClose)
+        connOpen();
+    QVector<int> vec;
+    vec=checkLayout(net);
+    if(vec.size()>0){
+       string command;
+       command+="SELECT COUNT(*) FROM ";
+       command+=NeuronLayout_Table_Name;
+       command+=" WHERE ";
+       command+=NeuronLayout_LayoutID;
+       command+=" = ";
+       command+=to_string(layoutId);
+       sqlcommandOpen(command);
+       if(query.first()){
+           unsigned int neuron;
+           neuron=0;
+           if(net->get_bias()){
+               neuron+=net->get_hiddenNeurons()+1;
+           }
+           neuron+=net->get_neurons();
+           neuron+=net->get_inputNeurons();
+           if(query.value(0).toUInt()==neuron){
+              return true;
+           }
+       }
+    }
+    if(!dontClose)
+        connClose();
+    return false;
+}
+
+QVector<int> SaveNetSql::checkLayout(Net* net){
     string command;
+    if(!dontClose)
+        connOpen();
     command= "SELECT ";
     command+=ID_Column ;
     command+=" FROM ";
@@ -343,13 +377,65 @@ int SaveNetSql::checkLayout(Net* net){
     command+=to_string(net->get_biasValue())+" = "+Net_Bias_Value_Column+" AND ";
     command+=to_string(net->get_enableAverage())+" = "+Net_Average_Column+" AND ";
     command+=to_string(net->get_activationFunction())+" = "+Net_Activation_Function_Column+" ; ";
-    qDebug()<<QString::fromStdString(command);
     sqlcommandOpen(command);
-    if(query.last()){
-        return query.value(ID_Column).toInt();
+    QVector<int> res;
+    query.first();
+    res.push_back(query.value(ID_Column).toInt());
+    while(query.next()){
+        res.push_back(query.value(ID_Column).toInt());
+    }
+    if(!dontClose)
+        connClose();
+    return res;
+}
+
+int SaveNetSql::checkLatestLayout(Net* net){
+    QVector<int> vec;
+    vec=checkLayout(net);
+    if(vec.size()>0){
+        return vec.last();
     }
     else{
-        return -1;
+        return  -1;
     }
 }
 
+QVector<qreal> SaveNetSql::getRelVec(string column,Net* net){
+    int id;
+    connOpen();
+    dontClose=true;
+    QVector<int> idVec;
+    QVector<qreal> value;
+    idVec=checkLayout(net);
+
+
+    for (int i=idVec.size()-1;i>=0;i--) {
+
+        if(checkLayout(idVec[i],net)){
+            qDebug()<<idVec[i];
+            string command;
+            command= "SELECT ";
+            command+=column;
+            command+=" FROM ";
+            command+=NeuronLayout_Table_Name;
+            command+=" WHERE ";
+            command+=NeuronLayout_LayoutID;
+            command+=" = ";
+            command+=to_string(idVec[i]);
+            sqlcommandOpen(command);
+            if(query.first()){
+
+               value.push_back(query.value(0).toReal());
+               while(query.next()){
+                   value.push_back(query.value(0).toReal());
+               }
+               dontClose=false;
+               connClose();
+               return value;
+            }
+        }
+    }
+    dontClose=false;
+    connClose();
+    return value;
+}

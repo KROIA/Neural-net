@@ -10,8 +10,19 @@ Rectangle {
     property bool lastNeuron: false
     property real xRel: 0
     property real yRel: 0
+    property int absId: 0
+    property int parentWidth: totalNet.width
+    property int parentHeight: totalNet.height
     x: xRel*totalNet.width-(d/2)
     y: yRel*totalNet.height-(d/2)
+    Connections{
+        target: netItem
+        function onLoadRelPos(){
+            neuron.xRel=netItem.xRel[absId]
+            neuron.yRel=netItem.yRel[absId]
+            dockingPoint()
+        }
+    }
 
     onXChanged:{
         //if(type===def.hiddenType) console.debug("hiddenx changed: "+x)
@@ -192,7 +203,10 @@ Rectangle {
     }
     signal clickedNeuron(var id,var type)
     property bool movable: netItem.moveable
-
+    Component.onCompleted: {
+        netItem.xRel[absId]=xRel
+        netItem.yRel[absId]=yRel
+    }
     MouseArea{
         id:mouseArea
         anchors.fill: parent
@@ -209,9 +223,23 @@ Rectangle {
 
             }
         onDragActiveChanged: if(drag){
-                                 xRel=totalNet.heigt/parent.x
-                                 yRel=totalNet.heigt/parent.y}
+                                 neuron.xRel=(dropArea.drag.x+(d/2))/parentWidth
+                                 neuron.yRel=(dropArea.drag.y+(d/2))/parentHeight
+                                 var provX=netItem.xRel
+                                 provX[absId]=neuron.xRel
+                                 netItem.xRel=provX
+                                 console.debug(absId,neuron.xRel,netItem.xRel[absId])
+                                 var provY=netItem.yRel
+                                 provY[absId]=neuron.yRel
+                                 netItem.yRel=provY
+
+                                 console.debug(absId,neuron.yRel,netItem.yRel[absId])
+                                 netItem.xRel=VisuFunction.updateArray(netItem.xRel)
+                                 netItem.yRel=VisuFunction.updateArray(netItem.yRel)
+                                 //console.debug(neuron.xRel,dropArea.drag.x,netItem.xRel)
+                             }
 
         property bool dragActive: drag.active
     }
+
 }

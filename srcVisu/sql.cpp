@@ -16,7 +16,7 @@ int Sql::countEnteries(QSqlQuery* _q){
     }while (_q->next());
     _q->first();
     }
-    qDebug()<<"ENTERIES"<<entries<<" "<<_q->first();
+    //qDebug()<<"ENTERIES"<<entries<<" "<<_q->first();
     return entries;
 }
 
@@ -31,8 +31,9 @@ void Sql::sqlcommandOpen(string command){
     QSqlQuery _query(mydb);
 
     if(!_query.exec(QString::fromStdString(command))){
-        throw("command failed to execut :\n"+command);
+        throw("command failed to execut : "+command);
     }
+    //qDebug()<<QString::fromStdString(command);
     #if defined(Sql_Debug_Time)
         if(Sql_Debug_MinTime<tim.elapsed()){
         qDebug()<<tim.elapsed()<< " ms for:";
@@ -100,7 +101,7 @@ void Sql::connClose(){
 
 
 void Sql::isertIntoTable(string tableName,vector<string> columns,
-                       vector<string> valuesName){
+    vector<string> valuesName){
     vector<vector<string>> vec;
     vec.push_back(valuesName);
     isertIntoTable(tableName,columns,vec);
@@ -108,13 +109,14 @@ void Sql::isertIntoTable(string tableName,vector<string> columns,
 
 void Sql::isertIntoTable(string tableName,vector<string> columns,
     vector<vector<string>> valuesName){
+
+    if(!dontClose)
+        connOpen();
     if(columns.size()!=valuesName[0].size()){
         qDebug()<<"ERROR SQL: column size "<<columns.size()<<" and  values size "<<valuesName[0].size()<<" don't match";
     }
     string command;
     command ="INSERT INTO "+tableName;
-
-
         command +=" (";
         for(unsigned long long i=0;i<columns.size();i++){
             command +=columns[i];
@@ -122,6 +124,7 @@ void Sql::isertIntoTable(string tableName,vector<string> columns,
                 command += " , ";
             }
         }
+
         command += ") VALUES ";
         for(unsigned j=0;j<valuesName.size();j++){
             command +="(";
@@ -135,7 +138,9 @@ void Sql::isertIntoTable(string tableName,vector<string> columns,
             command += "),";
         }
     }
-    command += ");";
 
+    command += ");";
     sqlcommandOpen(command);
+    if(!dontClose)
+        connClose();
 }

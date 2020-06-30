@@ -9,7 +9,7 @@
 #define Sql_Type_REAL "REAL"
 
 //#define Sql_Debug_Time
-#define Sql_Debug_MinTime 1
+//#define Sql_Debug_MinTime 1
 //#define Sql_Debug_DB_Status
 
 
@@ -39,6 +39,7 @@ public:
     void isertIntoTable(string tableName,vector<string> columns,
                         vector<vector<string>> valuesName);
     int countEnteries(QSqlQuery* _q);
+    bool dontClose;
 };
 
 #endif // SQL_H

@@ -16,6 +16,7 @@ NetVisu::NetVisu(vector<Net*> _net,QObject *parent):
     netList=_net;
     setupNetVisu();
 }
+
 NetVisu::~NetVisu(){
     delete context;
     delete engine;
@@ -200,9 +201,6 @@ QVector<int> NetVisu::getConSourceID(const int &netId) {
 
 QVector<int> NetVisu::getConDestinationID(const int &netId) {
     QVector<int> vect;
-    qDebug()<<" list size"<<netList[unsigned(netId)]->get_connectionList().size();
-    qDebug()<<netList[unsigned(netId)]->get_connections();
-    qDebug()<<netList[unsigned(netId)]->get_costumConnections();
     if(unsigned(netId)<netList.size()&&access){
         for(unsigned  int i=0;
             i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
@@ -255,6 +253,13 @@ QVector<qreal> NetVisu::getConWeight(const int &netId) {
     return vect;
 }
 
+QVector<qreal> NetVisu::getRelX(const int &netId){
+    return db.loadRelXPos(netList[unsigned(netId)]);
+}
+
+QVector<qreal> NetVisu::getRelY(const int &netId){
+    return db.loadRelYPos(netList[unsigned(netId)]);
+}
 
 bool NetVisu::getBias(const int &netId) {
     if(unsigned(netId)<netList.size()&&access){
@@ -318,4 +323,12 @@ void NetVisu::onNetConfigurationChanged()
 {
 
 }
+
+void NetVisu::saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId){
+    if(netId<netList.size()){
+        db.saveRelPos(relX,relY,netList[netId]);
+    }
+
+}
+
 
