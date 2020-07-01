@@ -99,6 +99,9 @@ void Sql::connClose(){
     mydb.removeDatabase(connection);
 }
 
+void Sql::setDbPath(QString dbFlieName){
+    dbPath=dbFlieName;
+}
 
 void Sql::isertIntoTable(string tableName,vector<string> columns,
     vector<string> valuesName){

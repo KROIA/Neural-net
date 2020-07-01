@@ -29,9 +29,10 @@ public:
     Sql();
     void connOpen();
     void connClose();
-    QString dbPath;
+
     QSqlDatabase mydb;
     QSqlQuery query;
+    void setDbPath(QString dbFlieName);
     void sqlcommandOpen(string command);
     void sqlcommand(string command);
     void isertIntoTable(string tableName,vector<string> columns,
@@ -40,6 +41,8 @@ public:
                         vector<vector<string>> valuesName);
     int countEnteries(QSqlQuery* _q);
     bool dontClose;
+protected:
+    QString dbPath;
 };
 
 #endif // SQL_H

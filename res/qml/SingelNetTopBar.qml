@@ -66,6 +66,7 @@ TopBar {
             defaultSuffix : "db"
             selectExisting :true
             nameFilters : "db files (*.db )"
+
         }
         FileDialog{
             id:saveFileDialog
@@ -73,7 +74,7 @@ TopBar {
             defaultSuffix : "db"
             selectExisting :false
             nameFilters : "db files (*.db )"
-            selectFolder :true
+            selectMultiple  :true
             folder: 	shortcuts.documents
         }
 
