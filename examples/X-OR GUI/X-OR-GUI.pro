@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml quick quickwidgets sql
+QT       += core gui qml quick quickwidgets sql quickcontrols2
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
