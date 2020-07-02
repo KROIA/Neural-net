@@ -10,7 +10,8 @@
 
 //#define Sql_Debug_Time
 //#define Sql_Debug_MinTime 1
-//#define Sql_Debug_DB_Status
+#define Sql_Debug_Commit_Time
+#define Sql_Debug_DB_Status
 
 
 #include <QSqlDatabase>
@@ -35,14 +36,19 @@ public:
     void setDbPath(QString dbFlieName);
     void sqlcommandOpen(string command);
     void sqlcommand(string command);
-    void isertIntoTable(string tableName,vector<string> columns,
+    void insertIntoTable(string tableName,vector<string> columns,
                         vector<string> valuesName);
-    void isertIntoTable(string tableName,vector<string> columns,
+    void insertIntoTable(string tableName,vector<string> columns,
                         vector<vector<string>> valuesName);
+    bool createTable(string tableName,vector<string> columns,vector<string> type);
     int countEnteries(QSqlQuery* _q);
+
     bool dontClose;
 protected:
     QString dbPath;
+private:
+    string getBrackedString(vector<string> data);
+    string getBrackedString(vector<vector<string>> data);
 };
 
 #endif // SQL_H

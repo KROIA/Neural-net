@@ -63,9 +63,11 @@ void NetVisu::setupNetVisu(){
 
     db.saveNet(saveVec);
     qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
-    Net* testNet;
-    //testNet=db.loadNet(0);
-    //qDebug("fertig");
+    tim.restart();
+    qDebug()<<"----------------------------------------- ";
+    db.saveNet(saveVec);
+
+    qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
 #endif
 }
 

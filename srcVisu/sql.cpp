@@ -6,18 +6,65 @@ Sql::Sql()
 }
 
 
+void Sql::connOpen(){
 
-int Sql::countEnteries(QSqlQuery* _q){
-    _q->first();
-    int entries=0;
-    if( _q->first()==true){
-    do {
-        ++entries;
-    }while (_q->next());
-    _q->first();
+    mydb = QSqlDatabase::addDatabase("QSQLITE","connction1");
+    //mydb = QSqlDatabase::database("connction1");
+    mydb.setDatabaseName(dbPath);
+
+        if (!mydb.open())
+        {
+        mydb.setDatabaseName(dbPath);
+          if (!mydb.open()){
+            #if defined (Sql_Debug_DB_Status)
+                   qDebug()<<" ";
+                   qDebug()<<"DB failed to connect";
+            #endif
+        }
     }
-    //qDebug()<<"ENTERIES"<<entries<<" "<<_q->first();
-    return entries;
+    else
+    {
+#if defined (Sql_Debug_DB_Status)
+    qDebug()<<" ";
+    qDebug()<<"DB is connected.";
+#endif
+#if defined (Sql_Debug_Commit_Time)
+    QElapsedTimer tim;
+    tim.start();
+#endif
+        mydb.transaction();
+#if defined (Sql_Debug_Commit_Time)
+    qDebug()<<tim.elapsed()<< " ms for transaction";
+#endif
+        //sqlcommandOpen("BEGIN TRANSACTION;");
+
+    }
+}
+
+void Sql::connClose(){
+
+#if defined (Sql_Debug_Commit_Time)
+    QElapsedTimer tim;
+    tim.start();
+#endif
+        mydb.commit();
+#if defined (Sql_Debug_Commit_Time)
+    qDebug()<<tim.elapsed()<< " ms for COMMIT";
+#endif
+    //sqlcommandOpen("END TRANSACTION;");
+    QString connection;
+    connection = mydb.connectionName();
+    mydb.close();
+    #if defined (Sql_Debug_DB_Status)
+           qDebug()<<" ";
+           qDebug()<<"DB connection closed";
+    #endif
+    mydb = QSqlDatabase();
+    mydb.removeDatabase(connection);
+}
+
+void Sql::setDbPath(QString dbFlieName){
+    dbPath=dbFlieName;
 }
 
 void Sql::sqlcommandOpen(string command){
@@ -37,7 +84,7 @@ void Sql::sqlcommandOpen(string command){
     #if defined(Sql_Debug_Time)
         if(Sql_Debug_MinTime<tim.elapsed()){
         qDebug()<<tim.elapsed()<< " ms for:";
-        qDebug()<<command;}
+        qDebug()<<QString::fromStdString(command);}
     #endif
     query=_query;
     _query.clear();
@@ -56,63 +103,16 @@ void Sql::sqlcommand(string command){
 }
 
 
-void Sql::connOpen(){
 
-    mydb = QSqlDatabase::addDatabase("QSQLITE","connction1");
-    //mydb = QSqlDatabase::database("connction1");
-    mydb.setDatabaseName(dbPath);
-
-        if (!mydb.open())
-        {
-        mydb.setDatabaseName(dbPath);
-          if (!mydb.open()){
-            #if defined (Sql_Debug_DB_Status)
-                   qDebug()<<" ";
-                   qDebug()<<"DB failed to connect";
-            #endif
-        }
-    }
-    else
-    {
-    #if defined (Sql_Debug_DB_Status)
-           qDebug()<<" ";
-           qDebug()<<"DB is connected.";
-    #endif
-        mydb.transaction();
-        //sqlcommandOpen("BEGIN TRANSACTION;");
-
-    }
-}
-
-void Sql::connClose(){
-
-    mydb.commit();
-    //sqlcommandOpen("END TRANSACTION;");
-    QString connection;
-    connection = mydb.connectionName();
-    mydb.close();
-    #if defined (Sql_Debug_DB_Status)
-           qDebug()<<" ";
-           qDebug()<<"DB connection closed";
-    #endif
-    mydb = QSqlDatabase();
-    mydb.removeDatabase(connection);
-}
-
-void Sql::setDbPath(QString dbFlieName){
-    dbPath=dbFlieName;
-}
-
-void Sql::isertIntoTable(string tableName,vector<string> columns,
+void Sql::insertIntoTable(string tableName,vector<string> columns,
     vector<string> valuesName){
     vector<vector<string>> vec;
     vec.push_back(valuesName);
-    isertIntoTable(tableName,columns,vec);
+    insertIntoTable(tableName,columns,vec);
 }
 
-void Sql::isertIntoTable(string tableName,vector<string> columns,
+void Sql::insertIntoTable(string tableName,vector<string> columns,
     vector<vector<string>> valuesName){
-
     if(!dontClose)
         connOpen();
     if(columns.size()!=valuesName[0].size()){
@@ -120,30 +120,76 @@ void Sql::isertIntoTable(string tableName,vector<string> columns,
     }
     string command;
     command ="INSERT INTO "+tableName;
-        command +=" (";
-        for(unsigned long long i=0;i<columns.size();i++){
-            command +=columns[i];
-            if(i<columns.size()-1){
-                command += " , ";
-            }
-        }
-
-        command += ") VALUES ";
-        for(unsigned j=0;j<valuesName.size();j++){
-            command +="(";
-            for(unsigned long long i=0;i<valuesName[j].size();i++){
-                command +=valuesName[j][i];
-                if(i<valuesName[j].size()-1){
-                    command += " , ";
-                }
-            }
-        if(j<valuesName.size()-1){
-            command += "),";
-        }
-    }
-
-    command += ");";
+    command +=getBrackedString(columns);
+    command += " VALUES ";
+    command +=getBrackedString(valuesName);
+    command += ";";
     sqlcommandOpen(command);
     if(!dontClose)
         connClose();
 }
+
+bool Sql::createTable(string tableName,vector<string> columns,vector<string> type){
+    if(columns.size()!=type.size()){
+        //qDebug()<<"ERROR SQL: column size "<<columns.size()<<" and  type size "<<type.size()<<" don't match";
+        return false;
+    }
+    string command;
+    command +="CREATE TABLE IF NOT EXISTS "+tableName+" (";
+    //command +=ID_Column;
+   // command +=" INT IDENTITY(1,1) PRIMARY KEY,";
+    for(unsigned long long i=0;i<type.size();i++){
+        if(type[i]==Sql_Type_BOOL||type[i]==Sql_Type_TEXT
+        ||type[i]==Sql_Type_INT||type[i]==Sql_Type_REAL){
+            command +=columns[i]+" "+type[i];
+            if(i<type.size()-1){
+                command += " , ";
+            }
+        }
+        else{
+           //qDebug()<<" sql Type "+type[i]+" unknown";
+           return false;
+        }
+    }
+    command+=");";
+    sqlcommandOpen(command);
+    return true;
+}
+
+int Sql::countEnteries(QSqlQuery* _q){
+    _q->first();
+    int entries=0;
+    if( _q->first()==true){
+    do {
+        ++entries;
+    }while (_q->next());
+    _q->first();
+    }
+    //qDebug()<<"ENTERIES"<<entries<<" "<<_q->first();
+    return entries;
+}
+
+string Sql::getBrackedString(vector<string> data){
+    string res;
+    res ="(";
+    for(unsigned long long i=0;i<data.size();i++){
+        res +=data[i];
+        if(i<data.size()-1){
+            res += " , ";
+        }
+    }
+    res+=") ";
+    return res;
+}
+
+string Sql::getBrackedString(vector<vector<string>> data){
+    string res;
+    for(unsigned long long i=0;i<data.size();i++){
+        res +=this->getBrackedString(data[i]);
+        if(i<data.size()-1){
+            res += " , ";
+        }
+    }
+    return res;
+}
+

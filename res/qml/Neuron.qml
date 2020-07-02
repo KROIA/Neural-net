@@ -228,12 +228,12 @@ Rectangle {
                                  var provX=netItem.xRel
                                  provX[absId]=neuron.xRel
                                  netItem.xRel=provX
-                                 console.debug(absId,neuron.xRel,netItem.xRel[absId])
+                                 //console.debug(absId,neuron.xRel,netItem.xRel[absId])
                                  var provY=netItem.yRel
                                  provY[absId]=neuron.yRel
                                  netItem.yRel=provY
 
-                                 console.debug(absId,neuron.yRel,netItem.yRel[absId])
+                                 ///console.debug(absId,neuron.yRel,netItem.yRel[absId])
                                  netItem.xRel=VisuFunction.updateArray(netItem.xRel)
                                  netItem.yRel=VisuFunction.updateArray(netItem.yRel)
                                  //console.debug(neuron.xRel,dropArea.drag.x,netItem.xRel)

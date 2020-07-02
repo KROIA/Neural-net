@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts qml quick quickwidgets sql
+QT       += core gui charts qml quick quickwidgets sql quickcontrols2
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = snake
@@ -92,7 +92,7 @@ SOURCES += \
     $$srcPath/maptile.cpp \
     $$srcPath/environment.cpp \
     $$visuSrc/netvisu.cpp\
-    $$visuSrc/sql.cpp
+    $$visuSrc/sql.cpp\
     $$visuSrc/savenetsql.cpp
 
 HEADERS += \

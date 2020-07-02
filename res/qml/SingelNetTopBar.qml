@@ -37,6 +37,8 @@ TopBar {
                 var y=[]
                 x=netListVisu.getRelX(mainNet.netID)
                 y=netListVisu.getRelY(mainNet.netID)
+                console.debug("x",x)
+                console.debug("y",y)
                 if(x.length>0&&y.length>0){
                     mainNet.xRel=netListVisu.getRelX(mainNet.netID)
                     mainNet.yRel=netListVisu.getRelY(mainNet.netID)
