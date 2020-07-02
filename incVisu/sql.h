@@ -33,6 +33,7 @@ public:
 
     QSqlDatabase mydb;
     QSqlQuery query;
+    QString getDbPath();
     void setDbPath(QString dbFlieName);
     void sqlcommandOpen(string command);
     void sqlcommand(string command);

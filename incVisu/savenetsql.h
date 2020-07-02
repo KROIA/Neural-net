@@ -76,7 +76,7 @@
 
 using namespace std;
 
-class SaveNetSql : Sql
+class SaveNetSql : public Sql
 {
 public:
     SaveNetSql(string _path= "/bin/save.db");

@@ -62,7 +62,9 @@ void Sql::connClose(){
     mydb = QSqlDatabase();
     mydb.removeDatabase(connection);
 }
-
+QString Sql::getDbPath(){
+    return dbPath;
+}
 void Sql::setDbPath(QString dbFlieName){
     dbPath=dbFlieName;
 }

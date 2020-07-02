@@ -71,6 +71,9 @@ public slots:
     QVector<qreal> getRelX(const int &netId);
     QVector<qreal> getRelY(const int &netId);
 
+    QString getDBtPath();
+    void setDBtPath(QString path);
+
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
 

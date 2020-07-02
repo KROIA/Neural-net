@@ -254,7 +254,12 @@ QVector<qreal> NetVisu::getConWeight(const int &netId) {
     }
     return vect;
 }
-
+QString NetVisu::getDBtPath(){
+    return db.getDbPath();
+}
+void NetVisu::setDBtPath(QString path){
+    db.setDbPath(path);
+}
 QVector<qreal> NetVisu::getRelX(const int &netId){
     return db.loadRelXPos(netList[unsigned(netId)]);
 }
