@@ -20,6 +20,10 @@
 #include <ratio>
 #include <chrono>
 
+
+#include <QtSerialPort>
+#include <QSerialPortInfo>
+
 QT_CHARTS_USE_NAMESPACE
 
 enum Modus{
@@ -59,6 +63,10 @@ class Snake : public QMainWindow
         void timerEvent();
         void timerEvent2();
     private slots:
+        void onSerialDataAvailable();
+        void on_connect_button_clicked();
+        void on_disconnect_button_clicked();
+
         void paintEvent(QPaintEvent *e);
         void closeEvent(QCloseEvent *event);
 
@@ -88,6 +96,22 @@ class Snake : public QMainWindow
         void on_toggleDisplay_pushbutton_clicked(bool checked);
 
     private:
+        void getAvalilableSerialDevices();
+        void serialRead();
+        void serialWrite(QString message);
+        QSerialPort *usbDevice;
+        std::vector<QSerialPortInfo> serialComPortList; //A list of the available ports for the dropdownmenue in the GUI
+
+        QString deviceDescription;
+        QString serialBuffer;
+
+        bool serialDeviceIsConnected;
+
+        void sendSnake(unsigned int snakeIndex);
+        void sendFood();
+        void sendObsticle();
+
+
         QString GetLastErrorStr();
         void saveError(QString error);
         void savePeroformanceData();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1521</width>
-    <height>891</height>
+    <height>906</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -880,7 +880,6 @@
    <widget class="QQuickWidget" name="net_widget">
     <property name="geometry">
      <rect>
-
       <x>1070</x>
       <y>10</y>
       <width>441</width>
@@ -889,6 +888,42 @@
     </property>
     <property name="resizeMode">
      <enum>QQuickWidget::SizeRootObjectToView</enum>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="serialPortSelect_comboBox">
+    <property name="geometry">
+     <rect>
+      <x>161</x>
+      <y>440</y>
+      <width>201</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="connect_button">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>470</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>connect</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="disconnect_button">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>470</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>disconnect</string>
     </property>
    </widget>
   </widget>

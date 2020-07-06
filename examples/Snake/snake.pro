@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts qml quick quickwidgets sql
+QT       += core gui charts qml quick quickwidgets sql serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = snake
@@ -32,11 +32,13 @@ DLL_buildPath = bin/64bit/build-Release
 #username     = Hannes
 #QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #change your PC-username
-username     = SCHEH
-QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
+#username     = SCHEH
+#QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
 
+username     = AlexKrieg
+QT_work_dir  = C:/Users/$$username/Documents/QT
 #username     = Hannes
 #QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 geometryPath = $$QT_work_dir/lib/Geometry
@@ -49,8 +51,7 @@ configPath   = $$QT_work_dir/DLL/Config
 
 
 
-#username     = AlexKrieg
-#QT_work_dir  = C:/Users/$$username/Documents/QT
+
 
 #geometryPath = $$QT_work_dir/lib/Geometry
 #rectPath     = $$QT_work_dir/DLL/Rect
@@ -92,7 +93,7 @@ SOURCES += \
     $$srcPath/maptile.cpp \
     $$srcPath/environment.cpp \
     $$visuSrc/netvisu.cpp\
-    $$visuSrc/sql.cpp
+    $$visuSrc/sql.cpp \
     $$visuSrc/savenetsql.cpp
 
 HEADERS += \
@@ -109,8 +110,8 @@ HEADERS += \
     $$netIncPath/error.h \
     $$netIncPath/geneticnet.h \
     $$netIncPath/backpropnet.h \
-    $$visuInc/netvisu.h\
-    $$visuInc/sql.h\
+    $$visuInc/netvisu.h \
+    $$visuInc/sql.h \
     $$visuInc/savenetsql.h
 
 FORMS += \

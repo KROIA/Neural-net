@@ -295,12 +295,12 @@ Snake::Snake(QWidget *parent) :
 
 
     _stats_performance_chartview->setParent(this);
-    _stats_performance_chartview->setGeometry(10,480,400,200);
+    _stats_performance_chartview->setGeometry(10,500,400,200);
     _stats_performance_chartview->show();
 
 
     _stats_score_chartview->setParent(this);
-    _stats_score_chartview->setGeometry(10,680,400,200);
+    _stats_score_chartview->setGeometry(10,700,400,200);
     _stats_score_chartview->show();
 
     _stats_score_Chart->axisX()->setRange(0,_maxChartSize);
@@ -321,10 +321,18 @@ Snake::Snake(QWidget *parent) :
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
     //qDebug() << "begin Visu setup done";
-    visu = new NetVisu(net->get_netList_ptr());
 
-    visu->loadNetInUi(ui->net_widget);
-    visu->showWindow();
+//  visu = new NetVisu(net->get_netList_ptr());
+ // visu->loadNetInUi(ui->net_widget);
+   // visu->showWindow();
+
+    qDebug() << "setup serial...";
+    usbDevice = new QSerialPort(this);
+    connect(usbDevice,SIGNAL(readyRead()),this,SLOT(onSerialDataAvailable()));
+
+    serialDeviceIsConnected = false;
+    getAvalilableSerialDevices();
+
     qDebug() << "Setup done";
 }
 
@@ -386,6 +394,9 @@ void Snake::paintEvent(QPaintEvent *e)
         }
     }
     _painter->end();
+
+
+
 }
 void Snake::timerEvent()
 {
@@ -470,7 +481,21 @@ void Snake::timerEvent()
     }
 
     if(_enableDisplay)
+    {
       this->update();
+      //Serial Send Coords of snake
+      if(serialDeviceIsConnected)
+      {
+          serialWrite("r]"); // clear display
+          for(unsigned int snake=0; snake<_environment->playerAmount(); snake++)
+          {
+              if(_environment->player(snake)->isAlive())
+                  sendSnake(snake);
+          }
+
+
+      }
+    }
     if(_record_enable && _enableDisplay)
     {
         takescreenshot();
@@ -1813,4 +1838,173 @@ void Snake::on_record_clearBuffer_pushButton_clicked()
     _record_imageList.reserve(1000);
 }
 
+//Serial stuff
+void Snake::getAvalilableSerialDevices()
+{
+    qDebug() << "Number of available ports: " << QSerialPortInfo::availablePorts().length();
+    serialComPortList.clear();
+    ui->serialPortSelect_comboBox->clear();
+    foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
+    {
+        QString dbgStr = "Vendor ID: ";
 
+
+       if(serialPortInfo.hasVendorIdentifier())
+       {
+          dbgStr+= serialPortInfo.vendorIdentifier();
+       }
+       else
+       {
+          dbgStr+= " - ";
+       }
+       dbgStr+= "  Product ID: ";
+       if(serialPortInfo.hasProductIdentifier())
+       {
+          dbgStr+= serialPortInfo.hasProductIdentifier();
+       }
+       else
+       {
+          dbgStr+= " - ";
+       }
+       dbgStr+= " Name: " + serialPortInfo.portName();
+       dbgStr+= " Description: "+serialPortInfo.description();
+      qDebug()<<dbgStr;
+      serialComPortList.push_back(serialPortInfo);
+      ui->serialPortSelect_comboBox->addItem(serialPortInfo.portName() +" "+serialPortInfo.description());
+    }
+}
+void Snake::serialWrite(QString message)
+{
+    if(serialDeviceIsConnected == true)
+    {
+        usbDevice->write(message.toUtf8()); // Send the message to the device
+        //qDebug() << "Message to device: "<<message;
+    }
+}
+void Snake::serialRead()
+{
+    if(serialDeviceIsConnected == true)
+    {
+        serialBuffer += usbDevice->readAll(); // Read the available data
+    }
+}
+void Snake::onSerialDataAvailable()
+{
+    if(serialDeviceIsConnected == true)
+    {
+        serialRead(); // Read a chunk of the Message
+        //To solve that problem I send a end char "]" in My case. That helped my to know when a message is complete
+
+        if(serialBuffer.indexOf("]") != -1) //Message complete
+        {
+            qDebug() << "Message from device: "<<serialBuffer;
+            serialWrite("echoFromGui");
+
+            //Do something with de message here
+
+            serialBuffer = "";  //Clear the buffer;
+        }
+    }
+}
+
+
+void Snake::on_connect_button_clicked()
+{
+    if(serialDeviceIsConnected == false)
+    {
+        usbDevice->setPortName(serialComPortList[ui->serialPortSelect_comboBox->currentIndex()].portName());
+        deviceDescription = serialComPortList[ui->serialPortSelect_comboBox->currentIndex()].description();
+        qDebug() << "connecting to: "<<usbDevice->portName();
+        if(usbDevice->open(QIODevice::ReadWrite))
+        {
+            //Now the serial port is open try to set configuration
+            if(!usbDevice->setBaudRate(QSerialPort::Baud115200))        //Depends on your boud-rate on the Device
+                qDebug()<<usbDevice->errorString();
+
+            if(!usbDevice->setDataBits(QSerialPort::Data8))
+                qDebug()<<usbDevice->errorString();
+
+            if(!usbDevice->setParity(QSerialPort::NoParity))
+                qDebug()<<usbDevice->errorString();
+
+            if(!usbDevice->setStopBits(QSerialPort::OneStop))
+                qDebug()<<usbDevice->errorString();
+
+            if(!usbDevice->setFlowControl(QSerialPort::NoFlowControl))
+                qDebug()<<usbDevice->errorString();
+
+            //If any error was returned the serial il corrctly configured
+
+            qDebug() << "Connection to: "<< usbDevice->portName() << " " << deviceDescription << " connected";
+            serialDeviceIsConnected = true;
+        }
+        else
+        {
+            qDebug() << "Connection to: "<< usbDevice->portName() << " " << deviceDescription << " not connected";
+            qDebug() <<"         Error: "<<usbDevice->errorString();
+            serialDeviceIsConnected = false;
+        }
+    }
+    else
+    {
+        qDebug() << "Can't connect, another device is connected";
+    }
+}
+
+void Snake::on_disconnect_button_clicked()
+{
+    if(serialDeviceIsConnected)
+    {
+        usbDevice->close();
+        serialDeviceIsConnected = false;
+        qDebug() << "Connection to: "<< usbDevice->portName() << " " << deviceDescription << " closed";
+    }
+    else
+    {
+       qDebug() << "Can't disconnect, no device is connected";
+    }
+}
+void Snake::sendSnake(unsigned int snakeIndex)
+{
+   // qDebug() << "sending snake: "<<snakeIndex;
+    serialWrite("snake="+QString::number(snakeIndex)+"]");
+    Player *snake = _environment->player(snakeIndex);
+
+    std::vector<QPoint> *snakePath = snake->pos();
+
+    //serialWrite("size="+QString::number(snakePath->size())+"]");
+    for(unsigned int pathIndex=0; pathIndex<snakePath->size(); pathIndex++)
+    {
+        QString message /*= "t="+QString::number(pathIndex)*/; //t == tile
+        message+=         "x="+QString::number((*snakePath)[pathIndex].x()); //xPos
+        message+=         "y="+QString::number((*snakePath)[pathIndex].y()); //yPos
+        serialWrite(message+"]");
+    }
+
+
+    //qDebug() << "sending snake done";
+}
+void Snake::sendFood()
+{
+   /* qDebug() << "sending food";
+    serialWrite("food]");
+    _environment->
+
+    std::vector<QPoint> *snakePath = snake->pos();
+
+    //serialWrite("size="+QString::number(snakePath->size())+"]");
+    for(unsigned int pathIndex=0; pathIndex<snakePath->size(); pathIndex++)
+    {
+        QString message;
+        message+=         "x="+QString::number((*snakePath)[pathIndex].x()); //xPos
+        message+=         "y="+QString::number((*snakePath)[pathIndex].y()); //yPos
+        serialWrite(message+"]");
+    }
+
+
+    qDebug() << "sending food done";*/
+}
+void Snake::sendObsticle()
+{
+
+}
