@@ -20,6 +20,8 @@
 #include <ratio>
 #include <chrono>
 
+//#define ENABLE_NET_VISU
+
 QT_CHARTS_USE_NAMESPACE
 
 enum Modus{
@@ -102,7 +104,9 @@ class Snake : public QMainWindow
         std::vector<QPoint> _fieldOfView;
 
         GeneticNet *net;
+#ifdef ENABLE_NET_VISU
         NetVisu *visu;
+#endif
 
         QString _statsFilename;
         std::vector<double> _snakeScore;
