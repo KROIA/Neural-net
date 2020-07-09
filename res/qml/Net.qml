@@ -296,6 +296,24 @@ NetData {
         }
 
     }
+    Component.onCompleted: {
+        loadLayout()
+    }
+    function loadLayout(){
+        var x=[]
+        var y=[]
+        x=netListVisu.getRelX(netID)
+        y=netListVisu.getRelY(netID)
+        if(x.length>0&&y.length>0){
+            xRel=netListVisu.getRelX(netID)
+            yRel=netListVisu.getRelY(netID)
+            loadRelPos()
+        }
+        else{
+            console.debug("found no Layout")
+        }
+    }
+
     function calculateXRelPos(pos,type){
         if(type===def.hiddenType){
             pos+=1

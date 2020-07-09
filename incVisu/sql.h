@@ -10,8 +10,8 @@
 
 //#define Sql_Debug_Time
 //#define Sql_Debug_MinTime 1
-#define Sql_Debug_Commit_Time
-#define Sql_Debug_DB_Status
+//#define Sql_Debug_Commit_Time
+//#define Sql_Debug_DB_Status
 
 
 #include <QSqlDatabase>

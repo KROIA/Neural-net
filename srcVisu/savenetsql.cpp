@@ -50,7 +50,7 @@ SaveNetSql::SaveNetSql(string _path )
         Connection_Save_Weight_Column
     };
 
-    dbPath="C:/Users/SCHEH/Desktop/savedb.db";
+    dbPath="savedb.db";
     //query=QSqlQuery(mydb);
     createDb();
     //connOpen();
@@ -272,7 +272,6 @@ void SaveNetSql::saveRelPos(QVector<qreal> relX,QVector<qreal> relY,Net *net){
     vector<string> dataRow;
     int layoutId;
     layoutId=query.lastInsertId().toInt();
-    qDebug()<<relX.size();
     for(int i=0;i<relX.size();i++){
         dataRow.clear();
         dataRow.push_back(to_string(i));
