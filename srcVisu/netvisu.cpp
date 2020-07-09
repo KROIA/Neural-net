@@ -69,6 +69,7 @@ void NetVisu::setupNetVisu(){
 
     qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
 #endif
+
 }
 
 void NetVisu::setUpdateTime(unsigned int upDateTime){
@@ -81,12 +82,15 @@ void NetVisu::showWindow(){
     context=engine->rootContext();
     context->setContextProperty (QmlRootContext, this);
     engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
-}
+    }
 
 void NetVisu::loadNetInUi(QQuickWidget* widget){
     widget->rootContext()->setContextProperty(QmlRootContext,this);
     widget->setSource((QUrl(QStringLiteral("qrc:/qml/UiIntegratableNet.qml"))));
     netWidget=widget;
+}
+void NetVisu::updateNetVisu(){
+    emit updateVisu();
 }
 
 void NetVisu::displayUpdatNetTimer(const int &netId){

@@ -39,6 +39,7 @@ public:
     vector<int> NeuronTyp;
     vector<qreal> ConnectionWeight;
     vector<qreal> NeuronValueVect;
+    QTimer *uTimer;
 #ifdef sqlsave
     SaveNetSql db;
 #endif
@@ -49,6 +50,7 @@ signals:
     void setUpdateTimeSignal(unsigned int time);
     void updateVisu();
 public slots:
+    void updateNetVisu();
     void setUpdateTime(unsigned int upDateTime);
     void displayUpdatNetTimer(const int &netId);
     int getHiddenX(const int &netId) ;
