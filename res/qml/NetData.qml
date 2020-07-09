@@ -39,8 +39,11 @@ Item {
                    function onStopUpdateSignal(){ timerNet.running=false}
                    function onStartUpdateSignal(){timerNet.running=true
                        updateStructur()}
-                   function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
-
+                    function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
+                    function onUpdateVisu(){
+                        netListVisu.displayUpdatNetTimer(netID)
+                        updateValue()
+                    }
     }
     Timer {
         id:timerNet

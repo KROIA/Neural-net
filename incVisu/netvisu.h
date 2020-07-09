@@ -47,6 +47,7 @@ signals:
     void stopUpdateSignal();
     void startUpdateSignal();
     void setUpdateTimeSignal(unsigned int time);
+    void updateVisu();
 public slots:
     void setUpdateTime(unsigned int upDateTime);
     void displayUpdatNetTimer(const int &netId);
