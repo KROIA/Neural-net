@@ -320,11 +320,12 @@ Snake::Snake(QWidget *parent) :
     _record_stepInterval = ui->record_stepInterval_spinbox->value();
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
-    qDebug() << "begin Visu setup done";
+#ifdef ENABLE_NET_VISU
     visu = new NetVisu(net->get_netList_ptr());
 
     visu->loadNetInUi(ui->net_widget);
     visu->showWindow();
+#endif
     qDebug() << "Setup done";
 }
 
@@ -1471,7 +1472,9 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
         _versusEnvironment->showInfoText(false);
         _environment->showInfoText(false);
         _backpropTrainingEnvironment->showInfoText(false);
+#ifdef ENABLE_NET_VISU
         visu->stopUpdateSlot();
+#endif
         return;
     }
 
@@ -1483,7 +1486,9 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(ui->mapinfo_checkbox->isChecked());
             _versusEnvironment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(false);
-            visu->startUpdateSlot();
+#ifdef ENABLE_NET_VISU
+            visu->stopUpdateSlot();
+#endif
             break;
         }
         case Modus::versusAI:
@@ -1491,7 +1496,9 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(false);
             _versusEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
-            visu->startUpdateSlot();
+#ifdef ENABLE_NET_VISU
+            visu->stopUpdateSlot();
+#endif
             break;
         }
         case Modus::backpropTraining:
@@ -1499,7 +1506,9 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
             _environment->showInfoText(false);
             _backpropTrainingEnvironment->showInfoText(ui->mapinfo_checkbox->isChecked());
             _versusEnvironment->showInfoText(false);
-            visu->startUpdateSlot();
+#ifdef ENABLE_NET_VISU
+            visu->stopUpdateSlot();
+#endif
             break;
         }
     }

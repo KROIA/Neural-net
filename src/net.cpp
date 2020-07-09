@@ -942,7 +942,7 @@ void                Net::updateNetConfiguration()
     //_connectionList.clear();
     if(_connectionList.size() == 0)
         prepareConnectionList();
-/*
+
     _outputNeurons  = 0;
     _hiddenNeurons  = 0;
     _neurons        = 0;
@@ -1076,7 +1076,7 @@ void                Net::updateNetConfiguration()
 
     _outputNeurons  = __filtered_outputIDs.size();
     _hiddenNeurons  = __filtered_hiddenIDs.size();
-    _costumNeurons  = __filtered_costumIDs.size();*/
+    _costumNeurons  = __filtered_costumIDs.size();
     _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
 
 
