@@ -128,7 +128,7 @@ void SaveNetSql::saveNet(vector<Net*> saveNet){
         vector<vector<string>> valuesVec;
         for(unsigned int i=0;i<saveNet[j]->get_genomsize();i++){
             vector<string> valuesGenom;
-            valuesGenom.push_back(to_string(netId[i]));
+            valuesGenom.push_back(to_string(netId[j]));
             valuesGenom.push_back(to_string(i));
             valuesGenom.push_back(to_string(*(*saveGenom)[i]));
             valuesVec.push_back(valuesGenom);

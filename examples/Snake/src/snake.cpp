@@ -320,7 +320,7 @@ Snake::Snake(QWidget *parent) :
     _record_stepInterval = ui->record_stepInterval_spinbox->value();
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
-    //qDebug() << "begin Visu setup done";
+    qDebug() << "begin Visu setup done";
     visu = new NetVisu(net->get_netList_ptr());
 
     visu->loadNetInUi(ui->net_widget);

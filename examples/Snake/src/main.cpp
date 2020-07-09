@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     a.setOrganizationName("AIOpenCloedProject");
     a.setOrganizationDomain("https://github.com/KROIA/Neural-net");
     Snake w;
-    //w.show();
+    w.show();
 
     try{
         return a.exec();
