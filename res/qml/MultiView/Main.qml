@@ -1,11 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 1.4
+import "../Basic"
+import "../"
 Item {
     id:multiNetArea
     width: 100
     height: 100
-    MultiNetTopBar{
+    TopBar{
         id:topBar
         anchors.top:multiNetArea.top
         anchors.left: multiNetArea.left

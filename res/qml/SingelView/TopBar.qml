@@ -2,7 +2,10 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
-TopBar {
+import "../Basic"
+import "../"
+import "../BasicTemplate" as Template
+Template.TopBar {
     property int visuNeuronModus: modus.currentIndex
     property bool moveable: moveSwitch.checked
 

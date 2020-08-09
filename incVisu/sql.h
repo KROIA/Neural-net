@@ -20,14 +20,17 @@
 #include <QSqlQueryModel>
 #include <iostream>
 
-
+enum SqlType{
+   slqite  = 0,
+    mysql  = 1,
+};
 
 using namespace std;
 
 class Sql
 {
 public:
-    Sql();
+    Sql(SqlType _type);
     void connOpen();
     void connClose();
 
@@ -50,6 +53,7 @@ protected:
 private:
     string getBrackedString(vector<string> data);
     string getBrackedString(vector<vector<string>> data);
+    SqlType type;
 };
 
 #endif // SQL_H

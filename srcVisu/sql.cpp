@@ -1,14 +1,19 @@
 #include "sql.h"
 
-Sql::Sql()
+Sql::Sql(SqlType _type)
 {
-
+    type=_type;
 }
 
 
 void Sql::connOpen(){
-
-    mydb = QSqlDatabase::addDatabase("QSQLITE","connction1");
+    if(type==slqite){
+        mydb.addDatabase("QSQLITE","connction1");
+    }
+    if(type==mysql){
+        mydb.addDatabase("QMYSQL","connction1");
+    }
+    //mydb = QSqlDatabase::addDatabase("QSQLITE","connction1");
     //mydb = QSqlDatabase::database("connction1");
     mydb.setDatabaseName(dbPath);
 

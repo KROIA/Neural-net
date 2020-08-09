@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Shapes 1.14
-import "../js/VisuFunction.js" as VisuFunction
+import "../../js/VisuFunction.js" as VisuFunction
 
 Shape {
     id:con

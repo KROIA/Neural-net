@@ -1,6 +1,6 @@
 #include "savenetsql.h"
 
-SaveNetSql::SaveNetSql(string _path )
+SaveNetSql::SaveNetSql(string _path ): Sql(SqlType::slqite)
 {   netSaveTable={
         Net_Config_Column
     };

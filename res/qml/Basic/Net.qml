@@ -4,7 +4,7 @@ import QtQuick 2.14
 //import QtQuick.Controls 2.4
 import QtQuick.Controls 2.14
 import QtQuick.Window 2.2
-import "../js/VisuFunction.js" as VisuFunction
+import "../../js/VisuFunction.js" as VisuFunction
 NetData {
     id:netItem
     width: 600

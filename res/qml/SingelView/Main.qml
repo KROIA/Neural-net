@@ -1,5 +1,8 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import "../Basic"
+import "../"
+
 FocusScope {
     id:singelWorkArea
     width: 100
@@ -25,7 +28,7 @@ FocusScope {
     }
 
 
-    SingelNetTopBar{
+    TopBar{
         id:singelTopBar
         anchors.top: singelWorkArea.top
         anchors.right:singelWorkArea.right
@@ -33,7 +36,7 @@ FocusScope {
         height: 100
     }
 
-    SingelNetSideBar{
+    SideBar{
         id:sidebar
         anchors.right:singelWorkArea.right
         anchors.top: singelTopBar.bottom

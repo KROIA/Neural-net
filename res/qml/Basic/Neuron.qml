@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../js/VisuFunction.js" as VisuFunction
+import "../../js/VisuFunction.js" as VisuFunction
 Rectangle {
     id:neuron
     property int d: 20

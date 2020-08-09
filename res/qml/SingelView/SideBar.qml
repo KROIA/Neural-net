@@ -1,6 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Extras 1.4
 import QtQuick.Controls 2.13
+import "../Basic"
+import "../"
+import "../BasicTemplate" as Template
 Rectangle{
     id:sidebar
     color: "silver"
@@ -18,7 +21,7 @@ Rectangle{
 
             }
         ]
-    TabControllBar{
+    Template.TabControllBar{
         id:tabBar
         onShowChanged: show ? sidebar.state= 'show':sidebar.state='*'
         width:sidebar.height

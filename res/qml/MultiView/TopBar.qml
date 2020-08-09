@@ -1,8 +1,8 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.4
+import "../BasicTemplate" as Template
 
-
-TopBar {
+Template.TopBar {
     id:itemTopBar
     width: 100
     height: 100
@@ -18,7 +18,7 @@ TopBar {
     Row {
         visible: multiView
         anchors.fill:parent
-        TopbarSpinBox{
+        Template.TopbarSpinBox{
             id:xAxisItem
             height: itemTopBar*0.8
             width:spinBoxSize*2
@@ -28,7 +28,7 @@ TopBar {
             spinBoxWidth: spinBoxSize
             onValueChanged: updateMultiNet()
         }
-        TopbarSpinBox{
+        Template.TopbarSpinBox{
             id:yAxisItem
             height: itemTopBar*0.8
             width:spinBoxSize*2
@@ -38,7 +38,7 @@ TopBar {
             spinBoxWidth: spinBoxSize
             onValueChanged: updateMultiNet()
         }
-        TopbarSpinBox{
+        Template.TopbarSpinBox{
             id:timerItem
             height: itemTopBar*0.8
             width:spinBoxSize*2.5
@@ -48,7 +48,7 @@ TopBar {
             defaultValue: 200
             spinBoxWidth: spinBoxSize*1.5
         }
-        TopbarSpinBox{
+        Template.TopbarSpinBox{
             id:tabItem
             height: itemTopBar*0.8
             width:spinBoxSize*2
