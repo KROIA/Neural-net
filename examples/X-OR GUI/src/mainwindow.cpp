@@ -86,10 +86,6 @@ MainWindow::MainWindow(QWidget *parent) :
     visu->showWindow();
     QElapsedTimer tim;
     tim.start();
-    for(unsigned long long i=0;i<1;i++){
-        net->saveToNetFile();
-    }
-    qDebug()<<"normal Save Timer "<<tim.elapsed()<<" millis";
 }
 
 MainWindow::~MainWindow()

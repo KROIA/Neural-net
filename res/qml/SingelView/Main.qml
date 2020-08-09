@@ -9,11 +9,7 @@ FocusScope {
     height: 100
     property int updateTime: 200
     visible:!singelTopBar.multiView
-    Connections {
-                   target: netListVisu
-                   function onStartUpdateSignal(){updateMultiNet()}
 
-    }
     Net{
         id:mainNet
         x:0

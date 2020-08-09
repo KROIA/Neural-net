@@ -34,7 +34,7 @@ Item{
                         y: Math.floor(index/xNetPerTab)*height
                         width: multiNet.width/xNetPerTab
                         height: multiNet.height/yNetPerTab
-                        netID: index+tabIndex*(yNetPerTab*xNetPerTab)
+                        netId: index+tabIndex*(yNetPerTab*xNetPerTab)
                         updateTime:multiNet.updateTime
                         enableMousArea: true
                         onClickedNet: clickedNetId=id

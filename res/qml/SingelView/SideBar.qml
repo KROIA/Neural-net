@@ -55,10 +55,14 @@ Rectangle{
         NetInfo{
             anchors.fill: sidebarContent
             visible: tabBar.showContent[1]
-            netID: mainNet.netID
+            netId: mainNet.netId
             clickedNeuronID:sidebar.clickedNeuronID
             clickedNeuronType: sidebar.clickedNeuronType
         }
+    }
+    Connections {
+                   target: netListVisu
+                   function onStartUpdateSignal(){multiNet.updateMultiNet()}
     }
 
 

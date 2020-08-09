@@ -4,15 +4,18 @@ import "../../js/VisuFunction.js" as VisuFunction
 
 Shape {
     id:con
-    property int conID: 0
+    property int conId: 0
+    property int netId: 0
     property real weight:1
     property int conWidth: 4
     property real minWidth: 0.2
     property real maxWidth: con.d*0.3
-    property int destinationId: conDestinationID[conID]
-    property int destinationType: conDestinationType[conID]
-    property int sourceId: conSourceID[conID]
-    property int sourceType:conSourceType[conID]
+
+    property int connType: 0
+    property int destinationId: netListVisu.getConDestinationID(con.netId,con.conId,con.connType)
+    property int destinationType: netListVisu.getConDestinationType(con.netId,con.conId,con.connType)
+    property int sourceId: netListVisu.getConSourceID(con.netId,con.conId,con.connType)
+    property int sourceType:netListVisu.getConSourceType(con.netId,con.conId,con.connType)
     property real d: 0.5//0.00001
     property int transparent: 100
     visible:netItem.visuNeuronModus===def.functionVisu||(Math.abs(weight)*d*0.2)>minWidth
@@ -107,4 +110,7 @@ Shape {
               }
            }
          }
+    function updateValue(){
+        weight=netListVisu.getConWeight(netId,conId)
+    }
 }

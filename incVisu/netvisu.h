@@ -58,21 +58,20 @@ public slots:
     int getInputs(const int &netId) ;
     int getOutputs(const int &netId) ;
     int getNetCount();
-    QVector<qreal> getHiddenValue(const int &netId);
-    QVector<qreal> getInputsValue(const int &netId) ;
-    QVector<qreal> getOutputsValue(const int &netId) ;
-    QVector<int> getHiddenID(const int &netId) ;
-    QVector<int> getOutputID(const int &netId) ;
 
-    QVector<int> getConSourceID(const int &netId) ;
-    QVector<int> getConDestinationID(const int &netId) ;
-    QVector<int> getConSourceType(const int &netId) ;
-    QVector<int> getConDestinationType(const int &netId) ;
+    qreal getNeuronValue(const int &netId , const int &neuronTypeId, const int type);
+    int getNeuronID(const int &netId, const int &neuronTypeId, const int type);
 
-    QVector<qreal> getConWeight(const int &netId) ;
+    int getConns(const int &netId);
+    int getConSourceID(const int &netId , const int &connId,  const int &connType=0) ;
+    int getConDestinationID(const int &netId , const int &connId,  const int &connType=0) ;
+    int getConSourceType(const int &netId , const int &connId,  const int &connType=0) ;
+    int getConDestinationType(const int &netId , const int &connId,  const int &connType=0) ;
 
-    QVector<qreal> getRelX(const int &netId);
-    QVector<qreal> getRelY(const int &netId);
+    qreal getConWeight(const int &netId , const int &connId) ;
+
+    QVector<qreal> getRelX(const int &netId );//,, const int &neuronAbsId);
+    QVector<qreal> getRelY(const int &netId );//, const int &neuronAbsId);
 
     QString getDBtPath();
     void setDBtPath(QString path);
@@ -108,6 +107,9 @@ private:
     vector<vector<double>   > genomList;       //Index depending on NetID, secondDimension: depending on the connection
 
     vector<double>  biasValueList; //Index depending on NetID
+
+    unsigned getX(int netId ,int id);
+    unsigned getY(int netId ,int id);
 };
 
 #endif // NETVISU_H

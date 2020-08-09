@@ -16,7 +16,6 @@ Template.TopBar {
     property int spinBoxSize: 150//if(width*0.2<150) return width*0.2
                                // else return 150
     Row {
-        visible: multiView
         anchors.fill:parent
         Template.TopbarSpinBox{
             id:xAxisItem
@@ -61,7 +60,9 @@ Template.TopBar {
 
     Connections {
                    target: netListVisu
-                   onStartUpdateSignal:updateMultiNet()
+                   function onStartUpdateSignal(){
+
+                       updateMultiNet()}
     }
     function updateMultiNet(){
                totalNet= netListVisu.getNetCount()

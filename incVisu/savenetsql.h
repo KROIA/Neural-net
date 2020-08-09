@@ -80,7 +80,7 @@ class SaveNetSql : public Sql
 {
 public:
     SaveNetSql(string _path= "/bin/save.db");
-
+    ~SaveNetSql();
 
     //Net* loadNet(int id);
     void saveNet(Net* saveNet);
@@ -96,15 +96,26 @@ public:
     void createDb();
 private:
 
-    vector<string> netSaveTable;
-    vector<string> netConfigTable;
-    vector<string> netLayoutTable;
+    vector<QString> netSaveTable;
+    vector<QString> netConfigTable;
+    vector<QString> netLayoutTable;
 
-    vector<string> neuronConfigTable;
-    vector<string> neuronLayoutTable;
+    vector<QString> neuronConfigTable;
+    vector<QString> neuronLayoutTable;
 
-    vector<string> connectionConfigTable;
-    vector<string> connectionSaveTable;
+    vector<QString> connectionConfigTable;
+    vector<QString> connectionSaveTable;
+
+    vector<QString> netSaveTypeTable;
+    vector<QString> netConfigTypeTable;
+    vector<QString> netLayoutTypeTable;
+
+    vector<QString> neuronConfigTypeTable;
+    vector<QString> neuronLayoutTypeTable;
+
+    vector<QString> connectionConfigTypeTable;
+    vector<QString> connectionSaveTypeTable;
+
     vector<Net*> savedNet;
     vector<int> savedNetId;
 

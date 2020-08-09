@@ -8,7 +8,7 @@ Item {
     height: 100
     property real buttonBar: 0.1
     property int maxNet: netListVisu.getNetCount()
-    property int netId: spinNetId.value
+    property int netId: spinnetId.value
     property int updateTime: 10
     Component.onCompleted: updateNet();
     Connections {
@@ -21,11 +21,11 @@ Item {
         y:0
         width:parent.width
         height: parent.height*(1-buttonBar)
-        netID:  parent.netId
+        netId:  parent.netId
         updateTime:uiIntegratableNet.updateTime
     }
     SpinBox{
-        id:spinNetId
+        id:spinnetId
         from: 0
         to: maxNet-1
         editable:true

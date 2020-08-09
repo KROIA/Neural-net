@@ -19,11 +19,11 @@ NetData {
     signal loadRelPos();
     property int netAlignment: Net.NetAlignment.Top
     property int visuNeuronModus: 0
-    property bool enableUpdateTimer: visuNeuronModus===def.functionVisu? false:true
+    property bool enableUpdateTimer: visuNeuronModus===def.functionVisu ? false:true
     property int visu: 0
     property bool enableMousArea: false
-    property int clickedNeuronID: -1
-    property int clickedNeuronType: 0
+    property int clickedneuronID: -1
+    property int clickedNeurontype: 0
     property bool moveable: false
 
     property variant yRel: []
@@ -42,12 +42,12 @@ NetData {
 
     property variant biasConXOutput: []
     property variant biasConYOutput: []
+    property variant hiddenTransparent:  []
+    property variant biasTransparent:  []
+    property variant inputTransparent:  []
+    property variant outputTransparent:  []
+    property variant conTransparent:  []
 
-    property variant hiddenTransparent: new Array(totalHidden).fill(100)
-    property variant biasTransparent: new Array(hiddenNeuronX+1).fill(100)
-    property variant inputTransparent: new Array(inputNeuron).fill(100)
-    property variant outputTransparent: new Array(outputNeuron).fill(100)
-    property variant conTransparent: new Array(conSourceID.length).fill(100)
     property bool neuronClickEnable: true
     property real yOffSet: 0.1
     property real xOffSet: 0.1
@@ -58,12 +58,43 @@ NetData {
                         else return 0
     property bool showId: true
     signal clickedNet(var id)
+    signal updateValue();
+    onUpdateStructurSignal:{
+        netItem.hiddenTransparent=new Array(totalHidden).fill(100)
+        netItem.biasTransparent= new Array(hiddenNeuronX+1).fill(100)
+        netItem.inputTransparent= new Array(inputNeuron).fill(100)
+        netItem.outputTransparent= new Array(outputNeuron).fill(100)
+        netItem.conTransparent= new Array(totalConns).fill(100)
+    }
+    Component.onCompleted: {
+        updateStructur()
+    }
 
+    Timer {
+        id:timerNet
+            interval: updateTime; running: enableUpdateTimer
+             repeat: true
+            onTriggered: {
+                netListVisu.displayUpdatNetTimer(netId)
+                updateValue()
+            }
+        }
+    Connections {
+                   target: netListVisu
+                   function onStopUpdateSignal(){ timerNet.running=false}
+                   function onStartUpdateSignal(){timerNet.running=true
+                       netItem.updateStructur()}
+                    function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
+                    function onUpdateVisu(){
+                        netListVisu.displayUpdatNetTimer(netId)
+                        updateValue()
+                    }
+    }
     MouseArea{
         id:mous
         anchors.fill: parent
         enabled: enableMousArea
-        onClicked: {clickedNet(netID)}
+        onClicked: {clickedNet(netId)}
         ScrollView{
                 id:scroll
                 ScrollBar.vertical.policy:Qt.ScrollBarAlwaysOn
@@ -157,12 +188,21 @@ NetData {
                     anchors.fill: parent
                 }
                 Repeater{
-                    model: conSourceID.length
+                    model: {
+                        return totalConns
+                    }
                     NeuronConnection{
-                        conID: index
-                        weight:conWeight[index]
-                        transparent:conTransparent[index]
+                        id:connection
+                        conId: index
+                        transparent: 100//conTransparent[index]
                         d:totalNet.d
+                        netId:netItem.netId
+                        Connections{
+                            target: netItem
+                            function onUpdateValue(){
+                                connection.updateValue()
+                            }
+                        }
                     }
                 }
                 Repeater{
@@ -170,21 +210,31 @@ NetData {
                     model: hiddenNeuronX+1
                     visible: bias
                     Neuron{
+                        x: xRel*totalNet.width-(d/2)
+                        y: yRel*totalNet.height-(d/2)
                         xRel:{
                             var i=index
-                            calculateXRelPos(i,type)}
+                            calculateXRelPos(i,dataNeuron.type)}
                         yRel: yOffSet+yBiasPos
                         d:totalNet.d
-                        neuronValue: biasValue
-                        typeId: index
-                        type:def.biasType
+                        visuModus:visuNeuronModus
+
+                        dataNeuron.typeId: index
+                        dataNeuron.type:def.biasType
+                        dataNeuron.netId:netItem.netId
+
                         lastNeuron: (index==(biasLayer.model-1))
                         onClickedNeuron: {
-                            clickedNeuronID= typeId
-                            clickedNeuronType= type
+                            clickedNeuronID= dataNeuron.typeId
+                            clickedNeuronType= data.type
                         }
-                        transparent: biasTransparent[index]
-                        absId: index+inputNeuron+totalHidden+outputNeuron
+                        transparent: 100// biasTransparent[index]
+                        Connections{
+                            target: netItem
+                            function onUpdateValue(){
+                                dataNeuron.updateValue()
+                            }
+                        }
                     }
                 }
 
@@ -192,27 +242,33 @@ NetData {
                     id:inputLayer
                     model:inputNeuron
                     Neuron{
+                        x: xRel*totalNet.width-(d/2)
+                        y: yRel*totalNet.height-(d/2)
                         xRel:{
                             var i=0
-                            calculateXRelPos(i,type)}
+                            calculateXRelPos(i,dataNeuron.type)}
                         yRel:{
                             var i=inputNeuron
                             return calculateYRelPos(index,i)
                         }
                         d:totalNet.d
-                        neuronValue: if(inputValue.length>typeId) return inputValue[typeId]
-                                        else return 0
-                        typeId: index
-                        type:def.inputType
-                        neuronID:index
-                        absId: index
+                        visuModus:visuNeuronModus
+                        dataNeuron.typeId: index
+                        dataNeuron.type:def.inputType
+                        dataNeuron.netId:netItem.netId
+
                         lastNeuron: (index==(inputLayer.model-1))
                         onClickedNeuron: {
-                            clickedNeuronID= typeId
-                            clickedNeuronType= type
+                            clickedNeuronID= dataNeuron.typeId
+                            clickedNeuronType= dataNeuron.type
                         }
-                        transparent: inputTransparent[index]
-
+                        transparent: 100//inputTransparent[index]
+                        Connections{
+                            target: netItem
+                            function onUpdateValue(){
+                                dataNeuron.updateValue()
+                            }
+                        }
                     }
                 }
 
@@ -224,29 +280,33 @@ NetData {
                         model:netItem.hiddenNeuronY
                         property int indexX: index
                         Neuron{
+                            x: xRel*totalNet.width-(d/2)
+                            y: yRel*totalNet.height-(d/2)
                             xRel:{
                                 var i=indexX
-                                calculateXRelPos(i,type)}
+                                calculateXRelPos(i,dataNeuron.type)}
                             yRel:{
                                 var i=hiddenNeuronY
                                 return calculateYRelPos(index,i)
                             }
+                            visuModus:visuNeuronModus
                             d:totalNet.d
-                            typeId: index+(indexX*hiddenNeuronY)
-                            absId: index+inputNeuron
-                            neuronID:if(0<hiddenIDs[typeId]){
-                                         return hiddenIDs[typeId]}
-                                        else return typeId
-                            neuronValue: if(index+(indexX*hiddenNeuronY)<hiddenValue.length){
-                                                     return hiddenValue[typeId]}
-                                         else return 0
-                            type:def.hiddenType
+                            dataNeuron.typeId: index+(indexX*hiddenNeuronY)
+                            dataNeuron.type:def.hiddenType
+                            dataNeuron.netId:netItem.netId
+
                             lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
                             onClickedNeuron: {
-                                clickedNeuronID= typeId
-                                clickedNeuronType= type
+                                clickedNeuronID= dataNeuron.typeId
+                                clickedNeuronType= dataNeuron.type
                             }
-                            transparent: hiddenTransparent[typeId]
+                            transparent: 100// hiddenTransparent[dataNeuron.typeId]
+                            Connections{
+                                target: netItem
+                                function onUpdateValue(){
+                                    dataNeuron.updateValue()
+                                }
+                            }
                         }
                     }
                 }
@@ -254,27 +314,33 @@ NetData {
                     id:outputLayer
                     model:outputNeuron
                     Neuron{
+                        x: xRel*totalNet.width-(d/2)
+                        y: yRel*totalNet.height-(d/2)
                         xRel:{
                             var i=0
-                            calculateXRelPos(i,type)}
+                            calculateXRelPos(i,dataNeuron.type)}
                         yRel:{
                             var i=outputNeuron
                             return calculateYRelPos(index,i)
                         }
+                        visuModus:visuNeuronModus
                         d:totalNet.d
-                        typeId: index
-                        absId: index+inputNeuron+totalHidden
-                        neuronID: if(outputIds.length>typeId) return outputIds[typeId]
-                                    else return typeId+totalHidden
-                        type:def.outputType
-                        neuronValue: if(outputValue.length>typeId) outputValue[index]
-                                        else return 0
+                        dataNeuron.typeId: index
+                        dataNeuron.type:def.outputType
+                        dataNeuron.netId:netItem.netId
+
                         lastNeuron: (index==(outputLayer.model-1))
                         onClickedNeuron: {
-                            clickedNeuronID= typeId
-                            clickedNeuronType= type
+                            clickedNeuronID= dataNeuron.typeId
+                            clickedNeuronType= dataNeuron.type
                         }
-                        transparent: outputTransparent[index]
+                        transparent: 100// outputTransparent[index]
+                        Connections{
+                            target: netItem
+                            function onUpdateValue(){
+                                dataNeuron.updateValue()
+                            }
+                        }
 
                     }
                 }
@@ -286,9 +352,8 @@ NetData {
                     anchors.rightMargin: totalNet.width*xOffSet
                     anchors.topMargin: yOffSet
                     topPadding: yOffSet
-                    text: "net Id: "+netID
+                    text: "net Id: "+netId
                     font.pixelSize: yOffSet
-
                     visible:showId
                     horizontalAlignment: Text.AlignRight
                 }
@@ -296,17 +361,14 @@ NetData {
         }
 
     }
-    Component.onCompleted: {
-        loadLayout()
-    }
     function loadLayout(){
         var x=[]
         var y=[]
-        x=netListVisu.getRelX(netID)
-        y=netListVisu.getRelY(netID)
+        x=netListVisu.getRelX(netId)
+        y=netListVisu.getRelY(netId)
         if(x.length>0&&y.length>0){
-            xRel=netListVisu.getRelX(netID)
-            yRel=netListVisu.getRelY(netID)
+            xRel=netListVisu.getRelX(netId)
+            yRel=netListVisu.getRelY(netId)
             loadRelPos()
         }
         else{
@@ -343,7 +405,7 @@ NetData {
         biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
         inputTransparent= new Array(inputNeuron).fill(trans)
         outputTransparent= new Array(outputNeuron).fill(trans)
-        conTransparent= new Array(conSourceID.length).fill(trans)
+        conTransparent= new Array(totalConns).fill(trans)
 
     }
     function updateTransparancy(){
@@ -370,7 +432,7 @@ NetData {
     }
 
     function setNetHighlight(id,type){
-        var highlightValue=100
+        /*var highlightValue=100
         setTransparancy(20)
         if(type===def.outputType) id+=totalHidden
         setHighlight(id,type,highlightValue)
@@ -378,7 +440,7 @@ NetData {
         var arrConId=[]
         var sType
         var sId
-        arrConId=getConSource(id,type)
+        arrConId=getConSourceID(id,type)
         for(var i=0;i<arrConId.length;i++){
 
             sId=conDestinationID[arrConId[i]]
@@ -397,6 +459,6 @@ NetData {
             conTransparent[arrConId[i]]=highlightValue
             setHighlight(sId,sType,highlightValue)
         }
-        updateTransparancy()
+        updateTransparancy()*/
     }
 }

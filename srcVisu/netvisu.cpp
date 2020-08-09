@@ -51,7 +51,7 @@ void NetVisu::setupNetVisu(){
         connect(netList[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
         connect(netList[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
     }
-    startUpdateSlot();
+
 
     vector<Net*> saveVec=netList;
     /*for(int i=0;i<100;i++){
@@ -69,6 +69,7 @@ void NetVisu::setupNetVisu(){
 
     qDebug()<<"sql Timer "<<tim.elapsed()<<" millis";
 #endif
+    qDebug()<<" finished setup";
 
 }
 
@@ -82,11 +83,13 @@ void NetVisu::showWindow(){
     context=engine->rootContext();
     context->setContextProperty (QmlRootContext, this);
     engine->load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+    //qDebug()<<"finished loading";
+    startUpdateSlot();
     }
 
 void NetVisu::loadNetInUi(QQuickWidget* widget){
     widget->rootContext()->setContextProperty(QmlRootContext,this);
-    widget->setSource((QUrl(QStringLiteral("qrc:/qml/UiIntegratableNet.qml"))));
+    widget->setSource((QUrl(QStringLiteral("qrc:/qml/IntegratableNet/Main.qml"))));
     netWidget=widget;
 }
 void NetVisu::updateNetVisu(){
@@ -135,141 +138,105 @@ int NetVisu::getOutputs(const int &netId) {
     }
 }
 
-QVector<qreal> NetVisu::getHiddenValue(const int &netId) {
-    QVector<qreal> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        std::vector<Neuron*> hiddenNeuronList = *netList[unsigned(netId)]->get_ptr_allNeurons();
-        for(unsigned  int j=0;j<hiddenNeuronList.size();j++){
-            if(hiddenNeuronList[j]->get_ID().TYPE == NeuronType::hidden)
-            {
-                vect.push_back(hiddenNeuronList[j]->get_output());
-            }
-            //vect.push_back(int(net->get_hiddenNeuronY_ptr(0)[j]->get_ID().ID));
-        }
+qreal NetVisu::getNeuronValue(const int &netId , const int &neuronTypeId, const int type) {
+    NeuronType _type =NeuronType(type);
+    if(_type==NeuronType::input){
+        return qreal(netList[netId]->get_input(unsigned(neuronTypeId)));
     }
-    return vect;
-}
-QVector<qreal> NetVisu::getInputsValue(const int &netId) {
-    QVector<qreal> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        vect =QVector<qreal>::fromStdVector(netList[unsigned(netId)]->get_input());
+    if(_type==NeuronType::output){
+        return qreal(netList[netId]->get_output(unsigned(neuronTypeId)));
     }
-    return vect;
-}
-QVector<qreal> NetVisu::getOutputsValue(const int &netId) {
-    QVector<qreal> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        vect =QVector<qreal>::fromStdVector(netList[unsigned(netId)]->get_output());
+    if(_type==NeuronType::hidden){
+        return qreal(netList[netId]->get_hidden(getX(netId,neuronTypeId),getY(netId,neuronTypeId)));
     }
-    return vect;
+    if(_type==NeuronType::bias){
+        return qreal(netList[netId]->get_biasValue());
+    }
+    return 0;
 }
 
-QVector<int> NetVisu::getHiddenID(const int &netId) {
+int NetVisu::getNeuronID(const int &netId, const int &neuronTypeId, const int type) {
     //qDebug()<<"get vect "<<net->get_hiddenNeuronY_ptr(1).size();
-    QVector<int> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        std::vector<Neuron*> hiddenNeuronList = *netList[unsigned(netId)]->get_ptr_allNeurons();
-        for(unsigned  int j=0;j<hiddenNeuronList.size();j++){
-            if(hiddenNeuronList[j]->get_ID().TYPE == NeuronType::hidden)
-            {
-                vect.push_back(hiddenNeuronList[j]->get_ID().ID);
-            }
-            //vect.push_back(int(net->get_hiddenNeuronY_ptr(0)[j]->get_ID().ID));
-        }
+    NeuronType _type =NeuronType(type);
+    if(_type==NeuronType::output){
+        return int(netList[unsigned(netId)]->get_ptr_outputNeuron(unsigned(neuronTypeId))->get_ID().ID);
     }
-    return vect;
+    if(_type==NeuronType::hidden){
+        return int(netList[unsigned(netId)]->get_ptr_hiddenNeuron(getX(netId,neuronTypeId),getY(netId,neuronTypeId))->get_ID().ID);
+    }
+    return 0;
 }
-QVector<int> NetVisu::getOutputID(const int &netId) {
-    QVector<int> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int j=0;j<netList[unsigned(netId)]->get_outputNeurons();j++){
-            vect.push_back(netList[unsigned(netId)]->get_ptr_outputNeuron(j)->get_ID().ID);
-        }
-    }
-    return vect;
+int NetVisu::getConns(const int &netId) {
+    qDebug()<<netList[unsigned(netId)]->get_connections();
+    return netList[unsigned(netId)]->get_connections();
 }
 
-QVector<int> NetVisu::getConSourceID(const int &netId) {
-    QVector<int> vect;
+int NetVisu::getConSourceID(const int &netId, const int &connId,  const int &connType) {
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;
-            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
-            i++){
-            vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].source_ID.ID);
+        if(connType==0){
+            return int(netList[unsigned(netId)]->get_connectionList()[unsigned(connId)].source_ID.ID);
         }
-        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
-            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].source_ID.ID);
+        if(connType==1){
+            return int(netList[unsigned(netId)]->get_costumConnectionList()[unsigned(connId)].source_ID.ID);
         }
     }
-    //qDebug()<<"Source \t"<<vect;
-    return vect;
+    return 0;
 }
 
-QVector<int> NetVisu::getConDestinationID(const int &netId) {
+int NetVisu::getConDestinationID(const int &netId, const int &connId,  const int &connType) {
     QVector<int> vect;
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;
-            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
-            i++){
-            vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].destination_ID.ID);
+        if(connType==0){
+            return int(netList[unsigned(netId)]->get_connectionList()[unsigned(connId)].destination_ID.ID);
         }
-
-        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
-            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].destination_ID.ID);
+        if(connType==1){
+            return int(netList[unsigned(netId)]->get_costumConnectionList()[unsigned(connId)].destination_ID.ID);
         }
     }
-    //qDebug()<<"\t"<<vect;
-    return vect;
+    return 0;
+
 }
 
-QVector<int> NetVisu::getConSourceType(const int &netId) {
-    QVector<int> vect;
+int NetVisu::getConSourceType(const int &netId, const int &connId,  const int &connType) {
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;
-            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
-            i++){
-            vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].source_ID.TYPE);
+        if(connType==0){
+            return int(netList[unsigned(netId)]->get_connectionList()[unsigned(connId)].source_ID.TYPE);
         }
-        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
-            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].source_ID.TYPE);
+        if(connType==1){
+            return int(netList[unsigned(netId)]->get_costumConnectionList()[unsigned(connId)].source_ID.TYPE);
         }
     }
-    return vect;
+    return 0;
 }
 
-QVector<int> NetVisu::getConDestinationType(const int &netId) {
-    QVector<int> vect;
+int NetVisu::getConDestinationType(const int &netId, const int &connId,  const int &connType) {
     if(unsigned(netId)<netList.size()&&access){
-        for(unsigned  int i=0;
-            i<netList[unsigned(netId)]->get_connections()-netList[unsigned(netId)]->get_costumConnections();
-            i++){
-            vect.push_back(netList[unsigned(netId)]->get_connectionList()[i].destination_ID.TYPE);
+        if(connType==0){
+            return int(netList[unsigned(netId)]->get_connectionList()[unsigned(connId)].destination_ID.TYPE);
         }
-        for(unsigned int i=0;i<netList[unsigned(netId)]->get_costumConnections();i++){
-            vect.push_back(netList[unsigned(netId)]->get_costumConnectionList()[i].destination_ID.TYPE);
+        if(connType==1){
+            return int(netList[unsigned(netId)]->get_costumConnectionList()[unsigned(connId)].destination_ID.TYPE);
         }
     }
-    return vect;
+    return 0;
 }
-QVector<qreal> NetVisu::getConWeight(const int &netId) {
-    QVector<qreal> vect;
-    if(unsigned(netId)<netList.size()&&access){
-        vect= QVector<qreal>::fromStdVector(netList[unsigned(netId)]->get_genom());
-    }
-    return vect;
+qreal NetVisu::getConWeight(const int &netId, const int &connId) {
+        return netList[netId]->get_genom()[unsigned(connId)];
 }
 QString NetVisu::getDBtPath(){
-    return db.getDbPath();
+    return db.getDatabaseName();
 }
 void NetVisu::setDBtPath(QString path){
-    db.setDbPath(path);
+    db.setDatabaseName(path);
 }
 QVector<qreal> NetVisu::getRelX(const int &netId){
     return db.loadRelXPos(netList[unsigned(netId)]);
+    //return db.loadRelXPos(netList[unsigned(netId)])[neuronAbsId];
 }
 
 QVector<qreal> NetVisu::getRelY(const int &netId){
     return db.loadRelYPos(netList[unsigned(netId)]);
+    //return db.loadRelYPos(netList[unsigned(netId)])[neuronAbsId];
 }
 
 bool NetVisu::getBias(const int &netId) {
@@ -291,7 +258,7 @@ qreal NetVisu::getBiasValue(const int &netId) {
 }
 
 int NetVisu::getNetCount(){
-    return netList.size();
+    return int(netList.size());
 }
 void NetVisu::stopUpdateSlot(){
     qDebug()<<"stop Update";
@@ -299,7 +266,6 @@ void NetVisu::stopUpdateSlot(){
     emit stopUpdateSignal();
 }
 void NetVisu::startUpdateSlot(){
-    qDebug()<<"start Update";
     access=true;
     emit startUpdateSignal();
 }
@@ -339,7 +305,11 @@ void NetVisu::saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId){
     if(netId<netList.size()){
         db.saveRelPos(relX,relY,netList[netId]);
     }
-
 }
 
-
+unsigned NetVisu::getX(int netId ,int id){
+    return unsigned(id-int(getY(netId,id)))/netList[unsigned(netId)]->get_hiddenNeuronsY();
+}
+unsigned NetVisu::getY(int netId ,int id){
+    return unsigned(id%int(netList[unsigned(netId)]->get_hiddenNeuronsY()));
+}
