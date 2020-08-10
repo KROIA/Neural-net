@@ -28,7 +28,7 @@ NetData {
 
     property variant yRel: []
     property variant xRel: []
-    property variant hiddenConXInput: []
+   /* property variant hiddenConXInput: []
     property variant hiddenConYInput: []
 
     property variant hiddenConXOutput: []
@@ -41,7 +41,7 @@ NetData {
     property variant inputConYOutput: []
 
     property variant biasConXOutput: []
-    property variant biasConYOutput: []
+    property variant biasConYOutput: []*/
     property variant hiddenTransparent:  []
     property variant biasTransparent:  []
     property variant inputTransparent:  []
@@ -79,7 +79,7 @@ NetData {
                 updateValue()
             }
         }
-    Connections {
+   Connections {
                    target: netListVisu
                    function onStopUpdateSignal(){ timerNet.running=false}
                    function onStartUpdateSignal(){timerNet.running=true
@@ -188,26 +188,38 @@ NetData {
                     anchors.fill: parent
                 }
                 Repeater{
-                    model: {
-                        return totalConns
-                    }
+                    model: totalConns
                     NeuronConnection{
-                        id:connection
-                        conId: index
-                        transparent: 100//conTransparent[index]
-                        d:totalNet.d
-                        netId:netItem.netId
                         Connections{
                             target: netItem
                             function onUpdateValue(){
                                 connection.updateValue()
                             }
                         }
+                        Connections {
+                                       target: netListVisu
+                                        function onUpdateDockingPoint(){
+                                            start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
+                                            end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
+                                        }
+                        }
+                        id:connection
+                        conId: index
+                        transparent: 100//conTransparent[index]
+                        d:totalNet.d
+                        netId:netItem.netId
+
+
+                        Component.onCompleted: {
+                                                start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
+                                                end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
+                                           }
                     }
                 }
+
                 Repeater{
                     id:biasLayer
-                    model: hiddenNeuronX+1
+                    model: netItem.hiddenNeuronX+1
                     visible: bias
                     Neuron{
                         x: xRel*totalNet.width-(d/2)
@@ -226,7 +238,7 @@ NetData {
                         lastNeuron: (index==(biasLayer.model-1))
                         onClickedNeuron: {
                             clickedNeuronID= dataNeuron.typeId
-                            clickedNeuronType= data.type
+                            clickedNeuronType= dataNeuron.type
                         }
                         transparent: 100// biasTransparent[index]
                         Connections{
@@ -240,7 +252,7 @@ NetData {
 
                 Repeater{
                     id:inputLayer
-                    model:inputNeuron
+                    model:netItem.inputNeuron
                     Neuron{
                         x: xRel*totalNet.width-(d/2)
                         y: yRel*totalNet.height-(d/2)
@@ -257,7 +269,7 @@ NetData {
                         dataNeuron.type:def.inputType
                         dataNeuron.netId:netItem.netId
 
-                        lastNeuron: (index==(inputLayer.model-1))
+                        //lastNeuron: (index==(inputLayer.model-1))
                         onClickedNeuron: {
                             clickedNeuronID= dataNeuron.typeId
                             clickedNeuronType= dataNeuron.type
@@ -274,7 +286,7 @@ NetData {
 
                 Repeater{
                     id:hiddenXLayer
-                    model:hiddenNeuronX
+                    model:netItem.hiddenNeuronX
                     Repeater{
                         id:hiddenYLayer
                         model:netItem.hiddenNeuronY
@@ -295,7 +307,7 @@ NetData {
                             dataNeuron.type:def.hiddenType
                             dataNeuron.netId:netItem.netId
 
-                            lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
+                            //lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
                             onClickedNeuron: {
                                 clickedNeuronID= dataNeuron.typeId
                                 clickedNeuronType= dataNeuron.type
@@ -312,7 +324,7 @@ NetData {
                 }
                 Repeater{
                     id:outputLayer
-                    model:outputNeuron
+                    model:netItem.outputNeuron
                     Neuron{
                         x: xRel*totalNet.width-(d/2)
                         y: yRel*totalNet.height-(d/2)
@@ -329,7 +341,7 @@ NetData {
                         dataNeuron.type:def.outputType
                         dataNeuron.netId:netItem.netId
 
-                        lastNeuron: (index==(outputLayer.model-1))
+                        //lastNeuron: (index==(outputLayer.model-1))
                         onClickedNeuron: {
                             clickedNeuronID= dataNeuron.typeId
                             clickedNeuronType= dataNeuron.type
@@ -430,9 +442,9 @@ NetData {
             biasTransparent[id]=highlightValue
         }
     }
-
+/*
     function setNetHighlight(id,type){
-        /*var highlightValue=100
+        var highlightValue=100
         setTransparancy(20)
         if(type===def.outputType) id+=totalHidden
         setHighlight(id,type,highlightValue)
@@ -459,6 +471,6 @@ NetData {
             conTransparent[arrConId[i]]=highlightValue
             setHighlight(sId,sType,highlightValue)
         }
-        updateTransparancy()*/
-    }
+        updateTransparancy()
+    }*/
 }

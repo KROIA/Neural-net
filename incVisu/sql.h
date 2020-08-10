@@ -8,10 +8,10 @@
 #define Sql_Type_BOOL "BOOL"
 #define Sql_Type_REAL "REAL"
 #define Sql_Type_DATE "DATE"
-#define Sql_Debug_Time
-#define Sql_Debug_MinTime 0
-#define Sql_Debug_Commit_Time
-#define Sql_Debug_DB_Status
+//#define Sql_Debug_Time
+//#define Sql_Debug_MinTime 0
+//#define Sql_Debug_Commit_Time
+//#define Sql_Debug_DB_Status
 
 
 #include <QSqlDatabase>

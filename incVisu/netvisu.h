@@ -49,6 +49,7 @@ signals:
     void startUpdateSignal();
     void setUpdateTimeSignal(unsigned int time);
     void updateVisu();
+    void updateDockingPoint();
 public slots:
     void updateNetVisu();
     void setUpdateTime(unsigned int upDateTime);
@@ -89,6 +90,12 @@ public slots:
     void onNetConfigurationChanged();
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
+    void setDockingPointInput(const int &netId, const int &absId,const QPoint &point, bool update);
+    void setDockingPointOutput(const int &netId, const int &absId,const QPoint &point, bool update);
+
+    QPoint getDockingPointInput(const int &netId, const int &absId);
+    QPoint getDockingPointOutput(const int &netId, const int &absId);
+
 private:
     bool access=false;
     QQmlApplicationEngine *engine;
@@ -100,6 +107,9 @@ private:
     vector<bool> disableNeuronSignalUpdateEvent;
     vector<bool> disableNetGenomUpdateEvent;
     vector<bool> disableNetBiasValueUpdateEvent;
+
+    vector<vector<QPoint>   > dockingPointInput;
+    vector<vector<QPoint>   > dockingPointOutput;
 
     vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
     vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID

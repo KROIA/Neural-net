@@ -3,15 +3,12 @@ import "../../js/VisuFunction.js" as VisuFunction
 Rectangle {
     id:neuron
     property int d: 20
-
     property int parentWidth: totalNet.width
     property int parentHeight: totalNet.height
     property int visuModus: 0
     property bool lastNeuron: false
-
     property real xRel: 0
     property real yRel: 0
-
     NeuronData{
         id:dataNeuron
     }
@@ -27,30 +24,31 @@ Rectangle {
 
     onXChanged:{
         //if(type===def.hiddenType) console.debug("hiddenx changed: "+x)
-        dockingXPoint()
-        if(Drag.active||lastNeuron){ updateXPos()
-        }}
-    onYChanged:{dockingYPoint()
-        if(Drag.active||lastNeuron) {updateYPos()
-        }}
+        dockingPoint()
+       /*if(Drag.active||lastNeuron){ //updatePos()
+        }*/}
+    onYChanged:{
+        dockingPoint()
+        /*if(Drag.active||lastNeuron) {updatePos()
+        }*/}
     onDChanged:{
         dockingPoint()
-        if(lastNeuron) {
-            updateXPos()
-            updateYPos()
-        }
+        /*if(lastNeuron) {
+            updatePos()
+        }*/
         xOffset=0.2*d
         }
 
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
 
-    function updatePos(){
-
-        updateXPos()
-        updateYPos()
+    /*function updatePos(){
+        input=netListVisu.getDockingPointInput(dataNeuron.netId,dataNeuron.absId)
+        output=netListVisu.getDockingPointOutput(dataNeuron.netId,dataNeuron.absId)
+        //updateXPos()
+        //updateYPos()
     }
-
+/*
     function updateXPos(){
 
         if(dataNeuron.type===def.inputType){
@@ -68,7 +66,7 @@ Rectangle {
         }
     }
     function updateYPos(){
-            //console.debug("update Y")
+            console.debug("update Y")
             if(dataNeuron.type===def.inputType){
                 inputConYOutput=VisuFunction.updateArray(inputConYOutput)
             }
@@ -82,11 +80,12 @@ Rectangle {
             else if(dataNeuron.type===def.biasType){
                 biasConYOutput=VisuFunction.updateArray(biasConYOutput)
             }
-        }
+        }*/
     function dockingPoint(){
-        dockingYPoint()
-        dockingXPoint()
+        netListVisu.setDockingPointInput(dataNeuron.netId,dataNeuron.absId,Qt.point(x+(0.2*d),(d/2)+y),0)//Drag.active||
+        netListVisu.setDockingPointOutput(dataNeuron.netId,dataNeuron.absId,Qt.point(d+x-(0.2*d),(d/2)+y),Drag.active||lastNeuron)
     }
+    /*
     function dockingXPoint(){
         var xInput
         var xOutput
@@ -112,7 +111,7 @@ Rectangle {
                     hiddenConXOutput[dataNeuron.typeId]=xOutput
                     //console.debug(hiddenConXOutput)
 
-                    if(lastNeuron){
+                   if(lastNeuron){
                         var tempHiddenConXOutput=[]
                         var tempHiddenConXInput=[]
                         tempHiddenConXInput=hiddenConXInput
@@ -134,11 +133,12 @@ Rectangle {
         yOutput=(d/2)+y
         if(dataNeuron.type===def.inputType){
                     inputConYOutput[dataNeuron.typeId]=yOutput
+                    //console.debug(,inputConYOutput)
                     if(lastNeuron){
                         var tempInputConYOutput=[]
                         tempInputConYOutput=inputConYOutput
                         inputConYOutput=tempInputConYOutput
-                    }
+                   }
                 }
                 else if(dataNeuron.type===def.biasType){
 
@@ -173,6 +173,8 @@ Rectangle {
                     }
                 }
     }
+
+*/
     property int transparent: 100
     property string neuronColor: {
                 if(visuModus===def.functionVisu) return VisuFunction.color(transparent,def.getTypeColor(dataNeuron.type))

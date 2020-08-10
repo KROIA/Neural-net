@@ -16,6 +16,32 @@ Shape {
     property int destinationType: netListVisu.getConDestinationType(con.netId,con.conId,con.connType)
     property int sourceId: netListVisu.getConSourceID(con.netId,con.conId,con.connType)
     property int sourceType:netListVisu.getConSourceType(con.netId,con.conId,con.connType)
+    property variant start: Qt.point(0,0)
+    property variant end: Qt.point(100,400)
+    property alias destinationData: destination
+    property alias sourceData: source
+    NeuronData{
+        id:destination
+        netId:con.netId
+        typeId:{
+            if(destinationType==def.outputType){
+                return destinationId-(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))
+            }
+            return destinationId
+            }
+        type:destinationType
+    }
+    NeuronData{
+        id:source
+        netId:con.netId
+        typeId:{
+            if(sourceType==def.biasType){
+                   return Math.floor(destinationId/netListVisu.getHiddenX(netId))
+            }
+            return sourceId
+            }
+        type:sourceType
+    }
     property real d: 0.5//0.00001
     property int transparent: 100
     visible:netItem.visuNeuronModus===def.functionVisu||(Math.abs(weight)*d*0.2)>minWidth
@@ -27,13 +53,12 @@ Shape {
                         else if(weight>0) return VisuFunction.color(transparent,"008000")
                         else return "white"
 
-           strokeWidth: if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.05
+           strokeWidth:if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.05
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
 
-           startX:{
-
-                    var xtemp=0
+           startX:start.x
+                    /*var xtemp=0
                    if(def.inputType===sourceType){
                        if(0<=inputConXOutput[sourceId]){
                        xtemp= inputConXOutput[sourceId]}
@@ -41,7 +66,7 @@ Shape {
                    else if(def.hiddenType===sourceType){
                        if(0<=hiddenConXOutput[sourceId]){
                        xtemp= hiddenConXOutput[sourceId]}
-                   }
+
                    else if(def.biasType===sourceType){
                        if(Math.floor(destinationId/hiddenNeuronY)<biasConXOutput.length){
                             if(0<=biasConXOutput[Math.floor(destinationId/hiddenNeuronY)]){
@@ -54,10 +79,10 @@ Shape {
                    }
 
                    return xtemp
-               }
+               }*/
 
-           startY:{
-               var ytemp=0
+           startY:start.y
+               /*{var ytemp=0
                   if(def.inputType===sourceType){
                       if(0<=inputConYOutput[sourceId]){
                       ytemp= inputConYOutput[sourceId]}
@@ -76,11 +101,11 @@ Shape {
                       }
                   }
                   return ytemp
-                }
+                }*/
            PathLine {
                id:path
-               x: {
-                   var xtemp=0
+               x: end.x
+                   /*var xtemp=0
                    if(def.outputType===destinationType){
                        if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
                             xtemp= outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]
@@ -94,9 +119,9 @@ Shape {
                    }
 
                    return xtemp
-               }
-               y: {
-                  if(def.outputType===destinationType){
+               }*/
+               y: end.y
+                  /*if(def.outputType===destinationType){
                       if(0<=outputConXInput[destinationId-hiddenNeuronX*hiddenNeuronY]){
                             return outputConYInput[destinationId-hiddenNeuronX*hiddenNeuronY]
                       }
@@ -107,7 +132,7 @@ Shape {
                       }
                   }
                   return 0
-              }
+              }*/
            }
          }
     function updateValue(){
