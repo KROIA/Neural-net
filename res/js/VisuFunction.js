@@ -14,19 +14,26 @@ function updateArray(arr){
 }
 
 function getAbsIdFromTypeId(id,type,netId){
-    if(type===def.input){
-        return id
+    var res
+    if(type===def.inputType){
+        res= id
     }
-    if(type===def.hiddenType){
-        return id+netListVisu.getInputs(netId)
+    else if(type===def.hiddenType){
+        res= id+netListVisu.getInputs(netId)
     }
-    if(type===def.outputType){
-        return id+netListVisu.getHiddenX(netId)*netListVisu.getHiddenX(netId)+netListVisu.getInputs(netId)
+    else if(type===def.outputType){
+        //console.debug(id,netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId),netListVisu.getInputs(netId))
+        res= id+(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))+netListVisu.getInputs(netId)
     }
-    if(type===def.bias){
-        return id+netListVisu.getHiddenX(netId)*netListVisu.getHiddenX(netId)+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
+
+    else if(type===def.biasType){
+        res= id+(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
     }
-    return id
+    else{
+      res= id
+    }
+    return res
+
 }
 
 function getAbsIdFromNeuronId(id,type){
@@ -37,7 +44,7 @@ function getAbsIdFromNeuronId(id,type){
         return id+netListVisu.getInputs(netId)
     }
     if(type===def.bias){
-        return id+netListVisu.getHiddenX(netId)*netListVisu.getHiddenX(netId)+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
+        return id+(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
     }
     return id
 }

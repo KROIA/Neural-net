@@ -25,28 +25,9 @@ NetData {
     property int clickedneuronID: -1
     property int clickedNeurontype: 0
     property bool moveable: false
-
+    property int layoutId: netListVisu.getNewLayoutId()
     property variant yRel: []
     property variant xRel: []
-   /* property variant hiddenConXInput: []
-    property variant hiddenConYInput: []
-
-    property variant hiddenConXOutput: []
-    property variant hiddenConYOutput: []
-
-    property variant outputConXInput: []
-    property variant outputConYInput: []
-
-    property variant inputConXOutput: []
-    property variant inputConYOutput: []
-
-    property variant biasConXOutput: []
-    property variant biasConYOutput: []*/
-    property variant hiddenTransparent:  []
-    property variant biasTransparent:  []
-    property variant inputTransparent:  []
-    property variant outputTransparent:  []
-    property variant conTransparent:  []
 
     property bool neuronClickEnable: true
     property real yOffSet: 0.1
@@ -58,14 +39,10 @@ NetData {
                         else return 0
     property bool showId: true
     signal clickedNet(var id)
+    signal clickedNeuronID(var absId)
+    signal showConnectedNeuron(var absId)
     signal updateValue();
-    onUpdateStructurSignal:{
-        netItem.hiddenTransparent=new Array(totalHidden).fill(100)
-        netItem.biasTransparent= new Array(hiddenNeuronX+1).fill(100)
-        netItem.inputTransparent= new Array(inputNeuron).fill(100)
-        netItem.outputTransparent= new Array(outputNeuron).fill(100)
-        netItem.conTransparent= new Array(totalConns).fill(100)
-    }
+    signal showAll();
     Component.onCompleted: {
         updateStructur()
     }
@@ -94,7 +71,8 @@ NetData {
         id:mous
         anchors.fill: parent
         enabled: enableMousArea
-        onClicked: {clickedNet(netId)}
+        onClicked: {clickedNet(netId)
+            }
         ScrollView{
                 id:scroll
                 ScrollBar.vertical.policy:Qt.ScrollBarAlwaysOn
@@ -103,49 +81,34 @@ NetData {
                 contentHeight: scroll.height*zoom
                 contentWidth: scroll.width*zoom
                 ScrollBar.vertical.position:0.8
-                Item{
+                Rectangle{
                     id:totalNet
                     width: scroll.contentWidth
                     height:scroll.contentHeight
                     x:0
                     y:0
+
                     MouseArea{
                             anchors.fill: parent
-                            onClicked: setTransparancy(100)
                             hoverEnabled:true
                             property bool zoomActiv: true
+                            onClicked: showAll()
                             onWheel: {
                                 if(zoomEnable){
-                                //console.debug(zoom)
-                                        if(zoomActiv) {
-                                        //console.debug("scroll")
-
+                                      if(zoomActiv) {
                                          if (wheel.angleDelta.y < 0)
                                          {
-                                             //console.debug("DOWN")
                                              zoom =0.95*zoom
-
                                          }
                                          else
                                          {
-                                             //console.debug("UP")
                                              zoom=1.05*zoom
-
                                          }
-
-                                         //console.debug(mouseY,scroll.height)
-                                          //  console.debug(mouseY/scroll.height)
                                         }
-                                         //scroll.ScrollBar.vertical.position=0.5//mouseY/scroll.height
-                                         //scroll.ScrollBar.horizontal.position=0.5//mouseX/scroll.width
-                                         //totalNet.x:mouseX
-                                         //console.debug(zoom)
                                 }
                             }
 
                         }
-
-
                 property int maxYNeuron: {
                     var b
                     if(bias===true)b=1
@@ -190,97 +153,78 @@ NetData {
                 Repeater{
                     model: totalConns
                     NeuronConnection{
-                        Connections{
-                            target: netItem
-                            function onUpdateValue(){
-                                connection.updateValue()
-                            }
-                        }
-                        Connections {
-                                       target: netListVisu
-                                        function onUpdateDockingPoint(){
-                                            start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
-                                            end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
-                                        }
-                        }
+
                         id:connection
                         conId: index
                         transparent: 100//conTransparent[index]
                         d:totalNet.d
                         netId:netItem.netId
-
-
+                        anchors.fill: parent
                         Component.onCompleted: {
                                                 start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
                                                 end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
                                            }
-                    }
-                }
+                        Connections{
+                            target: netItem
+                            function onUpdateValue(){
+                                connection.updateValue()}
 
+                            function onClickedNeuronID(absID){
+                                if(absID===connection.sourceData.absId){
+                                    transparent=100
+                                    netItem.showConnectedNeuron(connection.destinationData.absId)
+                                }
+                                else if(absID===connection.destinationData.absId){
+                                    transparent=100
+                                    netItem.showConnectedNeuron(connection.sourceData.absId)
+                                }
+                                else{
+                                    transparent=50
+                                }
+                            }
+                            function onShowAll(){
+                                transparent=100
+                            }
+                        }
+                        Connections {
+                                       target: netListVisu
+                                        function onUpdateDockingPoint(){
+                                            start=netListVisu.getDockingPointOutput(netItem.layoutId,connection.sourceData.absId)
+                                            end=netListVisu.getDockingPointInput(netItem.layoutId,connection.destinationData.absId)
+                                        }
+                            }
+                        }
+                    }
                 Repeater{
                     id:biasLayer
                     model: netItem.hiddenNeuronX+1
                     visible: bias
-                    Neuron{
-                        x: xRel*totalNet.width-(d/2)
-                        y: yRel*totalNet.height-(d/2)
+                    NetNeuron{
                         xRel:{
                             var i=index
-                            calculateXRelPos(i,dataNeuron.type)}
+                            return calculateXRelPos(i,dataNeuron.type)}
                         yRel: yOffSet+yBiasPos
-                        d:totalNet.d
-                        visuModus:visuNeuronModus
-
-                        dataNeuron.typeId: index
                         dataNeuron.type:def.biasType
-                        dataNeuron.netId:netItem.netId
-
                         lastNeuron: (index==(biasLayer.model-1))
-                        onClickedNeuron: {
-                            clickedNeuronID= dataNeuron.typeId
-                            clickedNeuronType= dataNeuron.type
-                        }
-                        transparent: 100// biasTransparent[index]
-                        Connections{
-                            target: netItem
-                            function onUpdateValue(){
-                                dataNeuron.updateValue()
-                            }
-                        }
+                        dataNeuron.typeId: index
                     }
                 }
 
                 Repeater{
                     id:inputLayer
                     model:netItem.inputNeuron
-                    Neuron{
-                        x: xRel*totalNet.width-(d/2)
-                        y: yRel*totalNet.height-(d/2)
+
+                    NetNeuron{
+
                         xRel:{
                             var i=0
-                            calculateXRelPos(i,dataNeuron.type)}
+                            return calculateXRelPos(i,dataNeuron.type)}
                         yRel:{
                             var i=inputNeuron
                             return calculateYRelPos(index,i)
                         }
-                        d:totalNet.d
-                        visuModus:visuNeuronModus
-                        dataNeuron.typeId: index
                         dataNeuron.type:def.inputType
-                        dataNeuron.netId:netItem.netId
-
-                        //lastNeuron: (index==(inputLayer.model-1))
-                        onClickedNeuron: {
-                            clickedNeuronID= dataNeuron.typeId
-                            clickedNeuronType= dataNeuron.type
-                        }
-                        transparent: 100//inputTransparent[index]
-                        Connections{
-                            target: netItem
-                            function onUpdateValue(){
-                                dataNeuron.updateValue()
-                            }
-                        }
+                        dataNeuron.typeId: index
                     }
                 }
 
@@ -291,73 +235,36 @@ NetData {
                         id:hiddenYLayer
                         model:netItem.hiddenNeuronY
                         property int indexX: index
-                        Neuron{
-                            x: xRel*totalNet.width-(d/2)
-                            y: yRel*totalNet.height-(d/2)
+                        NetNeuron{
                             xRel:{
                                 var i=indexX
-                                calculateXRelPos(i,dataNeuron.type)}
+                                return calculateXRelPos(i,dataNeuron.type)}
                             yRel:{
                                 var i=hiddenNeuronY
                                 return calculateYRelPos(index,i)
                             }
-                            visuModus:visuNeuronModus
-                            d:totalNet.d
                             dataNeuron.typeId: index+(indexX*hiddenNeuronY)
                             dataNeuron.type:def.hiddenType
-                            dataNeuron.netId:netItem.netId
-
-                            //lastNeuron: (indexX==(hiddenXLayer.model-1)&&index===(hiddenYLayer.model-1))
-                            onClickedNeuron: {
-                                clickedNeuronID= dataNeuron.typeId
-                                clickedNeuronType= dataNeuron.type
-                            }
-                            transparent: 100// hiddenTransparent[dataNeuron.typeId]
-                            Connections{
-                                target: netItem
-                                function onUpdateValue(){
-                                    dataNeuron.updateValue()
-                                }
-                            }
                         }
                     }
                 }
                 Repeater{
                     id:outputLayer
                     model:netItem.outputNeuron
-                    Neuron{
-                        x: xRel*totalNet.width-(d/2)
-                        y: yRel*totalNet.height-(d/2)
+                    NetNeuron{
                         xRel:{
                             var i=0
-                            calculateXRelPos(i,dataNeuron.type)}
+                            return calculateXRelPos(i,dataNeuron.type)}
                         yRel:{
                             var i=outputNeuron
                             return calculateYRelPos(index,i)
                         }
-                        visuModus:visuNeuronModus
-                        d:totalNet.d
-                        dataNeuron.typeId: index
                         dataNeuron.type:def.outputType
-                        dataNeuron.netId:netItem.netId
-
-                        //lastNeuron: (index==(outputLayer.model-1))
-                        onClickedNeuron: {
-                            clickedNeuronID= dataNeuron.typeId
-                            clickedNeuronType= dataNeuron.type
-                        }
-                        transparent: 100// outputTransparent[index]
-                        Connections{
-                            target: netItem
-                            function onUpdateValue(){
-                                dataNeuron.updateValue()
-                            }
-                        }
-
+                        dataNeuron.typeId: index
                     }
                 }
 
-
+                anchors.fill:parent
                 Text {
                     anchors.top:parent.top
                     anchors.right: parent.right
@@ -370,6 +277,7 @@ NetData {
                     horizontalAlignment: Text.AlignRight
                 }
             }
+
         }
 
     }
@@ -412,6 +320,8 @@ NetData {
         }
         return 0
     }
+
+    /*
     function setTransparancy(trans){
         hiddenTransparent= new Array(totalHidden).fill(trans)
         biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
@@ -442,7 +352,6 @@ NetData {
             biasTransparent[id]=highlightValue
         }
     }
-/*
     function setNetHighlight(id,type){
         var highlightValue=100
         setTransparancy(20)

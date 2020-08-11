@@ -115,6 +115,7 @@ int NetVisu::getInputs(const int &netId) {
         return int(netList[unsigned(netId)]->get_inputNeurons());
     }
     else{
+
         return 0;
     }
 }
@@ -209,7 +210,7 @@ int NetVisu::getConDestinationType(const int &netId, const int &connId,  const i
     return 0;
 }
 qreal NetVisu::getConWeight(const int &netId, const int &connId) {
-        return netList[netId]->get_genom()[unsigned(connId)];
+        return netList[unsigned(netId)]->get_genom()[unsigned(connId)];
 }
 QString NetVisu::getDBtPath(){
     return db.getDatabaseName();
@@ -290,14 +291,21 @@ void NetVisu::onNetConfigurationChanged()
 }
 
 void NetVisu::saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId){
-    if(netId<netList.size()){
+    if(netId<int(netList.size())){
         db.saveRelPos(relX,relY,netList[unsigned(netId)]);
     }
 }
 
+int NetVisu::getNewLayoutId(){
+    vector<QPoint> pointVec;
+    dockingPointInput.push_back(pointVec);
+    dockingPointOutput.push_back(pointVec);
+    return int(dockingPointOutput.size())-1;
+}
+
 void NetVisu::setDockingPointInput(const int &netId, const int &absId,const QPoint &point, bool update){
     vector<QPoint> pointVec;
-
+    //qDebug()<<absId<<" x "<<point.x()<<" y "<<point.y();
     while(int(dockingPointInput.size())<=netId){
         dockingPointInput.push_back(pointVec);
     }
@@ -305,13 +313,13 @@ void NetVisu::setDockingPointInput(const int &netId, const int &absId,const QPoi
         dockingPointInput[unsigned(netId)][unsigned(absId)]=point;
     }
     else{
-        while(int(dockingPointInput[unsigned(netId)].size())<absId){
+        while(int(dockingPointInput[unsigned(netId)].size())<=absId){
             dockingPointInput[unsigned(netId)].push_back(point);
         }
     }
-    //if(update){
+    if(update){
         emit updateDockingPoint();
-    //}
+    }
 }
 void NetVisu::setDockingPointOutput(const int &netId, const int &absId,const QPoint &point, bool update){
     vector<QPoint> pointVec;
@@ -322,18 +330,17 @@ void NetVisu::setDockingPointOutput(const int &netId, const int &absId,const QPo
         dockingPointOutput[unsigned(netId)][unsigned(absId)]=point;
     }
     else{
-        while(int(dockingPointOutput[unsigned(netId)].size())<absId){
+        while(int(dockingPointOutput[unsigned(netId)].size())<=absId){
             dockingPointOutput[unsigned(netId)].push_back(point);
         }
     }
-    //if(update){
+    if(update){
         emit updateDockingPoint();
-    //}
+    }
 }
 
 QPoint NetVisu::getDockingPointInput(const int &netId, const int &absId){
-    qDebug()<<unsigned(absId)<<" "<<dockingPointInput[unsigned(netId)].size();
-    if(unsigned(netId)<dockingPointInput.size()){
+     if(unsigned(netId)<dockingPointInput.size()){
         if(unsigned(absId)<dockingPointInput[unsigned(netId)].size()){
             return dockingPointInput[unsigned(netId)][unsigned(absId)];
         }
@@ -343,6 +350,7 @@ QPoint NetVisu::getDockingPointInput(const int &netId, const int &absId){
 }
 
 QPoint NetVisu::getDockingPointOutput(const int &netId, const int &absId){
+
     if(unsigned(netId)<dockingPointOutput.size()){
         if(unsigned(absId)<dockingPointOutput[unsigned(netId)].size()){
             return dockingPointOutput[unsigned(netId)][unsigned(absId)];

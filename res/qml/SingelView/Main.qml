@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import "../Basic"
 import "../"
 
-FocusScope {
+Item {
     id:singelWorkArea
     width: 100
     height: 100
@@ -38,7 +38,7 @@ FocusScope {
         anchors.top: singelTopBar.bottom
         showWidth: singelWorkArea.width*0.2
         anchors.bottom: singelWorkArea.bottom
-        clickedNeuronID: mainNet.clickedNeuronID
-        clickedNeuronType: mainNet.clickedNeuronType
+        //clickedNeuronID: mainNet.clickedNeuronID
+        //clickedNeuronType: mainNet.clickedNeuronType
     }
 }

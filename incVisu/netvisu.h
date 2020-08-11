@@ -90,6 +90,7 @@ public slots:
     void onNetConfigurationChanged();
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
+    int getNewLayoutId();
     void setDockingPointInput(const int &netId, const int &absId,const QPoint &point, bool update);
     void setDockingPointOutput(const int &netId, const int &absId,const QPoint &point, bool update);
 

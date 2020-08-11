@@ -23,5 +23,6 @@
         <file>qml/Basic/NeuronConnection.qml</file>
         <file>js/VisuFunction.js</file>
         <file>qml/Basic/NeuronData.qml</file>
+        <file>qml/Basic/NetNeuron.qml</file>
     </qresource>
 </RCC>

@@ -50,7 +50,7 @@ Window {
         Singel.Main{
             anchors.fill:parent
             visible: singel.checked
-        }/*
+        }
         Creator.Main{
             anchors.fill:parent
             visible: creator.checked
@@ -63,6 +63,6 @@ Window {
         Integrate.Main{
             anchors.fill:parent
             visible: integrate.checked
-        }*/
+        }
     }
 }
