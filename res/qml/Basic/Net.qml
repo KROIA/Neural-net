@@ -30,8 +30,8 @@ NetData {
     property variant xRel: []
 
     property bool neuronClickEnable: true
-    property real yOffSet: 0.1
-    property real xOffSet: 0.1
+    property real yOffSet: 0.2
+    property real xOffSet: 0.2
     property real zoom: 1
 
     property bool zoomEnable: false
@@ -198,7 +198,6 @@ NetData {
                 Repeater{
                     id:biasLayer
                     model: netItem.hiddenNeuronX+1
-                    visible: bias
                     NetNeuron{
                         xRel:{
                             var i=index
@@ -207,13 +206,12 @@ NetData {
                         dataNeuron.type:def.biasType
                         lastNeuron: (index==(biasLayer.model-1))
                         dataNeuron.typeId: index
+                        visible: netItem.bias
                     }
                 }
-
                 Repeater{
                     id:inputLayer
                     model:netItem.inputNeuron
-
                     NetNeuron{
 
                         xRel:{
@@ -297,13 +295,14 @@ NetData {
     }
 
     function calculateXRelPos(pos,type){
-        if(type===def.hiddenType){
+         if(type===def.hiddenType){
             pos+=1
         }
         if(type===def.outputType){
             pos+=hiddenNeuronX
             pos+=1
         }
+
         return (((1-(xOffSet*2))/(hiddenNeuronX+1))*(pos))+xOffSet
     }
 
@@ -313,73 +312,17 @@ NetData {
             return (((1-yOffSet-(yBiasPos))/(inARow+1))*(pos+1))+yOffSet+(yBiasPos)
         }
         else if(netAlignment===Net.NetAlignment.Top){
-            return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos
+            //console.debug("y",pos,inARow,(((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos)
+            if(bias===true){
+                return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos
+            }
+            else{
+                return (((1-yOffSet)/(totalNet.maxYNeuron))*(pos+1)/2)+yOffSet
+            }
         }
         else if(netAlignment===Net.NetAlignment.Bottom){
             return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron+1))*(totalNet.maxYNeuron-pos))+yOffSet
         }
         return 0
     }
-
-    /*
-    function setTransparancy(trans){
-        hiddenTransparent= new Array(totalHidden).fill(trans)
-        biasTransparent= new Array(hiddenNeuronX+1).fill(trans)
-        inputTransparent= new Array(inputNeuron).fill(trans)
-        outputTransparent= new Array(outputNeuron).fill(trans)
-        conTransparent= new Array(totalConns).fill(trans)
-
-    }
-    function updateTransparancy(){
-        hiddenTransparent=VisuFunction.updateArray(hiddenTransparent)
-        outputTransparent=VisuFunction.updateArray(outputTransparent)
-        inputTransparent=VisuFunction.updateArray(inputTransparent)
-        biasTransparent=VisuFunction.updateArray(biasTransparent)
-        conTransparent=VisuFunction.updateArray(conTransparent)
-    }
-
-    function setHighlight(id,type,highlightValue){
-        if(type===def.hiddenType){
-            hiddenTransparent[id]=highlightValue
-        }
-        else if(type===def.outputType){
-            outputTransparent[id-totalHidden]=highlightValue
-        }
-        else if(type===def.inputType){
-            inputTransparent[id]=highlightValue
-        }
-        else if(type===def.biasType){
-            biasTransparent[id]=highlightValue
-        }
-    }
-    function setNetHighlight(id,type){
-        var highlightValue=100
-        setTransparancy(20)
-        if(type===def.outputType) id+=totalHidden
-        setHighlight(id,type,highlightValue)
-        if(type===def.outputType) id-=totalHidden
-        var arrConId=[]
-        var sType
-        var sId
-        arrConId=getConSourceID(id,type)
-        for(var i=0;i<arrConId.length;i++){
-
-            sId=conDestinationID[arrConId[i]]
-            sType=conDestinationType[arrConId[i]]
-            conTransparent[arrConId[i]]=highlightValue
-            setHighlight(sId,sType,highlightValue)
-        }
-        arrConId=getConDestination(id,type)
-        for(i=0;i<arrConId.length;i++){
-            sId=conSourceID[arrConId[i]]
-            sType=conSourceType[arrConId[i]]
-            if(sType===def.biasType){
-                if(type===def.outputType)sId=hiddenNeuronX
-                else sId=Math.floor(id/hiddenNeuronY)
-            }
-            conTransparent[arrConId[i]]=highlightValue
-            setHighlight(sId,sType,highlightValue)
-        }
-        updateTransparancy()
-    }*/
 }

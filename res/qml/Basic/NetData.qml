@@ -2,28 +2,32 @@ import QtQuick 2.0
 import "../../js/VisuFunction.js" as VisuFunction
 Item {
     property int netId: 0
+    onNetIdChanged: {
+        console.debug("new Net Id")
+        updateStructur()
+    }
+
     property int updateTime:100
 
     property bool enableUpdateTimer: true
     property bool forceTimer: false
 
-    property int hiddenNeuronX: netListVisu.getHiddenX(netId)
-    property int hiddenNeuronY: netListVisu.getHiddenY(netId)
-    property int totalHidden: hiddenNeuronY*hiddenNeuronX
-    property int inputNeuron: netListVisu.getInputs(netId)
-    property int outputNeuron: netListVisu.getOutputs(netId)
-    property int totalConns: netListVisu.getConns(netId)
+    property int hiddenNeuronX: 0
+    property int hiddenNeuronY: 0
+    property int totalHidden: 0
+    property int inputNeuron: 0
+    property int outputNeuron: 0
+    property int totalConns: 0
     property int clickedNeuronID: -1
     property int clickedNeuronType: 0
 
-    property bool bias: netListVisu.getBias(netId)
+    property bool bias: false
     signal updateStructurSignal()
     Component.onCompleted: {
         updateStructur()
     }
 
     function updateStructur(){
-        //console.debug("update Struc")
         inputNeuron=netListVisu.getInputs(netId)
         outputNeuron=netListVisu.getOutputs(netId)
         hiddenNeuronX=netListVisu.getHiddenX(netId)
@@ -31,6 +35,7 @@ Item {
         totalHidden=hiddenNeuronX*hiddenNeuronY
         bias=netListVisu.getBias(netId)
         totalConns= netListVisu.getConns(netId)
+
         updateStructurSignal()
     }
     function getTypeString(type){

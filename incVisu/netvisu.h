@@ -97,6 +97,9 @@ public slots:
     QPoint getDockingPointInput(const int &netId, const int &absId);
     QPoint getDockingPointOutput(const int &netId, const int &absId);
 
+
+    int addNewNet();
+    void addNewNeuron(const int &netId,const int &neuronType);
 private:
     bool access=false;
     QQmlApplicationEngine *engine;

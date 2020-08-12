@@ -27,6 +27,8 @@ Rectangle {
     onXChanged:dockingPoint()
     onYChanged:dockingPoint()
     onDChanged:dockingPoint()
+    onXRelChanged: dockingPoint()
+    onYRelChanged:dockingPoint()
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
     function dockingPoint(){
@@ -34,7 +36,7 @@ Rectangle {
         input=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
         output=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
         netListVisu.setDockingPointInput(layoutId,dataNeuron.absId,input,0)//Drag.active||
-        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,Drag.active||lastNeuron)
+        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,1)//Drag.active||lastNeuron)
     }
 
     property int transparent: 100
@@ -73,6 +75,7 @@ Rectangle {
     Component.onCompleted: {
         netItem.xRel[dataNeuron.absId]=xRel
         netItem.yRel[dataNeuron.absId]=yRel
+        dockingPoint()
     }
     MouseArea{
         id:mouseArea

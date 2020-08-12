@@ -54,7 +54,7 @@ Window {
         Creator.Main{
             anchors.fill:parent
             visible: creator.checked
-        }
+        }/*
 
         Multi.Main{
             anchors.fill:parent
@@ -63,6 +63,6 @@ Window {
         Integrate.Main{
             anchors.fill:parent
             visible: integrate.checked
-        }
+        }*/
     }
 }
