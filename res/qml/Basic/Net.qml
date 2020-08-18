@@ -26,12 +26,32 @@ NetData {
     property int clickedNeurontype: 0
     property bool moveable: false
     property int layoutId: netListVisu.getNewLayoutId()
+
+    onLayoutIdChanged: {
+        updateStructur()
+        updateDockingPoint()
+    }
+
     property variant yRel: []
     property variant xRel: []
-
+    property int maxYNeuron: {
+        var b
+        if(bias===true)b=1
+        else b=0
+        if(hiddenNeuronY>=outputNeuron&&hiddenNeuronY>=inputNeuron){
+            return hiddenNeuronY+b
+        }
+        else if(hiddenNeuronY<=outputNeuron&&outputNeuron>=inputNeuron){
+            return outputNeuron+b
+        }
+        else if(hiddenNeuronY<=inputNeuron&&outputNeuron<=inputNeuron){
+            return inputNeuron+b
+        }
+        return 0
+    }
     property bool neuronClickEnable: true
-    property real yOffSet: 0.2
-    property real xOffSet: 0.2
+    property real yOffSet: (1/(maxYNeuron+1))/2
+    property real xOffSet: (1/(hiddenNeuronX+2))/2
     property real zoom: 1
 
     property bool zoomEnable: false
@@ -43,8 +63,11 @@ NetData {
     signal showConnectedNeuron(var absId)
     signal updateValue();
     signal showAll();
+    signal updateDockingPoint();
     Component.onCompleted: {
         updateStructur()
+        updateDockingPoint()
+
     }
 
     Timer {
@@ -58,13 +81,17 @@ NetData {
         }
    Connections {
                    target: netListVisu
+
                    function onStopUpdateSignal(){ timerNet.running=false}
                    function onStartUpdateSignal(){timerNet.running=true
-                       netItem.updateStructur()}
+                      } //netItem.updateStructur()
                     function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
                     function onUpdateVisu(){
                         netListVisu.displayUpdatNetTimer(netId)
                         updateValue()
+                    }
+                    function onUpdateNetStruc(){
+                        netItem.updateStructur()
                     }
     }
     MouseArea{
@@ -109,21 +136,7 @@ NetData {
                             }
 
                         }
-                property int maxYNeuron: {
-                    var b
-                    if(bias===true)b=1
-                    else b=0
-                    if(hiddenNeuronY>=outputNeuron&&hiddenNeuronY>=inputNeuron){
-                        return hiddenNeuronY+b
-                    }
-                    else if(hiddenNeuronY<=outputNeuron&&outputNeuron>=inputNeuron){
-                        return outputNeuron+b
-                    }
-                    else if(hiddenNeuronY<=inputNeuron&&outputNeuron<=inputNeuron){
-                        return inputNeuron+b
-                    }
-                    return 0
-                }
+
                 property real dRelationship: 0.8
                 property variant yRelInput: []
                 property variant yRelHidden: []
@@ -131,8 +144,8 @@ NetData {
                 property int d:{
                         var w
                         if((totalNet.width-(xOffSet*2*totalNet.width))/(hiddenNeuronX+2)>
-                            (totalNet.height-(yOffSet*2*totalNet.height))/totalNet.maxYNeuron){
-                            w=(totalNet.height-(yOffSet*2*totalNet.height))/totalNet.maxYNeuron
+                            (totalNet.height-(yOffSet*2*totalNet.height))/netItem.maxYNeuron){
+                            w=(totalNet.height-(yOffSet*2*totalNet.height))/netItem.maxYNeuron
                         }
                         else{
                             w=(totalNet.width-(xOffSet*2*totalNet.width))/(hiddenNeuronX+2)
@@ -161,6 +174,7 @@ NetData {
                         netId:netItem.netId
                         anchors.fill: parent
                         Component.onCompleted: {
+                                                updateNeurons()
                                                 start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
                                                 end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
                                            }
@@ -191,6 +205,9 @@ NetData {
                                         function onUpdateDockingPoint(){
                                             start=netListVisu.getDockingPointOutput(netItem.layoutId,connection.sourceData.absId)
                                             end=netListVisu.getDockingPointInput(netItem.layoutId,connection.destinationData.absId)
+                                        }
+                                        function onUpdateNetStruc(){
+                                            updateNeurons()
                                         }
                             }
                         }
@@ -223,6 +240,11 @@ NetData {
                         }
                         dataNeuron.type:def.inputType
                         dataNeuron.typeId: index
+                        lastNeuron: if(!netItem.bias){
+                                        return (index==(inputLayer.model-1))
+                                    }
+                                    else return false
+
                     }
                 }
 
@@ -312,16 +334,16 @@ NetData {
             return (((1-yOffSet-(yBiasPos))/(inARow+1))*(pos+1))+yOffSet+(yBiasPos)
         }
         else if(netAlignment===Net.NetAlignment.Top){
-            //console.debug("y",pos,inARow,(((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos)
+            //console.debug("y",pos,inARow,(((1-yOffSet-(yBiasPos))/(netItem.maxYNeuron))*(pos+1))+yOffSet+yBiasPos)
             if(bias===true){
-                return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron))*(pos+1))+yOffSet+yBiasPos
+                return (((1-yOffSet-(yBiasPos))/(netItem.maxYNeuron))*(pos+1))+yOffSet+yBiasPos
             }
             else{
-                return (((1-yOffSet)/(totalNet.maxYNeuron))*(pos+1)/2)+yOffSet
+                return (((1-yOffSet-(yBiasPos))/(netItem.maxYNeuron))*(pos))+yOffSet+yBiasPos
             }
         }
         else if(netAlignment===Net.NetAlignment.Bottom){
-            return (((1-yOffSet-(yBiasPos))/(totalNet.maxYNeuron+1))*(totalNet.maxYNeuron-pos))+yOffSet
+            return (((1-yOffSet-(yBiasPos))/(netItem.maxYNeuron+1))*(netItem.maxYNeuron-pos))+yOffSet
         }
         return 0
     }

@@ -14,7 +14,11 @@ Neuron {
         netItem.clickedNeuronID(dataNeuron.absId)
     }
     transparent: 100// biasTransparent[index]
-
+    Component.onCompleted: {
+        netItem.xRel[dataNeuron.absId]=xRel
+        netItem.yRel[dataNeuron.absId]=yRel
+        dockingPoint()
+    }
     Connections{
         target: netItem
         function onUpdateValue(){
@@ -36,6 +40,14 @@ Neuron {
             if(absID===dataNeuron.absId){
                 transparent=100
             }
+        }
+        function onLoadRelPos(){
+            neuron.xRel=netItem.xRel[dataNeuron.absId]
+            neuron.yRel=netItem.yRel[dataNeuron.absId]
+            dockingPoint()
+        }
+        function onUpdateDockingPoint(){
+            dockingPoint()
         }
     }
 }

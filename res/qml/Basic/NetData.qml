@@ -3,7 +3,6 @@ import "../../js/VisuFunction.js" as VisuFunction
 Item {
     property int netId: 0
     onNetIdChanged: {
-        console.debug("new Net Id")
         updateStructur()
     }
 
@@ -28,6 +27,7 @@ Item {
     }
 
     function updateStructur(){
+        console.debug("update structur")
         inputNeuron=netListVisu.getInputs(netId)
         outputNeuron=netListVisu.getOutputs(netId)
         hiddenNeuronX=netListVisu.getHiddenX(netId)
@@ -35,7 +35,6 @@ Item {
         totalHidden=hiddenNeuronX*hiddenNeuronY
         bias=netListVisu.getBias(netId)
         totalConns= netListVisu.getConns(netId)
-
         updateStructurSignal()
     }
     function getTypeString(type){

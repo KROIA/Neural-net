@@ -14,6 +14,7 @@ function updateArray(arr){
 }
 
 function getAbsIdFromTypeId(id,type,netId){
+    console.debug(id,type,netId)
     var res
     if(type===def.inputType){
         res= id
@@ -32,6 +33,7 @@ function getAbsIdFromTypeId(id,type,netId){
     else{
       res= id
     }
+    console.debug(id)
     return res
 
 }

@@ -49,6 +49,7 @@ signals:
     void startUpdateSignal();
     void setUpdateTimeSignal(unsigned int time);
     void updateVisu();
+    void updateNetStruc();
     void updateDockingPoint();
 public slots:
     void updateNetVisu();
@@ -99,7 +100,10 @@ public slots:
 
 
     int addNewNet();
-    void addNewNeuron(const int &netId,const int &neuronType);
+    void addInput(const int &netId);
+    void addHiddenX(const int &netId);
+    void addHiddenY(const int &netId);
+    void addOutput(const int &netId);
 private:
     bool access=false;
     QQmlApplicationEngine *engine;

@@ -42,19 +42,34 @@ Window {
         }
     }
     Item{
+        Loader{
+           anchors.fill: parent
+           sourceComponent: {
+               if(singel.checked)
+                   return singelLoader
+               else
+                   return creatorLoader
+           }
+        }
+
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: modusSelector.bottom
+        Component{
+            id:singelLoader
+            Singel.Main{
 
-        Singel.Main{
-            anchors.fill:parent
-            visible: singel.checked
+            }
         }
-        Creator.Main{
-            anchors.fill:parent
-            visible: creator.checked
-        }/*
+        Component{
+            id:creatorLoader
+            Creator.Main{
+
+            }
+        }
+
+        /*
 
         Multi.Main{
             anchors.fill:parent

@@ -21,24 +21,13 @@ Shape {
     NeuronData{
         id:destination
         netId:con.netId
-        typeId:{
-            var destinationId=netListVisu.getConDestinationID(con.netId,con.conId,con.connType)
-            if(type==def.outputType){
-                return destinationId-(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))
-            }
-            return destinationId
-            }
+        typeId:0
         type:netListVisu.getConDestinationType(con.netId,con.conId,con.connType)
     }
     NeuronData{
         id:source
         netId:con.netId
-        typeId:{
-            if(type==def.biasType){
-                   return Math.floor(destination.neuronID/netListVisu.getHiddenX(netId))
-            }
-            return netListVisu.getConSourceID(con.netId,con.conId,con.connType)
-            }
+        typeId:0
         type:netListVisu.getConSourceType(con.netId,con.conId,con.connType)
     }
 
@@ -62,4 +51,26 @@ Shape {
     function updateValue(){
         weight=netListVisu.getConWeight(netId,conId)
     }
+    function updateNeurons(){
+        setDesinationId()
+        setSourceId()
+    }
+
+    function setDesinationId(){
+                    var destinationId=netListVisu.getConDestinationID(con.netId,con.conId,con.connType)
+                    if(destination.type==def.outputType){
+                        destination.typeId= destinationId-(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))
+                    }
+                    else{
+                        destination.typeId=destinationId
+                    }
+                    }
+    function setSourceId(){
+        if(source.type==def.biasType){
+               source.typeId= Math.floor(destination.neuronID/netListVisu.getHiddenX(netId))
+        }
+        else{
+            source.typeId=netListVisu.getConSourceID(con.netId,con.conId,con.connType)
+        }
+        }
 }

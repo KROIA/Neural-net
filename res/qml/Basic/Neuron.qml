@@ -16,14 +16,7 @@ Rectangle {
         id:dataNeuron
     }
     property alias dataNeuron: dataNeuron
-    Connections{
-        target: netItem
-        function onLoadRelPos(){
-            neuron.xRel=netItem.xRel[dataNeuron.absId]
-            neuron.yRel=netItem.yRel[dataNeuron.absId]
-            dockingPoint()
-        }
-    }
+
     onXChanged:dockingPoint()
     onYChanged:dockingPoint()
     onDChanged:dockingPoint()
@@ -32,11 +25,10 @@ Rectangle {
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
     function dockingPoint(){
-        //console.debug(dataNeuron.absId,x,y)
         input=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
         output=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
         netListVisu.setDockingPointInput(layoutId,dataNeuron.absId,input,0)//Drag.active||
-        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,1)//Drag.active||lastNeuron)
+        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,Drag.active||lastNeuron)
     }
 
     property int transparent: 100
@@ -72,11 +64,7 @@ Rectangle {
 
     signal clickedNeuron(var id,var type)
     property bool movable: netItem.moveable
-    Component.onCompleted: {
-        netItem.xRel[dataNeuron.absId]=xRel
-        netItem.yRel[dataNeuron.absId]=yRel
-        dockingPoint()
-    }
+
     MouseArea{
         id:mouseArea
         anchors.fill: parent

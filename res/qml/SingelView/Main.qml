@@ -8,8 +8,6 @@ Item {
     width: 100
     height: 100
     property int updateTime: 200
-    visible:!singelTopBar.multiView
-
     Net{
         id:mainNet
         x:0
@@ -21,6 +19,7 @@ Item {
         visuNeuronModus:singelTopBar.visuNeuronModus
         moveable:singelTopBar.moveable
         zoomEnable:true
+        visible: parent.visible
     }
 
 
@@ -30,6 +29,7 @@ Item {
         anchors.right:singelWorkArea.right
         anchors.left:singelWorkArea.left
         height: 100
+        visible: parent.visible
     }
 
     SideBar{
@@ -38,6 +38,7 @@ Item {
         anchors.top: singelTopBar.bottom
         showWidth: singelWorkArea.width*0.2
         anchors.bottom: singelWorkArea.bottom
+        visible: parent.visible
         //clickedNeuronID: mainNet.clickedNeuronID
         //clickedNeuronType: mainNet.clickedNeuronType
     }

@@ -6,7 +6,6 @@ Template.TopBar{
     id:topbar
     width: 100
     height: 100
-    property int visuNeuronModus: modus.currentIndex
     property bool moveable: moveSwitch.checked
     property int netId: 0
     Row {
@@ -21,21 +20,28 @@ Template.TopBar{
             anchors.verticalCenter: parent.verticalCenter
             text: "add Input"
             onClicked: {
-                netListVisu.addNewNeuron(netId,def.inputType)
+                netListVisu.addInput(netId)
             }
         }
         Button{
             anchors.verticalCenter: parent.verticalCenter
-            text: "add Hidden"
+            text: "add HiddenX"
             onClicked: {
-                netListVisu.addNewNeuron(netId,def.hiddenType)
+                netListVisu.addHiddenX(netId)
+            }
+        }
+        Button{
+            anchors.verticalCenter: parent.verticalCenter
+            text: "add HiddenY"
+            onClicked: {
+                netListVisu.addHiddenY(netId)
             }
         }
         Button{
             anchors.verticalCenter: parent.verticalCenter
             text: "add Output"
             onClicked: {
-                netListVisu.addNewNeuron(netId,def.outputType)
+                netListVisu.addOutput(netId)
             }
         }
     }
