@@ -10,12 +10,13 @@
 */
 
 //  DEBUGING
-//#define _DEBUG_NET_ONLY_ID 0
+#define _DEBUG_NET_ONLY_ID 0
 //#define _DEBUG_NET_ALL
 //#define _DEBUG_NET_RUN
-//#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
+#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
 #define _DEBUG_NET_TIMING
-//#define _DEBUG_NET_CONNECT
+#define _DEBUG_NET_CONNECT
+#define _DEBUG_NET_CALCULATION_ORDER_LIST
 
 
 //#ifdef _DEBUG_NET_ALL
@@ -304,7 +305,10 @@ inline void __DEBUG_NET_(Net *ptr_net,QString func,QString message)
     if(ptr_net->get_ID() != _DEBUG_NET_ONLY_ID)
         return;
 #endif
-    qDebug(QString("["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message+"\n").toStdString().c_str());
+    QString msg = "["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message;
+    if(msg.lastIndexOf("\n") != msg.size()-1)
+        msg+="\n";
+    qDebug(msg.toStdString().c_str());
 }
 #define __DEBUG_NET(net,func,message)(__DEBUG_NET_(net,func,message));
 
