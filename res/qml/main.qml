@@ -41,7 +41,7 @@ Window {
             text: "integrate"
         }
     }
-    Item{
+    /*Item{
         Loader{
            anchors.fill: parent
            sourceComponent: {
@@ -56,7 +56,7 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: modusSelector.bottom
-        Component{
+        /*Component{
             id:singelLoader
             Singel.Main{
 
@@ -67,7 +67,7 @@ Window {
             Creator.Main{
 
             }
-        }
+        }*/
 
         /*
 
@@ -78,6 +78,29 @@ Window {
         Integrate.Main{
             anchors.fill:parent
             visible: integrate.checked
-        }*/
+        }
+    }*/
+    Item{
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: modusSelector.bottom
+        Singel.Main{
+            anchors.fill:parent
+            visible: singel.checked
+        }
+        Creator.Main{
+            anchors.fill:parent
+            visible: creator.checked
+        }
+        Multi.Main{
+            anchors.fill:parent
+            visible: multi.checked
+        }
+        Integrate.Main{
+            anchors.fill:parent
+            visible: integrate.checked
+        }
     }
+
 }

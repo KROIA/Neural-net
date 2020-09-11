@@ -42,8 +42,8 @@ Neuron {
             }
         }
         function onLoadRelPos(){
-            neuron.xRel=netItem.xRel[dataNeuron.absId]
-            neuron.yRel=netItem.yRel[dataNeuron.absId]
+            xRel=netItem.xRel[dataNeuron.absId]
+            yRel=netItem.yRel[dataNeuron.absId]
             dockingPoint()
         }
         function onUpdateDockingPoint(){

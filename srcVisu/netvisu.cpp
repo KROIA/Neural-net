@@ -345,9 +345,9 @@ void NetVisu::setDockingPointInput(const int &netId, const int &absId,const QPoi
             dockingPointInput[unsigned(netId)].push_back(point);
         }
     }
-    if(update){
-        emit updateDockingPoint();
-    }
+    //if(update){
+        emit updateDockingPoint(netId,absId);
+    //}
 }
 void NetVisu::setDockingPointOutput(const int &netId, const int &absId,const QPoint &point, bool update){
     vector<QPoint> pointVec;
@@ -363,9 +363,9 @@ void NetVisu::setDockingPointOutput(const int &netId, const int &absId,const QPo
             dockingPointOutput[unsigned(netId)].push_back(point);
         }
     }
-    if(update){
-        emit updateDockingPoint();
-    }
+    //if(update){
+        emit updateDockingPoint(netId,absId);
+    //}
 }
 
 QPoint NetVisu::getDockingPointInput(const int &netId, const int &absId){
@@ -415,25 +415,25 @@ void NetVisu::addInput(const int &netId){
     netList[unsigned(netId)]->set_inputNeurons(netList[unsigned(netId)]->get_inputNeurons()+1);
     netList[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint();
+    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addHiddenX(const int &netId){
     netList[unsigned(netId)]->set_hiddenNeuronsX(netList[unsigned(netId)]->get_hiddenNeuronsX()+1);
     netList[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint();
+    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addHiddenY(const int &netId){
     netList[unsigned(netId)]->set_hiddenNeuronsY(netList[unsigned(netId)]->get_hiddenNeuronsY()+1);
     netList[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint();
+    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addOutput(const int &netId){
     netList[unsigned(netId)]->set_outputNeurons(netList[unsigned(netId)]->get_outputNeurons()+1);
     netList[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint();
+    emit updateDockingPoint(netId,0);
 }
 
 unsigned NetVisu::getX(int netId ,int id){

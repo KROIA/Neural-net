@@ -20,6 +20,9 @@ Item {
         moveable:singelTopBar.moveable
         zoomEnable:true
         visible: parent.visible
+        Component.onCompleted: {
+            console.debug("load Net new")
+        }
     }
 
 

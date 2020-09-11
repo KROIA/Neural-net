@@ -25,10 +25,11 @@ Rectangle {
     Drag.active: mouseArea.drag.active
     property real xOffset: 0.2*d
     function dockingPoint(){
+        console.debug("point changed",input,Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y))
         input=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
         output=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
         netListVisu.setDockingPointInput(layoutId,dataNeuron.absId,input,0)//Drag.active||
-        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,Drag.active||lastNeuron)
+        netListVisu.setDockingPointOutput(layoutId,dataNeuron.absId,output,1)
     }
 
     property int transparent: 100
@@ -94,6 +95,7 @@ Rectangle {
                                  netItem.xRel=VisuFunction.updateArray(netItem.xRel)
                                  netItem.yRel=VisuFunction.updateArray(netItem.yRel)
                                  //console.debug(neuron.xRel,dropArea.drag.x,netItem.xRel)
+
                              }
 
         property bool dragActive: drag.active

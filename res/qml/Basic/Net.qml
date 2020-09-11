@@ -53,7 +53,6 @@ NetData {
     property real yOffSet: (1/(maxYNeuron+1))/2
     property real xOffSet: (1/(hiddenNeuronX+2))/2
     property real zoom: 1
-
     property bool zoomEnable: false
     property int yBiasPos: if(bias) return 0.1
                         else return 0
@@ -63,10 +62,10 @@ NetData {
     signal showConnectedNeuron(var absId)
     signal updateValue();
     signal showAll();
-    signal updateDockingPoint();
+    signal updateDockingPoint(var abs);
     Component.onCompleted: {
         updateStructur()
-        updateDockingPoint()
+        //updateDockingPoint(netItem.)
 
     }
 
@@ -202,10 +201,16 @@ NetData {
                         }
                         Connections {
                                        target: netListVisu
-                                        function onUpdateDockingPoint(){
-                                            start=netListVisu.getDockingPointOutput(netItem.layoutId,connection.sourceData.absId)
-                                            end=netListVisu.getDockingPointInput(netItem.layoutId,connection.destinationData.absId)
-                                        }
+                                        function onUpdateDockingPoint(netId,abs){
+                                            if(netId==netItem.netId){
+                                                if(abs==connection.sourceData.absId){
+                                                    start=netListVisu.getDockingPointOutput(netItem.layoutId,connection.sourceData.absId)
+                                                }
+                                                if(abs==connection.destinationData.absId){
+                                                    end=netListVisu.getDockingPointInput(netItem.layoutId,connection.destinationData.absId)
+                                                     }
+                                                }
+                                            }
                                         function onUpdateNetStruc(){
                                             updateNeurons()
                                         }

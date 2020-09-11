@@ -50,7 +50,7 @@ signals:
     void setUpdateTimeSignal(unsigned int time);
     void updateVisu();
     void updateNetStruc();
-    void updateDockingPoint();
+    void updateDockingPoint(int netId, int abs);
 public slots:
     void updateNetVisu();
     void setUpdateTime(unsigned int upDateTime);
