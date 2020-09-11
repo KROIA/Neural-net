@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts qml quick quickwidgets
+QT       += core gui charts qml quick quickwidgets sql quickcontrols2
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -47,18 +47,21 @@ SOURCES += \
         $$netSrcPath/backpropnet.cpp \
         $$netSrcPath/savenet.cpp \
         $$netSrcPath/error.cpp \
-        $$visuSrc/netvisu.cpp
+        $$visuSrc/netvisu.cpp \
+        $$visuSrc/savenetsql.cpp \
+        $$visuSrc/sql.cpp
 
 HEADERS += \
         $$incPath/mainwindow.h \
         $$netIncPath/net.h \
         $$netIncPath/neuron.h \
-        $$netIncPath/activation.h \
         $$netIncPath/savenet.h \
         $$netIncPath/error.h \
         $$netIncPath/geneticnet.h \
         $$netIncPath/backpropnet.h \
-        $$visuInc/netvisu.h
+        $$visuInc/netvisu.h \
+        $$visuInc/savenetsql.h \
+        $$visuInc/sql.h
 
 FORMS += \
         mainwindow.ui

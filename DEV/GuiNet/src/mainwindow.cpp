@@ -35,24 +35,35 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Connection con;
     con.netID = 0;
-    con.direction = ConnectionDirection::forward;
+    con.direction = ConnectionDirection::backward;
 
-    con.source_ID.ID = 0;
-    con.source_ID.TYPE = NeuronType::input;
+    con.source_ID.ID = 1;
+    con.source_ID.TYPE = NeuronType::hidden;
 
-    con.destination_ID.ID = 1;
-    con.destination_ID.TYPE = NeuronType::output;
+    con.destination_ID.ID = 0;
+    con.destination_ID.TYPE = NeuronType::hidden;
 
     con.weight = 0.5;
 
-    ptr_net->addConnection(con);
+    //ptr_net->addConnection(con);
+    ptr_net->addConnection(Connection{.netID=0,
+                                      .source_ID=NeuronID{.ID=0,.TYPE=NeuronType::input},
+                                      .destination_ID=NeuronID{.ID=2,.TYPE=NeuronType::costum},
+                                      .weight=0.5,
+                                      .direction=ConnectionDirection::forward});
+
+    ptr_net->addConnection(Connection{.netID=0,
+                                      .source_ID=NeuronID{.ID=2,.TYPE=NeuronType::costum},
+                                      .destination_ID=NeuronID{.ID=1,.TYPE=NeuronType::output},
+                                      .weight=0.75,
+                                      .direction=ConnectionDirection::forward});
 
     ptr_net->updateNetConfiguration();
-    ptr_net_visu = new NetVisu(ptr_net,this);
-    ptr_net_visu->loadNetInUi(ui->net_view_widget);
-    ptr_net_visu->setUpdateTime(timer_loop_interval);
+    //ptr_net_visu = new NetVisu(ptr_net,this);
+    //ptr_net_visu->loadNetInUi(ui->net_view_widget);
+    //ptr_net_visu->setUpdateTime(timer_loop_interval);
     ptr_net_genom = ptr_net->get_ptr_genom();
-    ptr_net_visu->showWindow();
+    //ptr_net_visu->showWindow();
 
 }
 
@@ -107,6 +118,7 @@ void MainWindow::sinusTestForWeights(std::vector<double*> &genom)
     {
         sinTest_angle = 0;
         sinTest_weightIndex++;
+        qDebug() << " sinTest_weightIndex: "<<sinTest_weightIndex;
     }
 }
 void MainWindow::netErrorOccured(unsigned int netID, Error &e)

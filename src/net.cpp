@@ -1165,8 +1165,8 @@ void                Net::updateNetConfiguration()
 #endif
     for(unsigned int ID=_hiddenNeurons+_outputNeurons; ID<_neurons; ID++)    // Save the rest (the output neurons) also in the _outputNeuronList
     {
-        _costumNeuronList[ID-_costumNeurons] = _allNeuronList[ID];
-        _costumNeuronList[ID-_costumNeurons]->set_TYPE(NeuronType::costum);
+        _costumNeuronList[ID-_costumNeurons-_outputNeurons] = _allNeuronList[ID];
+        _costumNeuronList[ID-_costumNeurons-_outputNeurons]->set_TYPE(NeuronType::costum);
     }
 
 
@@ -1181,15 +1181,16 @@ void                Net::updateNetConfiguration()
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
     for(unsigned int connection=0; connection<_connections; connection++)
     {
-        __DEBUG_NET(this,"updateNetConfiguration()","connection["+QString::number(connection)+"] "+Neuron::toConnectionString(_connectionList[connection]));
+        __DEBUG_NET(this,"updateNetConfiguration()","connection["+QString::number(connection)+"] "+Neuron::toConnectionString(__allConnectionList[connection]));
     }
 #endif
     for(unsigned int connection=0; connection<_connections; connection++)
     {
-        if(connection < _connectionList.size())
+        /*if(connection < _connectionList.size())
             set_ptr_intern_connectNeuron(&_connectionList[connection]);
         else
-            set_ptr_intern_connectNeuron(&_costumConnectionList[connection-_connectionList.size()]);
+            set_ptr_intern_connectNeuron(&_costumConnectionList[connection-_connectionList.size()]);*/
+        set_ptr_intern_connectNeuron(&__allConnectionList[connection]);
 #if defined(_DEBUG_NET_TIMING)
         __debug_timer1_end  = std::chrono::high_resolution_clock::now();
         __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer1_end - __debug_timer1_start);
@@ -1210,10 +1211,10 @@ void                Net::updateNetConfiguration()
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer2_end  = std::chrono::high_resolution_clock::now();
     __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer2_end - __debug_timer2_start);
-    __DEBUG_NET(this,"prepareConnectionList()","end. Elapsed time: "+QString::number(__debug_time_span.count())+" sec");
+    __DEBUG_NET(this,"updateNetConfiguration()","end. Elapsed time: "+QString::number(__debug_time_span.count())+" sec");
 #endif
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
-    __DEBUG_NET(this,"updateNetConfiguration()","finish");
+    __DEBUG_NET(this,"updateNetConfiguration()","end");
 #endif
     emit netConfigurationUpdated();
     emit weightValuesChanged(this);
@@ -1221,6 +1222,12 @@ void                Net::updateNetConfiguration()
 }
 void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
 {
+#if defined(_DEBUG_NET_CONNECT)
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","begin");
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","from:        "+Neuron::toIDString(fromNeuron));
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","to:          "+Neuron::toIDString(toNeuron));
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","direction:   "+Neuron::toDirectionString(direction));
+#endif
     Connection con;
     con.netID = this->get_ID();
     con.source_ID = fromNeuron;
@@ -1229,11 +1236,11 @@ void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,Con
     con.weight = Neuron::get_calcRandWeight(this->_randEngine);
     this->addConnection(con);
     //unsigned int maxNeuronID = _allNeuronList.size();
-#if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"],unsigned int ["+QString::number(toNeuron)+"],ConnectionDirection ["+Neuron::directionString(direction)+"])","begin");
-    __DEBUG_NET(this,"connectNeuronViaID(...)","connecting Neuron: "+QString::number(fromNeuron)+" to: "+QString::number(toNeuron));
-    __DEBUG_NET(this,"connectNeuronViaID(...)","maxNeuronID: "+QString::number(maxNeuronID));
-#endif
+//#if defined(_DEBUG_NET_CONNECT)
+
+    //__DEBUG_NET(this,"connectNeuronViaID(...)","connecting Neuron: "+QString::number(fromNeuron)+" to: "+QString::number(toNeuron));
+   // __DEBUG_NET(this,"connectNeuronViaID(...)","maxNeuronID: "+QString::number(maxNeuronID));
+//#endif
   /*  if(fromNeuron >= maxNeuronID)
     {
         this->addError(Error("connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"] ,"+
@@ -1271,7 +1278,7 @@ void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,Con
         return 0;
     }*/
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"],unsigned int ["+QString::number(toNeuron)+"],ConnectionDirection ["+Neuron::directionString(direction)+"])","end");
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","end");
 #endif
 }
 void                Net::addConnection(Connection connection)
@@ -1456,7 +1463,7 @@ void Net::init(unsigned int inputs,
     emit accessLock();
     time_t now                  = time(nullptr);
     struct tm *currentTime      = localtime(&now);
-    this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock()));
+    this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock())+rand()%100);
 
     _activationFunction         = Activation::Sigmoid;
     _inputs                     = NET_MIN_INPUTNEURONS;
@@ -1533,7 +1540,7 @@ void                Net::update_ptr_genomList()
 bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
 {
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])","begin");
+    __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection ["+Neuron::toConnectionString(*connection)+"])","begin");
 #endif
     if(connection->destination_ID.ID >= _allNeuronList.size())
     {
@@ -1541,7 +1548,7 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),connection->destination_ID.ID,static_cast<unsigned int>(_allNeuronList.size()-1),']'),
                        Neuron::toConnectionString(*connection)}));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuron(...)","destination neuron ID: "+QString::number(connection->destination_ID.ID)+" not found");
+        __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","destination neuron ID: "+QString::number(connection->destination_ID.ID)+" not found");
 #endif
         return 0;
     }
@@ -1551,7 +1558,7 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),connection->source_ID.ID,static_cast<unsigned int>(_allNeuronList.size()-1),']'),
                        Neuron::toConnectionString(*connection)}));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuron(...)","source neuron ID: "+QString::number(connection->source_ID.ID)+" not found");
+        __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","source neuron ID: "+QString::number(connection->source_ID.ID)+" not found");
 #endif
         return 0;
     }
@@ -1577,14 +1584,14 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
         default:
         {
 #if defined(_DEBUG_NET_CONNECT)
-            __DEBUG_NET(this,"connectNeuron(...)","unknown source Neuron TYPE: "+Neuron::typeString(connection->source_ID.TYPE));
+            __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","unknown source Neuron TYPE: "+Neuron::toTypeString(connection->source_ID.TYPE));
 #endif
             return 0;
         }
     }
     _allNeuronList[connection->destination_ID.ID]->set_weight(connection->source_ID,connection->weight);
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])","end");
+    __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection ["+Neuron::toConnectionString(*connection)+"])","end");
 #endif
     return 1;
 }
@@ -1721,9 +1728,90 @@ void                Net::prepareConnectionList()
 }
 void                Net::prepareCalculationOrderList()
 {
-#if defined(_DEBUG_NET_CONNECT)
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
     __DEBUG_NET(this,"prepareCalculationOrderList()","begin");
 #endif
+    _calculationOrderList.clear();
+    _calculationOrderList.reserve(_allNeuronList.size());
+
+
+
+    // Jede Variable in "isUpdated" befindet sich im array auch am selben ort wie das Neuron die ID hat.
+    // isUpdated[3] -> _allNeuronList[3]
+    // isUpdated wird verwendet um bei der Reihenfolgensuche zu schauen ob das vorherige Neuron bereits berechnet wurde.
+    std::vector<bool> isUpdated(_allNeuronList.size(),false);
+    bool allUpdated = false;
+    unsigned int counter = 0;
+    while(!allUpdated)
+    {
+        // Durch alle Neuronen gehen und jede einzeln analysieren
+        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
+        {
+            counter++;
+            // Dieses Neuron wurde bereits einmal berechnet
+            if(isUpdated[_allNeuronList[neuron]->get_ID().ID])
+                continue;
+
+            // invertiert initialisiert. So kann bei der ersten unstimmigkeit auf false gesetzt werden.
+            bool allInputsUpdated = true;
+
+            // Durch jeden Input gehen und schauen:
+            // 1) Von wo jede Verbindung kommt
+            // 2) Ob die Verbindung vorwärts oder rückwärts geht. (Rückwärts = Rückkopplung)
+            // 3) Ob die Neuronen, die sich am start der Verbindung befinden bereits berechnet wurden.
+            for(unsigned int input=0; input<_allNeuronList[neuron]->get_inputs(); input++)
+            {
+
+                unsigned int inputID                = _allNeuronList[neuron]->get_inputID(input).ID;
+                NeuronType   inputType              = _allNeuronList[neuron]->get_inputID(input).TYPE;
+                ConnectionDirection inputDirection  = _allNeuronList[neuron]->get_inputConnectionDirection(_allNeuronList[neuron]->get_inputID(input));
+
+                // 1)
+                // Diese Typen sind immer auf dem aktuellen Stand und müssen nicht berücksichtigt werden.
+                if(inputType == NeuronType::bias ||
+                   inputType == NeuronType::input)
+                    continue;
+
+                // 2)
+                // Rückwertsführende Verbindungen können noch gar nicht aktuell sein, müssen das auch nicht
+                if(inputDirection == ConnectionDirection::backward)
+                    continue;
+
+                // 3)
+                if(!isUpdated[inputID]) // Neuron an Quelle der Verbindung wurde noch nicht berechnet
+                {
+                    allInputsUpdated = false;
+                    break; // Es muss nicht weiter gesucht werden, dieses Neuron kann noch nicht berechnet werden.
+                }
+            }
+            if(!allInputsUpdated)
+                continue;
+
+            _calculationOrderList.push_back(_allNeuronList[neuron]->get_ID());
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
+            __DEBUG_NET(this,"prepareCalculationOrderList()","couter: "+QString::number(counter)+"\t_calculationOrderList[last] (TYPE: NeuronID) = "+Neuron::toIDString(_calculationOrderList[_calculationOrderList.size()-1]));
+#endif
+            isUpdated[_allNeuronList[neuron]->get_ID().ID] = true;
+        }
+
+        allUpdated = true;
+        for(unsigned int updates = 0; updates < isUpdated.size(); updates++)
+        {
+            if(!isUpdated[updates])
+                allUpdated = false;
+        }
+    }
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
+    __DEBUG_NET(this,"prepareCalculationOrderList()","all updated. Neurons are calculated in this order:");
+    for(unsigned int a=0; a<_calculationOrderList.size(); a++)
+    {
+        __DEBUG_NET(this,"prepareCalculationOrderList()","CalculationPos: "+QString::number(a)+"\tNeuron: (ID): "+Neuron::toIDString(_calculationOrderList[a]));
+    }
+#endif
+
+
+  /*
+
     _calculationOrderList.clear();
     _calculationOrderList.reserve(_allNeuronList.size());
     //std::vector<bool> isUpdated(_allNeuronList.size(),false);
@@ -1772,7 +1860,8 @@ void                Net::prepareCalculationOrderList()
             }
         }
     }
-#if defined(_DEBUG_NET_CONNECT)
+    */
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
     __DEBUG_NET(this,"prepareCalculationOrderList()","end");
 #endif
 }

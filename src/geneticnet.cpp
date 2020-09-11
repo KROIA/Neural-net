@@ -110,11 +110,12 @@ void                    GeneticNet::loadFromNetFile()
     {
         qDebug() << "ERROR: _saveNet.loadfile()";
     }
-#ifdef __DEBUG_GENETICNET
-    qDebug() << "read done -> applaying...";
-#endif
+
     if(loadSucceed)
     {
+#ifdef __DEBUG_GENETICNET
+        qDebug() << "read done -> applaying...";
+#endif
         try {
             this->set(_saveNet.get_animals(),
                       _saveNet.get_inputNeurons(),
@@ -143,10 +144,17 @@ void                    GeneticNet::loadFromNetFile()
                           {"unable to apply the settings. Maybe the file is damaged.",
                            e.what()}));
         }
+#ifdef __DEBUG_GENETICNET
+        qDebug() << "applaying done";
+#endif
     }
 #ifdef __DEBUG_GENETICNET
-    qDebug() << "applaying done";
+    else
+    {
+        qDebug() << _saveNet.get_filename()+"."+_saveNet.get_fileEnding() +" dosesn't exist";
+    }
 #endif
+
 }
 void                    GeneticNet::loadFromNetFile(QString filename)
 {
