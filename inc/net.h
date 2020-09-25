@@ -1,7 +1,7 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.06.00"
+#define    NET_VERSION "02.06.01"
 //              Datum   25.09.2020
 
 /*
@@ -45,7 +45,9 @@
 #endif
 
 #ifdef QDEBUG_H
+#ifndef CONSOLE
 #define CONSOLE qDebug()
+#endif
 #else
 #include <iostream>
 #include <stdio.h>

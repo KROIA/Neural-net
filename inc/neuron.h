@@ -1,7 +1,7 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.06.00"
+#define NEURON_VERSION "02.06.01"
 //              Datum   25.09.2020
 
 /*
@@ -9,7 +9,7 @@
  All thrwon errors are std::runtime_error
 */
 
-#define QT_APP
+//#define QT_APP
 
 //  Debuging
 //#define _DEBUG_NEURON_RUN
@@ -52,7 +52,9 @@
 #endif
 
 #ifdef QDEBUG_H
+#ifndef CONSOLE
 #define CONSOLE qDebug()
+#endif
 #else
 #include <iostream>
 #include <stdio.h>

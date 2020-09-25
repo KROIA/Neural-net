@@ -80,7 +80,11 @@ NeuronID Neuron::get_ID()
 
 void Neuron::set_inputs(unsigned int inputs)
 {
+#if NEURON_MIN_INPUTS == 0
+    if(inputs > NEURON_MAX_INPUTS)
+#else
     if(inputs < NEURON_MIN_INPUTS || inputs > NEURON_MAX_INPUTS)
+#endif
     {
         addError(Error("set_inputs(unsigned int ["+std::to_string(inputs)+"] )",
                  ErrorMessage::outOfRange<unsigned int>('[',static_cast<unsigned int>(NEURON_MIN_INPUTS),inputs,static_cast<unsigned int>(NEURON_MAX_INPUTS),']')));

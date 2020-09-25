@@ -95,7 +95,11 @@ unsigned int        Net::get_ID()
 
 void                Net::set_inputNeurons(unsigned int inputs)
 {
+#if NET_MIN_INPUTNEURONS == 0
+    if(inputs > NET_MAX_INPUTNEURONS)
+#else
     if(inputs < NET_MIN_INPUTNEURONS || inputs > NET_MAX_INPUTNEURONS)
+#endif
     {
         this->addError(Error("set_inputNeurons(unsigned int ["+std::to_string(inputs)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_INPUTNEURONS),inputs,static_cast<unsigned int>(NET_MAX_INPUTNEURONS),']')));
@@ -120,7 +124,11 @@ unsigned int        Net::get_inputNeurons()
 }
 void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
 {
+#if NET_MIN_HIDDENNEURONS_X == 0
+    if(hiddenX > NET_MAX_HIDDENNEURONS_X)
+#else
     if(hiddenX < NET_MIN_HIDDENNEURONS_X || hiddenX > NET_MAX_HIDDENNEURONS_X)
+#endif
     {
         this->addError(Error("set_hiddenNeuronsX(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_HIDDENNEURONS_X),hiddenX,static_cast<unsigned int>(NET_MAX_HIDDENNEURONS_X),']')));
@@ -146,8 +154,12 @@ unsigned int        Net::get_hiddenNeuronsX()
 }
 void                Net::set_hiddenNeuronsY(unsigned int hiddenY)
 {
+#if NET_MIN_HIDDENNEURONS_Y == 0
+    if(hiddenY > NET_MAX_HIDDENNEURONS_Y)
+#else
     if(hiddenY < NET_MIN_HIDDENNEURONS_Y || hiddenY > NET_MAX_HIDDENNEURONS_Y)
-    {
+#endif
+   {
         this->addError(Error("set_hiddenNeuronsY(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_HIDDENNEURONS_Y),hiddenY,static_cast<unsigned int>(NET_MAX_HIDDENNEURONS_Y),']')));
         return;
@@ -177,7 +189,11 @@ unsigned int        Net::get_hiddenNeurons()
 
 void                Net::set_outputNeurons(unsigned int outputs)
 {
+#if NET_MIN_OUTPUTNEURONS == 0
+    if(outputs > NET_MAX_OUTPUTNEURONS)
+#else
     if(outputs < NET_MIN_OUTPUTNEURONS || outputs > NET_MAX_OUTPUTNEURONS)
+#endif
     {
         this->addError(Error("set_outputNeurons(unsigned int ["+std::to_string(outputs)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_OUTPUTNEURONS),outputs,static_cast<unsigned int>(NET_MAX_OUTPUTNEURONS),']')));
@@ -1019,6 +1035,10 @@ void                Net::updateNetConfiguration()
     {
         switch(__allConnectionList[connection].source_ID.TYPE)
         {
+            case NeuronType::none:
+            {
+                break;
+            }
             case NeuronType::bias:
             {
                 break;
@@ -1046,6 +1066,10 @@ void                Net::updateNetConfiguration()
         }
         switch(__allConnectionList[connection].destination_ID.TYPE)
         {
+            case NeuronType::none:
+            {
+                break;
+            }
             case NeuronType::bias:
             {
                 break;

@@ -14,7 +14,9 @@
 #endif
 
 #ifdef QDEBUG_H
+#ifndef CONSOLE
 #define CONSOLE qDebug()
+#endif
 #else
 #include <iostream>
 #include <stdio.h>
