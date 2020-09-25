@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.05.01"
-//              Datum   28.05.2020
+#define    NET_VERSION "02.06.00"
+//              Datum   25.09.2020
 
 /*
  Some functions may throw errors.
@@ -13,10 +13,10 @@
 #define _DEBUG_NET_ONLY_ID 0
 //#define _DEBUG_NET_ALL
 //#define _DEBUG_NET_RUN
-#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
 #define _DEBUG_NET_TIMING
-#define _DEBUG_NET_CONNECT
-#define _DEBUG_NET_CALCULATION_ORDER_LIST
+//#define _DEBUG_NET_CONNECT
+//#define _DEBUG_NET_CALCULATION_ORDER_LIST
 
 
 //#ifdef _DEBUG_NET_ALL
@@ -38,11 +38,21 @@
 #include "neuron.h"
 #include <math.h>
 #include <random>
-#include <iostream>
 #include <time.h>
-#include <QDebug>
-#include <QString>
-#include <QStringList>
+
+#ifdef QT_APP
+  #include <QDebug>
+#endif
+
+#ifdef QDEBUG_H
+#define CONSOLE qDebug()
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
 
 #include <error.h>
 
@@ -68,10 +78,17 @@
 
 
 
+#ifdef QT_APP
 class Net : public QObject
+#else
+class Net
+#endif
 {
+#ifdef QT_APP
         Q_OBJECT
+#endif
     public:
+#ifdef QT_APP
         Net(unsigned int ID = 0,
             QObject *parent = nullptr);
         Net(unsigned int ID,
@@ -89,6 +106,22 @@ class Net : public QObject
             bool enableAverage,
             Activation func,
             QObject *parent = nullptr);
+#else
+        Net(unsigned int ID = 0);
+        Net(unsigned int ID,
+            unsigned int inputs,
+            unsigned int hiddenX,
+            unsigned int hiddenY,
+            unsigned int outputs);
+        Net(unsigned int ID,
+            unsigned int inputs,
+            unsigned int hiddenX,
+            unsigned int hiddenY,
+            unsigned int outputs,
+            bool enableBias,
+            bool enableAverage,
+            Activation func);
+#endif
         ~Net();
 
         void                    set_ID(unsigned int ID);
@@ -172,8 +205,8 @@ class Net : public QObject
         NeuronID                addNeuron(Neuron *neuron);                                          //update
 
 
-        QString                 toString();
-        QStringList             toStringList();
+        std::string                 toString();
+        std::vector<std::string>             toStringList();
         bool                    isEqual(Net *toCompare);
 #if defined(_DEBUG_NET_TIMING)
         double get_runtime();
@@ -189,8 +222,10 @@ class Net : public QObject
         Error           get_error(unsigned int index);
         ErrorList       get_errorList() const;
         unsigned int    get_errorAmount() const;
+#ifdef QT_APP
     signals:
         void errorOccured(unsigned int netID, Error &e);
+
         void netConfigurationUpdateNeeded(); //Trigger, for updating the netConfiguration
         void netConfigurationUpdateStarted(); //Trigger, when the updating function gets called
         void netConfigurationUpdated();      //Infosignal when the updating is finished
@@ -203,13 +238,16 @@ class Net : public QObject
         void runDone(Net *net);
         void biasValueChanged(Net *net);
         void weightValuesChanged(Net *net);
+#endif
 
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
         ErrorList _errorList;
+#ifdef QT_APP
     private slots:
         void onNeuronError(NeuronID ID,Error &e);
+#endif
     private:
         void init(unsigned int inputs,
                   unsigned int hiddenX,
@@ -299,16 +337,16 @@ class Net : public QObject
 
 };
 
-inline void __DEBUG_NET_(Net *ptr_net,QString func,QString message)
+inline void __DEBUG_NET_(Net *ptr_net,std::string func,std::string message)
 {
 #ifdef _DEBUG_NET_ONLY_ID
     if(ptr_net->get_ID() != _DEBUG_NET_ONLY_ID)
         return;
 #endif
-    QString msg = "["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message;
-    if(msg.lastIndexOf("\n") != msg.size()-1)
+    std::string msg = "["+std::to_string(ptr_net->get_ID())+"] Net::"+func+" "+message;
+    if(msg.find_last_of("\n") != msg.size()-1)
         msg+="\n";
-    qDebug(msg.toStdString().c_str());
+    CONSOLE << msg.c_str();
 }
 #define __DEBUG_NET(net,func,message)(__DEBUG_NET_(net,func,message));
 

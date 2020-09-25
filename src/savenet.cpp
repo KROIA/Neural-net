@@ -18,19 +18,19 @@ SaveNet::~SaveNet()
     _ID_list.clear();
 }
 
-void            SaveNet::set_filename(QString filename)
+void            SaveNet::set_filename(std::string filename)
 {
     _filename = filename;
 }
-QString         SaveNet::get_filename()
+std::string         SaveNet::get_filename()
 {
     return _filename;
 }
-void            SaveNet::set_fileEnding(QString fileEnding)
+void            SaveNet::set_fileEnding(std::string fileEnding)
 {
     _fileEnding = fileEnding;
 }
-QString         SaveNet::get_fileEnding()
+std::string         SaveNet::get_fileEnding()
 {
     return _fileEnding;
 }
@@ -134,7 +134,7 @@ Activation      SaveNet::get_activationFunction()
 {
     return _activationFuncton;
 }
-void            SaveNet::set_ExtraParam(QString name,double value)
+void            SaveNet::set_ExtraParam(std::string name,double value)
 {
     for(unsigned int a=0; a<_extraParamName.size(); a++)
     {
@@ -147,7 +147,7 @@ void            SaveNet::set_ExtraParam(QString name,double value)
     _extraParamName.push_back(name);
     _extraParamValue.push_back(value);
 }
-void            SaveNet::get_ExtraParam(QString name, double &value)
+void            SaveNet::get_ExtraParam(std::string name, double &value)
 {
     for(unsigned int a=0; a<_extraParamName.size(); a++)
     {
@@ -157,15 +157,15 @@ void            SaveNet::get_ExtraParam(QString name, double &value)
             return;
         }
     }
-    addError(Error("get_ExtraParam(QString ["+name+"] , double &["+QString::number(value)+"] )",
-                   QString("Unknown parameter: "+name)));
+    addError(Error("get_ExtraParam(std::string ["+name+"] , double &["+std::to_string(value)+"] )",
+                   std::string("Unknown parameter: "+name)));
 }
-void            SaveNet::set_ExtraParam(std::vector<QString> name,std::vector<double> value)
+void            SaveNet::set_ExtraParam(std::vector<std::string> name,std::vector<double> value)
 {
     if(name.size() != value.size())
     {
-        addError(Error("set_ExtraParam(std::vector<QString> name , std::vector<double> value )",
-                       QString("name.size() != value.size()")));
+        addError(Error("set_ExtraParam(std::vector<std::string> name , std::vector<double> value )",
+                       std::string("name.size() != value.size()")));
         return;
     }
     for(unsigned int a=0; a<name.size(); a++)
@@ -173,7 +173,7 @@ void            SaveNet::set_ExtraParam(std::vector<QString> name,std::vector<do
         set_ExtraParam(name[a],value[a]);
     }
 }
-void            SaveNet::get_ExtraParam(std::vector<QString> &name,std::vector<double> &value)
+void            SaveNet::get_ExtraParam(std::vector<std::string> &name,std::vector<double> &value)
 {
     name    = _extraParamName;
     value   = _extraParamValue;
@@ -185,21 +185,21 @@ bool SaveNet::loadFile()
     if(_filename == "")
     {
         addError(Error("loadFile())",
-                       QString("No filename declared")));
+                       std::string("No filename declared")));
         return false;
     }
-    _file = fopen((_filename+"."+_fileEnding).toStdString().c_str(),"r");
+    _file = fopen((_filename+"."+_fileEnding).c_str(),"r");
     if(!_file)
     {
         addError(Error("loadFile())",
-                       QString("can't open file: \""+_filename+"."+_fileEnding+"\"")));
+                       std::string("can't open file: \""+_filename+"."+_fileEnding+"\"")));
         return false;
     }
     this->clear();
-    std::vector<QString> fileBuffer;
-    QString tmpBuffer = "";
+    std::vector<std::string> fileBuffer;
+    std::string tmpBuffer = "";
     unsigned int tmpAnimals = 0;
-    while(tmpBuffer.indexOf("[NETS]") == -1)
+    while(tmpBuffer.find("[NETS]") == -1)
     {
         char list[255];
         fgets(list,255,_file);
@@ -208,89 +208,89 @@ bool SaveNet::loadFile()
     }
     for(unsigned int a=0; a<fileBuffer.size(); a++)
     {
-        QString buffLine = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1,fileBuffer[a].indexOf("\n"));
-        unsigned int uInt_buffLine = buffLine.toUInt();
-        if(fileBuffer[a].indexOf("SAVES") == 0)
+        std::string buffLine = fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n"));
+        unsigned int uInt_buffLine = stoul(buffLine);
+        if(fileBuffer[a].find("SAVES") == 0)
         {
             _saves = uInt_buffLine;
             continue;
-        }else if(fileBuffer[a].indexOf("ANIMALS ") == 0)
+        }else if(fileBuffer[a].find("ANIMALS ") == 0)
         {
             tmpAnimals = uInt_buffLine;
             continue;
-        }else if(fileBuffer[a].indexOf("__INPUTNEURONS ") == 0)
+        }else if(fileBuffer[a].find("__INPUTNEURONS ") == 0)
         {
             set_inputNeurons(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__HIDDENNEURONSX ") == 0)
+        }else if(fileBuffer[a].find("__HIDDENNEURONSX ") == 0)
         {
             set_hiddenNeuronsX(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__HIDDENNEURONSY ") == 0)
+        }else if(fileBuffer[a].find("__HIDDENNEURONSY ") == 0)
         {
             set_hiddenNeuronsY(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__OUTPUTNEURONS ") == 0)
+        }else if(fileBuffer[a].find("__OUTPUTNEURONS ") == 0)
         {
             set_outputNeurons(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__BIAS ") == 0)
+        }else if(fileBuffer[a].find("__BIAS ") == 0)
         {
             set_bias(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__AVERAGE ") == 0)
+        }else if(fileBuffer[a].find("__AVERAGE ") == 0)
         {
             set_enableAverage(uInt_buffLine);
             continue;
-        }else if(fileBuffer[a].indexOf("__BIASVALUE ") == 0)
+        }else if(fileBuffer[a].find("__BIASVALUE ") == 0)
         {
-            set_biasValue(buffLine.toDouble());
+            set_biasValue(stod(buffLine));
             continue;
-        }else if(fileBuffer[a].indexOf("__ACTIVATIONFUNCTION ") == 0)
+        }else if(fileBuffer[a].find("__ACTIVATIONFUNCTION ") == 0)
         {
             set_activationFunction(static_cast<Activation>(uInt_buffLine));
             continue;
-        }else if(fileBuffer[a].indexOf("__NEURONS ") == 0)
+        }else if(fileBuffer[a].find("__NEURONS ") == 0)
         {
             _neurons = uInt_buffLine;
             continue;
-        }else if(fileBuffer[a].indexOf(" __HIDDEN_NEURONS ") == 0)
+        }else if(fileBuffer[a].find(" __HIDDEN_NEURONS ") == 0)
         {
-            fileBuffer[a] = fileBuffer[a].mid(1);
-            _hiddenNeurons = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1,fileBuffer[a].indexOf("\n")).toUInt();
+            fileBuffer[a] = fileBuffer[a].substr(1);
+            _hiddenNeurons = stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")));
             continue;
-        }else if(fileBuffer[a].indexOf(" __OUTPUT_NEURONS ") == 0)
+        }else if(fileBuffer[a].find(" __OUTPUT_NEURONS ") == 0)
         {
-            fileBuffer[a] = fileBuffer[a].mid(1);
-            _outputNeurons = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1,fileBuffer[a].indexOf("\n")).toUInt();
+            fileBuffer[a] = fileBuffer[a].substr(1);
+            _outputNeurons = stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")));
             continue;
-        }else if(fileBuffer[a].indexOf(" __COSTUM_NEURONS ") == 0)
+        }else if(fileBuffer[a].find(" __COSTUM_NEURONS ") == 0)
         {
-            fileBuffer[a] = fileBuffer[a].mid(1);
-            _costumNeurons = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1,fileBuffer[a].indexOf("\n")).toUInt();
+            fileBuffer[a] = fileBuffer[a].substr(1);
+            _costumNeurons = stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")));
             continue;
-        }else if(fileBuffer[a].indexOf("__CONNECTIONS ") == 0)
+        }else if(fileBuffer[a].find("__CONNECTIONS ") == 0)
         {
             _connections = uInt_buffLine;
             continue;
-        }else if(fileBuffer[a].indexOf(" __SPECIAL_CONNECTIONS ") == 0)
+        }else if(fileBuffer[a].find(" __SPECIAL_CONNECTIONS ") == 0)
         {
-            fileBuffer[a] = fileBuffer[a].mid(1);
-            _costumConnections = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1,fileBuffer[a].indexOf("\n")).toUInt();
+            fileBuffer[a] = fileBuffer[a].substr(1);
+            _costumConnections = stoul(fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n")));
             continue;
-        }else if(fileBuffer[a].indexOf("[P] ") == 0)
+        }else if(fileBuffer[a].find("[P] ") == 0)
         {
-            fileBuffer[a]   = fileBuffer[a].mid(4);
-            QString name    = fileBuffer[a].mid(0,fileBuffer[a].indexOf(" "));
-            fileBuffer[a]   = fileBuffer[a].mid(fileBuffer[a].indexOf(" ")+1);
-            double value    = fileBuffer[a].mid(0,fileBuffer[a].indexOf("\n")).toDouble();
+            fileBuffer[a]   = fileBuffer[a].substr(4);
+            std::string name    = fileBuffer[a].substr(0,fileBuffer[a].find(" "));
+            fileBuffer[a]   = fileBuffer[a].substr(fileBuffer[a].find(" ")+1);
+            double value    = stod(fileBuffer[a].substr(0,fileBuffer[a].find("\n")));
             set_ExtraParam(name,value);
         }
     }
     //this->genomsize();
 
     fileBuffer.clear();
-    std::vector<std::vector<QString>  >connectionBuffer(1);
+    std::vector<std::vector<std::string>  >connectionBuffer(1);
     const int bufferSize = 100;
     tmpBuffer = "";
     tmpBuffer.resize(bufferSize);
@@ -306,10 +306,10 @@ bool SaveNet::loadFile()
             break;
         }
         connectionBuffer[connectionBuffer.size()-1].push_back(list);
-        if(QString(list).indexOf("\n") != -1)
+        if(std::string(list).find("\n") != -1)
         {
             //fileBuffer.push_back(tmpBuffer);
-            connectionBuffer.push_back(std::vector<QString>());
+            connectionBuffer.push_back(std::vector<std::string>());
             tmpBuffer = "";
         }
 #ifdef _DEBUG_READ_TIMING
@@ -319,7 +319,7 @@ bool SaveNet::loadFile()
         {
             secCounter+=debugInterval;
             __debug_timer1_start = __debug_timer1_end;
-            qDebug() << "SaveNet::loadFile() Reading File... Time elapsed: "<<secCounter<<" sec";
+            CONSOLE<< "SaveNet::loadFile() Reading File... Time elapsed: "<<secCounter<<" sec";
         }
 #endif
     }
@@ -353,7 +353,7 @@ bool SaveNet::loadFile()
         {
             a=50;
         }
-        QString tempBuff = "";
+        std::string tempBuff = "";
         int largeBufferIndex = 0;
         int smallBufferSize = 20;
         unsigned int connectionListIndex = 0;
@@ -365,37 +365,37 @@ bool SaveNet::loadFile()
             {
                 if(largeBufferIndex > connectionBuffer[a][connectionListIndex].size()-smallBufferSize)
                 {
-                    tempBuff.append(connectionBuffer[a][connectionListIndex].mid(largeBufferIndex,smallBufferSize));
+                    tempBuff.append(connectionBuffer[a][connectionListIndex].substr(largeBufferIndex,smallBufferSize));
                     connectionListIndex++;
                     largeBufferIndex = 0;
                     if(connectionBuffer[a].size()>connectionListIndex)
                     {
 
-                        tempBuff.append(connectionBuffer[a][connectionListIndex].mid(largeBufferIndex,smallBufferSize));
+                        tempBuff.append(connectionBuffer[a][connectionListIndex].substr(largeBufferIndex,smallBufferSize));
                         largeBufferIndex += smallBufferSize;
                     }else {
                         endOfList = true;
                     }
                 }else{
-                    tempBuff.append(connectionBuffer[a][connectionListIndex].mid(largeBufferIndex,smallBufferSize));
+                    tempBuff.append(connectionBuffer[a][connectionListIndex].substr(largeBufferIndex,smallBufferSize));
                     largeBufferIndex += smallBufferSize;
                 }
             }
             if(tempBuff == "")
                 break;
-            if(tempBuff.indexOf("N") == 0)
+            if(tempBuff.find("N") == 0)
             {
-                netID = tempBuff.mid(tempBuff.indexOf("N")+1,tempBuff.indexOf("D")-(tempBuff.indexOf("N")+1)).toUInt();
-                tempBuff = tempBuff.mid(tempBuff.indexOf("D"),tempBuff.size());
+                netID = stoul(tempBuff.substr(tempBuff.find("N")+1,tempBuff.find("D")-(tempBuff.find("N")+1)));
+                tempBuff = tempBuff.substr(tempBuff.find("D"),tempBuff.size());
                 _connectionListFromFile.push_back(std::vector<Connection>());
 
-            }else if(tempBuff.indexOf("D") == 0)
+            }else if(tempBuff.find("D") == 0)
             {
                 readPos   = ReadPos::NeuronID;
-            }else if(tempBuff.indexOf("I") == 0)
+            }else if(tempBuff.find("I") == 0)
             {
                 readPos   = ReadPos::Inputs;
-            }else if(tempBuff.indexOf("C") == 0)
+            }else if(tempBuff.find("C") == 0)
             {
                 readPos   = ReadPos::Connections;
                 _connectionListFromFile[_connectionListFromFile.size()-1].reserve(_connections);
@@ -405,20 +405,20 @@ bool SaveNet::loadFile()
             {
                 case ReadPos::NeuronID:
                 {
-                    if(tempBuff.indexOf("D") == 0)
+                    if(tempBuff.find("D") == 0)
                     {
-                        neuronID.ID = tempBuff.mid(tempBuff.indexOf("D")+1,tempBuff.indexOf("T")-(tempBuff.indexOf("D")+1)).toUInt();
-                        neuronID.TYPE = static_cast<NeuronType>(tempBuff.mid(tempBuff.indexOf("T")+1,tempBuff.indexOf("I")-(tempBuff.indexOf("T")+1)).toUInt());
-                        tempBuff = tempBuff.mid(tempBuff.indexOf("I"),tempBuff.size());
+                        neuronID.ID = stoul(tempBuff.substr(tempBuff.find("D")+1,tempBuff.find("T")-(tempBuff.find("D")+1)));
+                        neuronID.TYPE = static_cast<NeuronType>(stoul(tempBuff.substr(tempBuff.find("T")+1,tempBuff.find("I")-(tempBuff.find("T")+1))));
+                        tempBuff = tempBuff.substr(tempBuff.find("I"),tempBuff.size());
                         readPos = ReadPos::nothing;
                     }
                     break;
                 }
                 case ReadPos::Inputs:
                 {
-                    //ptr_tmpNeuron->inputs(atoi(fileBuffer[a+2].mid(fileBuffer[a+2].indexOf("<")+1,fileBuffer[a+2].indexOf(">")).c_str()));
-                    inputs = tempBuff.mid(tempBuff.indexOf("I")+1,tempBuff.indexOf("C")-(tempBuff.indexOf("I")+1)).toUInt();
-                    tempBuff = tempBuff.mid(tempBuff.indexOf("C"),tempBuff.size());
+                    //ptr_tmpNeuron->inputs(atoi(fileBuffer[a+2].substr(fileBuffer[a+2].find("<")+1,fileBuffer[a+2].find(">")).c_str()));
+                    inputs = stoul(tempBuff.substr(tempBuff.find("I")+1,tempBuff.find("C")-(tempBuff.find("I")+1)));
+                    tempBuff = tempBuff.substr(tempBuff.find("C"),tempBuff.size());
                     readPos = ReadPos::nothing;
                     break;
                 }
@@ -428,17 +428,17 @@ bool SaveNet::loadFile()
                     inputCounter++;
                     _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].netID = netID;
                     _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].destination_ID = neuronID;
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.ID = tempBuff.mid(tempBuff.indexOf("i")+1,tempBuff.indexOf("t")-(tempBuff.indexOf("i")+1)).toUInt();
-                    tempBuff = tempBuff.mid(tempBuff.indexOf("i")+1,tempBuff.size());
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.TYPE = static_cast<NeuronType>(tempBuff.mid(tempBuff.indexOf("t")+1,tempBuff.indexOf("w")-(tempBuff.indexOf("t")+1)).toUInt());
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = tempBuff.mid(tempBuff.indexOf("w")+1,tempBuff.indexOf("d")-(tempBuff.indexOf("w")+1)).toDouble();
-                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].direction = static_cast<ConnectionDirection>(tempBuff.mid(tempBuff.indexOf("d")+1,tempBuff.indexOf("i")-(tempBuff.indexOf("d")+1)).toUInt());
-                    tempBuff = tempBuff.mid(tempBuff.indexOf("i"),tempBuff.size());
+                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.ID = stoul(tempBuff.substr(tempBuff.find("i")+1,tempBuff.find("t")-(tempBuff.find("i")+1)));
+                    tempBuff = tempBuff.substr(tempBuff.find("i")+1,tempBuff.size());
+                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].source_ID.TYPE = static_cast<NeuronType>(stoul(tempBuff.substr(tempBuff.find("t")+1,tempBuff.find("w")-(tempBuff.find("t")+1))));
+                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].weight = stod(tempBuff.substr(tempBuff.find("w")+1,tempBuff.find("d")-(tempBuff.find("w")+1)));
+                    _connectionListFromFile[_connectionListFromFile.size()-1][_connectionListFromFile[_connectionListFromFile.size()-1].size()-1].direction = static_cast<ConnectionDirection>(stoul(tempBuff.substr(tempBuff.find("d")+1,tempBuff.find("i")-(tempBuff.find("d")+1))));
+                    tempBuff = tempBuff.substr(tempBuff.find("i"),tempBuff.size());
                     if(inputCounter == inputs)
                     {
                         inputCounter = 0;
                         readPos = ReadPos::nothing;
-                        tempBuff = tempBuff.mid(tempBuff.indexOf("|")+1,tempBuff.size());
+                        tempBuff = tempBuff.substr(tempBuff.find("|")+1,tempBuff.size());
                     }
                     break;
                 }
@@ -454,18 +454,18 @@ bool SaveNet::loadFile()
             {
                 secCounter+=debugInterval;
                 __debug_timer1_start = __debug_timer1_end;
-                qDebug() << "SaveNet::loadFile() Processing data... "<< a+1 << "of:"<<_connectionListFromFile.size() <<"\tConnections: "<< _connectionListFromFile[a].size()<<"\t"<<int(double(_connectionListFromFile[a].size())/double(_connections)*100)<<"%\tTime elapsed: "<<secCounter<<"sec";
+                CONSOLE<< "SaveNet::loadFile() Processing data... "<< a+1 << "of:"<<_connectionListFromFile.size() <<"\tConnections: "<< _connectionListFromFile[a].size()<<"\t"<<int(double(_connectionListFromFile[a].size())/double(_connections)*100)<<"%\tTime elapsed: "<<secCounter<<"sec";
             }
 #endif
         }
         _animals = static_cast<unsigned int>(_connectionListFromFile.size());
     }
-    qDebug() << "read finish";
-    qDebug() << "nets: "<<_connectionListFromFile.size() << " connections: "<<_connectionListFromFile[0].size();
+    CONSOLE<< "read finish";
+    CONSOLE<< "nets: "<<_connectionListFromFile.size() << " connections: "<<_connectionListFromFile[0].size();
     inputCounter = 0;
     return true;
 }
-bool SaveNet::loadFile(QString filename)
+bool SaveNet::loadFile(std::string filename)
 {
     this->set_filename(filename);
     return loadFile();
@@ -475,7 +475,7 @@ bool SaveNet::saveFile()
     if(_filename == "")
     {
         addError(Error("saveFile())",
-                       QString("No filename declared")));
+                       std::string("No filename declared")));
         return false;
         //error_general("saveFile()","no filename declared");
     }
@@ -483,15 +483,15 @@ bool SaveNet::saveFile()
     if(_neuronList.size() == 0)
     {
         addError(Error("saveFile())",
-                       QString("No nets defined")));
+                       std::string("No nets defined")));
         return false;
      //   error_general("saveFile()","No nets defined");
     }
-    _file = fopen((_filename+"."+_fileEnding).toStdString().c_str(),"w");
+    _file = fopen((_filename+"."+_fileEnding).c_str(),"w");
     if(!_file)
     {
         addError(Error("saveFile())",
-                       QString("can't create file: \""+_filename+"."+_fileEnding+"\"")));
+                       std::string("can't create file: \""+_filename+"."+_fileEnding+"\"")));
         return false;
       //  error_general("saveFile()","can't create file: \""+_filename+"."+_fileEnding+"\"");
     }
@@ -527,7 +527,7 @@ bool SaveNet::saveFile()
     fprintf(_file,"[PARAM]\n");
     for(unsigned int a=0; a<_extraParamName.size(); a++)
     {
-        fprintf(_file,"[P] %s %f\n",_extraParamName[a].toStdString().c_str(),_extraParamValue[a]);
+        fprintf(_file,"[P] %s %f\n",_extraParamName[a].c_str(),_extraParamValue[a]);
     }
 
     fprintf(_file,"\n");
@@ -588,7 +588,7 @@ bool SaveNet::saveFile()
             {
                 secCounter+=debugInterval;
                 __debug_timer1_start = __debug_timer1_end;
-                qDebug() << "SaveNet::saveFile() Saving data... Net: "<< net << "of:"<<_neuronList.size() <<"\tNeuron: "<<neuron<<"of:"<<_neuronList[net].size() <<"\tTime elapsed: "<<secCounter<<"sec";
+                CONSOLE<< "SaveNet::saveFile() Saving data... Net: "<< net << "of:"<<_neuronList.size() <<"\tNeuron: "<<neuron<<"of:"<<_neuronList[net].size() <<"\tTime elapsed: "<<secCounter<<"sec";
             }
 #endif
         }
@@ -599,7 +599,7 @@ bool SaveNet::saveFile()
     fclose(_file);
     return true;
 }
-bool SaveNet::saveFile(QString filename)
+bool SaveNet::saveFile(std::string filename)
 {
     this->set_filename(filename);
     return saveFile();
@@ -644,7 +644,7 @@ bool SaveNet::saveFile(QString filename)
     checkParam();
     if(this->genomsize() != genom.size())
     {
-        QString error = "genomsize is wrong\n";
+        std::string error = "genomsize is wrong\n";
                     error+= "genomsize is: "+std::to_string(genom.size()) + " but the Net has only place for an amount of: "+ std::to_string(_genomsize) + " weights.\n";
                     error+= "Check your net configuration:\n";
                     error+= "\tInput Neurons Y:\t"+std::to_string(_inputs)+"\n";
@@ -653,7 +653,7 @@ bool SaveNet::saveFile(QString filename)
                     error+= "\tOutputNeurons Y:\t"+std::to_string(_outputs)+"\n";
                     error+= "\tBias"+ std::to_string(_bias);
         //error_general("addGenom(std::vector<double>)",error);
-        qDebug() << "WARNING: "<< QString::fromStdString(error);        //only to test the aditional connections
+        CONSOLE<< "WARNING: "<< std::string::fromStdString(error);        //only to test the aditional connections
     }
     _genomList.push_back(genom);
 }*/
@@ -695,8 +695,8 @@ std::vector<double>           SaveNet::get_genom(unsigned int ID)
         return _genomList[index];
     }
     else {
-        addError(Error("get_genom(unsigned int ["+QString::number(ID)+"] )",
-                       QString("No net with such an ID")));
+        addError(Error("get_genom(unsigned int ["+std::to_string(ID)+"] )",
+                       std::string("No net with such an ID")));
         return std::vector<double>();
         //error_general("genom(unsigned int ["+std::to_string(ID)+"])","No net with such an ID");
     }
@@ -782,9 +782,9 @@ void                    SaveNet::set_ptr_neuronsOfNet(unsigned int ID,std::vecto
         }
         else
         {
-            addError(Error("set_ptr_neuronsOfNet(unsigned int ["+QString::number(ID)+"] , std::vector<Neuron*> *neurons)",
-                           QString("There are already some nets saved which have not the same amount of neurons: "+
-                                    QString::number(_neurons)+" as parameter 2: "+QString::number(neurons->size()))));
+            addError(Error("set_ptr_neuronsOfNet(unsigned int ["+std::to_string(ID)+"] , std::vector<Neuron*> *neurons)",
+                           std::string("There are already some nets saved which have not the same amount of neurons: "+
+                                    std::to_string(_neurons)+" as parameter 2: "+std::to_string(neurons->size()))));
             return;
            // error_general("neuronsOfNet(unsigned int ["+std::to_string(ID)+"], std::vector<Neuron*> neurons)","There are already some nets saved which have not the same amount of neurons: "+std::to_string(_neurons)+" as parameter 2: "+std::to_string(neurons->size()));
         }
@@ -858,8 +858,8 @@ std::vector<Neuron*>          SaveNet::get_neuronsOfNet(unsigned int ID)
     }
     else
     {
-        addError(Error("get_neuronsOfNet(unsigned int ["+QString::number(ID)+"] )",
-                       QString("No net with such an ID")));
+        addError(Error("get_neuronsOfNet(unsigned int ["+std::to_string(ID)+"] )",
+                       std::string("No net with such an ID")));
         return std::vector<Neuron*>();
         //error_general("neuronsOfNet(unsigned int ["+std::to_string(ID)+"])","Net not available. There is no Net with such an ID");
     }
@@ -958,7 +958,7 @@ std::vector<Connection>      *SaveNet::get_ptr_connectionList(unsigned int anima
 {
     if(animal >= get_animals())
     {
-        addError(Error("get_ptr_connectionList(unsigned int ["+QString::number(animal)+"] )",
+        addError(Error("get_ptr_connectionList(unsigned int ["+std::to_string(animal)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),animal,get_animals()-1,']')));
         //error_general("connectionList(unsigned int ["+std::to_string(animal)+"])",error_paramOutOfRange((unsigned int)0,animal,(unsigned int)0,animals()));
     }
@@ -980,7 +980,7 @@ void                    SaveNet::clearGenomList()
 }
 void                    SaveNet::clearExternParam()
 {
-    _extraParamName = std::vector<QString> ();
+    _extraParamName = std::vector<std::string> ();
     _extraParamValue = std::vector<double> ();
 }
 //----------ERROR
@@ -991,34 +991,34 @@ void                    SaveNet::addError(const Error &e)
     Error::print(_errorList[_errorList.size()-1]);
 }
 /*
-QString SaveNet::error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max)
+std::string SaveNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
     return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
-QString SaveNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+std::string SaveNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-QString SaveNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+std::string SaveNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-QString SaveNet::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
+std::string SaveNet::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
 {
     return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-void        SaveNet::error_general(QString function, QString cause)
+void        SaveNet::error_general(std::string function, std::string cause)
 {
     throw std::runtime_error("ERROR: SaveNet::" + function + "     " + cause);
 }
-void        SaveNet::error_general(QString function, std::runtime_error &e)
+void        SaveNet::error_general(std::string function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        SaveNet::error_general(QString function, QString cause, std::runtime_error &e)
+void        SaveNet::error_general(std::string function, std::string cause, std::runtime_error &e)
 {
-    QString error = "ERROR: SaveNet::" + function + "     " + cause;
-    error += "     --> "+QString(e.what());
+    std::string error = "ERROR: SaveNet::" + function + "     " + cause;
+    error += "     --> "+std::string(e.what());
     throw std::runtime_error(error);
 }
 */

@@ -1,14 +1,14 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.06.00"
-//                      Datum  02.02.2020
+#define    GENETICNET_VERSION "02.07.00"
+//                      Datum  25.09.2020
 
 #include "net.h"
 #include "savenet.h"
 
-#include <QDebug>
-#include <QObject>
+//#include <QDebug>
+
 
 #include <cstdlib>
 #include <pthread.h>
@@ -18,6 +18,21 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+
+#ifdef QT_APP
+  #include <QDebug>
+  #include <QObject>
+#endif
+
+#ifdef QDEBUG_H
+#define CONSOLE qDebug()
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
 
 #define GENETICNET_MIN_ANIMALS 2
 #define GENETICNET_MAX_ANIMALS 1000
@@ -38,11 +53,17 @@ struct thread_data_geneticNet {
    //long *delayMicros;
    unsigned int debugParam;
 };
-
+#ifdef QT_APP
 class GeneticNet    : public QObject
+#else
+class GeneticNet
+#endif
 {
-        Q_OBJECT
+        #ifdef QT_APP
+            Q_OBJECT
+        #endif
     public:
+#ifdef QT_APP
         GeneticNet(QObject *parent = nullptr);
         GeneticNet(unsigned int animals,
                    QObject *parent = nullptr);
@@ -61,6 +82,23 @@ class GeneticNet    : public QObject
                    bool enableAverage,
                    Activation func,
                    QObject *parent = nullptr);
+#else
+        GeneticNet();
+        GeneticNet(unsigned int animals);
+        GeneticNet(unsigned int animals,
+                   unsigned int inputs,
+                   unsigned int hiddenX,
+                   unsigned int hiddenY,
+                   unsigned int outputs);
+        GeneticNet(unsigned int animals,
+                   unsigned int inputs,
+                   unsigned int hiddenX,
+                   unsigned int hiddenY,
+                   unsigned int outputs,
+                   bool enableBias,
+                   bool enableAverage,
+                   Activation func);
+#endif
         ~GeneticNet();
 
         void                    set(unsigned int animals,
@@ -72,16 +110,16 @@ class GeneticNet    : public QObject
                                     bool enableAverage,
                                     Activation func);
 
-        void                    set_netFileName(QString filename);
-        QString                 get_netFileName();
-        void                    set_netFileEnding(QString fileEnding);
-        QString                 get_netFileEnding();
+        void                    set_netFileName(std::string filename);
+        std::string                 get_netFileName();
+        void                    set_netFileEnding(std::string fileEnding);
+        std::string                 get_netFileEnding();
         void                    loadFromNetFile();
-        void                    loadFromNetFile(QString filename);
-        void                    loadFromNetFile(QString filename,QString fileEnding);
+        void                    loadFromNetFile(std::string filename);
+        void                    loadFromNetFile(std::string filename,std::string fileEnding);
         void                    saveToNetFile();
-        void                    saveToNetFile(QString filename);
-        void                    saveToNetFile(QString filename,QString fileEnding);
+        void                    saveToNetFile(std::string filename);
+        void                    saveToNetFile(std::string filename,std::string fileEnding);
 
         void                    set_animals(unsigned int animals);
         unsigned int            get_animals();
@@ -150,7 +188,6 @@ class GeneticNet    : public QObject
 
 
         Net *operator[](unsigned int animal);
-        std::vector<Net*> get_netList_ptr();
 
         void                set_mutationFactor(double factor);
         void                set_mutationChangeWeight(double weight);
@@ -176,8 +213,8 @@ class GeneticNet    : public QObject
         NeuronID            addNeuron();
         NeuronID            addNeuron(Neuron *neuron);
 
-        QString             toString();
-        QStringList         toStringList();
+        std::string             toString();
+        std::vector<std::string>         toStringList();
 
 
 
@@ -196,10 +233,12 @@ class GeneticNet    : public QObject
         Error               get_error(unsigned int index);
         ErrorList           get_errorList() const;
         unsigned int        get_errorAmount() const;
+#ifdef QT_APP
     signals:
         void errorOccured(Error &e);
     private slots:
         void onNetError(unsigned int netID,Error &e);
+#endif
     private:
 
         void                init(unsigned int animals,
@@ -220,13 +259,13 @@ class GeneticNet    : public QObject
         static void *runThread_setupNet(void *threadarg);
         void addError(const Error &e);
        /* //----------ERROR
-        QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
-        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
-        void        error_general(QString function, QString cause);
-        void        error_general(QString function, std::runtime_error &e);
-        void        error_general(QString function, QString cause, std::runtime_error &e);
+        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        void        error_general(std::string function, std::string cause);
+        void        error_general(std::string function, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause, std::runtime_error &e);
         //---------------
 */
         bool         _needsCalculationUpdate;

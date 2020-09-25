@@ -1,43 +1,59 @@
 #ifndef ERROR_H
 #define ERROR_H
 //      Autor   Alex Krieg
-//      Version 00.00.00
-//      Datum   29.01.2020
+//      Version 00.01.00
+//      Datum   25.09.2020
 
-#include <QObject>
-#include <QDebug>
-#include <QString>
-#include <QStringList>
-#include <QList>
+#include <vector>
+
+#ifdef QT_APP
+  #include <QDebug>
+  #include <QObject>
+#endif
+
+#ifdef QDEBUG_H
+#define CONSOLE qDebug()
+#else
 #include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
 
 class Error;
 
-typedef QList<Error> ErrorList;
+typedef std::vector<Error> ErrorList;
 
+#ifdef QT_APP
 class Error : public QObject
+#else
+class Error
+#endif
 {
+#ifdef QT_APP
     Q_OBJECT
+#endif
     public:
        Error(const Error *err = nullptr);
        Error(const Error &err);
-       Error(const QString __namespace,const QStringList __messageList);
-       Error(const QString __namespace,const QString __message);
-       Error(const QString __message);
-       Error(const QStringList __messageList);
+       Error(const std::string __namespace,const std::vector<std::string> __messageList);
+       Error(const std::string __namespace,const std::string __message);
+       Error(const std::string __message);
+       Error(const std::vector<std::string> __messageList);
 
        ~Error();
        Error &operator=(const Error &e);
 
-       void setNamespace(const QString &space);
-       QString getNamespace() const ;
+       void setNamespace(const std::string &space);
+       std::string getNamespace() const ;
 
-       void addMessage(const QString &message);
-       void addMessageList(const QStringList &messageList);
-       QStringList getMessageList() const;
+       void addMessage(const std::string &message);
+       void addMessageList(const std::vector<std::string> &messageList);
+       std::vector<std::string> getMessageList() const;
 
-       QString toQString() const;
-       QStringList toQStringList() const;
+       std::string toString() const;
+       std::vector<std::string> toStringList() const;
 
       /*
             comparisonLower Must be '[' or ']'
@@ -51,18 +67,18 @@ class Error : public QObject
         void print();
 
     private:
-        QString _namespace; // where is the error occured?
-        QStringList _messageList;
+        std::string _namespace; // where is the error occured?
+        std::vector<std::string> _messageList;
 };
 namespace ErrorMessage{
     template<typename  T>
-    QString outOfRange(char comparisonLower,T minValue,T value,T maxValue,char comparisonHigher){
-        return " "+QString::number(value)+" Is out of range. Value must be in Range: "+
-                comparisonLower+QString::number(minValue)+":"+QString::number(maxValue)+comparisonHigher;
+    std::string outOfRange(char comparisonLower,T minValue,T value,T maxValue,char comparisonHigher){
+        return " "+std::to_string(value)+" Is out of range. Value must be in Range: "+
+                comparisonLower+std::to_string(minValue)+":"+std::to_string(maxValue)+comparisonHigher;
     }
 
-    extern QString listIsEmpty(QString varName);
-    extern QString updateNetFirst();
+    extern std::string listIsEmpty(std::string varName);
+    extern std::string updateNetFirst();
 }
 #endif // ERROR_H
 

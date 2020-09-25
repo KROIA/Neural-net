@@ -12,19 +12,25 @@ double BackpropNet::__dbg_time8 = 0;
 double BackpropNet::__dbg_time9 = 0;
 double BackpropNet::__dbg_time10 = 0;
 
+#ifdef QT_APP
 BackpropNet::BackpropNet(unsigned int ID
                          ,QObject *parent)
     :   Net(ID,parent)
+#else
+BackpropNet::BackpropNet(unsigned int ID)
+    :   Net(ID)
+#endif
 {
     this->init();
     try {
         this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-        this->addError(Error("BackpropNet",QString(e.what())));
+        this->addError(Error("BackpropNet",std::string(e.what())));
         //error_general("BackpropNet()",e);
     }
 
 }
+#ifdef QT_APP
 BackpropNet::BackpropNet(unsigned int ID,
                          unsigned int inputs,
                          unsigned int hiddenX,
@@ -32,22 +38,31 @@ BackpropNet::BackpropNet(unsigned int ID,
                          unsigned int outputs,
                          QObject *parent)
     :   Net(ID,inputs,hiddenX,hiddenY,outputs,parent)
+#else
+BackpropNet::BackpropNet(unsigned int ID,
+                         unsigned int inputs,
+                         unsigned int hiddenX,
+                         unsigned int hiddenY,
+                         unsigned int outputs)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs)
+#endif
 {
     this->init();
     try {
         this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-        /*error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
-                              "] , unsigned int ["+QString::number(hiddenX)+
-                              "] , unsigned int ["+QString::number(hiddenY)+
-                              "] , unsigned int ["+QString::number(outputs)+"])",e);*/
-        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
-                             "] , unsigned int ["+QString::number(hiddenX)+
-                             "] , unsigned int ["+QString::number(hiddenY)+
-                             "] , unsigned int ["+QString::number(outputs)+"]",
-                             QString(e.what())));
+        /*error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                              "] , unsigned int ["+std::to_string(hiddenX)+
+                              "] , unsigned int ["+std::to_string(hiddenY)+
+                              "] , unsigned int ["+std::to_string(outputs)+"])",e);*/
+        this->addError(Error("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                             "] , unsigned int ["+std::to_string(hiddenX)+
+                             "] , unsigned int ["+std::to_string(hiddenY)+
+                             "] , unsigned int ["+std::to_string(outputs)+"]",
+                             std::string(e.what())));
     }
 }
+#ifdef QT_APP
 BackpropNet::BackpropNet(unsigned int ID,
                          unsigned int inputs,
                          unsigned int hiddenX,
@@ -58,45 +73,56 @@ BackpropNet::BackpropNet(unsigned int ID,
                          Activation func,
                          QObject *parent)
     :   Net(ID,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func,parent)
+#else
+BackpropNet::BackpropNet(unsigned int ID,
+                         unsigned int inputs,
+                         unsigned int hiddenX,
+                         unsigned int hiddenY,
+                         unsigned int outputs,
+                         bool enableBias,
+                         bool enableAverage,
+                         Activation func)
+    :   Net(ID,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func)
+#endif
 {
     this->init();
     try {
         this->set_mutationFactor(0.1);
     } catch (std::runtime_error &e) {
-       /* error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
-                              "] , unsigned int ["+QString::number(hiddenX)+
-                              "] , unsigned int ["+QString::number(hiddenY)+
-                              "] , unsigned int ["+QString::number(outputs)+
-                              "] , bool ["+QString::number(enableBias)+
-                              "] , bool ["+QString::number(enableAverage)+
-                              "] , Activation ["+QString::number(func)+"])",e);*/
-        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
-                             "] , unsigned int ["+QString::number(hiddenX)+
-                             "] , unsigned int ["+QString::number(hiddenY)+
-                             "] , unsigned int ["+QString::number(outputs)+
-                             "] , bool ["+QString::number(enableBias)+
-                             "] , bool ["+QString::number(enableAverage)+
-                             "] , Activation ["+QString::number(func)+"])",
-                             QString(e.what())));
+       /* error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                              "] , unsigned int ["+std::to_string(hiddenX)+
+                              "] , unsigned int ["+std::to_string(hiddenY)+
+                              "] , unsigned int ["+std::to_string(outputs)+
+                              "] , bool ["+std::to_string(enableBias)+
+                              "] , bool ["+std::to_string(enableAverage)+
+                              "] , Activation ["+std::to_string(func)+"])",e);*/
+        this->addError(Error("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                             "] , unsigned int ["+std::to_string(hiddenX)+
+                             "] , unsigned int ["+std::to_string(hiddenY)+
+                             "] , unsigned int ["+std::to_string(outputs)+
+                             "] , bool ["+std::to_string(enableBias)+
+                             "] , bool ["+std::to_string(enableAverage)+
+                             "] , Activation ["+std::to_string(func)+"])",
+                             std::string(e.what())));
     }
     if(this->get_activationFunction() == Activation::Binary)
     {
-        /*error_general("BackpropNet(unsigned int ["+QString::number(inputs)+
-                      "] , unsigned int ["+QString::number(hiddenX)+
-                      "] , unsigned int ["+QString::number(hiddenY)+
-                      "] , unsigned int ["+QString::number(outputs)+
-                      "] , bool ["+QString::number(enableBias)+
-                      "] , bool ["+QString::number(enableAverage)+
-                      "] , Activation ["+QString::number(func)+"])","you cant use this activation function: Binary for this learn algorithm");
+        /*error_general("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                      "] , unsigned int ["+std::to_string(hiddenX)+
+                      "] , unsigned int ["+std::to_string(hiddenY)+
+                      "] , unsigned int ["+std::to_string(outputs)+
+                      "] , bool ["+std::to_string(enableBias)+
+                      "] , bool ["+std::to_string(enableAverage)+
+                      "] , Activation ["+std::to_string(func)+"])","you cant use this activation function: Binary for this learn algorithm");
         */
-        this->addError(Error("BackpropNet(unsigned int ["+QString::number(inputs)+
-                             "] , unsigned int ["+QString::number(hiddenX)+
-                             "] , unsigned int ["+QString::number(hiddenY)+
-                             "] , unsigned int ["+QString::number(outputs)+
-                             "] , bool ["+QString::number(enableBias)+
-                             "] , bool ["+QString::number(enableAverage)+
-                             "] , Activation ["+QString::number(func)+"])",
-                             QString("you cant use this activation function: Binary for this learn algorithm")));
+        this->addError(Error("BackpropNet(unsigned int ["+std::to_string(inputs)+
+                             "] , unsigned int ["+std::to_string(hiddenX)+
+                             "] , unsigned int ["+std::to_string(hiddenY)+
+                             "] , unsigned int ["+std::to_string(outputs)+
+                             "] , bool ["+std::to_string(enableBias)+
+                             "] , bool ["+std::to_string(enableAverage)+
+                             "] , Activation ["+std::to_string(func)+"])",
+                             std::string("you cant use this activation function: Binary for this learn algorithm")));
     }
 }
 
@@ -116,19 +142,19 @@ void        BackpropNet::set(unsigned int inputs,
     this->set_enableAverage(enableAverage);
     this->set_activationFunction(func);
 }
-void                    BackpropNet::set_netFileName(QString filename)
+void                    BackpropNet::set_netFileName(std::string filename)
 {
     _saveNet.set_filename(filename);
 }
-QString                 BackpropNet::get_netFileName()
+std::string                 BackpropNet::get_netFileName()
 {
     return _saveNet.get_filename();
 }
-void                    BackpropNet::set_netFileEnding(QString fileEnding)
+void                    BackpropNet::set_netFileEnding(std::string fileEnding)
 {
     _saveNet.set_fileEnding(fileEnding);
 }
-QString                 BackpropNet::get_netFileEnding()
+std::string                 BackpropNet::get_netFileEnding()
 {
     return _saveNet.get_fileEnding();
 }
@@ -139,7 +165,7 @@ void                    BackpropNet::loadFromNetFile()
     try {
         loadSucceed = _saveNet.loadFile();
     } catch (std::runtime_error &e) {
-       __DEBUG_BACKPROPNET(this,"loadFromNetFile()"," Warning: "+QString(e.what()));
+       __DEBUG_BACKPROPNET(this,"loadFromNetFile()"," Warning: "+std::string(e.what()));
         return;
     }
     if(loadSucceed)
@@ -162,18 +188,18 @@ void                    BackpropNet::loadFromNetFile()
             //this->updateNetConfiguration();
             //this->genom(_saveNet.genom(genomSelection));
         } catch (std::runtime_error &e) {
-            addError(Error("loadFromNetFile(QString ["+_saveNet.get_filename()+"] , QString ["+_saveNet.get_fileEnding()+"] )",
-                          {"unable to apply the settings. Maybe the file is damaged.",
+            addError(Error("loadFromNetFile(std::string ["+_saveNet.get_filename()+"] , std::string ["+_saveNet.get_fileEnding()+"] )",
+                          std::vector<std::string>{"unable to apply the settings. Maybe the file is damaged.",
                            e.what()}));
         }
     }
 }
-void                    BackpropNet::loadFromNetFile(QString filename)
+void                    BackpropNet::loadFromNetFile(std::string filename)
 {
     this->set_netFileName(filename);
     this->loadFromNetFile();
 }
-void                    BackpropNet::loadFromNetFile(QString filename,QString fileEnding)
+void                    BackpropNet::loadFromNetFile(std::string filename,std::string fileEnding)
 {
     this->set_netFileName(filename);
     this->set_netFileEnding(fileEnding);
@@ -194,16 +220,16 @@ void                    BackpropNet::saveToNetFile()
         _saveNet.set_ptr_neuronsOfNet(this->get_ID(),this->get_ptr_allNeurons());
         _saveNet.saveFile();
     } catch (std::runtime_error &e) {
-        addError(Error("saveToNetFile()",QString(e.what())));
+        addError(Error("saveToNetFile()",std::string(e.what())));
         //error_general("saveToNetFile()",e);
     }
 }
-void                    BackpropNet::saveToNetFile(QString filename)
+void                    BackpropNet::saveToNetFile(std::string filename)
 {
     this->set_netFileName(filename);
     this->saveToNetFile();
 }
-void                    BackpropNet::saveToNetFile(QString filename,QString fileEnding)
+void                    BackpropNet::saveToNetFile(std::string filename,std::string fileEnding)
 {
     this->set_netFileName(filename);
     this->set_netFileEnding(fileEnding);
@@ -218,7 +244,7 @@ double                  BackpropNet::get_netError()
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        addError(Error("get_netError()",QString(e.what())));
+        addError(Error("get_netError()",std::string(e.what())));
     }
     return _netError;
 }
@@ -227,7 +253,7 @@ std::vector<double>     BackpropNet::get_outputError()
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        addError(Error("get_outputError()",QString(e.what())));
+        addError(Error("get_outputError()",std::string(e.what())));
     }
     return _outputError;
 }
@@ -235,16 +261,16 @@ double                  BackpropNet::get_outputError(unsigned int output)
 {
     if(output >= this->get_outputNeurons())
     {
-        addError(Error("get_outputError(unsigned int ["+QString::number(output)+"] )",
+        addError(Error("get_outputError(unsigned int ["+std::to_string(output)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),output,this->get_outputNeurons()-1,']')));
-        //error_general("outputError(unsigned int ["+QString::number(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,this->outputNeurons()-1));
+        //error_general("outputError(unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,this->outputNeurons()-1));
     }
     try {
         calc_netError();
     } catch (std::runtime_error &e) {
-        addError(Error("get_outputError(unsigned int ["+QString::number(output)+"] )",
-                       QString(e.what())));
-        //error_general("outputError(unsigned int ["+QString::number(output)+"] )",e);
+        addError(Error("get_outputError(unsigned int ["+std::to_string(output)+"] )",
+                       std::string(e.what())));
+        //error_general("outputError(unsigned int ["+std::to_string(output)+"] )",e);
     }
     return _outputError[output];
 }
@@ -252,9 +278,9 @@ void                    BackpropNet::set_mutationFactor(double mutationFactor)
 {
     if(mutationFactor <= 0)
     {
-        addError(Error("set_mutationFactor(double ["+QString::number(mutationFactor)+"] )",
-                       QString("parameter 0 is out of range. MutationFactor has to be greather than 0")));
-        //error_general("mutationFactor(double ["+QString::number(mutationFactor)+"] )","parameter 0 is out of range. MutationFactor has to be greather than 0");
+        addError(Error("set_mutationFactor(double ["+std::to_string(mutationFactor)+"] )",
+                       std::string("parameter 0 is out of range. MutationFactor has to be greather than 0")));
+        //error_general("mutationFactor(double ["+std::to_string(mutationFactor)+"] )","parameter 0 is out of range. MutationFactor has to be greather than 0");
     }
     _mutationFactor = mutationFactor;
 }
@@ -267,10 +293,10 @@ void                    BackpropNet::set_expected(std::vector<double> expected)
     if(static_cast<unsigned int>(expected.size()) != this->get_outputNeurons())
     {
         addError(Error("get_outputNeurons()",
-                       QString("parameter 0 has the wrong size: "+
-                               QString::number(expected.size())+" std::vector.size() should be: "+
-                               QString::number(this->get_outputNeurons()))));
-        //error_general("expected(std::vector<double>)","parameter 0 has the wrong size: "+QString::number(expected.size())+" std::vector.size() should be: "+QString::number(this->outputNeurons()));
+                       std::string("parameter 0 has the wrong size: "+
+                               std::to_string(expected.size())+" std::vector.size() should be: "+
+                               std::to_string(this->get_outputNeurons()))));
+        //error_general("expected(std::vector<double>)","parameter 0 has the wrong size: "+std::to_string(expected.size())+" std::vector.size() should be: "+std::to_string(this->outputNeurons()));
     }
     _needsCalculationUpdate   = true;
     _expected = expected;
@@ -278,7 +304,7 @@ void                    BackpropNet::set_expected(std::vector<double> expected)
         calc_netError();
     } catch (std::runtime_error &e) {
         addError(Error("get_outputNeurons()",
-                       QString(e.what())));
+                       std::string(e.what())));
         //error_general("expected(std::vector<double>)",e);
     }
 }
@@ -289,7 +315,7 @@ void                    BackpropNet::learn()
     std::chrono::duration<double> __clock_time_span;
     std::chrono::high_resolution_clock::time_point __clock_start = std::chrono::high_resolution_clock::now();
 
-   /* if(__output_error.size() == 0)
+    if(__output_error.size() == 0)
     {
         __output_error = std::vector<double>(this->get_outputNeurons());
     }
@@ -298,7 +324,7 @@ void                    BackpropNet::learn()
     if(__hidden_error.size() == 0)
     {
         __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
-    }*/
+    }
     //std::vector<std::vector<double>  > __hidden_error(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
 
     for(unsigned int y=0; y<this->get_outputNeurons(); y++)
@@ -355,7 +381,7 @@ void                    BackpropNet::learn()
                 }
                 if( std::isnan(this->get_ptr_hiddenNeuron(0,y2)->get_weight(y) + (__hidden_error[0][y2] * _mutationFactor * output)))
                 {
-                    qDebug() << "nan";
+                    CONSOLE<< "nan";
                 }
                 this->get_ptr_hiddenNeuron(0,y2)->set_weight(y,this->get_ptr_hiddenNeuron(0,y2)->get_weight(y) + (__hidden_error[0][y2] * _mutationFactor * output));
             }
@@ -437,7 +463,9 @@ void                    BackpropNet::learn()
         __dbg_time6 = __dbg_time6*filter+(1-filter)*__clock_time_span.count()*1000;
         __clock_start = std::chrono::high_resolution_clock::now();
     }
-    emit weightValuesChanged(this);
+	#ifdef QT_APP
+		emit weightValuesChanged(this);
+	#endif
 }
 void                    BackpropNet::learn(std::vector<double> expected)
 {
@@ -449,7 +477,7 @@ void                    BackpropNet::calc_netError()
 {
     if(_expected.size() == 0)
     {
-        addError(Error("calc_netError()",QString("no expected output values defined. first set them by BackpropNet::set_expected(std::vector<double>)")));
+        addError(Error("calc_netError()",std::string("no expected output values defined. first set them by BackpropNet::set_expected(std::vector<double>)")));
         return;
         //error_general("calc_netError()","no expected output values defined. first set them by BackpropNet::expected(std::vector<double>)");
     }
@@ -469,10 +497,10 @@ double                  BackpropNet::derivative(double netinput)
     {
         case Activation::Binary:
         {
-            addError(Error("derivative(double ["+QString::number(netinput)+"])",
+            addError(Error("derivative(double ["+std::to_string(netinput)+"])",
                            "you cant use this activation function: Binary for this learn algorithm"));
             return 0;
-            //error_general("derivative(double ["+QString::number(netinput)+"] )","you cant use this activation function: Binary for this learn algorithm");
+            //error_general("derivative(double ["+std::to_string(netinput)+"] )","you cant use this activation function: Binary for this learn algorithm");
         }
         case Activation::Gaussian:
         {
@@ -500,7 +528,7 @@ double                  BackpropNet::derivative(double netinput)
 
 void                    BackpropNet::set_costumNeurons(unsigned int costum)
 {
-    printIllegalFunctionMessage("set_costumNeurons(unsigned int ["+QString::number(costum)+"])");
+    printIllegalFunctionMessage("set_costumNeurons(unsigned int ["+std::to_string(costum)+"])");
 }
 unsigned int            BackpropNet::get_costumNeurons()
 {
@@ -514,11 +542,11 @@ unsigned int            BackpropNet::get_costumConnections()
 }
 void                    BackpropNet::set_costumConnections(unsigned int connections)
 {
-    printIllegalFunctionMessage("set_costumConnections(unsigned int ["+QString::number(connections)+"])");
+    printIllegalFunctionMessage("set_costumConnections(unsigned int ["+std::to_string(connections)+"])");
 }
 /*void                 BackpropNet::set_neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons)
 {
-    printIllegalFunctionMessage("set_neurons(unsigned int ["+QString::number(neurons)+"] ,unsigned int ["+QString::number(hiddenNeurons)+"] ,unsigned int ["+QString::number(outputNeurons)+"] ,unsigned int ["+QString::number(costumNeurons)+"] )");
+    printIllegalFunctionMessage("set_neurons(unsigned int ["+std::to_string(neurons)+"] ,unsigned int ["+std::to_string(hiddenNeurons)+"] ,unsigned int ["+std::to_string(outputNeurons)+"] ,unsigned int ["+std::to_string(costumNeurons)+"] )");
 }*/
 Neuron              *BackpropNet::get_ptr_costumNeuron(NeuronID ID)
 {
@@ -608,21 +636,24 @@ unsigned int        BackpropNet::get_errorAmount() const
     return unsigned(_errorList.size());
 }
 
+#ifdef QT_APP
 void BackpropNet::onNetConfigurationUpdate()
 {
     __hidden_error.clear();
     __output_error.clear();
 }
+#endif
+#ifdef QT_APP
 void BackpropNet::onNetConfigurationUpdateFinished()
 {
     __output_error = std::vector<double>(this->get_outputNeurons());
     __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
 }
+#endif
 
-
-void BackpropNet::printIllegalFunctionMessage(QString func)
+void BackpropNet::printIllegalFunctionMessage(std::string func)
 {
-    addError(Error(func,QString("THIS FUNCTION IS NOT SUPPORTED IN THE BACKPROBNET")));
+    addError(Error(func,std::string("THIS FUNCTION IS NOT SUPPORTED IN THE BACKPROBNET")));
     __DEBUG_BACKPROPNET(this,func,"THIS FUNCTION IS NOT SUPPORTED IN THE BACKPROBNET");
 }
 void        BackpropNet::init()
@@ -632,46 +663,51 @@ void        BackpropNet::init()
     _needsConfigurationUpdate = true;
     this->set_netFileName("netFile");
     this->set_netFileEnding("bnet");
-    connect(this,SIGNAL(netConfigurationUpdateStarted()),this,SLOT(onNetConfigurationUpdate()));
-    connect(this,SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationUpdateFinished()));
+	#ifdef QT_APP
+		connect(this,SIGNAL(netConfigurationUpdateStarted()),this,SLOT(onNetConfigurationUpdate()));
+		connect(this,SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationUpdateFinished()));
+	#endif
+
 }
 void        BackpropNet::addError(const Error &e)
 {
     _errorList.push_back(e);
     _errorList[_errorList.size()-1].setNamespace("BackpropNet::"+_errorList[_errorList.size()-1].getNamespace());
     Error::print(_errorList[_errorList.size()-1]);
+#ifdef QT_APP
     emit errorOccured(this->get_ID(),_errorList[_errorList.size()-1]);
+#endif
 }
 /*
 
-QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max)
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
-    return " parameter "+QString::number(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
-QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-QString BackpropNet::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
+std::string BackpropNet::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
-void        BackpropNet::error_general(QString function, QString cause)
+void        BackpropNet::error_general(std::string function, std::string cause)
 {
     throw std::runtime_error("ERROR: BackpropNet::" + function + "     " + cause);
 }
-void        BackpropNet::error_general(QString function, std::runtime_error &e)
+void        BackpropNet::error_general(std::string function, std::runtime_error &e)
 {
     error_general(function,"",e);
 }
-void        BackpropNet::error_general(QString function, QString cause, std::runtime_error &e)
+void        BackpropNet::error_general(std::string function, std::string cause, std::runtime_error &e)
 {
-    QString error = "ERROR: BackpropNet::" + function + "     " + cause;
-    error += "      --> "+QString(e.what());
+    std::string error = "ERROR: BackpropNet::" + function + "     " + cause;
+    error += "      --> "+std::string(e.what());
     throw std::runtime_error(error);
 }
 */

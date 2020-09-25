@@ -8,7 +8,7 @@ Error::Error(const Error *err)
         this->_messageList  = err->_messageList;
     }else{
         this->_namespace    =   "";
-        this->_messageList  =   QStringList();
+        this->_messageList  =   std::vector<std::string>();
     }
 }
 Error::Error(const Error &err)
@@ -16,23 +16,23 @@ Error::Error(const Error &err)
     this->_namespace    = err._namespace;
     this->_messageList  = err._messageList;
 }
-Error::Error(const QString __namespace,const QStringList __messageList)
+Error::Error(const std::string __namespace,const std::vector<std::string> __messageList)
 {
     this->_namespace    =   __namespace;
     this->_messageList  =   __messageList;
 }
-Error::Error(const QString __namespace,const QString __message)
+Error::Error(const std::string __namespace,const std::string __message)
 {
     this->_namespace    =   __namespace;
-    this->_messageList  = QStringList();
+    this->_messageList  = std::vector<std::string>();
     this->_messageList.push_back(__message);
 }
-Error::Error(const QString __message)
+Error::Error(const std::string __message)
 {
     this->_namespace    =   __message;
-    this->_messageList  =   QStringList();
+    this->_messageList  =   std::vector<std::string>();
 }
-Error::Error(const QStringList __messageList)
+Error::Error(const std::vector<std::string> __messageList)
 {
     this->_namespace    =   "";
     this->_messageList  =   __messageList;
@@ -50,63 +50,64 @@ Error &Error::operator=(const Error &e)
     return *this;
 }
 
-void Error::setNamespace(const QString &space)
+void Error::setNamespace(const std::string &space)
 {
     this->_namespace    =   space;
 }
-QString Error::getNamespace() const
+std::string Error::getNamespace() const
 {
     return this->_namespace;
 }
 
-void Error::addMessage(const QString &message)
+void Error::addMessage(const std::string &message)
 {
     this->_messageList.push_back(message);
 }
-void Error::addMessageList(const QStringList &messageList)
+void Error::addMessageList(const std::vector<std::string> &messageList)
 {
-    this->_messageList.append(messageList);
+    this->_messageList.insert(this->_messageList.end(),messageList.begin(),messageList.end());
 }
-QStringList Error::getMessageList() const
+std::vector<std::string> Error::getMessageList() const
 {
     return _messageList;
 }
 
-QString Error::toQString() const
+std::string Error::toString() const
 {
-    QString message = "ERROR: "+_namespace+":\n";
-    for(int line=0; line <_messageList.size(); line++)
+    std::string message = "ERROR: "+_namespace+":\n";
+    for(unsigned int line=0; line <_messageList.size(); line++)
     {
         message+=_messageList[line]+"\n";
     }
     return message;
 }
-QStringList Error::toQStringList() const
+std::vector<std::string> Error::toStringList() const
 {
-    QStringList messageList;
+    std::vector<std::string> messageList;
     messageList.reserve(_messageList.size()+1);
     messageList.push_back("ERROR: "+_namespace+":\n");
-    messageList.append(_messageList);
+    messageList.insert(messageList.end(),_messageList.begin(),_messageList.end());
     return messageList;
 }
 void Error::print(Error &e)
 {
-    std::cout << "Error: "<<e.getNamespace().toStdString();
-    for(int a=0; a<e.getMessageList().size(); a++)
+    CONSOLE << "Error: "<<e.getNamespace();
+    for(unsigned int a=0; a<e.getMessageList().size(); a++)
     {
-        std::cout << "   "<<e.getMessageList()[a].toStdString();
+        CONSOLE << "   "<<e.getMessageList()[a];
     }
+    CONSOLE << "\n";
 }
 void Error::print()
 {
     print(*this);
 }
 
-QString ErrorMessage::listIsEmpty(QString varName)
+std::string ErrorMessage::listIsEmpty(std::string varName)
 {
         return varName+" is empty";
 }
-QString ErrorMessage::updateNetFirst()
+std::string ErrorMessage::updateNetFirst()
 {
     return "Update required: call updateNetConfiguration() first!";
 }
