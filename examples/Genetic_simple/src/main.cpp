@@ -1,3 +1,7 @@
+// Autor        Alex Krieg
+// Datum        28.09.2020
+// Version      00.01.00
+
 #include <QCoreApplication>
 #include <enviroment.h>
 #include <iostream>

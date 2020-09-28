@@ -1,3 +1,7 @@
+// Autor        Alex Krieg
+// Datum        28.09.2020
+// Version      00.01.00
+
 #include <QCoreApplication>
 #include <backpropnet.h>
 #include <iostream>
@@ -59,26 +63,6 @@ int main(int argc, char *argv[])
 #else
     generateTone();
 #endif
-
-  //  net->loadFromNetFile();
-  //  net->set_mutationFactor(0.1);
-    //net->connectNeuronViaID(0,2);
-  //  net->updateNetConfiguration();
-  //  net->saveToNetFile();
-
-
-    /*genomlogFile = fopen("genom.csv","r");
-    if(!genomlogFile)
-    {
-        fclose(genomlogFile);
-        genomlogFile = fopen("genom.csv","w");
-        for(unsigned int a=0; a<net->get_genomsize(); a++)
-        {
-            fprintf(genomlogFile,"w%i;",a+1);
-        }
-        fprintf(genomlogFile,"\n");
-        fclose(genomlogFile);
-    }*/
     std::vector<double> genom;
     std::vector<double> output;
     printf("net done, press enter\n");
@@ -333,10 +317,10 @@ void printNet(Net *net)
 {
     for(unsigned int b=0; b<net->get_neurons(); b++)
     {
-    QStringList    list = net->get_ptr_neuron_viaID(b)->toStringList();
-    for(int a=0; a<list.size(); a++)
+    std::vector<std::string>    list = net->get_ptr_neuron_viaID(b)->toStringList();
+    for(size_t a=0; a<list.size(); a++)
     {
-        printf(list[a].toStdString().c_str());
+        printf(list[a].c_str());
     }
     printf("------------------------------------\n");
     }

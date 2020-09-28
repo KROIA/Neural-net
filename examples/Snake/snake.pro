@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui charts
-
+QT       += core gui charts qml quick quickwidgets sql quickcontrols2
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = snake
@@ -30,26 +29,48 @@ DLL_buildPath = bin/64bit/build-Release
 # Qect.dll : https://github.com/KROIA/Rect
 # geometry : https://github.com/KROIA/Geometry
 
+#username     = Hannes
+#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #change your PC-username
+#username     = SCHEH
+#QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
+
+#username     = Hannes
+#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 username     = AlexKrieg
-QT_work_dir  = C:/Users/$$username/Documents/QT
+QT_work_dir  = E:/Dokumente/QT
 geometryPath = $$QT_work_dir/lib/Geometry
 rectPath     = $$QT_work_dir/DLL/Rect
 configPath   = $$QT_work_dir/DLL/Config
 
+#geometryPath = $$QT_work_dir/lib/Geometry
+#rectPath     = $$QT_work_dir/DLL/Rect
+#configPath   = $$QT_work_dir/DLL/Config
+
+
+
+#username     = AlexKrieg
+#QT_work_dir  = C:/Users/$$username/Documents/QT
+
+#geometryPath = $$QT_work_dir/lib/Geometry
+#rectPath     = $$QT_work_dir/DLL/Rect
+#configPath   = $$QT_work_dir/DLL/Config
+
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
-      $$configPath//$$DLL_buildPath/Config.dll
+      $$configPath/$$DLL_buildPath/Config.dll
 
 incPath = inc
 srcPath = src
 
 netIncPath = ../../inc
 netSrcPath = ../../src
+
 INCLUDEPATH += $$netIncPath \
                $$incPath \
                $$rectPath \
                $$geometryPath \
                $$configPath \
+               $$visuInc
 
 
 SOURCES += \
@@ -66,7 +87,7 @@ SOURCES += \
     $$srcPath/player.cpp \
     $$srcPath/food.cpp \
     $$srcPath/maptile.cpp \
-    $$srcPath/environment.cpp
+    $$srcPath/environment.cpp \
 
 HEADERS += \
     $$incPath/snake.h \
@@ -77,7 +98,6 @@ HEADERS += \
     $$incPath/environment.h \
     $$netIncPath/net.h \
     $$netIncPath/neuron.h \
-    $$netIncPath/activation.h \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h \
     $$netIncPath/geneticnet.h \
@@ -89,4 +109,5 @@ FORMS += \
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+!isEmpty(target.path): INSTALLS += target qml
+

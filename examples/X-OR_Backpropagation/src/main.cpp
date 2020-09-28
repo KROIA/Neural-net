@@ -1,3 +1,7 @@
+// Autor        Alex Krieg
+// Datum        28.09.2020
+// Version      00.01.00
+
 #include <QCoreApplication>
 #include <backpropnet.h>
 #include <iostream>
@@ -38,7 +42,6 @@ class ErrorHandler;
 
 static std::vector<std::vector<std::vector<double> >   > _genomCompareList;
 static std::vector<std::vector<double>  >_runtimeList;
-static unsigned int reserveSize = 10;
 
 
 //static ErrorHandler    *errorHandler;
@@ -84,7 +87,6 @@ int main(int argc, char *argv[])
 
     system("cls");
     unsigned long learningSteps = 0;
-    clock_t startTime = clock();
     t1 = std::chrono::high_resolution_clock::now();
     double averageCalcTime = 0;
 
@@ -94,9 +96,9 @@ int main(int argc, char *argv[])
         if(net->get_errorAmount() != 0)
         {
             ErrorList errors = net->get_errorList();
-            for(int error=0; error<errors.size(); error++)
+            for(size_t error=0; error<errors.size(); error++)
             {
-                std::cout << "Error: "<<errors[error].toQString().toStdString();
+                std::cout << "Error: "<<errors[error].toString();
             }
             net->clearErrors();
             getchar();
@@ -178,57 +180,13 @@ void printNet(Net *net)
 {
     for(unsigned int b=0; b<net->get_neurons(); b++)
     {
-    QStringList    list = net->get_ptr_neuron_viaID(b)->toStringList();
-    for(int a=0; a<list.size(); a++)
+    vector<std::string>    list = net->get_ptr_neuron_viaID(b)->toStringList();
+    for(unsigned int a=0; a<list.size(); a++)
     {
-        printf(list[a].toStdString().c_str());
+        printf(list[a].c_str());
     }
     printf("------------------------------------\n");
     }
-   /* printf("=================================================================================\n");
-    printf("Input neurons:\n");
-    printf("------------------\n");
-    for(unsigned int y=0; y<net->hiddenNeuronsY(); y++)
-    {
-            printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int i=0; i<net->hiddenNeuron(0,y)->inputs(); i++)
-        {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->hiddenNeuron(0,y)->input(i),net->hiddenNeuron(0,y)->weight(i));
-        }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->hiddenNeuron(0,y)->output());
-            printf("---------------------------------------------------------------------------------\n");
-    }
-    printf("=================================================================================\n");
-    printf("Hidden neurons:\n");
-    printf("------------------\n");
-    for(unsigned int x=1; x<net->hiddenNeuronsX(); x++)
-    {
-        for(unsigned int y=0; y<net->hiddenNeuronsY(); y++)
-        {
-                printf("\tneuron x: %i y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",x,y);
-            for(unsigned int b=0; b<net->hiddenNeuron(x,y)->inputs(); b++)
-            {
-                printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->hiddenNeuron(x,y)->input(b),net->hiddenNeuron(x,y)->weight(b));
-            }
-                printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->hiddenNeuron(x,y)->output());
-                printf("---------------------------------------------------------------------------------\n");
-        }
-    }
-    printf("=================================================================================\n");
-    printf("Output neurons:\n");
-    printf("------------------\n");
-    for(unsigned int y=0; y<net->outputNeurons(); y++)
-    {
-        printf("\tneuron      y: %i \t|\tinput\t|\tweight\t|\toutput\t|\n",y);
-        for(unsigned int b=0; b<net->outputNeuron(y)->inputs(); b++)
-        {
-            printf("\t                \t|\t %.2f \t|\t %.2f \t|\t      \t|\n",net->outputNeuron(y)->input(b),net->outputNeuron(y)->weight(b));
-        }
-            printf("\t                \t|\t      \t|\t      \t|\t %.2f \t|\n",net->output(y));
-            printf("---------------------------------------------------------------------------------\n");
-    }
-    printf("=================================================================================\n");
-*/
 }
 void setupTrainingSet()
 {

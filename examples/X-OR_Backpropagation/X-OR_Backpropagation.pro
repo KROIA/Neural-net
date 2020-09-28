@@ -42,6 +42,5 @@ HEADERS += \
     $$netIncPath/neuron.h \
     $$netIncPath/activation.h \
     $$netIncPath/backpropnet.h \
-    $$netIncPath/geneticnet.h \
     $$netIncPath/savenet.h \
     $$netIncPath/error.h

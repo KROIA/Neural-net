@@ -12,8 +12,8 @@ Snake::Snake(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QString version = "01.01.01";
-    QString datum   = "25.05.2020";
+    QString version = "01.01.03";
+    QString datum   = "28.09.2020";
 
     char cwd[MAX_PATH+1];
     _getcwd(cwd,MAX_PATH);
@@ -35,7 +35,7 @@ Snake::Snake(QWidget *parent) :
     // comfigParam
     bool enableKillreward   = false;
     unsigned int hiddenX    = 1;
-    unsigned int hiddenY    = 5;
+    unsigned int hiddenY    = 2;
     unsigned int animals    = 100;
     _respawnAmount          = 3;
     int mapSizeX            = 100;
@@ -44,9 +44,9 @@ Snake::Snake(QWidget *parent) :
     double net_mutationFactor = 0.05;
     double net_mutationChangeWeight = 0.1;
     unsigned int enviromentTileSize = 6;
-    unsigned int enviromentTileSpace = 1;
+    unsigned int enviromentTileSpace = 0;
 
-    unsigned int versusEnviromentTileSize = 30;
+    unsigned int versusEnviromentTileSize = 20;
     unsigned int versusEnviromentTileSpace = 2;
 
     //end comfigParam
@@ -95,7 +95,7 @@ Snake::Snake(QWidget *parent) :
     unsigned int outputs = 3;
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Gaussian);
     net->set_bias(true);
-    net->loadFromNetFile(netFileName,"net");
+    net->loadFromNetFile(netFileName.toStdString(),"net");
     double gen = 0;
     try {
         net->get_ptr_saveNet()->get_ExtraParam("generation",gen);
@@ -126,7 +126,7 @@ Snake::Snake(QWidget *parent) :
     _backpropNet->updateNetConfiguration();
 
     //-------additional connections
- /*   try{
+    /*try{
     net->connectNeuronViaID(0,0,false);
     net->connectNeuronViaID(20,1,false);
     net->connectNeuronViaID(21,2,false);
@@ -159,7 +159,7 @@ Snake::Snake(QWidget *parent) :
     _versusEnvironment->scale(1);
     _versusEnvironment->tileSize(versusEnviromentTileSize);
     _versusEnvironment->tileSpace(versusEnviromentTileSpace);
-    _versusEnvironment->drawPos(QPoint(450,15));
+    _versusEnvironment->drawPos(QPoint(420,15));
 
     _versusEnvironment->player(0)->globalView(true);
     _versusEnvironment->player(0)->standardColor(QColor(0,100,200));
@@ -320,7 +320,6 @@ Snake::Snake(QWidget *parent) :
     _record_stepInterval = ui->record_stepInterval_spinbox->value();
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
-
     qDebug() << "Setup done";
 }
 
@@ -518,10 +517,10 @@ void Snake::timerEvent()
 }
 void Snake::timerEvent2()
 {
-        QStringList data = net->toStringList();
-        for(int a=0; a<data.size(); a++)
+        std::vector<std::string> data = net->toStringList();
+        for(size_t a=0; a<data.size(); a++)
         {
-            qDebug() << data[a];
+            //qDebug() << data[a];
         }
         double filter = 0.9;
         _genPerSecond =(double)  filter*_genPerSecond + (1-filter)*(1000*_genPerSecCounter/(double)_updateTimer2->interval());
@@ -1467,7 +1466,6 @@ void Snake::on_toggleDisplay_pushbutton_clicked()
         _versusEnvironment->showInfoText(false);
         _environment->showInfoText(false);
         _backpropTrainingEnvironment->showInfoText(false);
-
         return;
     }
 
@@ -1606,7 +1604,7 @@ void Snake::on_backpropTraining_pushButton_clicked()
 }
 void Snake::on_selectedSnake_slider_valueChanged(int value)
 {
-    _selectedSnake = value-1;
+    _selectedSnake = value;
 }
 
 void Snake::modeReset()

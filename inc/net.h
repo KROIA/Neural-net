@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.05.00"
-//              Datum   02.02.2020
+#define    NET_VERSION "02.06.01"
+//              Datum   25.09.2020
 
 /*
  Some functions may throw errors.
@@ -10,24 +10,25 @@
 */
 
 //  DEBUGING
-//#define _DEBUG_NET_ONLY_ID 0
+#define _DEBUG_NET_ONLY_ID 0
 //#define _DEBUG_NET_ALL
 //#define _DEBUG_NET_RUN
 //#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
 #define _DEBUG_NET_TIMING
 //#define _DEBUG_NET_CONNECT
+//#define _DEBUG_NET_CALCULATION_ORDER_LIST
 
 
-#ifdef _DEBUG_NET_ALL
-#ifndef _DEBUG_NET_RUN
-#define _DEBUG_NET_RUN
-#endif
-#ifndef _DEBUG_NET_UPDATE_NET_CONFIGURATION
-#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
-#endif
+//#ifdef _DEBUG_NET_ALL
+//#ifndef _DEBUG_NET_RUN
+//#define _DEBUG_NET_RUN
+//#endif
+//#ifndef _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#define _DEBUG_NET_UPDATE_NET_CONFIGURATION
+//#endif
 #ifndef _DEBUG_NET_TIMING
 #define _DEBUG_NET_TIMING
-#endif
+//#endif
 #ifndef _DEBUG_NET_CONNECT
 #define _DEBUG_NET_CONNECT
 #endif
@@ -37,11 +38,23 @@
 #include "neuron.h"
 #include <math.h>
 #include <random>
-#include <iostream>
 #include <time.h>
-#include <QDebug>
-#include <QString>
-#include <QStringList>
+
+#ifdef QT_APP
+  #include <QDebug>
+#endif
+
+#ifdef QDEBUG_H
+#ifndef CONSOLE
+#define CONSOLE qDebug()
+#endif
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
 
 #include <error.h>
 
@@ -57,8 +70,8 @@
 #define NET_MIN_OUTPUTNEURONS 1
 
 #define NET_MAX_INPUTNEURONS 10000
-#define NET_MAX_HIDDENNEURONS_X 100
-#define NET_MAX_HIDDENNEURONS_Y 100
+#define NET_MAX_HIDDENNEURONS_X 1000
+#define NET_MAX_HIDDENNEURONS_Y 1000
 #define NET_MAX_OUTPUTNEURONS 200
 
 #define NET_MIN_NEURONS 1
@@ -67,10 +80,17 @@
 
 
 
+#ifdef QT_APP
 class Net : public QObject
+#else
+class Net
+#endif
 {
+#ifdef QT_APP
         Q_OBJECT
+#endif
     public:
+#ifdef QT_APP
         Net(unsigned int ID = 0,
             QObject *parent = nullptr);
         Net(unsigned int ID,
@@ -88,6 +108,22 @@ class Net : public QObject
             bool enableAverage,
             Activation func,
             QObject *parent = nullptr);
+#else
+        Net(unsigned int ID = 0);
+        Net(unsigned int ID,
+            unsigned int inputs,
+            unsigned int hiddenX,
+            unsigned int hiddenY,
+            unsigned int outputs);
+        Net(unsigned int ID,
+            unsigned int inputs,
+            unsigned int hiddenX,
+            unsigned int hiddenY,
+            unsigned int outputs,
+            bool enableBias,
+            bool enableAverage,
+            Activation func);
+#endif
         ~Net();
 
         void                    set_ID(unsigned int ID);
@@ -99,6 +135,7 @@ class Net : public QObject
         unsigned int            get_hiddenNeuronsX();
         void                    set_hiddenNeuronsY(unsigned int hiddenY);   //update
         unsigned int            get_hiddenNeuronsY();
+        unsigned int            get_hiddenNeurons();
         void                    set_outputNeurons(unsigned int outputs);    //update
         unsigned int            get_outputNeurons();
         //void                    set_costumNeurons(unsigned int costum);
@@ -130,6 +167,7 @@ class Net : public QObject
         void                    set_input(std::vector<double> inputList);
         std::vector<double>     get_input();
 
+        std::vector<double>     get_hidden();// Alle outpus der Hiddenneuronen
         double                  get_hidden(unsigned int hiddenX, unsigned int hiddenY);
         std::vector<double>     get_hiddenX(unsigned int hiddenX);  // |    Alle in einer Spalte
         std::vector<double>     get_hiddenY(unsigned int hiddenY);  // --   Alle in einer Reihe
@@ -151,6 +189,8 @@ class Net : public QObject
         std::vector<double>     get_output();
 
         void                    run();
+
+        bool                    needsUpdate();
         void                    updateNetConfiguration();
         /*  Needed after every change in the Net-structure like
          *  inputNeurons()
@@ -161,13 +201,14 @@ class Net : public QObject
         void                    addConnection(std::vector<Connection> connections);                //update
         void                    set_connectionList(std::vector<Connection> connections);           //update
         std::vector<Connection> get_connectionList();
+        std::vector<Connection> get_costumConnectionList();
 
         NeuronID                addNeuron();                                                        //update
         NeuronID                addNeuron(Neuron *neuron);                                          //update
 
 
-        QString                 toString();
-        QStringList             toStringList();
+        std::string                 toString();
+        std::vector<std::string>             toStringList();
         bool                    isEqual(Net *toCompare);
 #if defined(_DEBUG_NET_TIMING)
         double get_runtime();
@@ -183,14 +224,32 @@ class Net : public QObject
         Error           get_error(unsigned int index);
         ErrorList       get_errorList() const;
         unsigned int    get_errorAmount() const;
+#ifdef QT_APP
     signals:
         void errorOccured(unsigned int netID, Error &e);
+
+        void netConfigurationUpdateNeeded(); //Trigger, for updating the netConfiguration
+        void netConfigurationUpdateStarted(); //Trigger, when the updating function gets called
+        void netConfigurationUpdated();      //Infosignal when the updating is finished
+        void accessLock();                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
+        void accessUnlock();                  //from now on you can access all functions again
+
+        //void inputsChanged(Net *net);
+        //void hiddenOutputsChanged(Net *net);
+        //void outputsChanged(Net *net);
+        void runDone(Net *net);
+        void biasValueChanged(Net *net);
+        void weightValuesChanged(Net *net);
+#endif
+
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
         ErrorList _errorList;
+#ifdef QT_APP
     private slots:
         void onNeuronError(NeuronID ID,Error &e);
+#endif
     private:
         void init(unsigned int inputs,
                   unsigned int hiddenX,
@@ -280,13 +339,16 @@ class Net : public QObject
 
 };
 
-inline void __DEBUG_NET_(Net *ptr_net,QString func,QString message)
+inline void __DEBUG_NET_(Net *ptr_net,std::string func,std::string message)
 {
 #ifdef _DEBUG_NET_ONLY_ID
     if(ptr_net->get_ID() != _DEBUG_NET_ONLY_ID)
         return;
 #endif
-    qDebug() << "["+QString::number(ptr_net->get_ID())+"] Net::"+func+" "+message;
+    std::string msg = "["+std::to_string(ptr_net->get_ID())+"] Net::"+func+" "+message;
+    if(msg.find_last_of("\n") != msg.size()-1)
+        msg+="\n";
+    CONSOLE << msg.c_str();
 }
 #define __DEBUG_NET(net,func,message)(__DEBUG_NET_(net,func,message));
 

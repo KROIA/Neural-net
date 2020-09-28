@@ -1,13 +1,17 @@
 #include "net.h"
 
+#ifdef QT_APP
 Net::Net(unsigned int ID,
          QObject *parent)
     : QObject (parent)
+#else
+Net::Net(unsigned int ID)
+#endif
 {
     this->set_ID(ID);
     init(2,1,2,1,true,false,Activation::Sigmoid);
 }
-
+#ifdef QT_APP
 Net::Net(unsigned int ID,
          unsigned int inputs,
          unsigned int hiddenX,
@@ -15,11 +19,19 @@ Net::Net(unsigned int ID,
          unsigned int outputs,
          QObject *parent)
     : QObject (parent)
+#else
+Net::Net(unsigned int ID,
+         unsigned int inputs,
+         unsigned int hiddenX,
+         unsigned int hiddenY,
+         unsigned int outputs)
+#endif
 {
     this->set_ID(ID);
     init(inputs,hiddenX,hiddenY,outputs,true,false,Activation::Sigmoid);
 }
 
+#ifdef QT_APP
 Net::Net(unsigned int ID,
          unsigned int inputs,
          unsigned int hiddenX,
@@ -30,6 +42,16 @@ Net::Net(unsigned int ID,
          Activation func,
          QObject *parent)
     : QObject (parent)
+#else
+Net::Net(unsigned int ID,
+         unsigned int inputs,
+         unsigned int hiddenX,
+         unsigned int hiddenY,
+         unsigned int outputs,
+         bool enableBias,
+         bool enableAverage,
+         Activation func)
+#endif
 {
     this->set_ID(ID);
     init(inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
@@ -43,7 +65,7 @@ Net::~Net()
             delete _allNeuronList[a];
         } catch (std::exception &e) {
             //error_general("~Net()",e.what());
-            qDebug() << "~Net() error: " << e.what();
+            CONSOLE<< "~Net() error: " << e.what();
         }
     }
     /*for(int a=_allNeuronList.size()-1; a>=0; a--)
@@ -52,7 +74,7 @@ Net::~Net()
             delete _allNeuronList[a];
         } catch (std::exception &e) {
             //error_general("~Net()",e.what());
-            qDebug() << "~Net() error: " << e.what();
+            CONSOLE<< "~Net() error: " << e.what();
         }
     }*/
     _inputSignalList.clear();
@@ -73,16 +95,26 @@ unsigned int        Net::get_ID()
 
 void                Net::set_inputNeurons(unsigned int inputs)
 {
+#if NET_MIN_INPUTNEURONS == 0
+    if(inputs > NET_MAX_INPUTNEURONS)
+#else
     if(inputs < NET_MIN_INPUTNEURONS || inputs > NET_MAX_INPUTNEURONS)
+#endif
     {
-        this->addError(Error("set_inputNeurons(unsigned int ["+QString::number(inputs)+"] )",
+        this->addError(Error("set_inputNeurons(unsigned int ["+std::to_string(inputs)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_INPUTNEURONS),inputs,static_cast<unsigned int>(NET_MAX_INPUTNEURONS),']')));
         return;
-        //error_general("inputNeurons(unsigned int ["+QString::number(inputs)+"] )","Parameter 0 is out of range. Min: "+ QString::number(NET_MIN_INPUTNEURONS)+" Max: "+QString::number(NET_MAX_INPUTNEURONS));
+        //error_general("inputNeurons(unsigned int ["+std::to_string(inputs)+"] )","Parameter 0 is out of range. Min: "+ std::to_string(NET_MIN_INPUTNEURONS)+" Max: "+std::to_string(NET_MAX_INPUTNEURONS));
     }
     if(inputs != _inputs)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
         _inputs                     = inputs;
     }
 }
@@ -92,17 +124,27 @@ unsigned int        Net::get_inputNeurons()
 }
 void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
 {
+#if NET_MIN_HIDDENNEURONS_X == 0
+    if(hiddenX > NET_MAX_HIDDENNEURONS_X)
+#else
     if(hiddenX < NET_MIN_HIDDENNEURONS_X || hiddenX > NET_MAX_HIDDENNEURONS_X)
+#endif
     {
-        this->addError(Error("set_hiddenNeuronsX(unsigned int ["+QString::number(hiddenX)+"] )",
+        this->addError(Error("set_hiddenNeuronsX(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_HIDDENNEURONS_X),hiddenX,static_cast<unsigned int>(NET_MAX_HIDDENNEURONS_X),']')));
         return;
-        //error_general("hiddenNeuronsX(unsigned int ["+QString::number(hiddenX)+"] )","Parameter 0 is out of range. Min: "+ QString::number(NET_MIN_HIDDENNEURONS_X)+" Max: "+QString::number(NET_MAX_HIDDENNEURONS_X));
+        //error_general("hiddenNeuronsX(unsigned int ["+std::to_string(hiddenX)+"] )","Parameter 0 is out of range. Min: "+ std::to_string(NET_MIN_HIDDENNEURONS_X)+" Max: "+std::to_string(NET_MAX_HIDDENNEURONS_X));
     }
     if(hiddenX != _hiddenX)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _hiddenX                    = hiddenX;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
 }
@@ -112,17 +154,27 @@ unsigned int        Net::get_hiddenNeuronsX()
 }
 void                Net::set_hiddenNeuronsY(unsigned int hiddenY)
 {
+#if NET_MIN_HIDDENNEURONS_Y == 0
+    if(hiddenY > NET_MAX_HIDDENNEURONS_Y)
+#else
     if(hiddenY < NET_MIN_HIDDENNEURONS_Y || hiddenY > NET_MAX_HIDDENNEURONS_Y)
-    {
-        this->addError(Error("set_hiddenNeuronsY(unsigned int ["+QString::number(hiddenY)+"] )",
+#endif
+   {
+        this->addError(Error("set_hiddenNeuronsY(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_HIDDENNEURONS_Y),hiddenY,static_cast<unsigned int>(NET_MAX_HIDDENNEURONS_Y),']')));
         return;
-        //error_general("hiddenNeuronsY(unsigned int ["+QString::number(hiddenY)+"] )","Parameter 0 is out of range. Min: " + QString::number(NET_MIN_HIDDENNEURONS_Y)+" Max: "+QString::number(NET_MAX_HIDDENNEURONS_Y));
+        //error_general("hiddenNeuronsY(unsigned int ["+std::to_string(hiddenY)+"] )","Parameter 0 is out of range. Min: " + std::to_string(NET_MIN_HIDDENNEURONS_Y)+" Max: "+std::to_string(NET_MAX_HIDDENNEURONS_Y));
     }
     if(hiddenY != _hiddenY)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _hiddenY                    = hiddenY;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
 }
@@ -130,19 +182,34 @@ unsigned int        Net::get_hiddenNeuronsY()
 {
     return _hiddenY;
 }
+unsigned int        Net::get_hiddenNeurons()
+{
+    return _hiddenNeurons;
+}
+
 void                Net::set_outputNeurons(unsigned int outputs)
 {
+#if NET_MIN_OUTPUTNEURONS == 0
+    if(outputs > NET_MAX_OUTPUTNEURONS)
+#else
     if(outputs < NET_MIN_OUTPUTNEURONS || outputs > NET_MAX_OUTPUTNEURONS)
+#endif
     {
-        this->addError(Error("set_outputNeurons(unsigned int ["+QString::number(outputs)+"] )",
+        this->addError(Error("set_outputNeurons(unsigned int ["+std::to_string(outputs)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(NET_MIN_OUTPUTNEURONS),outputs,static_cast<unsigned int>(NET_MAX_OUTPUTNEURONS),']')));
         return;
-        //error_general("outputNeurons(unsigned int ["+QString::number(outputs)+"] )","Parameter 0 is out of range. Min: "+QString::number(NET_MIN_OUTPUTNEURONS)+" Max: "+QString::number(NET_MAX_OUTPUTNEURONS));
+        //error_general("outputNeurons(unsigned int ["+std::to_string(outputs)+"] )","Parameter 0 is out of range. Min: "+std::to_string(NET_MIN_OUTPUTNEURONS)+" Max: "+std::to_string(NET_MAX_OUTPUTNEURONS));
     }
     if(outputs != _outputs)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _outputs                    = outputs;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
         //_outputNeurons          = outputs;
     }
 }
@@ -178,13 +245,13 @@ unsigned int        Net::get_costumConnections()
     _costumNeurons  = costumNeurons;
     if(_hiddenNeurons+_outputNeurons+_costumNeurons != _neurons)
     {
-        this->addError(Error("set_neurons(unsigned int ["+QString::number(neurons)+
-                             "],unsigned int ["+QString::number(hiddenNeurons)+
-                             "],unsigned int ["+QString::number(outputNeurons)+
-                             "],unsigned int ["+QString::number(costumNeurons)+"])",
-                         QString("Its not possible like so. Parameter 1 shuld be the sum of the others") ));
+        this->addError(Error("set_neurons(unsigned int ["+std::to_string(neurons)+
+                             "],unsigned int ["+std::to_string(hiddenNeurons)+
+                             "],unsigned int ["+std::to_string(outputNeurons)+
+                             "],unsigned int ["+std::to_string(costumNeurons)+"])",
+                         std::string("Its not possible like so. Parameter 1 shuld be the sum of the others") ));
         return;
-        //error_general("neurons(unsigned int ["+QString::number(neurons)+"],unsigned int ["+QString::number(hiddenNeurons)+"],unsigned int ["+QString::number(outputNeurons)+"],unsigned int ["+QString::number(costumNeurons)+"],","Its not possible like so. Parameter 1 shuld be the sum of the others");
+        //error_general("neurons(unsigned int ["+std::to_string(neurons)+"],unsigned int ["+std::to_string(hiddenNeurons)+"],unsigned int ["+std::to_string(outputNeurons)+"],unsigned int ["+std::to_string(costumNeurons)+"],","Its not possible like so. Parameter 1 shuld be the sum of the others");
     }
 }*/
 unsigned int        Net::get_neurons()
@@ -195,8 +262,14 @@ void                Net::set_bias(bool enableBias)
 {
     if(enableBias != _bias)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _bias                       = enableBias;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
     }
 }
 bool                Net::get_bias()
@@ -207,8 +280,14 @@ void                Net::set_enableAverage(bool enableAverage)
 {
     if(enableAverage != _enableAverage)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _enableAverage              = enableAverage;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
     }
 }
 bool                Net::get_enableAverage()
@@ -217,8 +296,14 @@ bool                Net::get_enableAverage()
 }
 void                Net::set_biasValue(double value)
 {
-    _needsCalculationUpdate         = true;
-    _biasValue                      = value;
+    if(_biasValue != value)
+    {
+        _needsCalculationUpdate         = true;
+        _biasValue                      = value;
+        #ifdef QT_APP
+        emit biasValueChanged(this);
+        #endif
+    }
 }
 double              Net::get_biasValue()
 {
@@ -228,8 +313,14 @@ void                Net::set_activationFunction(Activation func)
 {
     if(func != _activationFunction)
     {
+        #ifdef QT_APP
+        emit accessLock();
+        #endif
         _needsConfigurationUpdate   = true;
         _activationFunction         = func;
+        #ifdef QT_APP
+        emit netConfigurationUpdateNeeded();
+        #endif
     }
 }
 Activation          Net::get_activationFunction()
@@ -272,10 +363,10 @@ void                Net::set_genom(std::vector<double> genom)
     if(static_cast<unsigned int>(genom.size()) != _connections)
     {
         this->addError(Error("set_genom(std::vector<double> genom)",{
-                       "parameter 0 has the wrong array size: "+QString::number(genom.size()),
-                       " array size should by "+QString::number(_ptr_genom.size())}));
+                       "parameter 0 has the wrong array size: "+std::to_string(genom.size()),
+                       " array size should by "+std::to_string(_ptr_genom.size())}));
         return;
-        //error_general("genom(std::vector<double>)","parameter 0 has the wrong array size: "+QString::number(genom.size())+" array size should by "+QString::number(_ptr_genom.size()));
+        //error_general("genom(std::vector<double>)","parameter 0 has the wrong array size: "+std::to_string(genom.size())+" array size should by "+std::to_string(_ptr_genom.size()));
     }
     unsigned int genIndex = 0;
     for(unsigned int ID=0; ID<_allNeuronList.size(); ID++)
@@ -286,6 +377,9 @@ void                Net::set_genom(std::vector<double> genom)
             genIndex++;
         }
     }
+    #ifdef QT_APP
+    emit weightValuesChanged(this);
+    #endif
 }
 std::vector<double>       Net::get_genom()
 {
@@ -333,42 +427,43 @@ void                Net::set_input(unsigned int input, double signal)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(signal)+"] )",
+        this->addError(Error("set_input(unsigned int ["+std::to_string(input)+"] , double ["+std::to_string(signal)+"] )",
                        ErrorMessage::updateNetFirst()));
         return;
-        //error_general("input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(signal)+"]) ) ",ErrorMessage::updateNetFirst());
+        //error_general("input(unsigned int ["+std::to_string(input)+"] , double ["+std::to_string(signal)+"]) ) ",ErrorMessage::updateNetFirst());
     }
     if(_inputs == 0)
     {
-        this->addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(signal)+"] )",
-                       QString("There are no inputs!")));
+        this->addError(Error("set_input(unsigned int ["+std::to_string(input)+"] , double ["+std::to_string(signal)+"] )",
+                       std::string("There are no inputs!")));
         return;
     } else if(input > _inputs-1)
     {
-        this->addError(Error("set_input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(signal)+"] )",
+        this->addError(Error("set_input(unsigned int ["+std::to_string(input)+"] , double ["+std::to_string(signal)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),input,static_cast<unsigned int>(_inputs-1),']')));
         return;
-        //error_general("input(unsigned int ["+QString::number(input)+"] , double ["+QString::number(signal)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        //error_general("input(unsigned int ["+std::to_string(input)+"] , double ["+std::to_string(signal)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
 
     _needsCalculationUpdate = true;
     _inputSignalList[input] = signal;
+    //emit inputsChanged(this);
 }
 double              Net::get_input(unsigned int input)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_input(unsigned int ["+QString::number(input)+"] )",
+        this->addError(Error("get_input(unsigned int ["+std::to_string(input)+"] )",
                        ErrorMessage::updateNetFirst()));
         return 0;
-       // error_general("input(unsigned int ["+QString::number(input)+"] ) ",ErrorMessage::updateNetFirst());
+       // error_general("input(unsigned int ["+std::to_string(input)+"] ) ",ErrorMessage::updateNetFirst());
     }
     if(input > _inputs-1)
     {
-        this->addError(Error("get_input(unsigned int ["+QString::number(input)+"] )",
+        this->addError(Error("get_input(unsigned int ["+std::to_string(input)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),input,static_cast<unsigned int>(_inputs-1),']')));
         return 0;
-        //error_general("input(unsigned int ["+QString::number(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
+        //error_general("input(unsigned int ["+std::to_string(input)+"] )",error_paramOutOfRange((unsigned int)0,input,(unsigned int)0,_inputs-1));
     }
     return _inputSignalList[input];
 }
@@ -376,7 +471,7 @@ void                Net::set_input(std::vector<double> inputList)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_input(unsigned int ["+QString::number(input)+"] )",
+        this->addError(Error("get_input(unsigned int ["+std::to_string(input)+"] )",
                        ErrorMessage::updateNetFirst()));
         return;
         //error_general("input(std::vector<double>) ",ErrorMessage::updateNetFirst());
@@ -384,16 +479,14 @@ void                Net::set_input(std::vector<double> inputList)
     if(static_cast<unsigned int>(inputList.size()) != _inputs)
     {
         this->addError(Error("set_input(std::vector<double> inputList)",{
-                       "parameter 0 has the wrong array size: "+QString::number(inputList.size()),
-                       " array size should by "+QString::number(_inputs)}));
+                       "parameter 0 has the wrong array size: "+std::to_string(inputList.size()),
+                       " array size should by "+std::to_string(_inputs)}));
         return;
-        //error_general("input(std::vector<double>) ","parameter 0 , size of the array is wrong: ["+QString::number(inputList.size()) + "] correct size is: ["+QString::number(_inputs)+"]");
+        //error_general("input(std::vector<double>) ","parameter 0 , size of the array is wrong: ["+std::to_string(inputList.size()) + "] correct size is: ["+std::to_string(_inputs)+"]");
     }
     _needsCalculationUpdate = true;
-    for(unsigned int a=0; a<_inputs; a++)
-    {
-        _inputSignalList[a] = inputList[a];
-    }
+    _inputSignalList = inputList;
+    //emit inputsChanged(this);
 }
 std::vector<double>       Net::get_input()
 {
@@ -407,35 +500,45 @@ std::vector<double>       Net::get_input()
     return _inputSignalList;
 }
 
+std::vector<double>     Net::get_hidden()
+{
+    std::vector<double> valueList;
+    valueList.reserve(_hiddenNeurons);
+    for(unsigned int ID=0; ID<_hiddenNeurons; ID++)
+    {
+        valueList.push_back(_hiddenNeuronList[ID]->get_output());
+    }
+    return valueList;
+}
 double              Net::get_hidden(unsigned int hiddenX, unsigned int hiddenY)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::updateNetFirst()));
         return 0;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",ErrorMessage::updateNetFirst());
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
+                       std::string("The network has no hidden layer")));
         return 0;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )","the network has no hidden layer");
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","the network has no hidden layer");
     }
     if(hiddenX > _hiddenX-1)
     {
-        this->addError(Error("get_hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenX,static_cast<unsigned int>(_hiddenX-1),']')));
         return 0;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
     }
     if(hiddenY > _hiddenY-1)
     {
-        this->addError(Error("get_hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenY,static_cast<unsigned int>(_hiddenY-1),']')));
         return 0;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",error_paramOutOfRange((unsigned int)1,hiddenY,(unsigned int)0,_hiddenY-1));
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)1,hiddenY,(unsigned int)0,_hiddenY-1));
     }
 
     unsigned int ID = hiddenX * _hiddenY + hiddenY;
@@ -445,24 +548,24 @@ std::vector<double>       Net::get_hiddenX(unsigned int hiddenX)// |    Alle in 
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_hiddenX(unsigned int ["+QString::number(hiddenX)+"] )",
+        this->addError(Error("get_hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::updateNetFirst()));
         return std::vector<double>();
-        //error_general("hiddenX(unsigned int ["+QString::number(hiddenX)+"] )",ErrorMessage::updateNetFirst());
+        //error_general("hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_hiddenX(unsigned int ["+QString::number(hiddenX)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )",
+                       std::string("The network has no hidden layer")));
         return std::vector<double>();
-        //error_general("hiddenX(unsigned int ["+QString::number(hiddenX)+"] )","the network has no hidden layer");
+        //error_general("hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )","the network has no hidden layer");
     }
     if(hiddenX > _hiddenX-1)
     {
-        this->addError(Error("get_hiddenX(unsigned int ["+QString::number(hiddenX)+"] )",
+        this->addError(Error("get_hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenX,static_cast<unsigned int>(_hiddenX-1),']')));
         return std::vector<double>();
-        //error_general("hiddenX(unsigned int ["+QString::number(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
+        //error_general("hiddenX(unsigned int ["+std::to_string(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
     }
 
     std::vector<double> ret(_hiddenY);
@@ -478,24 +581,24 @@ std::vector<double>       Net::get_hiddenY(unsigned int hiddenY)// --   Alle in 
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_hiddenY(unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::updateNetFirst()));
         return std::vector<double>();
-        //error_general("hiddenY(unsigned int ["+QString::number(hiddenY)+"] )",ErrorMessage::updateNetFirst());
+        //error_general("hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_hiddenY(unsigned int ["+QString::number(hiddenY)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )",
+                       std::string("The network has no hidden layer")));
         return std::vector<double>();
-        //error_general("hiddenY(unsigned int ["+QString::number(hiddenY)+"] )","the network has no hidden layer");
+        //error_general("hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )","the network has no hidden layer");
     }
     if(hiddenY > _hiddenY-1)
     {
-        this->addError(Error("get_hiddenY(unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenY,static_cast<unsigned int>(_hiddenY-1),']')));
         return std::vector<double>();
-        //error_general("hiddenY(unsigned int ["+QString::number(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenY,(unsigned int)0,_hiddenY-1));
+        //error_general("hiddenY(unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenY,(unsigned int)0,_hiddenY-1));
     }
 
     std::vector<double> ret(_hiddenX);
@@ -512,22 +615,22 @@ Neuron             *Net::get_ptr_neuron_viaID(unsigned int ID)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+QString::number(ID)+"] )",
+        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+std::to_string(ID)+"] )",
                        ErrorMessage::updateNetFirst()));
         return nullptr;
-        //error_general("neuron_viaID(unsigned int ["+QString::number(ID)+"])",ErrorMessage::updateNetFirst());
+        //error_general("neuron_viaID(unsigned int ["+std::to_string(ID)+"])",ErrorMessage::updateNetFirst());
     }
     if(_allNeuronList.size() == 0)
     {
-        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+QString::number(ID)+"] )",
+        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+std::to_string(ID)+"] )",
                        ErrorMessage::listIsEmpty("_allNeuronList")));
         return nullptr;
     }else if(ID >= static_cast<unsigned int>(_allNeuronList.size()))
     {
-        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+QString::number(ID)+"] )",
+        this->addError(Error("get_ptr_neuron_viaID(unsigned int ["+std::to_string(ID)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),ID,static_cast<unsigned int>(static_cast<unsigned int>(_allNeuronList.size())-1),']')));
         return nullptr;
-        //error_general("neuron_viaID(unsigned int ["+QString::number(ID)+"] )",error_paramOutOfRange((unsigned int)0,ID,(unsigned int)0,_allNeuronList.size()));
+        //error_general("neuron_viaID(unsigned int ["+std::to_string(ID)+"] )",error_paramOutOfRange((unsigned int)0,ID,(unsigned int)0,_allNeuronList.size()));
     }
 
     return _allNeuronList[ID];
@@ -551,11 +654,11 @@ Neuron             *Net::get_ptr_neuron_viaID(NeuronID ID)
         this->addError(Error("get_ptr_neuron_viaID("+Neuron::toIDString(ID)+")",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),ID.ID,static_cast<unsigned int>(static_cast<unsigned int>(_allNeuronList.size())-1),']')));
         return nullptr;
-        //error_general("neuron_viaID(unsigned int ["+QString::number(ID)+"] )",error_paramOutOfRange((unsigned int)0,ID,(unsigned int)0,_allNeuronList.size()));
+        //error_general("neuron_viaID(unsigned int ["+std::to_string(ID)+"] )",error_paramOutOfRange((unsigned int)0,ID,(unsigned int)0,_allNeuronList.size()));
     }/*
     if(ID.ID >= _allNeuronList.size())
     {
-        error_general("neuron_viaID(NeuronID [.ID="+QString::number(ID.ID)+",.TYPE="+QString::number(ID.TYPE)+"] )",error_paramOutOfRange((unsigned int)0,ID.ID,(unsigned int)0,_allNeuronList.size()));
+        error_general("neuron_viaID(NeuronID [.ID="+std::to_string(ID.ID)+",.TYPE="+std::to_string(ID.TYPE)+"] )",error_paramOutOfRange((unsigned int)0,ID.ID,(unsigned int)0,_allNeuronList.size()));
     }*/
 
     return _allNeuronList[ID.ID];
@@ -564,31 +667,31 @@ Neuron             *Net::get_ptr_hiddenNeuron(unsigned int hiddenX, unsigned int
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::updateNetFirst()));
         return nullptr;
-        //error_general("hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"])",ErrorMessage::updateNetFirst());
+        //error_general("hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"])",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
+                       std::string("The network has no hidden layer")));
         return nullptr;
-        //error_general("hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )","the network has no hidden layer");
+        //error_general("hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )","the network has no hidden layer");
     }
     if(hiddenX > _hiddenX-1)
     {
-        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenX,static_cast<unsigned int>(_hiddenX-1),']')));
         return nullptr;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
     }
     if(hiddenY > _hiddenY-1)
     {
-        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_ptr_hiddenNeuron(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenY,static_cast<unsigned int>(_hiddenY-1),']')));
         return nullptr;
-        //error_general("hidden(unsigned int ["+QString::number(hiddenX)+"] , unsigned int ["+QString::number(hiddenY)+"] )",error_paramOutOfRange((unsigned int)1,hiddenY,(unsigned int)0,_hiddenY-1));
+        //error_general("hidden(unsigned int ["+std::to_string(hiddenX)+"] , unsigned int ["+std::to_string(hiddenY)+"] )",error_paramOutOfRange((unsigned int)1,hiddenY,(unsigned int)0,_hiddenY-1));
     }
 
     unsigned int ID = hiddenX * _hiddenY + hiddenY;
@@ -598,24 +701,24 @@ std::vector<Neuron*>      Net::get_hiddenNeuronX_ptr(unsigned int hiddenX) // | 
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+QString::number(hiddenX)+"] )",
+        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::updateNetFirst()));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronX(unsigned int ["+QString::number(hiddenX)+"] ) ",ErrorMessage::updateNetFirst());
+        //error_general("hiddenNeuronX(unsigned int ["+std::to_string(hiddenX)+"] ) ",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+QString::number(hiddenX)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+std::to_string(hiddenX)+"] )",
+                       std::string("The network has no hidden layer")));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronX(unsigned int ["+QString::number(hiddenX)+"] )","the network has no hidden layer");
+        //error_general("hiddenNeuronX(unsigned int ["+std::to_string(hiddenX)+"] )","the network has no hidden layer");
     }
     if(hiddenX >= _hiddenX)
     {
-        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+QString::number(hiddenX)+"] )",
+        this->addError(Error("get_hiddenNeuronX_ptr(unsigned int ["+std::to_string(hiddenX)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenX,static_cast<unsigned int>(_hiddenX-1),']')));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronX(unsigned int ["+QString::number(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
+        //error_general("hiddenNeuronX(unsigned int ["+std::to_string(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
     }
 
     std::vector<Neuron*> ret(_hiddenY);
@@ -632,24 +735,24 @@ std::vector<Neuron*>      Net::get_hiddenNeuronY_ptr(unsigned int hiddenY)// -- 
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::updateNetFirst()));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronX(unsigned int ["+QString::number(hiddenX)+"] ) ",ErrorMessage::updateNetFirst());
+        //error_general("hiddenNeuronX(unsigned int ["+std::to_string(hiddenX)+"] ) ",ErrorMessage::updateNetFirst());
     }
     if(!_hasHiddenLayer)
     {
-        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+QString::number(hiddenY)+"] )",
-                       QString("The network has no hidden layer")));
+        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+std::to_string(hiddenY)+"] )",
+                       std::string("The network has no hidden layer")));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronY(unsigned int ["+QString::number(hiddenY)+"] )","the network has no hidden layer");
+        //error_general("hiddenNeuronY(unsigned int ["+std::to_string(hiddenY)+"] )","the network has no hidden layer");
     }
     if(hiddenY >= _hiddenY)
     {
-        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+QString::number(hiddenY)+"] )",
+        this->addError(Error("get_hiddenNeuronY_ptr(unsigned int ["+std::to_string(hiddenY)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),hiddenY,static_cast<unsigned int>(_hiddenY-1),']')));
         return std::vector<Neuron*>();
-        //error_general("hiddenNeuronX(unsigned int ["+QString::number(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
+        //error_general("hiddenNeuronX(unsigned int ["+std::to_string(hiddenX)+"] )",error_paramOutOfRange((unsigned int)0,hiddenX,(unsigned int)0,_hiddenX-1));
     }
 
     std::vector<Neuron*> ret(_hiddenX);
@@ -673,14 +776,14 @@ std::vector<std::vector<Neuron*> > Net::get_hiddenNeuron_ptr()
     if(!_hasHiddenLayer)
     {
         this->addError(Error("get_hiddenNeuron_ptr()",
-                       QString("The network has no hidden layer")));
+                       std::string("The network has no hidden layer")));
         return std::vector<std::vector<Neuron*> >();
         //error_general("hiddenNeuron()","the network has no hidden layer");
     }
     if(_hiddenX * _hiddenY != static_cast<unsigned int>(_hiddenNeuronList.size()))
     {
         this->addError(Error("get_hiddenNeuron_ptr()",
-                       QString("something went wrong: _hiddenX * _hiddenY != _hiddenNeuronList.size()")));
+                       std::string("something went wrong: _hiddenX * _hiddenY != _hiddenNeuronList.size()")));
         return std::vector<std::vector<Neuron*> >();
         //error_general("hiddenNeuron() ","something went wrong: _hiddenX * _hiddenY != _hiddenNeuronList.size()");
     }
@@ -712,14 +815,14 @@ Neuron              *Net::get_ptr_costumNeuron(NeuronID ID)
     if(_costumNeuronList.size() == 0)
     {
         this->addError(Error("get_ptr_costumNeuron("+Neuron::toIDString(ID)+")",
-                       QString("There are no costum neurons")));
+                       std::string("There are no costum neurons")));
         return nullptr;
         //error_general("costumNeuron(NeuronID ["+Neuron::IDString(ID)+"] )"," There are no costum neurons");
     }
     if(ID.TYPE != costum)
     {
         this->addError(Error("get_ptr_costumNeuron("+Neuron::toIDString(ID)+")",
-                       QString("This is not a costum neuron")));
+                       std::string("This is not a costum neuron")));
         return nullptr;
     }
     if(ID.ID < static_cast<unsigned int>(_allNeuronList.size()-_costumNeuronList.size()))
@@ -740,17 +843,17 @@ Neuron              *Net::get_ptr_outputNeuron(unsigned int output)
 {
     if(_needsConfigurationUpdate)
     {
-        this->addError(Error("get_ptr_outputNeuron(unsigned int ["+QString::number(output)+"] )",
+        this->addError(Error("get_ptr_outputNeuron(unsigned int ["+std::to_string(output)+"] )",
                        ErrorMessage::updateNetFirst()));
         return nullptr;
-        //error_general("outputNeuron(unsigned int ["+QString::number(output)+"]) ",ErrorMessage::updateNetFirst());
+        //error_general("outputNeuron(unsigned int ["+std::to_string(output)+"]) ",ErrorMessage::updateNetFirst());
     }
     if(output >= _outputs)
     {
-        this->addError(Error("get_ptr_outputNeuron(unsigned int ["+QString::number(output)+"] )",
+        this->addError(Error("get_ptr_outputNeuron(unsigned int ["+std::to_string(output)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),output,_outputs-1,']')));
         return nullptr;
-        //error_general("outputNeuron(unsigned int ["+QString::number(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,_outputs-1));
+        //error_general("outputNeuron(unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,_outputs-1));
     }
 
     return _outputNeuronList[output];
@@ -790,10 +893,10 @@ double              Net::get_output(unsigned int output)
     }
     if(output >= _outputs)
     {
-        this->addError(Error("get_output(unsigned int ["+QString::number(output)+"] )",
+        this->addError(Error("get_output(unsigned int ["+std::to_string(output)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),output,static_cast<unsigned int>(_outputs-1),']')));
         return 0;
-        //error_general("output(unsigned int ["+QString::number(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,_outputs-1));
+        //error_general("output(unsigned int ["+std::to_string(output)+"] )",error_paramOutOfRange((unsigned int)0,output,(unsigned int)0,_outputs-1));
     }
     return _outputNeuronList[output]->get_output();
 }
@@ -844,42 +947,6 @@ void                Net::run()
 #endif
         _allNeuronList[_calculationOrderList[neuron].ID]->run();
     }
-   /* while(!allUpdated)
-    {
-        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
-        {
-            bool readyToCalcCostumNeuron = true;
-            if(!_allNeuronList[neuron]->isUpdated())
-            {
-                for(unsigned int input=0; input<_allNeuronList[neuron]->inputs(); input++)
-                {
-                    if((_allNeuronList[neuron]->inputID(input).TYPE == NeuronType::costum ||
-                        _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::hidden ||
-                        _allNeuronList[neuron]->inputID(input).TYPE == NeuronType::output) &&
-                        (!_allNeuronList[_allNeuronList[neuron]->inputID(input).ID]->isUpdated() &&
-                         _allNeuronList[neuron]->inputConnectionDirection(_allNeuronList[neuron]->inputID(input)) == true))
-                    {
-                        readyToCalcCostumNeuron = false;
-                    }
-                }
-                if(readyToCalcCostumNeuron)
-                {
-#if defined(_DEBUG_NET_RUN)
-                    __DEBUG_NET(this,"run()","calculates neuron ID: "+QString::number(neuron));
-#endif
-                    _allNeuronList[neuron]->run();
-                }
-            }
-        }
-        allUpdated = true;
-        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
-        {
-            if(!_allNeuronList[neuron]->isUpdated())
-            {
-                allUpdated = false;
-            }
-        }
-    }*/
 
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer1_end          = std::chrono::high_resolution_clock::now();
@@ -889,14 +956,23 @@ void                Net::run()
 #endif
 #if defined(_DEBUG_NET_RUN)
 #if defined(_DEBUG_NET_TIMING)
-    __DEBUG_NET(this,"run()","all updated, finish. Elapsed time: "+QString::number(__debug_run_time)+" ms");
+    __DEBUG_NET(this,"run()","all updated, finish. Elapsed time: "+std::to_string(__debug_run_time)+" ms");
 #else
     __DEBUG_NET(this,"run()","all updated, finish");
 #endif
 #endif
     _needsCalculationUpdate = false;
+    //emit hiddenOutputsChanged(this);
+    //emit outputsChanged(this);
+    #ifdef QT_APP
+    emit runDone(this);
+    #endif
 }
 
+bool                Net::needsUpdate()
+{
+    return _needsConfigurationUpdate;
+}
 void                Net::updateNetConfiguration()
 {
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
@@ -912,6 +988,9 @@ void                Net::updateNetConfiguration()
 #endif
         return;
     }
+    #ifdef QT_APP
+    emit netConfigurationUpdateStarted();
+    #endif
     _needsCalculationUpdate = true;
     if(_hiddenX == 0 || _hiddenY == 0)
     {
@@ -927,18 +1006,162 @@ void                Net::updateNetConfiguration()
             delete _allNeuronList[a-1];
         } catch (std::exception &e) {
             this->addError(Error("updateNetConfiguration()",
-                           QString(e.what())));
+                           std::string(e.what())));
             return;
             //error_general("updateNetConfiguration()",e.what());
         }
     }
-    _outputNeurons  = _outputs;
-    _hiddenNeurons  = _hiddenX * _hiddenY;
 
+
+    //_connectionList.clear();
+    if(_connectionList.size() == 0)
+        prepareConnectionList();
+
+    _outputNeurons  = 0;
+    _hiddenNeurons  = 0;
+    _neurons        = 0;
+
+    std::vector<Connection>   __allConnectionList = _connectionList;
+    for(unsigned int pos=0; pos<_costumConnectionList.size(); pos++)
+        __allConnectionList.push_back(_costumConnectionList[pos]);
+
+    std::vector<unsigned int> __inputIDs;
+    std::vector<unsigned int> __hiddenIDs;
+    std::vector<unsigned int> __outputIDs;
+    std::vector<unsigned int> __costumIDs;
+
+
+    for(unsigned int connection=0; connection<__allConnectionList.size(); connection++)
+    {
+        switch(__allConnectionList[connection].source_ID.TYPE)
+        {
+            case NeuronType::none:
+            {
+                break;
+            }
+            case NeuronType::bias:
+            {
+                break;
+            }
+            case NeuronType::input:
+            {
+                __inputIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                break;
+            }
+            case NeuronType::hidden:
+            {
+                __hiddenIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                break;
+            }
+            case NeuronType::output:
+            {
+                __outputIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                break;
+            }
+            case NeuronType::costum:
+            {
+                __costumIDs.push_back(__allConnectionList[connection].source_ID.ID);
+                break;
+            }
+        }
+        switch(__allConnectionList[connection].destination_ID.TYPE)
+        {
+            case NeuronType::none:
+            {
+                break;
+            }
+            case NeuronType::bias:
+            {
+                break;
+            }
+            case NeuronType::input:
+            {
+                __inputIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                break;
+            }
+            case NeuronType::hidden:
+            {
+                __hiddenIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                break;
+            }
+            case NeuronType::output:
+            {
+                __outputIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                break;
+            }
+            case NeuronType::costum:
+            {
+                __costumIDs.push_back(__allConnectionList[connection].destination_ID.ID);
+                break;
+            }
+        }
+    }
+    // __inputIDs kann mehrfach die gleiche ID enthalten.
+    // __filtered_inputIDs enthällt jede ID nur noch ein mal.
+    std::vector<unsigned int> __filtered_inputIDs;
+    std::vector<unsigned int> __filtered_hiddenIDs;
+    std::vector<unsigned int> __filtered_outputIDs;
+    std::vector<unsigned int> __filtered_costumIDs;
+
+    for(unsigned int pos=0; pos<__inputIDs.size(); pos++)
+    {
+        bool alreadyExists = false;
+        for(unsigned int new_pos=0; new_pos<__filtered_inputIDs.size(); new_pos++)
+        {
+            if(__filtered_inputIDs[new_pos] == __inputIDs[pos])
+            {
+                alreadyExists = true;
+            }
+        }
+        if(!alreadyExists)
+            __filtered_inputIDs.push_back(__inputIDs[pos]);
+    }
+    for(unsigned int pos=0; pos<__hiddenIDs.size(); pos++)
+    {
+        bool alreadyExists = false;
+        for(unsigned int new_pos=0; new_pos<__filtered_hiddenIDs.size(); new_pos++)
+        {
+            if(__filtered_hiddenIDs[new_pos] == __hiddenIDs[pos])
+            {
+                alreadyExists = true;
+            }
+        }
+        if(!alreadyExists)
+            __filtered_hiddenIDs.push_back(__hiddenIDs[pos]);
+    }
+    for(unsigned int pos=0; pos<__outputIDs.size(); pos++)
+    {
+        bool alreadyExists = false;
+        for(unsigned int new_pos=0; new_pos<__filtered_outputIDs.size(); new_pos++)
+        {
+            if(__filtered_outputIDs[new_pos] == __outputIDs[pos])
+            {
+                alreadyExists = true;
+            }
+        }
+        if(!alreadyExists)
+            __filtered_outputIDs.push_back(__outputIDs[pos]);
+    }
+    for(unsigned int pos=0; pos<__costumIDs.size(); pos++)
+    {
+        bool alreadyExists = false;
+        for(unsigned int new_pos=0; new_pos<__filtered_costumIDs.size(); new_pos++)
+        {
+            if(__filtered_costumIDs[new_pos] == __costumIDs[pos])
+            {
+                alreadyExists = true;
+            }
+        }
+        if(!alreadyExists)
+            __filtered_costumIDs.push_back(__costumIDs[pos]);
+    }
+
+    _outputNeurons  = __filtered_outputIDs.size();
+    _hiddenNeurons  = __filtered_hiddenIDs.size();
+    _costumNeurons  = __filtered_costumIDs.size();
     _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
 
-    _connectionList.clear();
-    prepareConnectionList();
+
 
 
 
@@ -953,12 +1176,12 @@ void                Net::updateNetConfiguration()
     _ptr_genom.clear();
 
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
-    __DEBUG_NET(this,"updateNetConfiguration()","inputs:         "+QString::number(_inputs));
-    __DEBUG_NET(this,"updateNetConfiguration()","hiddenX:        "+QString::number(_hiddenX));
-    __DEBUG_NET(this,"updateNetConfiguration()","hiddenY:        "+QString::number(_hiddenY));
-    __DEBUG_NET(this,"updateNetConfiguration()","outputs:        "+QString::number(_outputs));
-    __DEBUG_NET(this,"updateNetConfiguration()","costum:         "+QString::number(_costumNeurons));
-    __DEBUG_NET(this,"updateNetConfiguration()","connections:    "+QString::number(_connections));
+    __DEBUG_NET(this,"updateNetConfiguration()","inputs:         "+std::to_string(_inputs));
+    __DEBUG_NET(this,"updateNetConfiguration()","hiddenX:        "+std::to_string(_hiddenX));
+    __DEBUG_NET(this,"updateNetConfiguration()","hiddenY:        "+std::to_string(_hiddenY));
+    __DEBUG_NET(this,"updateNetConfiguration()","outputs:        "+std::to_string(_outputs));
+    __DEBUG_NET(this,"updateNetConfiguration()","costum:         "+std::to_string(_costumNeurons));
+    __DEBUG_NET(this,"updateNetConfiguration()","connections:    "+std::to_string(_connections));
     __DEBUG_NET(this,"updateNetConfiguration()","reserving memory");
 #endif
 
@@ -986,11 +1209,19 @@ void                Net::updateNetConfiguration()
 #endif
     for(unsigned int neuronID=0; neuronID<_neurons; neuronID++)
     {
+
+        #ifdef QT_APP
         Neuron * tmp_neuron = new Neuron(this);
+        #else
+        Neuron * tmp_neuron = new Neuron();
+        #endif
+
         tmp_neuron->set_activationFunction(_activationFunction);
         tmp_neuron->set_enableAverage(_enableAverage);
         tmp_neuron->set_ID(neuronID);
+        #ifdef QT_APP
         QObject::connect(tmp_neuron,&Neuron::errorOccured,this,&Net::onNeuronError);
+        #endif
         _allNeuronList[neuronID] = tmp_neuron;
 #if defined(_DEBUG_NET_TIMING)
         __debug_timer1_end  = std::chrono::high_resolution_clock::now();
@@ -999,7 +1230,7 @@ void                Net::updateNetConfiguration()
         {
             secCounter+=debugInterval;
             __debug_timer1_start = __debug_timer1_end;
-            __DEBUG_NET(this,"updateNetConfiguration()","Creating Neurons... "+QString::number(neuronID)+" of: "+QString::number(_neurons)+" generated. Time elapsed: "+QString::number(secCounter)+" sec");
+            __DEBUG_NET(this,"updateNetConfiguration()","Creating Neurons... "+std::to_string(neuronID)+" of: "+std::to_string(_neurons)+" generated. Time elapsed: "+std::to_string(secCounter)+" sec");
         }
 #endif
     }
@@ -1024,26 +1255,32 @@ void                Net::updateNetConfiguration()
 #endif
     for(unsigned int ID=_hiddenNeurons+_outputNeurons; ID<_neurons; ID++)    // Save the rest (the output neurons) also in the _outputNeuronList
     {
-        _costumNeuronList[ID-_costumNeurons] = _allNeuronList[ID];
-        _costumNeuronList[ID-_costumNeurons]->set_TYPE(NeuronType::costum);
+        _costumNeuronList[ID-_costumNeurons-_outputNeurons] = _allNeuronList[ID];
+        _costumNeuronList[ID-_costumNeurons-_outputNeurons]->set_TYPE(NeuronType::costum);
     }
 
 
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
-    __DEBUG_NET(this,"updateNetConfiguration()","connect "+QString::number(_connections)+" connections");
+    __DEBUG_NET(this,"updateNetConfiguration()","connect "+std::to_string(_connections)+" connections");
 #endif
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer1_start = std::chrono::high_resolution_clock::now();
     secCounter    = 0;
 #endif
     //- Connect the inputs
-
+#if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
     for(unsigned int connection=0; connection<_connections; connection++)
     {
-        if(connection < _connectionList.size())
+        __DEBUG_NET(this,"updateNetConfiguration()","connection["+std::to_string(connection)+"] "+Neuron::toConnectionString(__allConnectionList[connection]));
+    }
+#endif
+    for(unsigned int connection=0; connection<_connections; connection++)
+    {
+        /*if(connection < _connectionList.size())
             set_ptr_intern_connectNeuron(&_connectionList[connection]);
         else
-            set_ptr_intern_connectNeuron(&_costumConnectionList[connection]);
+            set_ptr_intern_connectNeuron(&_costumConnectionList[connection-_connectionList.size()]);*/
+        set_ptr_intern_connectNeuron(&__allConnectionList[connection]);
 #if defined(_DEBUG_NET_TIMING)
         __debug_timer1_end  = std::chrono::high_resolution_clock::now();
         __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer1_end - __debug_timer1_start);
@@ -1051,7 +1288,7 @@ void                Net::updateNetConfiguration()
         {
             secCounter+=debugInterval;
             __debug_timer1_start = std::chrono::high_resolution_clock::now();
-            __DEBUG_NET(this,"updateNetConfiguration()","connecting... "+QString::number(connection)+" of: "+QString::number(_connections)+" connection. Time elapsed: "+QString::number(secCounter)+" sec");
+            __DEBUG_NET(this,"updateNetConfiguration()","connecting... "+std::to_string(connection)+" of: "+std::to_string(_connections)+" connection. Time elapsed: "+std::to_string(secCounter)+" sec");
         }
 #endif
     }
@@ -1064,14 +1301,25 @@ void                Net::updateNetConfiguration()
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer2_end  = std::chrono::high_resolution_clock::now();
     __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer2_end - __debug_timer2_start);
-    __DEBUG_NET(this,"prepareConnectionList()","end. Elapsed time: "+QString::number(__debug_time_span.count())+" sec");
+    __DEBUG_NET(this,"updateNetConfiguration()","end. Elapsed time: "+std::to_string(__debug_time_span.count())+" sec");
 #endif
 #if defined(_DEBUG_NET_UPDATE_NET_CONFIGURATION)
-    __DEBUG_NET(this,"updateNetConfiguration()","finish");
+    __DEBUG_NET(this,"updateNetConfiguration()","end");
+#endif
+#ifdef QT_APP
+    emit netConfigurationUpdated();
+    emit weightValuesChanged(this);
+    emit accessUnlock();
 #endif
 }
 void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
 {
+#if defined(_DEBUG_NET_CONNECT)
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","begin");
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","from:        "+Neuron::toIDString(fromNeuron));
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","to:          "+Neuron::toIDString(toNeuron));
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","direction:   "+Neuron::toDirectionString(direction));
+#endif
     Connection con;
     con.netID = this->get_ID();
     con.source_ID = fromNeuron;
@@ -1080,30 +1328,30 @@ void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,Con
     con.weight = Neuron::get_calcRandWeight(this->_randEngine);
     this->addConnection(con);
     //unsigned int maxNeuronID = _allNeuronList.size();
-#if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"],unsigned int ["+QString::number(toNeuron)+"],ConnectionDirection ["+Neuron::directionString(direction)+"])","begin");
-    __DEBUG_NET(this,"connectNeuronViaID(...)","connecting Neuron: "+QString::number(fromNeuron)+" to: "+QString::number(toNeuron));
-    __DEBUG_NET(this,"connectNeuronViaID(...)","maxNeuronID: "+QString::number(maxNeuronID));
-#endif
+//#if defined(_DEBUG_NET_CONNECT)
+
+    //__DEBUG_NET(this,"connectNeuronViaID(...)","connecting Neuron: "+std::to_string(fromNeuron)+" to: "+std::to_string(toNeuron));
+   // __DEBUG_NET(this,"connectNeuronViaID(...)","maxNeuronID: "+std::to_string(maxNeuronID));
+//#endif
   /*  if(fromNeuron >= maxNeuronID)
     {
-        this->addError(Error("connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"] ,"+
-                             "unsigned int ["+QString::number(toNeuron)+"] ,"+
+        this->addError(Error("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"] ,"+
+                             "unsigned int ["+std::to_string(toNeuron)+"] ,"+
                              "ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),fromNeuron,static_cast<unsigned int>(maxNeuronID-1),']')));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+error_paramOutOfRange(0,QString::number(fromNeuron),QString::number(0),QString::number(maxNeuronID)));
+        __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+error_paramOutOfRange(0,std::to_string(fromNeuron),std::to_string(0),std::to_string(maxNeuronID)));
 #endif
         return 0;
     }
     if(toNeuron > maxNeuronID)
     {
-        this->addError(Error("connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"] ,"+
-                             "unsigned int ["+QString::number(toNeuron)+"] ,"+
+        this->addError(Error("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"] ,"+
+                             "unsigned int ["+std::to_string(toNeuron)+"] ,"+
                              "ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),toNeuron,static_cast<unsigned int>(maxNeuronID-1),']')));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+error_paramOutOfRange(1,QString::number(toNeuron),QString::number(0),QString::number(maxNeuronID)));
+        __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+error_paramOutOfRange(1,std::to_string(toNeuron),std::to_string(0),std::to_string(maxNeuronID)));
 #endif
         return 0;
     }*/
@@ -1112,25 +1360,32 @@ void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,Con
         _costumConnections++;
     }*/
     /*} catch (std::runtime_error &e) {
-        this->addError(Error("connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"] ,"+
-                             "unsigned int ["+QString::number(toNeuron)+"] ,"+
+        this->addError(Error("connectNeuronViaID(unsigned int ["+std::to_string(fromNeuron)+"] ,"+
+                             "unsigned int ["+std::to_string(toNeuron)+"] ,"+
                              "ConnectionDirection ["+Neuron::toDirectionString(direction)+"] )",
-                             QString(e.what())));
+                             std::string(e.what())));
 #if defined(_DEBUG_NET_CONNECT)
         __DEBUG_NET(this,"connectNeuronViaID(...)","Problem: "+std::string(e.what()));
 #endif
         return 0;
     }*/
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuronViaID(unsigned int ["+QString::number(fromNeuron)+"],unsigned int ["+QString::number(toNeuron)+"],ConnectionDirection ["+Neuron::directionString(direction)+"])","end");
+    __DEBUG_NET(this,"addConnection(NeuronID,NeuronID,ConnectionDirection)","end");
 #endif
 }
 void                Net::addConnection(Connection connection)
 {
     //bool ret = set_ptr_intern_connectNeuron(connection);
     //prepareCalculationOrderList();
+    #ifdef QT_APP
+    emit accessLock();
+    #endif
     _costumConnectionList.push_back(connection);
     _needsConfigurationUpdate = true;
+    #ifdef QT_APP
+    emit netConfigurationUpdateNeeded();
+    #endif
+
 }
 
 void                Net::addConnection(std::vector<Connection> connections)
@@ -1142,14 +1397,23 @@ void                Net::addConnection(std::vector<Connection> connections)
 }
 void                Net::set_connectionList(std::vector<Connection> connections)
 {
+    #ifdef QT_APP
+    emit accessLock();
+    #endif
     _connectionList = connections;
+    #ifdef QT_APP
+    emit netConfigurationUpdateNeeded();
+    #endif
     _needsConfigurationUpdate = true;
 }
 std::vector<Connection>  Net::get_connectionList()
 {
     return _connectionList;
 }
-
+std::vector<Connection>  Net::get_costumConnectionList()
+{
+    return _costumConnectionList;
+}
 
 NeuronID            Net::addNeuron()
 {
@@ -1159,7 +1423,7 @@ NeuronID            Net::addNeuron(Neuron *neuron)
 {
     if(neuron == nullptr)
     {
-        addError(Error("addNeuron(Neuron *neuron)",QString("neuron == nullptr")));
+        addError(Error("addNeuron(Neuron *neuron)",std::string("neuron == nullptr")));
         return NeuronID();
     }
     _costumNeuronList.push_back(neuron);
@@ -1170,47 +1434,47 @@ NeuronID            Net::addNeuron(Neuron *neuron)
     return _costumNeuronList[_costumNeuronList.size()-1]->get_ID();
 }
 
-QString             Net::toString()
+std::string             Net::toString()
 {
-    QString separator = "\n";
-    QString buffer = "Net: ["+QString::number(this->get_ID())+"]"+separator;
+    std::string separator = "\n";
+    std::string buffer = "Net: ["+std::to_string(this->get_ID())+"]"+separator;
     buffer += "Neurons: "+separator;
-    buffer += "\tInputs:           "+QString::number(this->get_inputNeurons())+separator;
-    buffer += "\tHiddenlayers:     "+QString::number(this->get_hiddenNeuronsX())+separator;
-    buffer += "\tNeuronsPerLayer:  "+QString::number(this->get_hiddenNeuronsY())+separator;
-    buffer += "\tCostumneurons:    "+QString::number(this->get_costumNeurons())+separator;
-    buffer += "\tOutputneurons:    "+QString::number(this->get_outputNeurons())+separator;
+    buffer += "\tInputs:           "+std::to_string(this->get_inputNeurons())+separator;
+    buffer += "\tHiddenlayers:     "+std::to_string(this->get_hiddenNeuronsX())+separator;
+    buffer += "\tNeuronsPerLayer:  "+std::to_string(this->get_hiddenNeuronsY())+separator;
+    buffer += "\tCostumneurons:    "+std::to_string(this->get_costumNeurons())+separator;
+    buffer += "\tOutputneurons:    "+std::to_string(this->get_outputNeurons())+separator;
     buffer += "--------------------------------------------------------"+separator;
-    buffer += "\tTotal:            "+QString::number(this->get_neurons())+separator+separator;
+    buffer += "\tTotal:            "+std::to_string(this->get_neurons())+separator+separator;
 
     buffer += "Connections:"+separator;
-    buffer += "\tNormal:           "+QString::number(this->get_connections()-this->get_costumConnections())+separator;
-    buffer += "\tCostum:           "+QString::number(this->get_costumConnections())+separator;
+    buffer += "\tNormal:           "+std::to_string(this->get_connections()-this->get_costumConnections())+separator;
+    buffer += "\tCostum:           "+std::to_string(this->get_costumConnections())+separator;
     buffer += "--------------------------------------------------------"+separator;
-    buffer += "\tTotal:            "+QString::number(this->get_connections())+separator+separator;
+    buffer += "\tTotal:            "+std::to_string(this->get_connections())+separator+separator;
 
     buffer += "Activation: "+Neuron::toActivationString(this->get_activationFunction())+separator;
     buffer += "Bias:       ";
     if(this->get_bias())
-        buffer+= "true\tvalue: "+QString::number(this->get_biasValue())+separator;
+        buffer+= "true\tvalue: "+std::to_string(this->get_biasValue())+separator;
     else
         buffer+="false"+separator;
 
 #ifdef _DEBUG_NET_TIMING
-    buffer += "Calculation time:   "+QString::number(__debug_average_run_time)+"ms"+separator;
+    buffer += "Calculation time:   "+std::to_string(__debug_average_run_time)+"ms"+separator;
 #endif
 
     return buffer;
 }
-QStringList         Net::toStringList()
+std::vector<std::string>         Net::toStringList()
 {
-    QStringList list;
-    QString separator = "\n";
-    QString buff = this->toString();
-    while(buff.indexOf(separator) != -1)
+    std::vector<std::string> list;
+    std::string separator = "\n";
+    std::string buff = this->toString();
+    while(buff.find(separator) != -1)
     {
-        list.push_back(buff.mid(0,buff.indexOf(separator)));
-        buff=buff.mid(buff.indexOf(separator)+1,buff.size());
+        list.push_back(buff.substr(0,buff.find(separator)));
+        buff=buff.substr(buff.find(separator)+1,buff.size());
     }
 
     return list;
@@ -1245,12 +1509,12 @@ Error               Net::get_error(unsigned int index)
     int allErrors = _errorList.size()+static_cast<int>(neuronErrors);
     if(allErrors == 0)
     {
-        return Error("get_error(unsigned int ["+QString::number(index)+"] )",
+        return Error("get_error(unsigned int ["+std::to_string(index)+"] )",
                      ErrorMessage::listIsEmpty("_errorList"));
     }
     if(index >= static_cast<unsigned int>(allErrors))
     {
-        return Error("get_error(unsigned int ["+QString::number(index)+"] )",
+        return Error("get_error(unsigned int ["+std::to_string(index)+"] )",
                      ErrorMessage::outOfRange<unsigned int>('[',0,index,static_cast<unsigned int>(_errorList.size()-1),']'));
     }
     return this->get_errorList()[static_cast<int>(index)];
@@ -1265,10 +1529,11 @@ ErrorList           Net::get_errorList() const
     int allErrors = _errorList.size()+static_cast<int>(neuronErrors);
     ErrorList list;
     list.reserve(allErrors);
-    list.append(_errorList);
+    list.insert(list.end(),_errorList.begin(),_errorList.end());
     for(unsigned int a=0; a<this->_allNeuronList.size(); a++)
     {
-        list.append(_allNeuronList[a]->get_errorList());
+        ErrorList toInsert = _allNeuronList[a]->get_errorList();
+        list.insert(list.end(),toInsert.begin(),toInsert.end());
     }
 
     return list;
@@ -1282,12 +1547,13 @@ unsigned int        Net::get_errorAmount() const
     }
     return static_cast<unsigned int>(_errorList.size())+neuronErrors;
 }
-
+#ifdef QT_APP
 void                Net::onNeuronError(NeuronID ID,Error &e)
 {
     e.setNamespace(Neuron::toIDString(ID)+" :: "+e.getNamespace());
     emit errorOccured(this->get_ID(),e);
 }
+#endif
 void Net::init(unsigned int inputs,
           unsigned int hiddenX,
           unsigned int hiddenY,
@@ -1296,10 +1562,13 @@ void Net::init(unsigned int inputs,
           bool enableAverage,
           Activation func)
 {
+    #ifdef QT_APP
+    emit accessLock();
+    #endif
     time_t now                  = time(nullptr);
     struct tm *currentTime      = localtime(&now);
-    this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock()));
-    _needsConfigurationUpdate   = true;
+    this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock())+rand()%100);
+
     _activationFunction         = Activation::Sigmoid;
     _inputs                     = NET_MIN_INPUTNEURONS;
     _hiddenX                    = NET_MIN_HIDDENNEURONS_X;
@@ -1323,27 +1592,31 @@ void Net::init(unsigned int inputs,
         this->set_enableAverage(enableAverage);
         this->set_activationFunction(func);
     } catch (std::runtime_error &e) {
-       /* error_general("Net(unsigned int ["+QString::number(inputs)+
-                      "] , unsigned int ["+QString::number(hiddenX)+
-                      "] , unsigned int ["+QString::number(hiddenY)+
-                      "] , unsigned int ["+QString::number(outputs)+
-                      "] , bool ["+QString::number(enableBias)+
-                      "] , bool ["+QString::number(enableAverage)+
-                      "] , Activation ["+QString::number(func)+"])",e);*/
-        this->addError(Error("init()",{"unsigned int ["+QString::number(inputs)+"]",
-                           " , unsigned int ["+QString::number(hiddenX)+"]",
-                           " , unsigned int ["+QString::number(hiddenY)+"]",
-                           " , unsigned int ["+QString::number(outputs)+"]",
-                           " , bool ["+QString::number(enableBias)+"]",
-                           " , bool ["+QString::number(enableAverage)+"]",
-                           " , Activation ["+QString::number(func)+"])",
-                           "error: "+QString(e.what())}));
+       /* error_general("Net(unsigned int ["+std::to_string(inputs)+
+                      "] , unsigned int ["+std::to_string(hiddenX)+
+                      "] , unsigned int ["+std::to_string(hiddenY)+
+                      "] , unsigned int ["+std::to_string(outputs)+
+                      "] , bool ["+std::to_string(enableBias)+
+                      "] , bool ["+std::to_string(enableAverage)+
+                      "] , Activation ["+std::to_string(func)+"])",e);*/
+        this->addError(Error("init()",{"unsigned int ["+std::to_string(inputs)+"]",
+                           " , unsigned int ["+std::to_string(hiddenX)+"]",
+                           " , unsigned int ["+std::to_string(hiddenY)+"]",
+                           " , unsigned int ["+std::to_string(outputs)+"]",
+                           " , bool ["+std::to_string(enableBias)+"]",
+                           " , bool ["+std::to_string(enableAverage)+"]",
+                           " , Activation ["+std::to_string(func)+"])",
+                           "error: "+std::string(e.what())}));
         return;
     }
     this->set_biasValue(1.0);
    // this->updateNetConfiguration();
+    #ifdef QT_APP
+    emit netConfigurationUpdateNeeded();
+    #endif
     _needsConfigurationUpdate = true;
     _needsCalculationUpdate = true;
+
 #ifdef _DEBUG_NET_TIMING
     __debug_run_time = 0;
     __debug_average_run_time = 0;
@@ -1373,7 +1646,7 @@ void                Net::update_ptr_genomList()
 bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
 {
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])","begin");
+    __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection ["+Neuron::toConnectionString(*connection)+"])","begin");
 #endif
     if(connection->destination_ID.ID >= _allNeuronList.size())
     {
@@ -1381,7 +1654,7 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),connection->destination_ID.ID,static_cast<unsigned int>(_allNeuronList.size()-1),']'),
                        Neuron::toConnectionString(*connection)}));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuron(...)","destination neuron ID: "+QString::number(connection->destination_ID.ID)+" not found");
+        __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","destination neuron ID: "+std::to_string(connection->destination_ID.ID)+" not found");
 #endif
         return 0;
     }
@@ -1391,7 +1664,7 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
                        ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),connection->source_ID.ID,static_cast<unsigned int>(_allNeuronList.size()-1),']'),
                        Neuron::toConnectionString(*connection)}));
 #if defined(_DEBUG_NET_CONNECT)
-        __DEBUG_NET(this,"connectNeuron(...)","source neuron ID: "+QString::number(connection->source_ID.ID)+" not found");
+        __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","source neuron ID: "+std::to_string(connection->source_ID.ID)+" not found");
 #endif
         return 0;
     }
@@ -1417,14 +1690,14 @@ bool                Net::set_ptr_intern_connectNeuron(Connection *connection)
         default:
         {
 #if defined(_DEBUG_NET_CONNECT)
-            __DEBUG_NET(this,"connectNeuron(...)","unknown source Neuron TYPE: "+Neuron::typeString(connection->source_ID.TYPE));
+            __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection *ptr)","unknown source Neuron TYPE: "+Neuron::toTypeString(connection->source_ID.TYPE));
 #endif
             return 0;
         }
     }
     _allNeuronList[connection->destination_ID.ID]->set_weight(connection->source_ID,connection->weight);
 #if defined(_DEBUG_NET_CONNECT)
-    __DEBUG_NET(this,"connectNeuron(Connection ["+Neuron::connectionString(*connection)+"])","end");
+    __DEBUG_NET(this,"set_ptr_intern_connectNeuron(Connection ["+Neuron::toConnectionString(*connection)+"])","end");
 #endif
     return 1;
 }
@@ -1437,6 +1710,13 @@ void                Net::prepareConnectionList()
     __debug_timer1_start      = std::chrono::high_resolution_clock::now();
 #endif
     _connectionList.clear();
+    //_connectionList.reserve(1000000);
+    //qDebug() << "reserve finish";
+
+    _outputNeurons  = _outputs;
+    _hiddenNeurons  = _hiddenX * _hiddenY;
+    _neurons        = _hiddenNeurons + _outputNeurons + _costumNeurons;
+
     unsigned int ID = 0;
     for(unsigned int hiddenNeuronX=0; hiddenNeuronX<_hiddenX; hiddenNeuronX++)
     {
@@ -1546,7 +1826,7 @@ void                Net::prepareConnectionList()
 #if defined(_DEBUG_NET_TIMING)
     __debug_timer1_end  = std::chrono::high_resolution_clock::now();
     __debug_time_span   = std::chrono::duration_cast<std::chrono::microseconds>(__debug_timer1_end - __debug_timer1_start);
-    __DEBUG_NET(this,"prepareConnectionList()","end. Elapsed time: "+QString::number(__debug_time_span.count())+" sec");
+    __DEBUG_NET(this,"prepareConnectionList()","end. Elapsed time: "+std::to_string(__debug_time_span.count())+" sec");
 #else
     __DEBUG_NET(this,"prepareConnectionList()","end");
 #endif
@@ -1554,9 +1834,90 @@ void                Net::prepareConnectionList()
 }
 void                Net::prepareCalculationOrderList()
 {
-#if defined(_DEBUG_NET_CONNECT)
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
     __DEBUG_NET(this,"prepareCalculationOrderList()","begin");
 #endif
+    _calculationOrderList.clear();
+    _calculationOrderList.reserve(_allNeuronList.size());
+
+
+
+    // Jede Variable in "isUpdated" befindet sich im array auch am selben ort wie das Neuron die ID hat.
+    // isUpdated[3] -> _allNeuronList[3]
+    // isUpdated wird verwendet um bei der Reihenfolgensuche zu schauen ob das vorherige Neuron bereits berechnet wurde.
+    std::vector<bool> isUpdated(_allNeuronList.size(),false);
+    bool allUpdated = false;
+    unsigned int counter = 0;
+    while(!allUpdated)
+    {
+        // Durch alle Neuronen gehen und jede einzeln analysieren
+        for(unsigned int neuron=0; neuron<_allNeuronList.size(); neuron++)
+        {
+            counter++;
+            // Dieses Neuron wurde bereits einmal berechnet
+            if(isUpdated[_allNeuronList[neuron]->get_ID().ID])
+                continue;
+
+            // invertiert initialisiert. So kann bei der ersten unstimmigkeit auf false gesetzt werden.
+            bool allInputsUpdated = true;
+
+            // Durch jeden Input gehen und schauen:
+            // 1) Von wo jede Verbindung kommt
+            // 2) Ob die Verbindung vorwärts oder rückwärts geht. (Rückwärts = Rückkopplung)
+            // 3) Ob die Neuronen, die sich am start der Verbindung befinden bereits berechnet wurden.
+            for(unsigned int input=0; input<_allNeuronList[neuron]->get_inputs(); input++)
+            {
+
+                unsigned int inputID                = _allNeuronList[neuron]->get_inputID(input).ID;
+                NeuronType   inputType              = _allNeuronList[neuron]->get_inputID(input).TYPE;
+                ConnectionDirection inputDirection  = _allNeuronList[neuron]->get_inputConnectionDirection(_allNeuronList[neuron]->get_inputID(input));
+
+                // 1)
+                // Diese Typen sind immer auf dem aktuellen Stand und müssen nicht berücksichtigt werden.
+                if(inputType == NeuronType::bias ||
+                   inputType == NeuronType::input)
+                    continue;
+
+                // 2)
+                // Rückwertsführende Verbindungen können noch gar nicht aktuell sein, müssen das auch nicht
+                if(inputDirection == ConnectionDirection::backward)
+                    continue;
+
+                // 3)
+                if(!isUpdated[inputID]) // Neuron an Quelle der Verbindung wurde noch nicht berechnet
+                {
+                    allInputsUpdated = false;
+                    break; // Es muss nicht weiter gesucht werden, dieses Neuron kann noch nicht berechnet werden.
+                }
+            }
+            if(!allInputsUpdated)
+                continue;
+
+            _calculationOrderList.push_back(_allNeuronList[neuron]->get_ID());
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
+            __DEBUG_NET(this,"prepareCalculationOrderList()","couter: "+std::to_string(counter)+"\t_calculationOrderList[last] (TYPE: NeuronID) = "+Neuron::toIDString(_calculationOrderList[_calculationOrderList.size()-1]));
+#endif
+            isUpdated[_allNeuronList[neuron]->get_ID().ID] = true;
+        }
+
+        allUpdated = true;
+        for(unsigned int updates = 0; updates < isUpdated.size(); updates++)
+        {
+            if(!isUpdated[updates])
+                allUpdated = false;
+        }
+    }
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
+    __DEBUG_NET(this,"prepareCalculationOrderList()","all updated. Neurons are calculated in this order:");
+    for(unsigned int a=0; a<_calculationOrderList.size(); a++)
+    {
+        __DEBUG_NET(this,"prepareCalculationOrderList()","CalculationPos: "+std::to_string(a)+"\tNeuron: (ID): "+Neuron::toIDString(_calculationOrderList[a]));
+    }
+#endif
+
+
+  /*
+
     _calculationOrderList.clear();
     _calculationOrderList.reserve(_allNeuronList.size());
     //std::vector<bool> isUpdated(_allNeuronList.size(),false);
@@ -1605,7 +1966,8 @@ void                Net::prepareCalculationOrderList()
             }
         }
     }
-#if defined(_DEBUG_NET_CONNECT)
+    */
+#if defined(_DEBUG_NET_CALCULATION_ORDER_LIST)
     __DEBUG_NET(this,"prepareCalculationOrderList()","end");
 #endif
 }
@@ -1618,7 +1980,9 @@ void                Net::addError(const Error &e)
     _errorList.push_back(e);
     _errorList[_errorList.size()-1].setNamespace("Net::"+_errorList[_errorList.size()-1].getNamespace());
     Error::print(_errorList[_errorList.size()-1]);
+    #ifdef QT_APP
     emit errorOccured(this->get_ID(),_errorList[_errorList.size()-1]);
+    #endif
 }
 bool                Net::isEqual(Net *toCompare)
 {
@@ -1644,19 +2008,19 @@ double Net::get_runtime()
 /*
 std::string Net::error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max)
 {
-    return " parameter "+QString::number(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
+    return " parameter "+std::to_string(paramPos)+" is out of range: "+value+"     minimum is: "+min+"     maximum is: "+max;
 }
 std::string Net::error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
 std::string Net::error_paramOutOfRange(unsigned int paramPos,int value,int min, int max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
 std::string Net::error_paramOutOfRange(unsigned int paramPos,double value,double min, double max)
 {
-    return error_paramOutOfRange(paramPos,QString::number(value),QString::number(min),QString::number(max));
+    return error_paramOutOfRange(paramPos,std::to_string(value),std::to_string(min),std::to_string(max));
 }
 void        Net::error_general(std::string function, std::string cause)
 {

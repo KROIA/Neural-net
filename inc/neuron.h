@@ -1,13 +1,15 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.05.00"
-//              Datum   02.02.2020
+#define NEURON_VERSION "02.06.01"
+//              Datum   25.09.2020
 
 /*
  Some functions may throw errors.
  All thrwon errors are std::runtime_error
 */
+
+#define QT_APP
 
 //  Debuging
 //#define _DEBUG_NEURON_RUN
@@ -36,17 +38,29 @@
 #include <random>
 #include <iostream>
 #include <time.h>
-#include <QDebug>
-#include <QString>
-#include <QStringList>
-#include <QObject>
 
+#ifdef QT_APP
+    #include <QDebug>
+    #include <QObject>
+#endif
 #include <error.h>
 
 #if defined(_DEBUG_NEURON_TIMING)
 #include <ctime>
 #include <ratio>
 #include <chrono>
+#endif
+
+#ifdef QDEBUG_H
+#ifndef CONSOLE
+#define CONSOLE qDebug()
+#endif
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
 #endif
 
 
@@ -108,12 +122,21 @@ struct Connection
     ConnectionDirection direction;
 };
 
-
-class Neuron : public QObject
+#ifdef QT_APP
+    class Neuron : public QObject
+#else
+   class Neuron
+#endif
 {
-        Q_OBJECT
+        #ifdef QT_APP
+            Q_OBJECT
+        #endif
     public:
-        Neuron(QObject *parent = nullptr);
+        #ifdef QT_APP
+            Neuron(QObject *parent = nullptr);
+        #else
+           Neuron();
+        #endif
         /*Constructor of Neuron
             Parameter:
             none
@@ -126,8 +149,13 @@ class Neuron : public QObject
           ERROR:
            | same as Neuron::init(init(unsigned int inputs, Activation activationFunction, bool enableAverage);
          */
-        Neuron(unsigned int inputs,
-               QObject *parent = nullptr);
+
+        #ifdef QT_APP
+           Neuron(unsigned int inputs,
+                  QObject *parent = nullptr);
+        #else
+           Neuron(unsigned int inputs);
+        #endif
         /* Constructor of Neuron
           Parameter:
            | inputs: input connection, have to be connected later
@@ -140,9 +168,15 @@ class Neuron : public QObject
            | same as Neuron::init(init(unsigned int inputs, Activation activationFunction, bool enableAverage);
 
          */
-        Neuron(unsigned int inputs,
-               Activation activationFunction,
-               QObject *parent = nullptr);
+
+        #ifdef QT_APP
+           Neuron(unsigned int inputs,
+                  Activation activationFunction,
+                  QObject *parent = nullptr);
+        #else
+           Neuron(unsigned int inputs,
+                  Activation activationFunction);
+        #endif
         /* Constructor of Neuron
           Parameter:
            | inputs: input connection, have to be connected later
@@ -155,10 +189,17 @@ class Neuron : public QObject
            | same as Neuron::init(init(unsigned int inputs, Activation activationFunction, bool enableAverage);
 
          */
-        Neuron(unsigned int inputs,
-               Activation activationFunction,
-               bool enableAverage,
-               QObject *parent = nullptr);
+
+        #ifdef QT_APP
+           Neuron(unsigned int inputs,
+                  Activation activationFunction,
+                  bool enableAverage,
+                  QObject *parent = nullptr);
+        #else
+           Neuron(unsigned int inputs,
+                  Activation activationFunction,
+                  bool enableAverage);
+        #endif
         /* Constructor of Neuron
           Parameter:
            | inputs: input connection, have to be connected later
@@ -612,13 +653,13 @@ class Neuron : public QObject
         static double deriv_activation_Gaussian(double netInput);
         static double deriv_activation_Sigmoid(double netInput);
 
-        static const QString toIDString(NeuronID ID);
-        static const QString toTypeString(NeuronType TYPE);
-        static const QString toActivationString(Activation activationFunction);
-        static const QString toConnectionString(Connection connection);
-        static const QString toDirectionString(ConnectionDirection dir);
-        QString              toString();
-        QStringList          toStringList();
+        static const std::string toIDString(NeuronID ID);
+        static const std::string toTypeString(NeuronType TYPE);
+        static const std::string toActivationString(Activation activationFunction);
+        static const std::string toConnectionString(Connection connection);
+        static const std::string toDirectionString(ConnectionDirection dir);
+        std::string              toString();
+        std::vector<std::string>          toStringList();
 
         void needsUpdate();
         /* Enables the Neuron::run() function once.
@@ -648,9 +689,10 @@ class Neuron : public QObject
         Error get_error(unsigned int index);
         ErrorList get_errorList() const;
         unsigned int get_errorAmount() const;
+#ifdef QT_APP
     signals:
         void errorOccured(NeuronID ID,Error &e);
-
+#endif
     protected:
         static unsigned int _globalNeurons;
 
@@ -675,14 +717,14 @@ class Neuron : public QObject
         void calc_output();
 
   /*      //----------ERROR
-        QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
-        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
 
-        void        error_general(QString function, QString cause);
-        void        error_general(QString function, std::runtime_error &e);
-        void        error_general(QString function, QString cause, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause);
+        void        error_general(std::string function, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause, std::runtime_error &e);
         //---------------
 */
 
@@ -715,12 +757,12 @@ class Neuron : public QObject
 
 };
 
-/*inline void __DEBUG_NEURON_(Neuron *ptr_neuron,QString func,QString message)
+/*inline void __DEBUG_NEURON_(Neuron *ptr_neuron,std::string func,std::string message)
 {
 #ifdef QT_APPLICATION
-    qDebug() << "["+QString::number(ptr_neuron->ID().ID)+" | "+QString::fromStdString(Neuron::typeString(ptr_neuron->ID().TYPE))+"] Neuron::"+QString::fromStdString(func)+" "+QString::fromStdString(message);
+    CONSOLE<< "["+std::to_string(ptr_neuron->ID().ID)+" | "+std::string::fromStdString(Neuron::typeString(ptr_neuron->ID().TYPE))+"] Neuron::"+std::string::fromStdString(func)+" "+std::string::fromStdString(message);
 #else
-    std::cout << "["<<ptr_neuron->ID().ID<<" | "<<Neuron::typeString(ptr_neuron->ID().TYPE)<<"]"<<"Net::"<<func<<" "<<message << std::endl;
+    CONSOLE << "["<<ptr_neuron->ID().ID<<" | "<<Neuron::typeString(ptr_neuron->ID().TYPE)<<"]"<<"Net::"<<func<<" "<<message << std::endl;
 #endif
 }*/
 //#define __DEBUG_NEURON(neuron,func,message)(__DEBUG_NEURON_(neuron,func,message));

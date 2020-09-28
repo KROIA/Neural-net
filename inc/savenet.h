@@ -1,11 +1,27 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "02.02.01"
-//              Datum   09.02.2020
+#define SAVENET_VERSION "02.03.01"
+//              Datum   28.09.2020
 
 #include <net.h>
 #include <time.h>
+
+#ifdef QT_APP
+  #include <QDebug>
+#endif
+
+#ifdef QDEBUG_H
+#ifndef CONSOLE
+#define CONSOLE qDebug()
+#endif
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
 
 #define _DEBUG_READ_TIMING
 
@@ -15,10 +31,10 @@ class SaveNet
         SaveNet();
         ~SaveNet();
 
-        void            set_filename(QString filename);
-        QString         get_filename();
-        void            set_fileEnding(QString fileEnding);
-        QString         get_fileEnding();
+        void            set_filename(std::string filename);
+        std::string         get_filename();
+        void            set_fileEnding(std::string fileEnding);
+        std::string         get_fileEnding();
         void            set_inputNeurons(unsigned int inputs);
         unsigned int    get_inputNeurons();
         void            set_hiddenNeuronsX(unsigned int hiddenX);
@@ -42,16 +58,16 @@ class SaveNet
         bool            get_enableAverage();
         void            set_activationFunction(Activation func);
         Activation      get_activationFunction();
-        void            set_ExtraParam(QString name,double value);
-        void            get_ExtraParam(QString name, double &value);
-        void            set_ExtraParam(std::vector<QString> name,std::vector<double> value);
-        void            get_ExtraParam(std::vector<QString> &name,std::vector<double> &value);
+        void            set_ExtraParam(std::string name,double value);
+        void            get_ExtraParam(std::string name, double &value);
+        void            set_ExtraParam(std::vector<std::string> name,std::vector<double> value);
+        void            get_ExtraParam(std::vector<std::string> &name,std::vector<double> &value);
 
 
         bool            loadFile();
-        bool            loadFile(QString filename);
+        bool            loadFile(std::string filename);
         bool            saveFile();
-        bool            saveFile(QString filename);
+        bool            saveFile(std::string filename);
 
       //  void setGenom(std::vector<double>   genom);
       //  void setGenom(unsigned int index,std::vector<double>   genom);
@@ -95,17 +111,17 @@ class SaveNet
         void addError(const Error &e);
 
      /*   //----------ERROR
-        QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
-        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
-        void        error_general(QString function, QString cause);
-        void        error_general(QString function, std::runtime_error &e);
-        void        error_general(QString function, QString cause, std::runtime_error &e);
+        std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        void        error_general(std::string function, std::string cause);
+        void        error_general(std::string function, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause, std::runtime_error &e);
         //---------------
 */
-        QString _filename;
-        QString _fileEnding;
+        std::string _filename;
+        std::string _fileEnding;
         unsigned int _saves;
         FILE *_file;
 
@@ -124,7 +140,7 @@ class SaveNet
         unsigned int  _costumNeurons;
         unsigned int _connections;
         unsigned int  _costumConnections;
-        std::vector<QString> _extraParamName;
+        std::vector<std::string> _extraParamName;
         std::vector<double>       _extraParamValue;
 
         std::vector<std::vector<double>  >_genomList;

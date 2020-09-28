@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1521</width>
-    <height>933</height>
+    <height>891</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -877,6 +877,20 @@
      </property>
     </widget>
    </widget>
+   <widget class="QQuickWidget" name="net_widget">
+    <property name="geometry">
+     <rect>
+
+      <x>1070</x>
+      <y>10</y>
+      <width>441</width>
+      <height>841</height>
+     </rect>
+    </property>
+    <property name="resizeMode">
+     <enum>QQuickWidget::SizeRootObjectToView</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -891,6 +905,13 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QQuickWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QtQuickWidgets/QQuickWidget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

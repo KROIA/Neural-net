@@ -10,6 +10,7 @@
 #include <backpropnet.h>
 #include <config.h>
 
+
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QLineSeries>
@@ -18,6 +19,7 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -101,6 +103,7 @@ class Snake : public QMainWindow
         std::vector<QPoint> _fieldOfView;
 
         GeneticNet *net;
+
 
         QString _statsFilename;
         std::vector<double> _snakeScore;

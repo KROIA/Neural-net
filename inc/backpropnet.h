@@ -1,18 +1,38 @@
 #ifndef BACKPROPNET_H
 #define BACKPROPNET_H
 //                      Autor   Alex Krieg
-#define    BACKPROPNET_VERSION "02.05.00"
-//                      Datum   02.02.2020
+#define    BACKPROPNET_VERSION "02.06.00"
+//                      Datum   25.09.2020
 
 #include "net.h"
 #include "savenet.h"
 #include <cmath>       /* isnan, sqrt */
 
+#ifdef QT_APP
+  #include <QDebug>
+  #include <QObject>
+#endif
+
+#ifdef QDEBUG_H
+#ifndef CONSOLE
+#define CONSOLE qDebug()
+#endif
+#else
+#include <iostream>
+#include <stdio.h>
+#ifndef CONSOLE
+#define CONSOLE std::cout
+#endif
+#endif
+
 
 class BackpropNet : public Net
 {
+#ifdef QT_APP
         Q_OBJECT
+#endif
     public:
+#ifdef QT_APP
         BackpropNet(unsigned int ID = 0,
                     QObject *parent = nullptr);
         BackpropNet(unsigned int ID,
@@ -38,19 +58,42 @@ class BackpropNet : public Net
                         bool enableBias,
                         bool enableAverage,
                         Activation func);
+#else
+        BackpropNet(unsigned int ID = 0);
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
+                    unsigned int hiddenX,
+                    unsigned int hiddenY,
+                    unsigned int outputs);
+        BackpropNet(unsigned int ID,
+                    unsigned int inputs,
+                    unsigned int hiddenX,
+                    unsigned int hiddenY,
+                    unsigned int outputs,
+                    bool enableBias,
+                    bool enableAverage,
+                    Activation func);
+
+        void        set(unsigned int inputs,
+                        unsigned int hiddenX,
+                        unsigned int hiddenY,
+                        unsigned int outputs,
+                        bool enableBias,
+                        bool enableAverage,
+                        Activation func);
+#endif
 
 
-
-        void        set_netFileName(QString filename);
-        QString     get_netFileName();
-        void        set_netFileEnding(QString fileEnding);
-        QString     get_netFileEnding();
+        void        set_netFileName(std::string filename);
+        std::string     get_netFileName();
+        void        set_netFileEnding(std::string fileEnding);
+        std::string     get_netFileEnding();
         void        loadFromNetFile();
-        void        loadFromNetFile(QString filename);
-        void        loadFromNetFile(QString filename,QString fileEnding);
+        void        loadFromNetFile(std::string filename);
+        void        loadFromNetFile(std::string filename,std::string fileEnding);
         void        saveToNetFile();
-        void        saveToNetFile(QString filename);
-        void        saveToNetFile(QString filename,QString fileEnding);
+        void        saveToNetFile(std::string filename);
+        void        saveToNetFile(std::string filename,std::string fileEnding);
 
 
 
@@ -99,23 +142,27 @@ class BackpropNet : public Net
         static double __dbg_time8;
         static double __dbg_time9;
         static double __dbg_time10;
+#ifdef QT_APP
     signals:
         void errorOccured(unsigned int netID, Error &e);
-
+	private slots:
+        void onNetConfigurationUpdate();
+        void onNetConfigurationUpdateFinished();
+#endif
 
     private:
-        void printIllegalFunctionMessage(QString func);
+        void printIllegalFunctionMessage(std::string func);
         void init();
         void addError(const Error &e);
 
         //----------ERROR
-       /* QString error_paramOutOfRange(unsigned int paramPos,QString value,QString min, QString max);
-        QString error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
-        QString error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
-        QString error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
-        void        error_general(QString function, QString cause);
-        void        error_general(QString function, std::runtime_error &e);
-        void        error_general(QString function, QString cause, std::runtime_error &e);*/
+       /* std::string error_paramOutOfRange(unsigned int paramPos,std::string value,std::string min, std::string max);
+        std::string error_paramOutOfRange(unsigned int paramPos,unsigned int value,unsigned int min, unsigned int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,int value,int min, int max);
+        std::string error_paramOutOfRange(unsigned int paramPos,double value,double min, double max);
+        void        error_general(std::string function, std::string cause);
+        void        error_general(std::string function, std::runtime_error &e);
+        void        error_general(std::string function, std::string cause, std::runtime_error &e);*/
         //---------------
 
 
@@ -136,17 +183,13 @@ class BackpropNet : public Net
         // tempVariables for learn() end
 };
 
-inline void __DEBUG_BACKPROPNET_(Net *ptr_net,QString func,QString message)
+inline void __DEBUG_BACKPROPNET_(Net *ptr_net,std::string func,std::string message)
 {
 #ifdef _DEBUG_NET_ONLY_ID
     if(ptr_net->get_ID() != _DEBUG_NET_ONLY_ID)
         return;
 #endif
-#ifdef QT_APPLICATION
-    qDebug() << "["+QString::number(ptr_net->ID())+"] BackpropNet::"+QString::fromStdString(func)+" "+QString::fromStdString(message);
-#else
-    qDebug() << "["<<ptr_net->get_ID()<<"]"<<"Net::"<<func<<" "<<message;
-#endif
+    CONSOLE<< ("["+std::to_string(ptr_net->get_ID())+"]"+"Net::"+func+" "+message+"\n").c_str();
 
 #define __DEBUG_BACKPROPNET(net,func,message)(__DEBUG_BACKPROPNET_(net,func,message));
 
