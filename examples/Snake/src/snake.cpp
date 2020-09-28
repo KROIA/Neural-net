@@ -95,7 +95,7 @@ Snake::Snake(QWidget *parent) :
     unsigned int outputs = 3;
     net = new GeneticNet(animals,inputs,hiddenX,hiddenY,outputs,true,false,Activation::Gaussian);
     net->set_bias(true);
-    net->loadFromNetFile(netFileName,"net");
+    net->loadFromNetFile(netFileName.toStdString(),"net");
     double gen = 0;
     try {
         net->get_ptr_saveNet()->get_ExtraParam("generation",gen);
@@ -523,8 +523,8 @@ void Snake::timerEvent()
 }
 void Snake::timerEvent2()
 {
-        QStringList data = net->toStringList();
-        for(int a=0; a<data.size(); a++)
+        std::vector<std::string> data = net->toStringList();
+        for(size_t a=0; a<data.size(); a++)
         {
             //qDebug() << data[a];
         }
