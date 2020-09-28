@@ -199,7 +199,7 @@ bool SaveNet::loadFile()
     std::vector<std::string> fileBuffer;
     std::string tmpBuffer = "";
     unsigned int tmpAnimals = 0;
-    while(tmpBuffer.find("[NETS]") == -1)
+    while(tmpBuffer.find("[NETS]") == std::string::npos)
     {
         char list[255];
         fgets(list,255,_file);
@@ -208,8 +208,18 @@ bool SaveNet::loadFile()
     }
     for(unsigned int a=0; a<fileBuffer.size(); a++)
     {
-        std::string buffLine = fileBuffer[a].substr(fileBuffer[a].find(" ")+1,fileBuffer[a].find("\n"));
-        unsigned int uInt_buffLine = stoul(buffLine);
+        std::string buffLine = fileBuffer[a].substr(fileBuffer[a].find_last_of(" ")+1,fileBuffer[a].find("\n"));
+        qDebug() << buffLine.c_str();
+        unsigned int uInt_buffLine;
+        if(buffLine == "" || fileBuffer[a].find(" ") == std::string::npos)
+            continue;
+        try {
+            uInt_buffLine = stoul(buffLine);
+        } catch (std::invalid_argument &e) {
+            qDebug() << e.what();
+
+        }
+
         if(fileBuffer[a].find("SAVES") == 0)
         {
             _saves = uInt_buffLine;
@@ -306,7 +316,7 @@ bool SaveNet::loadFile()
             break;
         }
         connectionBuffer[connectionBuffer.size()-1].push_back(list);
-        if(std::string(list).find("\n") != -1)
+        if(std::string(list).find("\n") != std::string::npos)
         {
             //fileBuffer.push_back(tmpBuffer);
             connectionBuffer.push_back(std::vector<std::string>());
@@ -354,8 +364,8 @@ bool SaveNet::loadFile()
             a=50;
         }
         std::string tempBuff = "";
-        int largeBufferIndex = 0;
-        int smallBufferSize = 20;
+        size_t largeBufferIndex = 0;
+        size_t smallBufferSize = 20;
         unsigned int connectionListIndex = 0;
         bool endOfList = false;
         while(tempBuff != "\n")

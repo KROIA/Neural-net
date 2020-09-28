@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
             ErrorList errors = net->get_errorList();
             for(int error=0; error<errors.size(); error++)
             {
-                std::cout << "Error: "<<errors[error].toQString().toStdString();
+                std::cout << "Error: "<<errors[error].toString();
             }
             net->clearErrors();
             getchar();
@@ -178,10 +178,10 @@ void printNet(Net *net)
 {
     for(unsigned int b=0; b<net->get_neurons(); b++)
     {
-    QStringList    list = net->get_ptr_neuron_viaID(b)->toStringList();
-    for(int a=0; a<list.size(); a++)
+    vector<std::string>    list = net->get_ptr_neuron_viaID(b)->toStringList();
+    for(unsigned int a=0; a<list.size(); a++)
     {
-        printf(list[a].toStdString().c_str());
+        printf(list[a].c_str());
     }
     printf("------------------------------------\n");
     }

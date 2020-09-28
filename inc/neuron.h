@@ -9,7 +9,7 @@
  All thrwon errors are std::runtime_error
 */
 
-//#define QT_APP
+#define QT_APP
 
 //  Debuging
 //#define _DEBUG_NEURON_RUN
