@@ -1,3 +1,7 @@
+// Autor        Alex Krieg
+// Datum        28.09.2020
+// Version      00.01.00
+
 #include <QCoreApplication>
 #include <backpropnet.h>
 #include <iostream>
@@ -72,7 +76,7 @@ int main(int argc, char *argv[])
     }
     std::vector<double> genom;
     std::vector<double> output;
-    std::cout << net->toString().toStdString();
+    std::cout << net->toString();
     printf("net done, press enter\n");
     getchar();
     unsigned int counter =0;
@@ -92,9 +96,9 @@ int main(int argc, char *argv[])
         if(net->get_errorAmount() != 0)
         {
             ErrorList errors = net->get_errorList();
-            for(int error=0; error<errors.size(); error++)
+            for(size_t error=0; error<errors.size(); error++)
             {
-                std::cout << "Error: "<<errors[error].toQString().toStdString();
+                std::cout << "Error: "<<errors[error].toString();
             }
             net->clearErrors();
             getchar();
@@ -173,10 +177,10 @@ void printNet(Net *net)
 {
     for(unsigned int b=0; b<net->get_neurons(); b++)
     {
-    QStringList    list = net->get_ptr_neuron_viaID(b)->toStringList();
-    for(int a=0; a<list.size(); a++)
+    std::vector<std::string>    list = net->get_ptr_neuron_viaID(b)->toStringList();
+    for(size_t a=0; a<list.size(); a++)
     {
-        printf(list[a].toStdString().c_str());
+        printf(list[a].c_str());
     }
     printf("------------------------------------\n");
     }

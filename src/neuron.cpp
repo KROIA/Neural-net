@@ -740,7 +740,16 @@ const std::string Neuron::toDirectionString(ConnectionDirection dir)
 }
 std::string       Neuron::toString()
 {
-    return "not implemented";
+    std::string str = "";
+    std::vector<std::string> list = this->toStringList();
+    size_t size = 0;
+    for(size_t i=0; i<list.size(); i++)
+        size += list[i].size();
+    str.reserve(size);
+
+    for(size_t i=0; i<list.size(); i++)
+        str += list[i];
+    return str;
 }
 std::vector<std::string> Neuron::toStringList()
 {
@@ -749,7 +758,17 @@ std::vector<std::string> Neuron::toStringList()
     const std::string spacer = "\t";
     const std::string newline = "\n";
 
-    stringList.push_back(toIDString(this->_ID)+newline);
+    stringList.push_back("+-----------------------------------------------------+"+newline);
+    stringList.push_back("| "+toIDString(this->_ID)+newline);
+
+    char buff[50];
+    line  = "+-----------------------------------------------------+"+newline;
+    line += "|   Inputs | Activation | Is updated | Enable average |"+newline;
+    sprintf(buff,"|%9i |%11s |%11s |%15s |",_inputs,toActivationString(this->_activationFunction).c_str(),
+                                         (_needsCalculationUpdate==false?"TRUE":"FALSE"),
+                                         (_enableAverage==true?"TRUE":"FALSE"));
+    line += buff + newline +  "+-----------------------------------------------------+"+newline;
+    /*
     line = "Inputs:"+spacer+std::to_string(_inputs)+spacer;
     line += "Activation:"+ spacer + toActivationString(this->_activationFunction)+spacer;
     if(!_needsCalculationUpdate)
@@ -760,27 +779,39 @@ std::vector<std::string> Neuron::toStringList()
     if(_enableAverage)
         line+= "Enable average:"+spacer+"true"+spacer;
     else
-        line+= "Enable average:"+spacer+"false"+spacer;
-    stringList.push_back(line+newline);
+        line+= "Enable average:"+spacer+"false"+spacer;*/
+    stringList.push_back(line);
 
-    line = "weight:"+spacer;
+    line = "|   Weight: ";
     for(unsigned int input=0; input<_inputs; input++)
     {
-        line += std::to_string(_weightList[input])+spacer;
+        char buff[20];
+        sprintf(buff,"%8.3f",_weightList[input]);
+        line += buff;
+        //line += std::to_string(_weightList[input])+spacer;
     }
     stringList.push_back(line+newline);
 
-    line = "value:"+spacer;
+    line = "|    Value: ";
     for(unsigned int input=0; input<_inputs; input++)
     {
-        line += std::to_string(*_ptr_inputList[input])+spacer;
+        char buff[20];
+        sprintf(buff,"%8.3f",*_ptr_inputList[input]);
+        line += buff;
+        //line += std::to_string(*_ptr_inputList[input])+spacer;
     }
     stringList.push_back(line+newline);
-    stringList.push_back("Netinp:"+spacer+std::to_string(_netInput)+newline);
 
-    line = "Output:"+spacer+std::to_string(_output)+spacer;
-    line+= "Delayed output:"+spacer+std::to_string(_delayedOutput)+spacer;
-    stringList.push_back(line+newline);
+    sprintf(buff,"| Netinput: %8.3f%s",_netInput,newline.c_str());
+    stringList.push_back(buff);
+    //stringList.push_back("Netinp:"+spacer+std::to_string(_netInput)+newline);
+
+    sprintf(buff,"|   Output: %8.3f%sDelayed output:%s%8.3f%s",_output,spacer.c_str(),spacer.c_str(),_delayedOutput,newline.c_str());
+    stringList.push_back(buff);
+    stringList.push_back("+-----------------------------------------------------+"+newline);
+   // line = "Output:"+spacer+std::to_string(_output)+spacer;
+   // line+= "Delayed output:"+spacer+std::to_string(_delayedOutput)+spacer;
+   // stringList.push_back(line+newline);
 
 
     return stringList;

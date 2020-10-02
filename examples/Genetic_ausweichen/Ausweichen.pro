@@ -28,6 +28,7 @@ SOURCES += \
     $$netSrcPath/neuron.cpp \
     $$netSrcPath/activation.cpp \
     $$netSrcPath/geneticnet.cpp \
+    $$netSrcPath/backpropnet.cpp \
     $$netSrcPath/savenet.cpp \
     $$netSrcPath/error.cpp\
     $$srcPath/timer.cpp \

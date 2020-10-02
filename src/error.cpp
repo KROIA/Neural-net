@@ -91,10 +91,10 @@ std::vector<std::string> Error::toStringList() const
 }
 void Error::print(Error &e)
 {
-    CONSOLE << "Error: "<<e.getNamespace();
+    CONSOLE << "Error: "<<e.getNamespace().c_str();
     for(unsigned int a=0; a<e.getMessageList().size(); a++)
     {
-        CONSOLE << "   "<<e.getMessageList()[a];
+        CONSOLE << "   "<<e.getMessageList()[a].c_str();
     }
     CONSOLE << "\n";
 }
