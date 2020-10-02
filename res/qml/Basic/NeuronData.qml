@@ -12,7 +12,6 @@ Item {
     property int typeId:0
     property int type: 0
     property int absId: {
-        //console.debug("update absId  new ",Logic.getAbsIdFromTypeId(typeId,type,netId))
         return Logic.getAbsIdFromTypeId(typeId,type,netId)
     }
 

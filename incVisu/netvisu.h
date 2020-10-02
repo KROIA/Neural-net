@@ -88,6 +88,7 @@ public slots:
     void onWeightsChanged(Net *p_net);
 
     void onNetConfigurationChanged();
+    void updateNetConfiguration();
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
     int addNewNet();
@@ -97,6 +98,7 @@ public slots:
     void addOutput(const int &netId);
 private:
     bool access=false;
+
     QQmlApplicationEngine *engine;
     QQmlContext* context;
     vector<Net*> *netList;

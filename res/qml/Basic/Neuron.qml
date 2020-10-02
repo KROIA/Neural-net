@@ -16,21 +16,28 @@ Rectangle {
         id:dataNeuron
     }
     property alias dataNeuron: dataNeuron
+    Component.onCompleted: {
+        if(!finishedLoading){
+            lastId=dataNeuron.absId
+            loadedNeuron++
+
+        }
+    }
 
     onXChanged:dockingPoint()
     onYChanged:dockingPoint()
-    onDChanged:dockingPoint()
+    //onDChanged:dockingPoint()
     onXRelChanged: dockingPoint()
     onYRelChanged:dockingPoint()
     Drag.active: mouseArea.drag.active
-    property real xOffset: 0.2*d
+    property real xOffset: 0.1*d
     function dockingPoint(){
-        netItem.inputDockingPoint[dataNeuron.absId]=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
-        netItem.outputDockingPoint[dataNeuron.absId]=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
-        console.debug("set Docking Point ",dataNeuron.absId)
+        netItem.inputDockingPoint[dataNeuron.absId]=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
+        netItem.outputDockingPoint[dataNeuron.absId]=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
+        //console.debug("set Docking Point ",dataNeuron.absId)
         if(Drag.active||lastNeuron){
-            console.debug("update Docking list")
-           netItem.inputDockingPoint=VisuFunction.updateArray(netItem.inputDockingPoint)
+            //console.debug("update Docking list",dataNeuron.absId)
+            netItem.inputDockingPoint=VisuFunction.updateArray(netItem.inputDockingPoint)
             netItem.outputDockingPoint=VisuFunction.updateArray(netItem.outputDockingPoint)
         }
     }

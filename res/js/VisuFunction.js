@@ -7,14 +7,10 @@ function color(transparent,color) {
 }
 
 function updateArray(arr){
-    /*var temp=[]
-    temp=arr
-    arr=temp*/
     return arr
 }
 
 function getAbsIdFromTypeId(id,type,netId){
-
     var res
     if(type===def.inputType){
         res= id
@@ -28,7 +24,7 @@ function getAbsIdFromTypeId(id,type,netId){
     }
 
     else if(type===def.biasType){
-        console.debug(id,type,netId)
+
         res= id+(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
     }
     else{

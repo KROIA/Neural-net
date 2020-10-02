@@ -25,14 +25,7 @@ NetData {
     property int clickedneuronID: -1
     property int clickedNeurontype: 0
     property bool moveable: false
-    property var inputDockingPoint : [
-                Qt.point(0,0),
-                Qt.point(100,100)
-            ]
-    property var outputDockingPoint : [
-                Qt.point(0,0),
-                Qt.point(100,100)
-            ]
+
     property variant yRel: []
     property variant xRel: []
     property int maxYNeuron: {
@@ -64,8 +57,18 @@ NetData {
     signal updateValue();
     signal showAll();
     signal updateDockingPoint(var abs);
+    property var inputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
+    property var outputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
     Component.onCompleted: {
         updateStructur()
+        neuronLoader.active = true
+        connectionLoader.active = true
         //updateDockingPoint(netItem.)
 
     }
@@ -91,7 +94,18 @@ NetData {
                         updateValue()
                     }
                     function onUpdateNetStruc(){
+                        neuronLoader.active = false
+                        connectionLoader.active = false
+                        inputDockingPoint=[]
+                        outputDockingPoint=[]
                         netItem.updateStructur()
+                        /*console.debug("new Config:")
+                        console.debug("input ",netItem.inputNeuron)
+                        console.debug("output ",netItem.outputNeuron)
+                        console.debug("hiddenX", netItem.hiddenNeuronX)
+                        console.debug("hiddenY", netItem.hiddenNeuronY)*/
+                        neuronLoader.active = true
+                        connectionLoader.active = true
                     }
     }
     MouseArea{
@@ -163,6 +177,22 @@ NetData {
                     id:dropArea
                     anchors.fill: parent
                 }
+                Loader{
+                   id:connectionLoader
+                   anchors.fill: parent
+                   sourceComponent: connectionComp
+                   active: false
+                }
+                Loader{
+                    id:neuronLoader
+                    anchors.fill: parent
+                    sourceComponent: neuronComp
+                    active: false
+                }
+                Component{
+                    id: connectionComp
+
+
                 Repeater{
                     model: totalConns
                     NeuronConnection{
@@ -208,78 +238,97 @@ NetData {
                             }
                         }
                     }
-                Repeater{
-                    id:biasLayer
-                    model: netItem.hiddenNeuronX+1
-                    NetNeuron{
-                        xRel:{
-                            var i=index
-                            return calculateXRelPos(i,dataNeuron.type)}
-                        yRel: yOffSet+yBiasPos
-                        dataNeuron.type:def.biasType
-                        lastNeuron: false //(index==(biasLayer.model-1))
-                        dataNeuron.typeId: index
-                        visible: netItem.bias
-                    }
                 }
-                Repeater{
-                    id:inputLayer
-                    model:netItem.inputNeuron
-                    NetNeuron{
+                Component{
+                    id: neuronComp
+                    Item{
 
-                        xRel:{
-                            var i=0
-                            return calculateXRelPos(i,dataNeuron.type)}
-                        yRel:{
-                            var i=inputNeuron
-                            return calculateYRelPos(index,i)
+                        id:neuronItem
+                        property int lastId: 0
+                        property int loadedNeuron: 0
+                        property bool finishedLoading: loadedNeuron>=totalHidden+outputNeuron+inputNeuron+netItem.hiddenNeuronX+1
+                        onFinishedLoadingChanged: {
+                            console.debug("last neuron id ",lastId)
                         }
-                        dataNeuron.type:def.inputType
-                        dataNeuron.typeId: index
-                        lastNeuron: false /*
-                        lastNeuron: if(!netItem.bias){
-                                        return (index==(inputLayer.model-1))
-                                    }
-                                    else return false*/
 
-                    }
-                }
+                        Repeater{
+                            id:biasLayer
+                            model: netItem.hiddenNeuronX+1
+                            NetNeuron{
+                                xRel:{
+                                    var i=index
+                                    return calculateXRelPos(i,dataNeuron.type)}
+                                yRel: yOffSet+yBiasPos
+                                dataNeuron.type:def.biasType
+                                lastNeuron:{
+                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
+                                    return lastId==dataNeuron.absId||!finishedLoading}
+                                dataNeuron.typeId: index
+                                visible: netItem.bias
 
-                Repeater{
-                    id:hiddenXLayer
-                    model:netItem.hiddenNeuronX
-                    Repeater{
-                        id:hiddenYLayer
-                        model:netItem.hiddenNeuronY
-                        property int indexX: index
-                        NetNeuron{
-                            xRel:{
-                                var i=indexX
-                                return calculateXRelPos(i,dataNeuron.type)}
-                            yRel:{
-                                var i=hiddenNeuronY
-                                return calculateYRelPos(index,i)
                             }
-                            dataNeuron.typeId: index+(indexX*hiddenNeuronY)
-                            dataNeuron.type:def.hiddenType
-                            lastNeuron: hiddenXLayer.model-1==hiddenYLayer.indexX&&hiddenYLayer.model-1==index
                         }
-                    }
-                }
-                Repeater{
-                    id:outputLayer
-                    model:netItem.outputNeuron
-                    NetNeuron{
-                        xRel:{
-                            var i=0
-                            return calculateXRelPos(i,dataNeuron.type)}
-                        yRel:{
-                            var i=outputNeuron
-                            return calculateYRelPos(index,i)
+                        Repeater{
+                            id:inputLayer
+                            model:netItem.inputNeuron
+                            NetNeuron{
+                                xRel:{
+                                    var i=0
+                                    return calculateXRelPos(i,dataNeuron.type)}
+                                yRel:{
+                                    var i=inputNeuron
+                                    return calculateYRelPos(index,i)
+                                }
+                                dataNeuron.type:def.inputType
+                                dataNeuron.typeId: index
+                                lastNeuron:{
+                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
+                                    return lastId==dataNeuron.absId||!finishedLoading}
+                            }
                         }
-                        dataNeuron.type:def.outputType
-                        dataNeuron.typeId: index
-                        lastNeuron: false
+
+                        Repeater{
+                            id:hiddenXLayer
+                            model:netItem.hiddenNeuronX
+                            Repeater{
+                                id:hiddenYLayer
+                                model:netItem.hiddenNeuronY
+                                property int indexX: index
+                                NetNeuron{
+                                    xRel:{
+                                        var i=indexX
+                                        return calculateXRelPos(i,dataNeuron.type)}
+                                    yRel:{
+                                        var i=hiddenNeuronY
+                                        return calculateYRelPos(index,i)
+                                    }
+                                    dataNeuron.typeId: index+(indexX*hiddenNeuronY)
+                                    dataNeuron.type:def.hiddenType
+                                    lastNeuron:{
+                                        //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
+                                        return lastId==dataNeuron.absId||!finishedLoading}
+                                }
+                            }
+                        }
+                        Repeater{
+                            id:outputLayer
+                            model:netItem.outputNeuron
+                            NetNeuron{
+                                xRel:{
+                                    var i=0
+                                    return calculateXRelPos(i,dataNeuron.type)}
+                                yRel:{
+                                    var i=outputNeuron
+                                    return calculateYRelPos(index,i)
+                                }
+                                dataNeuron.type:def.outputType
+                                dataNeuron.typeId: index
+                                lastNeuron:{
+                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
+                                    return lastId==dataNeuron.absId||!finishedLoading}
+                            }
+                        }
+
                     }
                 }
 

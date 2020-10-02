@@ -12,7 +12,7 @@ Item {
         id:mainNet
         x:0
         y:0
-        anchors.right: sidebar.left
+        anchors.right:singelWorkArea.right// sidebar.left
         anchors.left: singelWorkArea.left
         anchors.top: singelTopBar.bottom
         anchors.bottom: singelWorkArea.bottom
@@ -34,7 +34,7 @@ Item {
         height: 100
         visible: parent.visible
     }
-
+/*
     SideBar{
         id:sidebar
         anchors.right:singelWorkArea.right
@@ -44,5 +44,5 @@ Item {
         visible: parent.visible
         //clickedNeuronID: mainNet.clickedNeuronID
         //clickedNeuronType: mainNet.clickedNeuronType
-    }
+    }*/
 }

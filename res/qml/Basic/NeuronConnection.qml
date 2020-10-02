@@ -68,10 +68,10 @@ Shape {
                     }
     function setSourceId(){
         if(source.type==def.biasType){
-               source.typeId= Math.floor(destination.neuronID/netListVisu.getHiddenX(netId))
-        }
+            source.typeId= Math.floor(destination.neuronID/netListVisu.getHiddenY(netId))
+            }
         else{
             source.typeId=netListVisu.getConSourceID(con.netId,con.conId,con.connType)
-        }
+            }
         }
 }

@@ -53,6 +53,7 @@ void NetVisu::setupNetVisu(){
     for(unsigned i=0;i<netList->size();++i){
         connect((*netList)[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
         connect((*netList)[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
+        connect((*netList)[i],SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationChanged()));
     }
 
 
@@ -100,16 +101,18 @@ void NetVisu::displayUpdatNetTimer(const int &netId){
 }
 
 int NetVisu::getHiddenX(const int &netId) {
-    if((*netList)[unsigned(netId)]->needsUpdate())
-        return 0;
+    if((*netList)[unsigned(netId)]->needsUpdate()){
+        qDebug()<<"Configuration needs update";
+        return 0;}
     if(unsigned(netId)<netList->size()&&access){
         return int((*netList)[unsigned(netId)]->get_hiddenNeuronsX());
     }
     return 0;
 }
 int NetVisu::getHiddenY(const int &netId) {
-    if((*netList)[unsigned(netId)]->needsUpdate())
-        return 0;
+    if((*netList)[unsigned(netId)]->needsUpdate()){
+        qDebug()<<"Configuration needs update";
+        return 0;}
     if(unsigned(netId)<netList->size()&&access){
         return int((*netList)[unsigned(netId)]->get_hiddenNeuronsY());
     }
@@ -118,8 +121,9 @@ int NetVisu::getHiddenY(const int &netId) {
     }
 }
 int NetVisu::getInputs(const int &netId) {
-    if((*netList)[unsigned(netId)]->needsUpdate())
-        return 0;
+    if((*netList)[unsigned(netId)]->needsUpdate()){
+        qDebug()<<"Configuration needs update";
+        return 0;}
     if(unsigned(netId)<netList->size()&&access){
         return int((*netList)[unsigned(netId)]->get_inputNeurons());
     }
@@ -129,12 +133,15 @@ int NetVisu::getInputs(const int &netId) {
     }
 }
 int NetVisu::getOutputs(const int &netId) {
-    if((*netList)[unsigned(netId)]->needsUpdate())
-        return 0;
+    if((*netList)[unsigned(netId)]->needsUpdate()){
+        qDebug()<<"Configuration needs update";
+        return 0;}
     if(unsigned(netId)<netList->size()&&access){
         return int((*netList)[unsigned(netId)]->get_outputNeurons());
     }
     else{
+        if(!access)
+            qDebug()<<"No Access to Net Configuration";
         return 0;
     }
 }
@@ -318,7 +325,16 @@ void NetVisu::onWeightsChanged(Net *p_net)
 }
 void NetVisu::onNetConfigurationChanged()
 {
+    for(unsigned i=0;i<netList->size();++i){
+        connect((*netList)[i],SIGNAL(accessUnlock()),this,SLOT(updateNetConfiguration()));
+    }
+}
 
+void NetVisu::updateNetConfiguration(){
+    for(unsigned i=0;i<netList->size();++i){
+        disconnect((*netList)[i],SIGNAL(accessUnlock()),this,SLOT(updateNetConfiguration()));
+    }
+    emit updateNetStruc();
 }
 
 void NetVisu::saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId){

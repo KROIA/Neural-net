@@ -27,7 +27,6 @@ Item {
     }
 
     function updateStructur(){
-        console.debug("update structur")
         inputNeuron=netListVisu.getInputs(netId)
         outputNeuron=netListVisu.getOutputs(netId)
         hiddenNeuronX=netListVisu.getHiddenX(netId)
