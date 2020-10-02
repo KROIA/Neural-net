@@ -1,3 +1,7 @@
+// Autor        Alex Krieg
+// Datum        28.09.2020
+const double VERSION = 9.03;
+
 #include <QCoreApplication>
 #include "geneticnet.h"
 #include <iostream>
@@ -22,7 +26,7 @@
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 
-const double VERSION = 9.02;
+
 #define NETWORK
 
 using namespace std;
@@ -171,7 +175,7 @@ COORD DE_COORD;
 GeneticNet *calcNet;
 
 unsigned __stdcall handleThreadStartNet(void * p);
-void startNet(int animal);
+void startNet(size_t animal);
 void HandleNet(int animal);
 void Control(double c1,double c2,double c3,double c4,int offsetX,int offsetY,int thread_animal);
 void getMapData(int thread_animal);
@@ -223,7 +227,7 @@ void bdgMapData(){
 }*/
 unsigned __stdcall handleThreadStartNet(void * p)
 {
-	int animal = (int)p;
+    size_t animal = (size_t)p;
 //	double fitnessTMP = 0;
 //  int local_c = 0;
 	
@@ -237,7 +241,7 @@ unsigned __stdcall handleThreadStartNet(void * p)
 	//delete (void)p;
 	_endthreadex (0);
 }
-void startNet(int animal)
+void startNet(size_t animal)
 {
 	//printf("startNet %i\n",animal);
 	int local_a = 0;

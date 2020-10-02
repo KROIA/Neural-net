@@ -5,6 +5,7 @@
 //      Datum   25.09.2020
 
 #include <vector>
+#define QT_APP
 
 #ifdef QT_APP
   #include <QDebug>

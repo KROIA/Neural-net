@@ -112,6 +112,7 @@ void                Net::set_inputNeurons(unsigned int inputs)
         emit accessLock();
         #endif
         _needsConfigurationUpdate   = true;
+        _doRegenerateConnectionlist = true;
         #ifdef QT_APP
         emit netConfigurationUpdateNeeded();
         #endif
@@ -141,6 +142,7 @@ void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
         emit accessLock();
         #endif
         _needsConfigurationUpdate   = true;
+        _doRegenerateConnectionlist = true;
         _hiddenX                    = hiddenX;
         #ifdef QT_APP
         emit netConfigurationUpdateNeeded();
@@ -171,6 +173,7 @@ void                Net::set_hiddenNeuronsY(unsigned int hiddenY)
         emit accessLock();
         #endif
         _needsConfigurationUpdate   = true;
+        _doRegenerateConnectionlist = true;
         _hiddenY                    = hiddenY;
         #ifdef QT_APP
         emit netConfigurationUpdateNeeded();
@@ -206,6 +209,7 @@ void                Net::set_outputNeurons(unsigned int outputs)
         emit accessLock();
         #endif
         _needsConfigurationUpdate   = true;
+        _doRegenerateConnectionlist = true;
         _outputs                    = outputs;
         #ifdef QT_APP
         emit netConfigurationUpdateNeeded();
@@ -266,6 +270,7 @@ void                Net::set_bias(bool enableBias)
         emit accessLock();
         #endif
         _needsConfigurationUpdate   = true;
+        _doRegenerateConnectionlist = true;
         _bias                       = enableBias;
         #ifdef QT_APP
         emit netConfigurationUpdateNeeded();
@@ -1013,9 +1018,12 @@ void                Net::updateNetConfiguration()
     }
 
 
-    //_connectionList.clear();
-    if(_connectionList.size() == 0)
+    if(_doRegenerateConnectionlist || _connectionList.size() == 0)
+    {
+        _connectionList.clear();
         prepareConnectionList();
+        _doRegenerateConnectionlist = false;
+    }
 
     _outputNeurons  = 0;
     _hiddenNeurons  = 0;
@@ -1615,6 +1623,7 @@ void Net::init(unsigned int inputs,
     emit netConfigurationUpdateNeeded();
     #endif
     _needsConfigurationUpdate = true;
+    _doRegenerateConnectionlist = true;
     _needsCalculationUpdate = true;
 
 #ifdef _DEBUG_NET_TIMING

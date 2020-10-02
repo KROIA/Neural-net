@@ -1,8 +1,8 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "02.03.01"
-//              Datum   28.09.2020
+#define SAVENET_VERSION "02.03.02"
+//              Datum   02.10.2020
 
 #include <net.h>
 #include <time.h>
@@ -78,7 +78,8 @@ class SaveNet
         std::vector<std::vector<double>  >  get_genom();
         unsigned int            get_animals();
 
-        void clear();
+        void removeAllNets();
+        void removeNet(unsigned int ID);
         void set(unsigned int inputs,
                  unsigned int hiddenX,
                  unsigned int hiddenY,
@@ -104,6 +105,7 @@ class SaveNet
         unsigned int    get_errorAmount() const;
 
     private:
+        void            addNet(unsigned int ID,std::vector<Neuron*> *neurons);
         void            checkParam();
         unsigned int    get_genomsize();
         void            saveGenomOfNet(unsigned int ID);

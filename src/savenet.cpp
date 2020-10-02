@@ -7,7 +7,7 @@ SaveNet::SaveNet()
     set_fileEnding("net");
     _saves = 0;
     _genomsize = 0;
-    this->clear();
+    this->removeAllNets();
 }
 SaveNet::~SaveNet()
 {
@@ -195,7 +195,7 @@ bool SaveNet::loadFile()
                        std::string("can't open file: \""+_filename+"."+_fileEnding+"\"")));
         return false;
     }
-    this->clear();
+    this->removeAllNets();
     std::vector<std::string> fileBuffer;
     std::string tmpBuffer = "";
     unsigned int tmpAnimals = 0;
@@ -719,7 +719,7 @@ unsigned int            SaveNet::get_animals()
 {
     return _animals;//_genomList.size();
 }
-void SaveNet::clear()
+void SaveNet::removeAllNets()
 {
 
     _check_inputs               = false;
@@ -750,6 +750,30 @@ void SaveNet::clear()
     _ID_list.clear();
     clearGenomList();
     clearExternParam();
+}
+void SaveNet::removeNet(unsigned int ID)
+{
+    bool exists = false;
+    unsigned int index = 0;
+    for(unsigned int a=0; a<_ID_list.size(); a++)
+    {
+        if(_ID_list[a] == ID)
+        {
+            exists = true;
+            index  = a;
+            break;
+        }
+    }
+    if(exists)
+    {
+        _neuronList.erase(_neuronList.begin()+index);
+        _ID_list.erase(_ID_list.begin()+index);
+        _genomList.erase(_genomList.begin()+index);
+    }
+    else {
+        addError(Error("removeNet(unsigned int ["+std::to_string(ID)+"] )",
+                       std::string("No net with such an ID")));
+    }
 }
 void SaveNet::set(unsigned int inputs,
          unsigned int hiddenX,
@@ -792,61 +816,18 @@ void                    SaveNet::set_ptr_neuronsOfNet(unsigned int ID,std::vecto
         }
         else
         {
-            addError(Error("set_ptr_neuronsOfNet(unsigned int ["+std::to_string(ID)+"] , std::vector<Neuron*> *neurons)",
-                           std::string("There are already some nets saved which have not the same amount of neurons: "+
-                                    std::to_string(_neurons)+" as parameter 2: "+std::to_string(neurons->size()))));
-            return;
-           // error_general("neuronsOfNet(unsigned int ["+std::to_string(ID)+"], std::vector<Neuron*> neurons)","There are already some nets saved which have not the same amount of neurons: "+std::to_string(_neurons)+" as parameter 2: "+std::to_string(neurons->size()));
-        }
+            // overwrite the old net with the new netconfiguration
+            this->removeNet(ID);
+            this->addNet(ID,neurons);
+            //addError(Error("set_ptr_neuronsOfNet(unsigned int ["+std::to_string(ID)+"] , std::vector<Neuron*> *neurons)",
+            //               std::string("There are already some nets saved which have not the same amount of neurons: "+
+            //                        std::to_string(_neurons)+" as parameter 2: "+std::to_string(neurons->size()))));
+            //return;
+       }
     }
     else
     {
-        _neuronList.push_back(*neurons);
-
-        _ID_list.push_back(ID);
-        _animals = static_cast<unsigned int>(_ID_list.size());
-        _check_neurons = true;
-
-        _neurons        = static_cast<unsigned int>(neurons->size());
-        _hiddenNeurons  = 0;
-        _outputNeurons  = 0;
-        _costumNeurons  = 0;
-
-        for(unsigned int a=0; a<neurons->size(); a++)
-        {
-            if((*neurons)[a]->get_ID().TYPE == NeuronType::hidden)
-            {
-                _hiddenNeurons++;
-            }else if((*neurons)[a]->get_ID().TYPE == NeuronType::output)
-            {
-                _outputNeurons++;
-            }else if((*neurons)[a]->get_ID().TYPE == NeuronType::costum)
-            {
-                _costumNeurons++;
-            }
-        }
-        _check_hiddenNeurons = true;
-        _check_outputNeurons = true;
-        _check_costumNeuron  = true;
-
-        _connections         = 0;
-        _costumConnections   = 0;
-
-        for(unsigned int a=0; a<neurons->size(); a++)
-        {
-            _connections += (*neurons)[a]->get_inputs();
-            for(unsigned int b=0; b<(*neurons)[a]->get_inputs(); b++)
-            {
-                if((*neurons)[a]->get_inputID(b).TYPE == NeuronType::costum)
-                {
-                    _costumConnections++;
-                }
-            }
-        }
-        _check_connections       = true;
-        _check_costumConnections = true;
-        _genomList.push_back(std::vector<double>());
-        saveGenomOfNet(static_cast<unsigned int>(_neuronList.size()-1));
+        this->addNet(ID,neurons);
     }
 }
 std::vector<Neuron*>          SaveNet::get_neuronsOfNet(unsigned int ID)
@@ -873,6 +854,57 @@ std::vector<Neuron*>          SaveNet::get_neuronsOfNet(unsigned int ID)
         return std::vector<Neuron*>();
         //error_general("neuronsOfNet(unsigned int ["+std::to_string(ID)+"])","Net not available. There is no Net with such an ID");
     }
+}
+void                    SaveNet::addNet(unsigned int ID,std::vector<Neuron*> *neurons)
+{
+    _neuronList.push_back(*neurons);
+
+    _ID_list.push_back(ID);
+    _genomList.push_back(std::vector<double>());
+
+    _animals = static_cast<unsigned int>(_ID_list.size());
+    _check_neurons = true;
+
+    _neurons        = static_cast<unsigned int>(neurons->size());
+    _hiddenNeurons  = 0;
+    _outputNeurons  = 0;
+    _costumNeurons  = 0;
+
+    for(unsigned int a=0; a<neurons->size(); a++)
+    {
+        if((*neurons)[a]->get_ID().TYPE == NeuronType::hidden)
+        {
+            _hiddenNeurons++;
+        }else if((*neurons)[a]->get_ID().TYPE == NeuronType::output)
+        {
+            _outputNeurons++;
+        }else if((*neurons)[a]->get_ID().TYPE == NeuronType::costum)
+        {
+            _costumNeurons++;
+        }
+    }
+    _check_hiddenNeurons = true;
+    _check_outputNeurons = true;
+    _check_costumNeuron  = true;
+
+    _connections         = 0;
+    _costumConnections   = 0;
+
+    for(unsigned int a=0; a<neurons->size(); a++)
+    {
+        _connections += (*neurons)[a]->get_inputs();
+        for(unsigned int b=0; b<(*neurons)[a]->get_inputs(); b++)
+        {
+            if((*neurons)[a]->get_inputID(b).TYPE == NeuronType::costum)
+            {
+                _costumConnections++;
+            }
+        }
+    }
+    _check_connections       = true;
+    _check_costumConnections = true;
+
+    saveGenomOfNet(static_cast<unsigned int>(_neuronList.size()-1));
 }
 void                    SaveNet::checkParam()
 {
