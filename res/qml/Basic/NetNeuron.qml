@@ -1,11 +1,8 @@
 import QtQuick 2.0
-
+import "../../js/VisuFunction.js" as VisuFunction
 Neuron {
     x: xRel*totalNet.width-(totalNet.d/2)
     y: yRel*totalNet.height-(totalNet.d/2)
-    /*onXChanged: {
-       console.debug("yRel",yRel,"height",totalNet.height,"width",totalNet.width,"d",totalNet.d)
-    }*/
     d:totalNet.d
     visuModus:netItem.visuNeuronModus
     dataNeuron.netId:netItem.netId
@@ -14,8 +11,25 @@ Neuron {
     }
     transparent: 100// biasTransparent[index]
     Component.onCompleted: {
+        if(!finishedLoading){
+            lastId=dataNeuron.absId
+            loadedNeuron++
+        }
         netItem.xRel[dataNeuron.absId]=xRel
         netItem.yRel[dataNeuron.absId]=yRel
+        dockingPoint()
+    }
+    onXChanged:{
+        dockingPoint()
+    }
+    onYChanged:{
+        dockingPoint()
+    }
+    //onDChanged:dockingPoint()
+    onXRelChanged: {
+        dockingPoint()
+    }
+    onYRelChanged:{
         dockingPoint()
     }
     Connections{
@@ -45,8 +59,14 @@ Neuron {
             yRel=netItem.yRel[dataNeuron.absId]
             dockingPoint()
         }
-        function onUpdateDockingPoint(){
-            dockingPoint()
+
+    }
+    function dockingPoint(){
+        netItem.inputDockingPoint[dataNeuron.absId]=Qt.point(d+x-(0.2*d),(d/2)+y)
+        netItem.outputDockingPoint[dataNeuron.absId]=Qt.point(x+(0.2*d),(d/2)+y)
+        if(Drag.active||lastNeuron){
+            netItem.inputDockingPoint=VisuFunction.updateArray(netItem.inputDockingPoint)
+            netItem.outputDockingPoint=VisuFunction.updateArray(netItem.outputDockingPoint)
         }
     }
 }

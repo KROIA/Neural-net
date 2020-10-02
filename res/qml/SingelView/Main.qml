@@ -12,7 +12,7 @@ Item {
         id:mainNet
         x:0
         y:0
-        anchors.right:singelWorkArea.right// sidebar.left
+        anchors.right:sidebar.left
         anchors.left: singelWorkArea.left
         anchors.top: singelTopBar.bottom
         anchors.bottom: singelWorkArea.bottom
@@ -31,18 +31,18 @@ Item {
         anchors.top: singelWorkArea.top
         anchors.right:singelWorkArea.right
         anchors.left:singelWorkArea.left
-        height: 100
+        height: 70
         visible: parent.visible
     }
-/*
+
     SideBar{
         id:sidebar
         anchors.right:singelWorkArea.right
         anchors.top: singelTopBar.bottom
-        showWidth: singelWorkArea.width*0.2
+        showWidth: 350
         anchors.bottom: singelWorkArea.bottom
         visible: parent.visible
         //clickedNeuronID: mainNet.clickedNeuronID
         //clickedNeuronType: mainNet.clickedNeuronType
-    }*/
+    }
 }

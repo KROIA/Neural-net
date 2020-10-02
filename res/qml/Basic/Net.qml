@@ -56,7 +56,6 @@ NetData {
     signal showConnectedNeuron(var absId)
     signal updateValue();
     signal showAll();
-    signal updateDockingPoint(var abs);
     property var inputDockingPoint : [
                 Qt.point(0,0),
                 Qt.point(100,100)
@@ -69,8 +68,6 @@ NetData {
         updateStructur()
         neuronLoader.active = true
         connectionLoader.active = true
-        //updateDockingPoint(netItem.)
-
     }
 
     Timer {
@@ -247,10 +244,6 @@ NetData {
                         property int lastId: 0
                         property int loadedNeuron: 0
                         property bool finishedLoading: loadedNeuron>=totalHidden+outputNeuron+inputNeuron+netItem.hiddenNeuronX+1
-                        onFinishedLoadingChanged: {
-                            console.debug("last neuron id ",lastId)
-                        }
-
                         Repeater{
                             id:biasLayer
                             model: netItem.hiddenNeuronX+1

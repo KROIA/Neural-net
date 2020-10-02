@@ -47,8 +47,12 @@ Window {
            sourceComponent: {
                if(singel.checked)
                    return singelLoader
-               else
+               if(multi.checked)
+                   return multiLoader
+               if(creator.checked)
                    return creatorLoader
+               if(integrate.checked)
+                   return integrateLoader
            }
         }
 
@@ -59,23 +63,23 @@ Window {
         Component{
             id:singelLoader
             Singel.Main{
-
             }
         }
         Component{
             id:creatorLoader
             Creator.Main{
-
+            }
+        }
+        Component{
+            id:multiLoader
+            Multi.Main{
             }
         }
 
-        Multi.Main{
-            anchors.fill:parent
-            visible: multi.checked
-        }
-        Integrate.Main{
-            anchors.fill:parent
-            visible: integrate.checked
+        Component{
+            id:integrateLoader
+            Integrate.Main{
+            }
         }
     }
         /*
