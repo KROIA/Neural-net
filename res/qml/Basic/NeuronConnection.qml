@@ -9,7 +9,7 @@ Shape {
     property real weight:1
     property int conWidth: 4
     property real minWidth: 0.2
-    property real maxWidth: 10*d
+    property real maxWidth: 5*d
     property real d: 50
     property int transparent: 100
     property int connType: 0
@@ -40,6 +40,7 @@ Shape {
            strokeWidth:if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.1
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
+
            startX:con.start.x
            startY:con.start.y
            PathLine {

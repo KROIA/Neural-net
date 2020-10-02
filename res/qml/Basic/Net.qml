@@ -174,9 +174,6 @@ NetData {
                         netId:netItem.netId
                         anchors.fill: parent
                         start:netItem.inputDockingPoint[connection.sourceData.absId];
-
-
-
                         end:netItem.outputDockingPoint[connection.destinationData.absId];
                         Component.onCompleted: {
                                                 updateNeurons()
@@ -220,7 +217,7 @@ NetData {
                             return calculateXRelPos(i,dataNeuron.type)}
                         yRel: yOffSet+yBiasPos
                         dataNeuron.type:def.biasType
-                        lastNeuron: (index==(biasLayer.model-1))
+                        lastNeuron: false //(index==(biasLayer.model-1))
                         dataNeuron.typeId: index
                         visible: netItem.bias
                     }
@@ -239,10 +236,11 @@ NetData {
                         }
                         dataNeuron.type:def.inputType
                         dataNeuron.typeId: index
+                        lastNeuron: false /*
                         lastNeuron: if(!netItem.bias){
                                         return (index==(inputLayer.model-1))
                                     }
-                                    else return false
+                                    else return false*/
 
                     }
                 }
@@ -264,6 +262,7 @@ NetData {
                             }
                             dataNeuron.typeId: index+(indexX*hiddenNeuronY)
                             dataNeuron.type:def.hiddenType
+                            lastNeuron: hiddenXLayer.model-1==hiddenYLayer.indexX&&hiddenYLayer.model-1==index
                         }
                     }
                 }
@@ -280,6 +279,7 @@ NetData {
                         }
                         dataNeuron.type:def.outputType
                         dataNeuron.typeId: index
+                        lastNeuron: false
                     }
                 }
 

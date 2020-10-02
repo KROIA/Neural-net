@@ -352,25 +352,21 @@ void NetVisu::addInput(const int &netId){
     (*netList)[unsigned(netId)]->set_inputNeurons((*netList)[unsigned(netId)]->get_inputNeurons()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addHiddenX(const int &netId){
     (*netList)[unsigned(netId)]->set_hiddenNeuronsX((*netList)[unsigned(netId)]->get_hiddenNeuronsX()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addHiddenY(const int &netId){
     (*netList)[unsigned(netId)]->set_hiddenNeuronsY((*netList)[unsigned(netId)]->get_hiddenNeuronsY()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint(netId,0);
 }
 void NetVisu::addOutput(const int &netId){
     (*netList)[unsigned(netId)]->set_outputNeurons((*netList)[unsigned(netId)]->get_outputNeurons()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
     emit updateNetStruc();
-    emit updateDockingPoint(netId,0);
 }
 
 unsigned NetVisu::getX(int netId ,int id){

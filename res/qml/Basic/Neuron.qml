@@ -27,7 +27,9 @@ Rectangle {
     function dockingPoint(){
         netItem.inputDockingPoint[dataNeuron.absId]=Qt.point(neuron.x+(0.2*neuron.d),(neuron.d/2)+neuron.y)
         netItem.outputDockingPoint[dataNeuron.absId]=Qt.point(neuron.d+neuron.x-(0.2*neuron.d),(neuron.d/2)+neuron.y)
+        console.debug("set Docking Point ",dataNeuron.absId)
         if(Drag.active||lastNeuron){
+            console.debug("update Docking list")
            netItem.inputDockingPoint=VisuFunction.updateArray(netItem.inputDockingPoint)
             netItem.outputDockingPoint=VisuFunction.updateArray(netItem.outputDockingPoint)
         }
@@ -54,9 +56,9 @@ Rectangle {
         visible: (parent.d>10)
 
 
-        font.pixelSize: parent.d*0.2
+        font.pixelSize: parent.d*0.15
         horizontalAlignment: Text.AlignHCenter
-        text: if(dataNeuron.type>def.noneType) return  "ID:"+dataNeuron.neuronID+"\nValue: \n"+Math.round(dataNeuron.neuronValue*10000)/10000
+        text: if(dataNeuron.type>def.noneType) return  "ID:"+dataNeuron.neuronID+" ABS: "+dataNeuron.absId+"\nValue: \n"+Math.round(dataNeuron.neuronValue*10000)/10000
                 else return "Value: \n"+Math.round(dataNeuron.neuronValue*10000)/10000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
