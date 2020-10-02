@@ -15,6 +15,7 @@ DEV/bin
 *.dll
 *bin
 *qml.cpp
+examples/Pathfinder
 examples/X-OR_Backpropagation/bin
 examples/X-OR_Backpropagation/Tests
 examples/Genetic_simple/bin

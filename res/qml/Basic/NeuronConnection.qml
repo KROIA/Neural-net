@@ -40,12 +40,12 @@ Shape {
            strokeWidth:if(netItem.visuNeuronModus===def.functionVisu) return con.d*0.1
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
-           startX:start.x
-           startY:start.y
+           startX:con.start.x
+           startY:con.start.y
            PathLine {
                id:path
-               x: end.x
-               y: end.y
+               x: con.end.x
+               y: con.end.y
            }
          }
     function updateValue(){

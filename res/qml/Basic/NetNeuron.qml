@@ -9,7 +9,6 @@ Neuron {
     d:totalNet.d
     visuModus:netItem.visuNeuronModus
     dataNeuron.netId:netItem.netId
-    layoutId: netItem.layoutId
     onClickedNeuron: {
         netItem.clickedNeuronID(dataNeuron.absId)
     }

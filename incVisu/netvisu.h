@@ -28,7 +28,7 @@ class NetVisu : public QThread
     Q_OBJECT
 public:
     explicit NetVisu(Net* _net,QObject *parent = nullptr);
-    explicit NetVisu(vector<Net*> _net,QObject *parent = nullptr);
+    explicit NetVisu(vector<Net*> *_net,QObject *parent = nullptr);
     ~NetVisu();
     void setupNetVisu();
     void showWindow();
@@ -91,14 +91,6 @@ public slots:
     void onNetConfigurationChanged();
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
-    int getNewLayoutId();
-    void setDockingPointInput(const int &netId, const int &absId,const QPoint &point, bool update);
-    void setDockingPointOutput(const int &netId, const int &absId,const QPoint &point, bool update);
-
-    QPoint getDockingPointInput(const int &netId, const int &absId);
-    QPoint getDockingPointOutput(const int &netId, const int &absId);
-
-
     int addNewNet();
     void addInput(const int &netId);
     void addHiddenX(const int &netId);
@@ -108,16 +100,13 @@ private:
     bool access=false;
     QQmlApplicationEngine *engine;
     QQmlContext* context;
-    vector<Net*> netList;
+    vector<Net*> *netList;
     QQuickWidget* netWidget;
 
 
     vector<bool> disableNeuronSignalUpdateEvent;
     vector<bool> disableNetGenomUpdateEvent;
     vector<bool> disableNetBiasValueUpdateEvent;
-
-    vector<vector<QPoint>   > dockingPointInput;
-    vector<vector<QPoint>   > dockingPointOutput;
 
     vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
     vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID

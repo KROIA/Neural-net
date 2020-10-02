@@ -82,10 +82,11 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
     setupTrainingSet();
+#ifdef qmlVisu
     visu = new NetVisu(net);
     visu->showWindow();
-    QElapsedTimer tim;
-    tim.start();
+#endif
+
 }
 
 MainWindow::~MainWindow()

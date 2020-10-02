@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define qmlVisu
+
 #include <QMainWindow>
 #include <backpropnet.h>
 #include <QTimer>
@@ -51,8 +53,9 @@ private slots:
     void setupTrainingSet();
     double qFunc(double x);
 
+#ifdef qmlVisu
     NetVisu *visu;
-
+#endif
     Ui::MainWindow *ui;
     BackpropNet *net;
     QTimer *timer;

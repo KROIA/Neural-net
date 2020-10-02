@@ -14,7 +14,7 @@ function updateArray(arr){
 }
 
 function getAbsIdFromTypeId(id,type,netId){
-    console.debug(id,type,netId)
+
     var res
     if(type===def.inputType){
         res= id
@@ -28,12 +28,13 @@ function getAbsIdFromTypeId(id,type,netId){
     }
 
     else if(type===def.biasType){
+        console.debug(id,type,netId)
         res= id+(netListVisu.getHiddenX(netId)*netListVisu.getHiddenY(netId))+netListVisu.getOutputs(netId)+netListVisu.getInputs(netId)
     }
     else{
       res= id
     }
-    console.debug(id)
+    //console.debug(id)
     return res
 
 }

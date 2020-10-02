@@ -25,13 +25,14 @@ NetData {
     property int clickedneuronID: -1
     property int clickedNeurontype: 0
     property bool moveable: false
-    property int layoutId: netListVisu.getNewLayoutId()
-
-    onLayoutIdChanged: {
-        updateStructur()
-        updateDockingPoint()
-    }
-
+    property var inputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
+    property var outputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
     property variant yRel: []
     property variant xRel: []
     property int maxYNeuron: {
@@ -172,10 +173,13 @@ NetData {
                         d:totalNet.d
                         netId:netItem.netId
                         anchors.fill: parent
+                        start:netItem.inputDockingPoint[connection.sourceData.absId];
+
+
+
+                        end:netItem.outputDockingPoint[connection.destinationData.absId];
                         Component.onCompleted: {
                                                 updateNeurons()
-                                                start=netListVisu.getDockingPointOutput(netItem.netId,connection.sourceData.absId)
-                                                end=netListVisu.getDockingPointInput(netItem.netId,connection.destinationData.absId)
                                            }
                         Connections{
                             target: netItem
@@ -201,16 +205,6 @@ NetData {
                         }
                         Connections {
                                        target: netListVisu
-                                        function onUpdateDockingPoint(netId,abs){
-                                            if(netId==netItem.netId){
-                                                if(abs==connection.sourceData.absId){
-                                                    start=netListVisu.getDockingPointOutput(netItem.layoutId,connection.sourceData.absId)
-                                                }
-                                                if(abs==connection.destinationData.absId){
-                                                    end=netListVisu.getDockingPointInput(netItem.layoutId,connection.destinationData.absId)
-                                                     }
-                                                }
-                                            }
                                         function onUpdateNetStruc(){
                                             updateNeurons()
                                         }

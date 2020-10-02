@@ -41,7 +41,7 @@ Window {
             text: "integrate"
         }
     }
-    /*Item{
+    Item{
         Loader{
            anchors.fill: parent
            sourceComponent: {
@@ -56,7 +56,7 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: modusSelector.bottom
-        /*Component{
+        Component{
             id:singelLoader
             Singel.Main{
 
@@ -67,9 +67,7 @@ Window {
             Creator.Main{
 
             }
-        }*/
-
-        /*
+        }
 
         Multi.Main{
             anchors.fill:parent
@@ -79,7 +77,8 @@ Window {
             anchors.fill:parent
             visible: integrate.checked
         }
-    }*/
+    }
+        /*
     Item{
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -101,6 +100,6 @@ Window {
             anchors.fill:parent
             visible: integrate.checked
         }
-    }
+    }*/
 
 }
