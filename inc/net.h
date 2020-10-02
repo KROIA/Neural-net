@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.06.01"
-//              Datum   25.09.2020
+#define    NET_VERSION "02.06.02"
+//              Datum   02.10.2020
 
 /*
  Some functions may throw errors.
@@ -245,6 +245,7 @@ class Net
     protected:
         bool    _needsCalculationUpdate;
         bool    _needsConfigurationUpdate;
+        bool    _doRegenerateConnectionlist;
         ErrorList _errorList;
 #ifdef QT_APP
     private slots:

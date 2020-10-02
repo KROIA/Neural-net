@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
 
     unsigned int netID              = 0;
     unsigned int inputNeurons       = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
-    unsigned int hiddenNeuronX      = 1;
-    unsigned int hiddenNeuronY      = 4;
+    unsigned int hiddenNeuronX      = 0;
+    unsigned int hiddenNeuronY      = 0;
     unsigned int outputNeuron       = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
     bool enableBias                 = true;
     bool enableAverage              = false;
