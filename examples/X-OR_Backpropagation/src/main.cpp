@@ -1,6 +1,6 @@
 // Autor        Alex Krieg
-// Datum        28.09.2020
-// Version      00.01.00
+// Datum        02.10.2020
+// Version      00.01.01
 
 #include <QCoreApplication>
 #include <backpropnet.h>
@@ -19,12 +19,20 @@
 #include <random>
 #include <cmath>
 
+//#define LOG_MUCH_DETAILED
+
 
 using namespace std;
 
 static std::vector<std::vector<double>    >trainingsSet;  //Trainings input std::vector
 static std::vector<std::vector<double>    >outputSet;     //Trainings expected output std::vector
 
+#ifdef LOG_MUCH_DETAILED
+    static std::vector<std::vector<double>    >logGenomList;
+    static std::vector<double    >             logErrorList;
+    static std::vector<unsigned int>           logIterationList;
+    const unsigned int                         logReserveSize = 10000;
+#endif
 
 static FILE *genomlogFile;
 static FILE *logfile;
@@ -37,7 +45,13 @@ void printNet(Net *net);
 void setupTrainingSet();
 void netFinished(BackpropNet *net);
 void cmdXY(unsigned int x,unsigned int y);
+#ifdef LOG_MUCH_DETAILED
+    void logGenom();
+    void logError();
+#endif
 void logGenom(std::vector<double> genom);
+
+void logError(const unsigned int &steps, const double &error);
 class ErrorHandler;
 
 static std::vector<std::vector<std::vector<double> >   > _genomCompareList;
@@ -52,14 +66,14 @@ int main(int argc, char *argv[])
 
     unsigned int netID              = 0;
     unsigned int inputNeurons       = trainingsSet[0].size(); //Makes the amount of inputs dependend of the training set
-    unsigned int hiddenNeuronX      = 0;
-    unsigned int hiddenNeuronY      = 0;
+    unsigned int hiddenNeuronX      = 1;
+    unsigned int hiddenNeuronY      = 2;
     unsigned int outputNeuron       = outputSet[0].size();    //Makes the amount of outputs dependent of the training set
     bool enableBias                 = true;
     bool enableAverage              = false;
     Activation activation           = Activation::Gaussian;
 
-
+    //Makes the Net object
     BackpropNet *net = new BackpropNet(netID,
                                        inputNeurons,
                                        hiddenNeuronX,
@@ -67,12 +81,19 @@ int main(int argc, char *argv[])
                                        outputNeuron,
                                        enableBias,
                                        enableAverage,
-                                       activation); //Makes the Net object
+                                       activation);
 
-    net->loadFromNetFile();
+    //net->loadFromNetFile();
     net->set_mutationFactor(0.1);
     net->updateNetConfiguration();
     net->saveToNetFile();
+
+
+    #ifdef LOG_MUCH_DETAILED
+        logGenomList.reserve(logReserveSize);
+        logErrorList.reserve(logReserveSize);
+        logIterationList.reserve(logReserveSize);
+    #endif
 
 
     std::vector<double> genom;
@@ -89,6 +110,12 @@ int main(int argc, char *argv[])
     unsigned long learningSteps = 0;
     t1 = std::chrono::high_resolution_clock::now();
     double averageCalcTime = 0;
+
+    logfile = fopen("score.csv","w");           // save Excel header
+    fprintf(logfile,"Iteration;error;\n");      //
+    fclose(logfile);                            //
+    genomlogFile = fopen("genom.csv","w");
+    fclose(genomlogFile);
 
     while(true)
     {
@@ -116,6 +143,12 @@ int main(int argc, char *argv[])
         net->learn();                            //Improve the net
         learningSteps++;                        //Adding one training cycle
 
+        #ifdef LOG_MUCH_DETAILED
+            logGenomList.push_back(net->get_genom());
+            logErrorList.push_back(abs(net->get_netError()));
+            logIterationList.push_back(learningSteps);
+        #endif
+
         if(isnan(averageError))
         {
             qDebug() << "nan";
@@ -132,20 +165,21 @@ int main(int argc, char *argv[])
             {
                 cmdXY(0,0);  // Sets the cursor pos of the console
                 saveCounter = 0;
-                saves+=100; //spam the console in the beginning and later no more
+                saves+=30; //spam the console in the beginning and later no more
                 printf("error: %.5f\n",averageError);   //Prints the error
-                printf("steps: %i\n",learningSteps);    //Prints the learn cyles
-
-                logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
-                fprintf(logfile,"%.5f;\n",averageError);    //
-                fclose(logfile);                            //
+                printf("steps: %lu\n",learningSteps);    //Prints the learn cyles
 
 
 
                 net->saveToNetFile();                        //Save the genom
 
-                logGenom(net->get_genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
-               // system("cls");
+                #ifdef LOG_MUCH_DETAILED
+                    logError();
+                    logGenom();
+                #else
+                    logError(learningSteps,averageError);
+                    logGenom(net->get_genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
+                #endif
             }
             if(averageError < 0.0005 || learningSteps > 1000000)//Learn until the error is below 0.005 or learning cycles are more then 1000000
             {
@@ -155,17 +189,17 @@ int main(int argc, char *argv[])
                 saveCounter = 0;
                 saves+=100; //spam the console in the beginning and later no more
                 printf("error: %.5f\n",averageError);   //Prints the error
-                printf("steps: %i\n",learningSteps);    //Prints the learn cyles
-
-                logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
-                fprintf(logfile,"%.5f;\n",averageError);    //
-                fclose(logfile);                            //
-
+                printf("steps: %lu\n",learningSteps);    //Prints the learn cyles
 
 
                 net->saveToNetFile();                        //Save the genom
-
-                logGenom(net->get_genom());
+                #ifdef LOG_MUCH_DETAILED
+                    logError();
+                    logGenom();
+                #else
+                    logError(learningSteps,averageError);
+                    logGenom(net->get_genom());                      //Saves all weights of the net in: genom.csv so you can track the weights over the time of improvement
+                #endif
                 qDebug() << "Learning time: "<< time_span.count() << "sec.\t Average net calculation Time: "<<averageCalcTime<<"sec.";
                 getchar();
                 netFinished(net);
@@ -180,12 +214,7 @@ void printNet(Net *net)
 {
     for(unsigned int b=0; b<net->get_neurons(); b++)
     {
-    vector<std::string>    list = net->get_ptr_neuron_viaID(b)->toStringList();
-    for(unsigned int a=0; a<list.size(); a++)
-    {
-        printf(list[a].c_str());
-    }
-    printf("------------------------------------\n");
+        printf("%s\n",net->get_ptr_neuron_viaID(b)->toString().c_str());
     }
 }
 void setupTrainingSet()
@@ -246,6 +275,38 @@ void cmdXY(unsigned int x,unsigned int y)
     COORD pos = {static_cast<short>(x), static_cast<short>(y)};
     SetConsoleCursorPosition(hConsole_c,pos);
 }
+#ifdef LOG_MUCH_DETAILED
+void logGenom()
+{
+    genomlogFile = fopen("genom.csv","a");
+    for(size_t i=0; i<logGenomList.size(); i++)
+    {
+        for(unsigned int a=0; a<logGenomList[i].size(); a++)
+        {
+            fprintf(genomlogFile,"%.5f;",logGenomList[i][a]);
+        }
+        fprintf(genomlogFile,"\n");
+    }
+
+    fclose(genomlogFile);
+    logGenomList.clear();
+    logGenomList.reserve(logReserveSize);
+}
+void logError()
+{
+    logfile = fopen("score.csv","a");
+    for(size_t i=0; i<logErrorList.size(); i++)
+    {
+        fprintf(logfile,"%u;%.5f;\n",logIterationList[i], logErrorList[i]);
+    }
+
+    fclose(logfile);
+    logErrorList.clear();
+    logErrorList.reserve(logReserveSize);
+    logIterationList.clear();
+    logIterationList.reserve(logReserveSize);
+}
+#endif
 void logGenom(std::vector<double> genom)
 {
     genomlogFile = fopen("genom.csv","a");
@@ -255,4 +316,11 @@ void logGenom(std::vector<double> genom)
     }
     fprintf(genomlogFile,"\n");
     fclose(genomlogFile);
+}
+
+void logError(const unsigned int &steps, const double &error)
+{
+    logfile = fopen("score.csv","a");           //Saves the error in the file: score.csv
+    fprintf(logfile,"%i;%.5f;\n",steps,error);  //
+    fclose(logfile);                            //
 }
