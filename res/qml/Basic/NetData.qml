@@ -6,9 +6,7 @@ Item {
         updateStructur()
     }
 
-    property int updateTime:100
 
-    property bool enableUpdateTimer: true
     property bool forceTimer: false
 
     property int hiddenNeuronX: 0

@@ -20,6 +20,7 @@ Window {
         anchors.leftMargin: 0
         anchors.top: parent.top
         anchors.topMargin: 0
+        currentIndex: 3
         TabButton{
             id:singel
             width: 100
@@ -82,28 +83,4 @@ Window {
             }
         }
     }
-        /*
-    Item{
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: modusSelector.bottom
-        Singel.Main{
-            anchors.fill:parent
-            visible: singel.checked
-        }
-        Creator.Main{
-            anchors.fill:parent
-            visible: creator.checked
-        }
-        Multi.Main{
-            anchors.fill:parent
-            visible: multi.checked
-        }
-        Integrate.Main{
-            anchors.fill:parent
-            visible: integrate.checked
-        }
-    }*/
-
 }

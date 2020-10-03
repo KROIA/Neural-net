@@ -72,8 +72,7 @@ Rectangle {
         onDragActiveChanged: if(drag){
                                  neuron.xRel=(dropArea.drag.x+(d/2))/parentWidth
                                  neuron.yRel=(dropArea.drag.y+(d/2))/parentHeight
-                                 var prov
-                                 netItem.xRel
+                                 var provX=netItem.xRel
                                  provX[dataNeuron.absId]=neuron.xRel
                                  netItem.xRel=provX
                                  //console.debug(absId,neuron.xRel,netItem.xRel[absId])

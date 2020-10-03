@@ -23,6 +23,12 @@ QtObject {
             italic: false,
             pointSize: 24
         })
+
+
+    readonly property int interval:0
+    readonly property int realTime:1
+    readonly property int pause:2
+
     function getTypeColor(type){
         if(type===noneType) return noneTypeColor
         else if(type===inputType)return inputTypeColor

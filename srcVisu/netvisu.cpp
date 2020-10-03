@@ -54,6 +54,7 @@ void NetVisu::setupNetVisu(){
         connect((*netList)[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
         connect((*netList)[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
         connect((*netList)[i],SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationChanged()));
+        connect((*netList)[i],SIGNAL(runDone(Net *net)),this,SLOT(newValues()));
     }
 
 
@@ -288,7 +289,6 @@ int NetVisu::getNetCount(){
     return int(netList->size());
 }
 void NetVisu::stopUpdateSlot(){
-    qDebug()<<"stop Update";
     access=false;
     emit stopUpdateSignal();
 }

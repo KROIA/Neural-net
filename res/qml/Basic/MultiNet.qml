@@ -9,8 +9,8 @@ Item{
     property int yNetPerTab: 3
     property int totalNet: 0
     property int tabIndex:0
-    property int updateTime: 100
-    property bool enableUpdateTimer: true
+    property int updateInterval: 100
+    property bool updateModus: def.interval
     property bool forceTimer: false
     property int maxTab: Math.ceil(totalNet/(xNetPerTab*yNetPerTab))
     property int minTab: 0
@@ -35,10 +35,9 @@ Item{
                         width: multiNet.width/xNetPerTab
                         height: multiNet.height/yNetPerTab
                         netId: index+tabIndex*(yNetPerTab*xNetPerTab)
-                        updateTime:multiNet.updateTime
-                        enableMousArea: true
+                        updateModus: multiNet.updateModus
+                        updateInterval: multiNet.updateInterval
                         onClickedNet: clickedNetId=id
-                        enableUpdateTimer:multiNet.enableUpdateTimer
                         forceTimer:multiNet.forceTimer
                         neuronClickEnable:false
                         zoomEnable: false

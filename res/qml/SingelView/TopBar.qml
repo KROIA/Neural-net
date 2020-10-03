@@ -6,18 +6,24 @@ import "../Basic"
 import "../"
 import "../BasicTemplate" as Template
 Template.TopBar {
+    id: topBar
     property int visuNeuronModus: modus.currentIndex
     property bool moveable: moveSwitch.checked
-
+    property int updateModus: updateTimer.currentIndex
+    property int updateInterval: updateIntervalSpinBox.value
     Row{
         spacing: 10
         padding:10
+        anchors.top: topBar.top
+        anchors.bottom: topBar.bottom
         Switch{id:moveSwitch
             text: "moveable"
+            anchors.verticalCenter: parent.verticalCenter
         }
         ComboBox {
             id:modus
             model: ["Value", "Function", "Combined"]
+            anchors.verticalCenter: parent.verticalCenter
         }
         Button{
             text:"save Netlayout"
@@ -25,6 +31,7 @@ Template.TopBar {
 
                 netListVisu.saveRelPos(mainNet.xRel,mainNet.yRel,mainNet.netID)
             }
+            anchors.verticalCenter: parent.verticalCenter
         }
         Button{
             text:"save Netlayout as"
@@ -32,12 +39,14 @@ Template.TopBar {
                 saveFileDialog.open()
                 netListVisu.saveRelPos(mainNet.xRel,mainNet.yRel,mainNet.netID)
             }
+            anchors.verticalCenter: parent.verticalCenter
         }
         Button{
             text:"load Netlayout"
             onClicked: {
                 mainNet.loadLayout()
             }
+            anchors.verticalCenter: parent.verticalCenter
         }
         Button{
             text:"load Netlayout from"
@@ -53,7 +62,31 @@ Template.TopBar {
                     mainNet.loadRelPos()
                 }
             }
+            anchors.verticalCenter: parent.verticalCenter
         }
+
+        ComboBox {
+            id:updateTimer
+            model: [ "interval","real time", "pause"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        SpinBox{
+            id:updateIntervalSpinBox
+            editable :true
+            value:500
+            visible: updateTimer.currentIndex==def.interval
+            from: 0
+            to: 10000//Math.floor(itemTopBar.totalNet/(yAxisItem.value*xAxisItem.value))
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        Label{
+            text: "ms"
+            font.pixelSize:  15
+            verticalAlignment:Text.AlignVCenter
+            visible: updateTimer.currentIndex==def.interval
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         FileDialog{
             id:loadFileDialog
             title:  "Load Netlayout from"

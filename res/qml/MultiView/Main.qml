@@ -22,7 +22,7 @@ Item {
         anchors.right: multiNetArea.right
         xNetPerTab: topBar.netXAxis
         yNetPerTab: topBar.netYAxis
-        updateTime: topBar.updateTimer
+        updateInterval: topBar.updateTimer
         tabIndex: topBar.tabId
     }
 }

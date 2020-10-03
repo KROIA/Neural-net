@@ -65,8 +65,8 @@ Neuron {
         netItem.inputDockingPoint[dataNeuron.absId]=Qt.point(d+x-(0.2*d),(d/2)+y)
         netItem.outputDockingPoint[dataNeuron.absId]=Qt.point(x+(0.2*d),(d/2)+y)
         if(Drag.active||lastNeuron){
-            netItem.inputDockingPoint=VisuFunction.updateArray(netItem.inputDockingPoint)
-            netItem.outputDockingPoint=VisuFunction.updateArray(netItem.outputDockingPoint)
+            netItem.inputDockingPointChanged()
+            netItem.outputDockingPointChanged()
         }
     }
 }

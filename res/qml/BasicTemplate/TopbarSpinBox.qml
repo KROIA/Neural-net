@@ -10,7 +10,7 @@ Item {
     property int defaultValue: from
 
     width: 300
-    height: 100
+    height: 8
     Text {
         id:spinText
         font.pixelSize: parent.height*0.3

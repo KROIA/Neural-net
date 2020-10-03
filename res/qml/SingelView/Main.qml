@@ -8,6 +8,7 @@ Item {
     width: 100
     height: 100
     property int updateTime: 200
+
     Net{
         id:mainNet
         x:0
@@ -20,6 +21,8 @@ Item {
         moveable:singelTopBar.moveable
         zoomEnable:true
         visible: parent.visible
+        updateInterval:singelTopBar.updateInterval
+        updateModus: singelTopBar.updateModus
         Component.onCompleted: {
             console.debug("load Net new")
         }

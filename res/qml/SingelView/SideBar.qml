@@ -47,10 +47,11 @@ Rectangle{
             xNetPerTab:1
             yNetPerTab:3
             visible: tabBar.showContent[0]
-            updateTime: 1000//singelWorkArea.updateTime
+            updateInterval: 2000//singelWorkArea.updateTime
             forceTimer: true
             clickedNetId:0
             onClickedNetIdChanged: mainNet.netID=clickedNetId
+            updateModus:def.interval
         }
         NetInfo{
             anchors.fill: sidebarContent

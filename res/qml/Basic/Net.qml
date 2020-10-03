@@ -10,6 +10,20 @@ NetData {
     width: 600
     height: 600
 
+
+    ////--------Costumizing Net Property--------////
+
+    //Timer Propery
+
+    signal updateValue();
+    property int updateModus: def.interval
+    property int updateInterval:100
+
+    //Visual Option
+    property bool moveable: false
+    property bool neuronClickEnable: true
+    property int netAlignment: Net.NetAlignment.Top
+
     enum NetAlignment{
         Top=0,
         Bottom,
@@ -17,17 +31,42 @@ NetData {
         Costum
     }
     signal loadRelPos();
-    property int netAlignment: Net.NetAlignment.Top
     property int visuNeuronModus: 0
-    property bool enableUpdateTimer: visuNeuronModus===def.functionVisu ? false:true
-    property int visu: 0
+
     property bool enableMousArea: false
+    property real zoom: 1
+    property bool zoomEnable: false
+    property bool showId: true
+
+    // Clickevent/properties
+
+    signal clickedNet(var id)
+    signal clickedNeuronID(var absId)
     property int clickedneuronID: -1
     property int clickedNeurontype: 0
-    property bool moveable: false
+    signal showConnectedNeuron(var absId)
+    signal showAll();
+
+    //Position
 
     property variant yRel: []
     property variant xRel: []
+    property real yOffSet: (1/(maxYNeuron+1))/2
+    property real xOffSet: (1/(hiddenNeuronX+2))/2
+    property int yBiasPos: if(bias) return 0.1
+                        else return 0
+
+    property var inputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
+    property var outputDockingPoint : [
+                Qt.point(0,0),
+                Qt.point(100,100)
+            ]
+
+    //Neuron auxiliary properties
+
     property int maxYNeuron: {
         var b
         if(bias===true)b=1
@@ -43,27 +82,9 @@ NetData {
         }
         return 0
     }
-    property bool neuronClickEnable: true
-    property real yOffSet: (1/(maxYNeuron+1))/2
-    property real xOffSet: (1/(hiddenNeuronX+2))/2
-    property real zoom: 1
-    property bool zoomEnable: false
-    property int yBiasPos: if(bias) return 0.1
-                        else return 0
-    property bool showId: true
-    signal clickedNet(var id)
-    signal clickedNeuronID(var absId)
-    signal showConnectedNeuron(var absId)
-    signal updateValue();
-    signal showAll();
-    property var inputDockingPoint : [
-                Qt.point(0,0),
-                Qt.point(100,100)
-            ]
-    property var outputDockingPoint : [
-                Qt.point(0,0),
-                Qt.point(100,100)
-            ]
+
+    ///////////////////////////////////////////////////////////////////////////
+
     Component.onCompleted: {
         updateStructur()
         neuronLoader.active = true
@@ -72,24 +93,29 @@ NetData {
 
     Timer {
         id:timerNet
-            interval: updateTime; running: enableUpdateTimer
-             repeat: true
+            interval: netItem.updateInterval
+            running: true
+            repeat: true
             onTriggered: {
-                netListVisu.displayUpdatNetTimer(netId)
-                updateValue()
+                if(def.interval==netItem.updateModus){
+                    updateNetData()
+                }
             }
         }
    Connections {
                    target: netListVisu
-
                    function onStopUpdateSignal(){ timerNet.running=false}
                    function onStartUpdateSignal(){timerNet.running=true
                       } //netItem.updateStructur()
                     function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
                     function onUpdateVisu(){
-                        netListVisu.displayUpdatNetTimer(netId)
-                        updateValue()
+                        updateNetData()
                     }
+                    function newValues(){
+                        if(updateModus==def.realTime)
+                            updateNetData()
+                    }
+
                     function onUpdateNetStruc(){
                         neuronLoader.active = false
                         connectionLoader.active = false
@@ -342,6 +368,14 @@ NetData {
         }
 
     }
+
+    function updateNetData(){
+        if(!(visuNeuronModus===def.functionVisu)){
+            netListVisu.displayUpdatNetTimer(netId)
+            updateValue()
+        }
+    }
+
     function loadLayout(){
         var x=[]
         var y=[]

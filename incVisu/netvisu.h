@@ -44,14 +44,16 @@ public:
     SaveNetSql db;
 #endif
 signals:
-    void newNetData();
     void stopUpdateSignal();
     void startUpdateSignal();
     void setUpdateTimeSignal(unsigned int time);
+
     void updateVisu();
+    void newValues();
     void updateNetStruc();
 public slots:
     void updateNetVisu();
+    ;
     void setUpdateTime(unsigned int upDateTime);
     void displayUpdatNetTimer(const int &netId);
     int getHiddenX(const int &netId) ;
