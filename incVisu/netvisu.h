@@ -44,15 +44,15 @@ public:
     SaveNetSql db;
 #endif
 signals:
-    void stopUpdateSignal();
-    void startUpdateSignal();
+    void stopUpdateSignal(int id);
+    void startUpdateSignal(int id);
     void setUpdateTimeSignal(unsigned int time);
 
     void updateVisu();
-    void newValues();
-    void updateNetStruc();
+    void newValues(int id);
+    void updateNetStruc(int id);
 public slots:
-    void updateValues();
+    //void updateValues();
     void setUpdateTime(unsigned int upDateTime);
     void displayUpdatNetTimer(const int &netId);
     int getHiddenX(const int &netId) ;
@@ -81,15 +81,17 @@ public slots:
     bool getBias(const int &netId) ;
     qreal getBiasValue(const int &netId) ;
 
+    void stopUpdateSlot(Net *p_net);
     void stopUpdateSlot();
+    void startUpdateSlot(Net *p_net);
     void startUpdateSlot();
 
     void onRunDone(Net *p_net);
     void onBiasValueChanged(Net *p_net);
     void onWeightsChanged(Net *p_net);
 
-    void onNetConfigurationChanged();
-    void updateNetConfiguration();
+    void onNetConfigurationChanged(Net *p_net);
+    void updateNetConfiguration(Net *p_net);
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
     int addNewNet();
@@ -98,7 +100,7 @@ public slots:
     void addHiddenY(const int &netId);
     void addOutput(const int &netId);
 private:
-    bool access=false;
+    vector<bool> access;
 
     QQmlApplicationEngine *engine;
     QQmlContext* context;

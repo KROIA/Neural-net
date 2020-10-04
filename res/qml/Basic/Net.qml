@@ -104,31 +104,43 @@ NetData {
         }
    Connections {
                    target: netListVisu
-                   function onStopUpdateSignal(){
-                       timerNet.running=false}
-                   function onStartUpdateSignal(){
-                       timerNet.running=true
+                   function onStopUpdateSignal(id){
+                       if(id==netItem.netId){
+                            timerNet.running=false
+                       }
+                   }
+
+                   function onStartUpdateSignal(id){
+                       if(id==netItem.netId){
+                            timerNet.running=true
+                       }
                       }
-                    function onSetUpdateTimeSignal(){
-                        if(!forceTimer) netItem.updateInterval=100}
-                    function onNewValues(){
-                        if(updateModus==def.realTime){
-                        updateNetData()}
+
+                    function onSetUpdateTimeSignal(time){
+                        if(!forceTimer) netItem.updateInterval=time
                     }
 
-                    function onUpdateNetStruc(){
-                        neuronLoader.active = false
-                        connectionLoader.active = false
-                        inputDockingPoint=[]
-                        outputDockingPoint=[]
-                        netItem.updateStructur()
-                        /*console.debug("new Config:")
-                        console.debug("input ",netItem.inputNeuron)
-                        console.debug("output ",netItem.outputNeuron)
-                        console.debug("hiddenX", netItem.hiddenNeuronX)
-                        console.debug("hiddenY", netItem.hiddenNeuronY)*/
-                        neuronLoader.active = true
-                        connectionLoader.active = true
+                    function onNewValues(id){
+                        if(id==netItem.netId){
+                            if(updateModus==def.realTime){
+                                updateNetData()}}
+                    }
+
+                    function onUpdateNetStruc(id){
+                        if(id==netItem.netId){
+                            neuronLoader.active = false
+                            connectionLoader.active = false
+                            inputDockingPoint=[]
+                            outputDockingPoint=[]
+                            netItem.updateStructur()
+                            /*console.debug("new Config:")
+                            console.debug("input ",netItem.inputNeuron)
+                            console.debug("output ",netItem.outputNeuron)
+                            console.debug("hiddenX", netItem.hiddenNeuronX)
+                            console.debug("hiddenY", netItem.hiddenNeuronY)*/
+                            neuronLoader.active = true
+                            connectionLoader.active = true
+                        }
                     }
     }
     MouseArea{

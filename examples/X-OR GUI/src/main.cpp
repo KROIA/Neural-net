@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     a.setOrganizationName("AIOpenCloedProject");
     a.setOrganizationDomain("https://github.com/KROIA/Neural-net");
     MainWindow w;
-    //w.show();
+    w.show();
 
     return a.exec();
 }
