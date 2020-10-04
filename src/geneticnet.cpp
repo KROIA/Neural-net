@@ -278,7 +278,7 @@ void                    GeneticNet::set_animals(unsigned int animals)
         {
            #ifdef QT_APP
             _netList.push_back(new Net(a,this));
-            QObject::connect(_netList[a],&Net::errorOccured,this,&GeneticNet::onNetError);
+            this->connectSignalsFromNet(_netList[_netList.size()-1]);
             #else
             _netList.push_back(new Net(a));
             #endif
@@ -1282,10 +1282,42 @@ unsigned int            GeneticNet::get_errorAmount() const
     return static_cast<unsigned int>(_errorList.size())+neuronErrors;
 }
 #ifdef QT_APP
-void                    GeneticNet::onNetError(unsigned int netID,Error &e)
+void GeneticNet::onNetError(unsigned int netID,Error &e)
 {
     e.setNamespace("GeneticNet : NET["+std::to_string(netID)+"]  ::  "+e.getNamespace());
     emit errorOccured(e);
+}
+void GeneticNet::onNetConfigurationUpdateNeeded(Net *net)
+{
+    emit netConfigurationUpdateNeeded(net);
+}
+void GeneticNet::onNetConfigurationUpdateStarted(Net *net)
+{
+    emit netConfigurationUpdateStarted(net);
+}
+void GeneticNet::onNetConfigurationUpdated(Net *net)
+{
+    emit netConfigurationUpdated(net);
+}
+void GeneticNet::onAccessLock(Net *net)
+{
+    emit accessLock(net);
+}
+void GeneticNet::onAccessUnlock(Net *net)
+{
+    emit accessUnlock(net);
+}
+void GeneticNet::onRunDone(Net *net)
+{
+    emit runDone(net);
+}
+void GeneticNet::onBiasValueChanged(Net *net)
+{
+    emit biasValueChanged(net);
+}
+void GeneticNet::onWeightValuesChanged(Net *net)
+{
+    emit weightValuesChanged(net);
 }
 #endif
 void                    GeneticNet::init(unsigned int animals,
@@ -1309,6 +1341,20 @@ void                    GeneticNet::init(unsigned int animals,
     this->set_netFileEnding("gnet");
     this->set(animals,inputs,hiddenX,hiddenY,outputs,enableBias,enableAverage,func);
 }
+#ifdef QT_APP
+void GeneticNet::connectSignalsFromNet(Net *net)
+{
+    QObject::connect(net,&Net::errorOccured,                    this,&GeneticNet::onNetError);
+    QObject::connect(net,&Net::netConfigurationUpdateNeeded,    this,&GeneticNet::onNetConfigurationUpdateNeeded);
+    QObject::connect(net,&Net::netConfigurationUpdateStarted,   this,&GeneticNet::onNetConfigurationUpdateStarted);
+    QObject::connect(net,&Net::netConfigurationUpdated,         this,&GeneticNet::onNetConfigurationUpdated);
+    QObject::connect(net,&Net::accessLock,                      this,&GeneticNet::onAccessLock);
+    QObject::connect(net,&Net::accessUnlock,                    this,&GeneticNet::onAccessUnlock);
+    QObject::connect(net,&Net::runDone,                         this,&GeneticNet::onRunDone);
+    QObject::connect(net,&Net::biasValueChanged,                this,&GeneticNet::onBiasValueChanged);
+    QObject::connect(net,&Net::weightValuesChanged,             this,&GeneticNet::onWeightValuesChanged);
+}
+#endif
 
 void                    GeneticNet::learn_selectAnimal(double gesScore,unsigned int &selection1,unsigned int &selection2)
 {

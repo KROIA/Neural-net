@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.06.02"
-//              Datum   02.10.2020
+#define    NET_VERSION "02.06.03"
+//              Datum   04.10.2020
 
 /*
  Some functions may throw errors.
@@ -191,7 +191,7 @@ class Net
         void                    run();
 
         bool                    needsUpdate();
-        void                    updateNetConfiguration();
+        virtual void            updateNetConfiguration();
         /*  Needed after every change in the Net-structure like
          *  inputNeurons()
          *  sins V02.01.00
@@ -228,11 +228,11 @@ class Net
     signals:
         void errorOccured(unsigned int netID, Error &e);
 
-        void netConfigurationUpdateNeeded(); //Trigger, for updating the netConfiguration
-        void netConfigurationUpdateStarted(); //Trigger, when the updating function gets called
-        void netConfigurationUpdated();      //Infosignal when the updating is finished
-        void accessLock();                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
-        void accessUnlock();                  //from now on you can access all functions again
+        void netConfigurationUpdateNeeded(Net *net); //Trigger, for updating the netConfiguration
+        void netConfigurationUpdateStarted(Net *net); //Trigger, when the updating function gets called
+        void netConfigurationUpdated(Net *net);      //Infosignal when the updating is finished
+        void accessLock(Net *net);                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
+        void accessUnlock(Net *net);                  //from now on you can access all functions again
 
         //void inputsChanged(Net *net);
         //void hiddenOutputsChanged(Net *net);

@@ -43,14 +43,11 @@ double Neuron::activation_Gaussian(double netInput)
 {
     //https://www.wolframalpha.com/input/?i=exp%28-pow%28x%2C2%29%29*2-1
     return 2*pow(EULER,-pow(netInput,2))-1;
-    //return exp(-pow(netInput,2))*2-1;
-    //return 2*double(exp(-(pow(netInput,2)) * 4)-1);
 }
 double Neuron::deriv_activation_Gaussian(double netInput)
 {
     //https://www.wolframalpha.com/input/?i=derivative+of+exp%28-pow%28x%2C2%29%29*2-1
     return -4*pow(EULER,-pow(netInput,2))*netInput;
-    //return netInput * (1+activation_Gaussian(netInput))/-0.43;
 }
 
 

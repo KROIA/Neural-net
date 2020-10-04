@@ -1,8 +1,8 @@
 #ifndef SAVENET_H
 #define SAVENET_H
 //              Autor   Alex Krieg
-#define SAVENET_VERSION "02.03.02"
-//              Datum   02.10.2020
+#define SAVENET_VERSION "02.03.03"
+//              Datum   04.10.2020
 
 #include <net.h>
 #include <time.h>
