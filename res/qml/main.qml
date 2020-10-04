@@ -20,7 +20,7 @@ Window {
         anchors.leftMargin: 0
         anchors.top: parent.top
         anchors.topMargin: 0
-        currentIndex: 3
+        currentIndex: 0
         TabButton{
             id:singel
             width: 100

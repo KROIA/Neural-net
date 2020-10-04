@@ -51,10 +51,10 @@ void NetVisu::setupNetVisu(){
     biasValueList   = vector<double>          (netList->size(),0);
 
     for(unsigned i=0;i<netList->size();++i){
-        connect((*netList)[i],SIGNAL(accessLock()),this,SLOT(stopUpdateSlot()));
-        connect((*netList)[i],SIGNAL(accessUnlock()),this,SLOT(startUpdateSlot()));
-        connect((*netList)[i],SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationChanged()));
-        connect((*netList)[i],SIGNAL(runDone(Net *net)),this,SLOT(newValues()));
+        connect((*netList)[i],SIGNAL(accessLock(Net *)),this,SLOT(stopUpdateSlot()));
+        connect((*netList)[i],SIGNAL(accessUnlock(Net *)),this,SLOT(startUpdateSlot()));
+        connect((*netList)[i],SIGNAL(netConfigurationUpdated(Net *)),this,SLOT(onNetConfigurationChanged()));
+        connect((*netList)[i],SIGNAL(runDone(Net *)),this,SLOT(updateValues()));
     }
 
 
@@ -86,8 +86,8 @@ void NetVisu::loadNetInUi(QQuickWidget* widget){
     widget->setSource((QUrl(QStringLiteral("qrc:/qml/IntegratableNet/Main.qml"))));
     netWidget=widget;
 }
-void NetVisu::updateNetVisu(){
-    emit updateVisu();
+void NetVisu::updateValues(){
+    emit newValues();
 }
 
 void NetVisu::displayUpdatNetTimer(const int &netId){
@@ -307,6 +307,7 @@ void NetVisu::onRunDone(Net *p_net)
     outputValueList[netID]          = p_net->get_output();
     disableNeuronSignalUpdateEvent[p_net->get_ID()]  = true;
 }
+
 void NetVisu::onBiasValueChanged(Net *p_net)
 {
     if(!access || disableNetBiasValueUpdateEvent[p_net->get_ID()])

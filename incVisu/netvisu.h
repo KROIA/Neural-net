@@ -52,8 +52,7 @@ signals:
     void newValues();
     void updateNetStruc();
 public slots:
-    void updateNetVisu();
-    ;
+    void updateValues();
     void setUpdateTime(unsigned int upDateTime);
     void displayUpdatNetTimer(const int &netId);
     int getHiddenX(const int &netId) ;

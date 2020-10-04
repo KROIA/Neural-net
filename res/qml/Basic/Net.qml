@@ -104,16 +104,16 @@ NetData {
         }
    Connections {
                    target: netListVisu
-                   function onStopUpdateSignal(){ timerNet.running=false}
-                   function onStartUpdateSignal(){timerNet.running=true
-                      } //netItem.updateStructur()
-                    function onSetUpdateTimeSignal(){if(!forceTimer) updateTime=100}
-                    function onUpdateVisu(){
-                        updateNetData()
-                    }
-                    function newValues(){
-                        if(updateModus==def.realTime)
-                            updateNetData()
+                   function onStopUpdateSignal(){
+                       timerNet.running=false}
+                   function onStartUpdateSignal(){
+                       timerNet.running=true
+                      }
+                    function onSetUpdateTimeSignal(){
+                        if(!forceTimer) netItem.updateInterval=100}
+                    function onNewValues(){
+                        if(updateModus==def.realTime){
+                        updateNetData()}
                     }
 
                     function onUpdateNetStruc(){
