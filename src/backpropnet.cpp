@@ -317,18 +317,20 @@ void                    BackpropNet::learn()
 
     if(__output_error.size() == 0)
     {
+        // Erstelle eine Liste für jeden Error der Output-Neuronen
         __output_error = std::vector<double>(this->get_outputNeurons());
     }
-    //std::vector<double>  __output_error(this->get_outputNeurons());
 
     if(__hidden_error.size() == 0)
     {
+        // Erstelle eine zweidimensionale Liste für jeden Error der Hidden-Neuronen
         __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
     }
-    //std::vector<std::vector<double>  > __hidden_error(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
 
     for(unsigned int y=0; y<this->get_outputNeurons(); y++)
     {
+        // Ermittle den Fehler aller Output-Neuronen
+        // E_Out_Y = ableitung_activationFunc(Netinput_Out_Y) * (expected_Y - Out_Y)
         __output_error[y] = derivative(this->get_ptr_outputNeuron(y)->get_netInput()) * _outputError[y];
     }
     double output   = 0;
@@ -358,6 +360,8 @@ void                    BackpropNet::learn()
                         weightError += __hidden_error[x][y2] * this->get_ptr_hiddenNeuron(x,y2)->get_weight(y);
                     }
                 }
+                // Ermittle den Fehler aller Hidden-Neuronen
+                // E_Hidd_X-1_Y = ableitung_activationFunc(Netinput_Hidd_X-1_Y) * (Summe[iterator i ](E_Hidd_X_i * "Gewicht hidden (X-1)Y zu hidden Xi))
                 __hidden_error[x-1][y] = derivative(this->get_ptr_hiddenNeuron(x-1,y)->get_netInput()) * weightError;
             }
         }
@@ -579,6 +583,14 @@ void                 BackpropNet::addConnection(std::vector<Connection> connecti
     printIllegalFunctionMessage("get_ptr_connectionList()");
     return nullptr;
 }*/
+void                BackpropNet::updateNetConfiguration()
+{
+    __hidden_error.clear();
+    __output_error.clear();
+    Net::updateNetConfiguration();
+    __output_error = std::vector<double>(this->get_outputNeurons());
+    __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
+}
 void                BackpropNet::clearConnectionList()
 {
     printIllegalFunctionMessage("clearConnectionList()");
@@ -636,20 +648,20 @@ unsigned int        BackpropNet::get_errorAmount() const
     return unsigned(_errorList.size());
 }
 
-#ifdef QT_APP
+/*#ifdef QT_APP
 void BackpropNet::onNetConfigurationUpdate()
 {
     __hidden_error.clear();
     __output_error.clear();
 }
-#endif
-#ifdef QT_APP
+#endif*/
+/*#ifdef QT_APP
 void BackpropNet::onNetConfigurationUpdateFinished()
 {
     __output_error = std::vector<double>(this->get_outputNeurons());
     __hidden_error = std::vector<std::vector<double>  >(this->get_hiddenNeuronsX(),std::vector<double>(this->get_hiddenNeuronsY(),0));
 }
-#endif
+#endif*/
 
 void BackpropNet::printIllegalFunctionMessage(std::string func)
 {
@@ -663,10 +675,10 @@ void        BackpropNet::init()
     _needsConfigurationUpdate = true;
     this->set_netFileName("netFile");
     this->set_netFileEnding("bnet");
-	#ifdef QT_APP
-		connect(this,SIGNAL(netConfigurationUpdateStarted()),this,SLOT(onNetConfigurationUpdate()));
-		connect(this,SIGNAL(netConfigurationUpdated()),this,SLOT(onNetConfigurationUpdateFinished()));
-	#endif
+    /*#ifdef QT_APP
+        QObject::connect(this,&Net::netConfigurationUpdateStarted,this,SLOT(onNetConfigurationUpdate()));
+        QObject::connect(this,&Net::netConfigurationUpdated,this,SLOT(onNetConfigurationUpdateFinished()));
+    #endif*/
 
 }
 void        BackpropNet::addError(const Error &e)

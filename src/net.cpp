@@ -109,12 +109,12 @@ void                Net::set_inputNeurons(unsigned int inputs)
     if(inputs != _inputs)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _doRegenerateConnectionlist = true;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
         _inputs                     = inputs;
     }
@@ -139,13 +139,13 @@ void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
     if(hiddenX != _hiddenX)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _doRegenerateConnectionlist = true;
         _hiddenX                    = hiddenX;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
@@ -170,13 +170,13 @@ void                Net::set_hiddenNeuronsY(unsigned int hiddenY)
     if(hiddenY != _hiddenY)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _doRegenerateConnectionlist = true;
         _hiddenY                    = hiddenY;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
         //_hiddenNeurons              = _hiddenX * _hiddenY;
     }
@@ -206,13 +206,13 @@ void                Net::set_outputNeurons(unsigned int outputs)
     if(outputs != _outputs)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _doRegenerateConnectionlist = true;
         _outputs                    = outputs;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
         //_outputNeurons          = outputs;
     }
@@ -267,13 +267,13 @@ void                Net::set_bias(bool enableBias)
     if(enableBias != _bias)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _doRegenerateConnectionlist = true;
         _bias                       = enableBias;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
     }
 }
@@ -286,12 +286,12 @@ void                Net::set_enableAverage(bool enableAverage)
     if(enableAverage != _enableAverage)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _enableAverage              = enableAverage;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
     }
 }
@@ -319,12 +319,12 @@ void                Net::set_activationFunction(Activation func)
     if(func != _activationFunction)
     {
         #ifdef QT_APP
-        emit accessLock();
+        emit accessLock(this);
         #endif
         _needsConfigurationUpdate   = true;
         _activationFunction         = func;
         #ifdef QT_APP
-        emit netConfigurationUpdateNeeded();
+        emit netConfigurationUpdateNeeded(this);
         #endif
     }
 }
@@ -994,7 +994,7 @@ void                Net::updateNetConfiguration()
         return;
     }
     #ifdef QT_APP
-    emit netConfigurationUpdateStarted();
+    emit netConfigurationUpdateStarted(this);
     #endif
     _needsCalculationUpdate = true;
     if(_hiddenX == 0 || _hiddenY == 0)
@@ -1315,9 +1315,9 @@ void                Net::updateNetConfiguration()
     __DEBUG_NET(this,"updateNetConfiguration()","end");
 #endif
 #ifdef QT_APP
-    emit netConfigurationUpdated();
+    emit netConfigurationUpdated(this);
     emit weightValuesChanged(this);
-    emit accessUnlock();
+    emit accessUnlock(this);
 #endif
 }
 void                Net::addConnection(NeuronID fromNeuron,NeuronID toNeuron,ConnectionDirection direction)
@@ -1386,12 +1386,12 @@ void                Net::addConnection(Connection connection)
     //bool ret = set_ptr_intern_connectNeuron(connection);
     //prepareCalculationOrderList();
     #ifdef QT_APP
-    emit accessLock();
+    emit accessLock(this);
     #endif
     _costumConnectionList.push_back(connection);
     _needsConfigurationUpdate = true;
     #ifdef QT_APP
-    emit netConfigurationUpdateNeeded();
+    emit netConfigurationUpdateNeeded(this);
     #endif
 
 }
@@ -1406,11 +1406,11 @@ void                Net::addConnection(std::vector<Connection> connections)
 void                Net::set_connectionList(std::vector<Connection> connections)
 {
     #ifdef QT_APP
-    emit accessLock();
+    emit accessLock(this);
     #endif
     _connectionList = connections;
     #ifdef QT_APP
-    emit netConfigurationUpdateNeeded();
+    emit netConfigurationUpdateNeeded(this);
     #endif
     _needsConfigurationUpdate = true;
 }
@@ -1479,7 +1479,7 @@ std::vector<std::string>         Net::toStringList()
     std::vector<std::string> list;
     std::string separator = "\n";
     std::string buff = this->toString();
-    while(buff.find(separator) != -1)
+    while(buff.find(separator) != std::string::npos)
     {
         list.push_back(buff.substr(0,buff.find(separator)));
         buff=buff.substr(buff.find(separator)+1,buff.size());
@@ -1571,7 +1571,7 @@ void Net::init(unsigned int inputs,
           Activation func)
 {
     #ifdef QT_APP
-    emit accessLock();
+    emit accessLock(this);
     #endif
     time_t now                  = time(nullptr);
     struct tm *currentTime      = localtime(&now);
@@ -1620,7 +1620,7 @@ void Net::init(unsigned int inputs,
     this->set_biasValue(1.0);
    // this->updateNetConfiguration();
     #ifdef QT_APP
-    emit netConfigurationUpdateNeeded();
+    emit netConfigurationUpdateNeeded(this);
     #endif
     _needsConfigurationUpdate = true;
     _doRegenerateConnectionlist = true;

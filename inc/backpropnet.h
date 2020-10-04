@@ -120,6 +120,8 @@ class BackpropNet : public Net
         void         addConnection(std::vector<Connection> connections);
         //void         set_ptr_connectionList(std::vector<Connection> *connections);
         //std::vector<Connection> *get_ptr_connectionList();
+        virtual void updateNetConfiguration();
+
         void         clearConnectionList();
         NeuronID     addNeuron();
         NeuronID     addNeuron(Neuron *neuron);
@@ -146,8 +148,8 @@ class BackpropNet : public Net
     signals:
         void errorOccured(unsigned int netID, Error &e);
 	private slots:
-        void onNetConfigurationUpdate();
-        void onNetConfigurationUpdateFinished();
+     //   void onNetConfigurationUpdate();
+     //   void onNetConfigurationUpdateFinished();
 #endif
 
     private:

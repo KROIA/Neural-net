@@ -209,14 +209,14 @@ bool SaveNet::loadFile()
     for(unsigned int a=0; a<fileBuffer.size(); a++)
     {
         std::string buffLine = fileBuffer[a].substr(fileBuffer[a].find_last_of(" ")+1,fileBuffer[a].find("\n"));
-        qDebug() << buffLine.c_str();
+        //qDebug() << buffLine.c_str();
         unsigned int uInt_buffLine;
         if(buffLine == "" || fileBuffer[a].find(" ") == std::string::npos)
             continue;
         try {
             uInt_buffLine = stoul(buffLine);
         } catch (std::invalid_argument &e) {
-            qDebug() << e.what();
+            CONSOLE << e.what();
 
         }
 

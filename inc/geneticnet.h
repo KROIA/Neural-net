@@ -1,8 +1,8 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.07.00"
-//                      Datum  25.09.2020
+#define    GENETICNET_VERSION "02.07.01"
+//                      Datum  04.10.2020
 
 #include "net.h"
 #include "savenet.h"
@@ -240,8 +240,28 @@ class GeneticNet
 #ifdef QT_APP
     signals:
         void errorOccured(Error &e);
+        void netConfigurationUpdateNeeded(Net *net); //Trigger, for updating the netConfiguration
+        void netConfigurationUpdateStarted(Net *net); //Trigger, when the updating function gets called
+        void netConfigurationUpdated(Net *net);      //Infosignal when the updating is finished
+        void accessLock(Net *net);                    //do not access functions like: get_input() ... otherwise this error will be shown: "Update required: call updateNetConfiguration() first!"
+        void accessUnlock(Net *net);                  //from now on you can access all functions again
+
+        void runDone(Net *net);
+        void biasValueChanged(Net *net);
+        void weightValuesChanged(Net *net);
     private slots:
         void onNetError(unsigned int netID,Error &e);
+
+        void onNetConfigurationUpdateNeeded(Net *net);
+        void onNetConfigurationUpdateStarted(Net *net);
+        void onNetConfigurationUpdated(Net *net);
+        void onAccessLock(Net *net);
+        void onAccessUnlock(Net *net);
+
+        void onRunDone(Net *net);
+        void onBiasValueChanged(Net *net);
+        void onWeightValuesChanged(Net *net);
+
 #endif
     private:
 
@@ -253,6 +273,9 @@ class GeneticNet
                                  bool enableBias,
                                  bool enableAverage,
                                  Activation func);
+#ifdef QT_APP
+        void connectSignalsFromNet(Net *net);
+#endif
 
         void learn_selectAnimal(double gesScore,unsigned int &selection1,unsigned int &selection2);
         void learn_crossover(unsigned int selection1,unsigned int selection2,std::vector<double> &newGen1,std::vector<double> &newGen2);
