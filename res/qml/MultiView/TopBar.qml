@@ -3,25 +3,116 @@ import QtQuick.Controls 2.4
 import "../BasicTemplate" as Template
 
 Template.TopBar {
-    id:itemTopBar
-    width: 100
-    height: 100
+    id: topBar
 
-    property int netXAxis: xAxisItem.value
-    property int netYAxis: yAxisItem.value
-    property int updateTimer: timerItem.value
     property int totalNet: 0
-    property int tabId: tabItem.value
-    property int fontSize: itemTopBar.height*0.2
-    property int spinBoxSize: 150//if(width*0.2<150) return width*0.2
-                               // else return 150
+
+    Row{
+        spacing: 10
+        padding:10
+        anchors.top: topBar.top
+        anchors.bottom: topBar.bottom
+
+        ComboBox {
+            id:modus
+            model: ["Value", "Function", "Combined"]
+            anchors.verticalCenter: parent.verticalCenter
+            currentIndex: generalVariable.visuNeuronModus
+            onCurrentIndexChanged: {
+                generalVariable.visuNeuronModus=currentIndex
+            }
+        }
+        ComboBox {
+            id:updateTimer
+            model: [ "interval","real time", "pause"]
+            anchors.verticalCenter: parent.verticalCenter
+            currentIndex: generalVariable.updateModus
+            onCurrentIndexChanged: {
+                generalVariable.updateModus=currentIndex
+            }
+        }
+        SpinBox{
+            id:updateIntervalSpinBox
+            anchors.verticalCenter: parent.verticalCenter
+            editable :true
+            visible: generalVariable.updateModus==def.interval
+            from: 0
+            to: 10000
+            value:generalVariable.updateInterval
+            onValueChanged: {
+                generalVariable.updateInterval=value
+            }
+        }
+        Label{
+            text: "ms"
+            font.pixelSize:  15
+            verticalAlignment:Text.AlignVCenter
+            visible: generalVariable.updateModus==def.interval
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Label{
+            text: "rows "
+            font.pixelSize:  15
+            verticalAlignment:Text.AlignVCenter
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        SpinBox{
+            id:xAxisItem
+            editable :true
+            from: 1
+            to: 10
+            anchors.verticalCenter: parent.verticalCenter
+            value:generalVariable.netXAxis
+            onValueChanged: {
+                updateMultiNet()
+                generalVariable.netXAxis=value
+            }
+        }
+        Label{
+            text: "columns "
+            font.pixelSize:  15
+            verticalAlignment:Text.AlignVCenter
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        SpinBox{
+            id:yAxisItem
+            editable :true
+            from: 1
+            to: 10
+            value:generalVariable.netYAxis
+            anchors.verticalCenter: parent.verticalCenter
+            onValueChanged: {
+                updateMultiNet()
+                generalVariable.netYAxis=value
+            }
+        }
+        Label{
+            text: "rows "
+            font.pixelSize:  15
+            verticalAlignment:Text.AlignVCenter
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        SpinBox{
+            id:tabItem
+            editable :true
+            from: 0
+            to: Math.floor(generalVariable.totalNet/(yAxisItem.value*xAxisItem.value))
+            anchors.verticalCenter: parent.verticalCenter
+            onValueChanged: {
+                updateMultiNet()
+                generalVariable.tabId=value
+            }
+        }
+    }
+        /*
     Row {
         anchors.fill:parent
         Template.TopbarSpinBox{
-            id:xAxisItem
+            id:
             height: itemTopBar*0.8
             width:spinBoxSize*2
-            text: "max nets\nrow  "
+            text:
             from: 1
             to: 10
             spinBoxWidth: spinBoxSize
@@ -56,7 +147,7 @@ Template.TopBar {
             to: 100//Math.floor(itemTopBar.totalNet/(yAxisItem.value*xAxisItem.value))
             spinBoxWidth: spinBoxSize
         }
-    }
+    }*/
 
     Connections {
                    target: netListVisu

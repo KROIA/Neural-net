@@ -17,12 +17,12 @@ Item {
         anchors.left: singelWorkArea.left
         anchors.top: singelTopBar.bottom
         anchors.bottom: singelWorkArea.bottom
-        visuNeuronModus:singelTopBar.visuNeuronModus
-        moveable:singelTopBar.moveable
+        visuNeuronModus:generalVariable.visuNeuronModus
+        moveable:generalVariable.moveable
         zoomEnable:true
         visible: parent.visible
-        updateInterval:singelTopBar.updateInterval
-        updateModus: singelTopBar.updateModus
+        updateInterval:generalVariable.updateInterval
+        updateModus: generalVariable.updateModus
         Component.onCompleted: {
             console.debug("load Net new")
         }

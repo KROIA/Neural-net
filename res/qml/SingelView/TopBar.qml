@@ -7,28 +7,31 @@ import "../"
 import "../BasicTemplate" as Template
 Template.TopBar {
     id: topBar
-    property int visuNeuronModus: modus.currentIndex
-    property bool moveable: moveSwitch.checked
-    property int updateModus: updateTimer.currentIndex
-    property int updateInterval: updateIntervalSpinBox.value
+
     Row{
         spacing: 10
         padding:10
-        anchors.top: topBar.top
-        anchors.bottom: topBar.bottom
+        anchors.fill:parent
         Switch{id:moveSwitch
             text: "moveable"
             anchors.verticalCenter: parent.verticalCenter
+            checked: generalVariable.moveable
+            onCheckedChanged: {
+                generalVariable.moveable=checked
+            }
         }
         ComboBox {
             id:modus
             model: ["Value", "Function", "Combined"]
             anchors.verticalCenter: parent.verticalCenter
+            currentIndex: generalVariable.visuNeuronModus
+            onCurrentIndexChanged: {
+                generalVariable.visuNeuronModus=currentIndex
+            }
         }
         Button{
             text:"save Netlayout"
             onClicked: {
-
                 netListVisu.saveRelPos(mainNet.xRel,mainNet.yRel,mainNet.netID)
             }
             anchors.verticalCenter: parent.verticalCenter
@@ -69,24 +72,30 @@ Template.TopBar {
             id:updateTimer
             model: [ "interval","real time", "pause"]
             anchors.verticalCenter: parent.verticalCenter
+            currentIndex: generalVariable.updateModus
+            onCurrentIndexChanged: {
+                generalVariable.updateModus=currentIndex
+            }
         }
         SpinBox{
             id:updateIntervalSpinBox
+            anchors.verticalCenter: parent.verticalCenter
             editable :true
-            value:500
             visible: updateTimer.currentIndex==def.interval
             from: 0
-            to: 10000//Math.floor(itemTopBar.totalNet/(yAxisItem.value*xAxisItem.value))
-            anchors.verticalCenter: parent.verticalCenter
+            to: 10000
+            value:generalVariable.updateInterval
+            onValueChanged: {
+                generalVariable.updateInterval=value
+            }
         }
         Label{
             text: "ms"
             font.pixelSize:  15
             verticalAlignment:Text.AlignVCenter
-            visible: updateTimer.currentIndex==def.interval
+            visible: generalVariable.currentIndex==def.interval
             anchors.verticalCenter: parent.verticalCenter
         }
-
         FileDialog{
             id:loadFileDialog
             title:  "Load Netlayout from"

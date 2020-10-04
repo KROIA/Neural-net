@@ -7,10 +7,14 @@ Item{
     height: 600
     property int xNetPerTab: 3
     property int yNetPerTab: 3
+
     property int totalNet: 0
     property int tabIndex:0
+
     property int updateInterval: 100
-    property bool updateModus: def.interval
+    property int updateModus: def.interval
+
+    property int visuNeuronModus: def.valueVisu
     property bool forceTimer: false
     property int maxTab: Math.ceil(totalNet/(xNetPerTab*yNetPerTab))
     property int minTab: 0
@@ -41,6 +45,7 @@ Item{
                         forceTimer:multiNet.forceTimer
                         neuronClickEnable:false
                         zoomEnable: false
+                        visuNeuronModus:multiNet.visuNeuronModus
                     }
                     }
     function updateMultiNet(){

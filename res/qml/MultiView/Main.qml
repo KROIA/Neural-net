@@ -12,17 +12,18 @@ Item {
         anchors.top:multiNetArea.top
         anchors.left: multiNetArea.left
         anchors.right: multiNetArea.right
-        height:100//if(multiNetArea.height*0.2<100) return multiNetArea.height*0.2
-                //else return 100
+        height: 70
     }
     MultiNet{
         anchors.top:topBar.bottom
         anchors.bottom: multiNetArea.bottom
         anchors.left: multiNetArea.left
         anchors.right: multiNetArea.right
-        xNetPerTab: topBar.netXAxis
-        yNetPerTab: topBar.netYAxis
-        updateInterval: topBar.updateTimer
-        tabIndex: topBar.tabId
+        xNetPerTab: generalVariable.netXAxis
+        yNetPerTab: generalVariable.netYAxis
+        updateModus: generalVariable.updateModus
+        updateInterval: generalVariable.updateInterval
+        tabIndex: generalVariable.tabId
+        visuNeuronModus: generalVariable.visuNeuronModus
     }
 }

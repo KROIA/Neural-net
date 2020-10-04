@@ -14,6 +14,10 @@ Window {
     Definition{
         id:def
     }
+    Saveproperties{
+        id:generalVariable
+    }
+
     TabBar{
         id:modusSelector
         anchors.left: parent.left

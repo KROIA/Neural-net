@@ -22,39 +22,33 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
-DLL_buildPath = bin/64bit/build-Release
+#DLL_buildPath = bin/64bit/build-Release
+DLL_buildPath = bin/release
+
 
 #-------------------------------------------------------
 #---This Project needs external code--------------------
 # Qect.dll : https://github.com/KROIA/Rect
 # geometry : https://github.com/KROIA/Geometry
 
-#username     = Hannes
-#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 #change your PC-username
+
 #username     = SCHEH
 #QT_work_dir  = C:/Users/SCHEH/Documents/GitHub/
 
-#username     = Hannes
-#QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
-username     = AlexKrieg
-QT_work_dir  = E:/Dokumente/QT
-geometryPath = $$QT_work_dir/lib/Geometry
-rectPath     = $$QT_work_dir/DLL/Rect
-configPath   = $$QT_work_dir/DLL/Config
+username     = Hannes
+QT_work_dir  = C:/Users/Hannes/Documents/Programme/GitHub
 
-#geometryPath = $$QT_work_dir/lib/Geometry
-#rectPath     = $$QT_work_dir/DLL/Rect
-#configPath   = $$QT_work_dir/DLL/Config
-
-
+#username     = AlexKrieg
+#QT_work_dir  = E:/Dokumente/QT
 
 #username     = AlexKrieg
 #QT_work_dir  = C:/Users/$$username/Documents/QT
 
-#geometryPath = $$QT_work_dir/lib/Geometry
-#rectPath     = $$QT_work_dir/DLL/Rect
-#configPath   = $$QT_work_dir/DLL/Config
+geometryPath = $$QT_work_dir/lib/Geometry
+rectPath     = $$QT_work_dir/DLL/Rect
+configPath   = $$QT_work_dir/DLL/Config
+
 
 LIBS+=$$rectPath/$$DLL_buildPath/Rect.dll \
       $$configPath/$$DLL_buildPath/Config.dll

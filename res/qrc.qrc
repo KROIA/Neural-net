@@ -25,5 +25,6 @@
         <file>qml/Basic/NeuronData.qml</file>
         <file>qml/Basic/NetNeuron.qml</file>
         <file>qml/NetCreater/Topbar.qml</file>
+        <file>qml/Saveproperties.qml</file>
     </qresource>
 </RCC>
