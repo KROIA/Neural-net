@@ -191,7 +191,6 @@ class GeneticNet
 
         Net *operator[](unsigned int animal);
         std::vector<Net*>   get_netList_ptr();
-        std::vector<Net*>   *get_ptr_netList_ptr();
 
         void                set_mutationFactor(double factor);
         void                set_mutationChangeWeight(double weight);

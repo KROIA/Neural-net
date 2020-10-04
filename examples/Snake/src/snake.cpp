@@ -321,7 +321,7 @@ Snake::Snake(QWidget *parent) :
     _record_generationIndex = generation;
     _record_imageList.reserve(1000);
 #ifdef ENABLE_NET_VISU
-    visu = new NetVisu(net->get_ptr_netList_ptr());
+    visu = new NetVisu(net->get_netList_ptr());
 
     visu->loadNetInUi(ui->net_widget);
     visu->showWindow();

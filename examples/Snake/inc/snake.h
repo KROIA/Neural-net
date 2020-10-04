@@ -20,7 +20,7 @@
 #include <ratio>
 #include <chrono>
 
-#define ENABLE_NET_VISU
+//#define ENABLE_NET_VISU
 
 QT_CHARTS_USE_NAMESPACE
 
