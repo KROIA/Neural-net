@@ -1,7 +1,7 @@
 #ifndef GENETICNET_H
 #define GENETICNET_H
 //                      Autor   Alex Krieg
-#define    GENETICNET_VERSION "02.07.01"
+#define    GENETICNET_VERSION "02.07.02"
 //                      Datum  04.10.2020
 
 #include "net.h"
@@ -191,6 +191,7 @@ class GeneticNet
 
         Net *operator[](unsigned int animal);
         std::vector<Net*>   get_netList_ptr();
+        std::vector<Net*>   *get_ptr_netList_ptr();
 
         void                set_mutationFactor(double factor);
         void                set_mutationChangeWeight(double weight);
