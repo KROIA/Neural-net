@@ -41,11 +41,15 @@ Shape {
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
 
-           startX:con.start.x
+           startX:{
+               //console.debug("Start ",getTypeString(source.type),source.typeId )
+               con.start.x}
            startY:con.start.y
            PathLine {
                id:path
-               x: con.end.x
+               x: {
+                   //console.debug("End ",getTypeString(destination.type),destination.typeId )
+                   con.end.x}
                y: con.end.y
            }
          }
@@ -65,11 +69,17 @@ Shape {
                     else{
                         destination.typeId=destinationId
                     }
-                    }
+                }
+
     function setSourceId(){
         if(source.type==def.biasType){
-            source.typeId= Math.floor(destination.neuronID/netListVisu.getHiddenY(netId))
+            if(Math.floor(destination.neuronID/netListVisu.getHiddenY(netId))<=netListVisu.getHiddenX(netId)){
+                source.typeId= Math.floor(destination.neuronID/netListVisu.getHiddenY(netId))
             }
+            else{
+                source.typeId=netListVisu.getHiddenX(netId)
+            }
+        }
         else{
             source.typeId=netListVisu.getConSourceID(con.netId,con.conId,con.connType)
             }

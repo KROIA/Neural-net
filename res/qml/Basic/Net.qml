@@ -89,6 +89,7 @@ NetData {
         updateStructur()
         neuronLoader.active = true
         connectionLoader.active = true
+
     }
 
     Timer {
@@ -276,8 +277,8 @@ NetData {
                 }
                 Component{
                     id: neuronComp
-                    Item{
 
+                    Item{
                         id:neuronItem
                         property int lastId: 0
                         property int loadedNeuron: 0
