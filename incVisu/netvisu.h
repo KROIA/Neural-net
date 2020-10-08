@@ -94,11 +94,31 @@ public slots:
     void updateNetConfiguration(Net *p_net);
     void saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId);
 
+
+    /////////////////////////////////////////////////////////////////////
+    //////////////////////////////Creator////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     int addNewNet();
+
     void addInput(const int &netId);
+    void removeInput(const int &netId);
+
     void addHiddenX(const int &netId);
+    void removeHiddenX(const int &netId);
+
     void addHiddenY(const int &netId);
+    void removeHiddenY(const int &netId);
+
     void addOutput(const int &netId);
+    void removeOutput(const int &netId);
+
+    void addBias(const int &netId);
+    void removeBias(const int &netId);
+
+    void changeBias(const int &netId, double signal);
+
+    void changeInput(const int &netId,int input, double signal);
+
 private:
     vector<bool> access;
 
@@ -112,13 +132,14 @@ private:
     vector<bool> disableNetGenomUpdateEvent;
     vector<bool> disableNetBiasValueUpdateEvent;
 
-    vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
+    /*vector<vector<double>   > inputValueList;  //Index depending on NetID, secondDimension: depending on ID
     vector<vector<double>   > hiddenValueList; //Index depending on NetID, secondDimension: depending on neuron ID
     vector<vector<double>   > outputValueList; //Index depending on NetID, secondDimension: depending on the output
-    vector<vector<double>   > genomList;       //Index depending on NetID, secondDimension: depending on the connection
+  */vector<vector<double>   > genomList;       //Index depending on NetID, secondDimension: depending on the connection
 
     vector<double>  biasValueList; //Index depending on NetID
 
+    vector<double> inputCreatorNetValueList;
     unsigned getX(int netId ,int id);
     unsigned getY(int netId ,int id);
 };

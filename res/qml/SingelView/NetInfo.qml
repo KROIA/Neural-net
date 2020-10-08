@@ -6,10 +6,10 @@ NetData {
 
     id: netData
     property string netStatus: "stop"
-    //property variant conDest:getConDestination(clickedNeuronID,clickedNeuronType)
-    //property variant conSource:getConSource(clickedNeuronID,clickedNeuronType)
+    property variant conDest:getConDestination(clickedNeuronID,clickedNeuronType)
+    property variant conSource:getConSource(clickedNeuronID,clickedNeuronType)
     property int fontSize:10
-    /*
+
     ScrollView {
         horizontalScrollBarPolicy :Qt.ScrollBarAlwaysOff
         verticalScrollBarPolicy :Qt.ScrollBarAsNeeded
@@ -17,7 +17,7 @@ NetData {
         Column{
             x:15
             Text{
-                text: "Net ID: "+netID+"\n"
+                text: "Net ID: "+netId+"\n"
                 font.pointSize: 20
             }
 
@@ -25,7 +25,6 @@ NetData {
                 anchors.topMargin: 20
                 spacing:15
                 columns:2
-                /*
                 Text {font.pointSize: fontSize;text: "status "}
                 Text{
                     text: netStatus
@@ -76,6 +75,6 @@ NetData {
                 }
             }
         }
-    }*/
+    }
 }
 

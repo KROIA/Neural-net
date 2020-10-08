@@ -46,7 +46,7 @@ NetData {
     property int clickedNeurontype: 0
     signal showConnectedNeuron(var absId)
     signal showAll();
-
+    property bool changableInput: false
     //Position
 
     property variant yRel: []
@@ -129,18 +129,7 @@ NetData {
 
                     function onUpdateNetStruc(id){
                         if(id==netItem.netId){
-                            neuronLoader.active = false
-                            connectionLoader.active = false
-                            inputDockingPoint=[]
-                            outputDockingPoint=[]
-                            netItem.updateStructur()
-                            /*console.debug("new Config:")
-                            console.debug("input ",netItem.inputNeuron)
-                            console.debug("output ",netItem.outputNeuron)
-                            console.debug("hiddenX", netItem.hiddenNeuronX)
-                            console.debug("hiddenY", netItem.hiddenNeuronY)*/
-                            neuronLoader.active = true
-                            connectionLoader.active = true
+                            netItem.updateNetStrucVisu()
                         }
                     }
     }
@@ -285,19 +274,15 @@ NetData {
                         property bool finishedLoading: loadedNeuron>=totalHidden+outputNeuron+inputNeuron+netItem.hiddenNeuronX+1
                         Repeater{
                             id:biasLayer
-                            model: netItem.hiddenNeuronX+1
+                            model:netItem.bias ? netItem.hiddenNeuronX+1 : 0
                             NetNeuron{
                                 xRel:{
                                     var i=index
                                     return calculateXRelPos(i,dataNeuron.type)}
                                 yRel: yOffSet+yBiasPos
                                 dataNeuron.type:def.biasType
-                                lastNeuron:{
-                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
-                                    return lastId==dataNeuron.absId||!finishedLoading}
+                                lastNeuron:lastId==dataNeuron.absId||!finishedLoading
                                 dataNeuron.typeId: index
-                                visible: netItem.bias
-
                             }
                         }
                         Repeater{
@@ -313,9 +298,8 @@ NetData {
                                 }
                                 dataNeuron.type:def.inputType
                                 dataNeuron.typeId: index
-                                lastNeuron:{
-                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
-                                    return lastId==dataNeuron.absId||!finishedLoading}
+                                lastNeuron:lastId==dataNeuron.absId||!finishedLoading
+                                inputEnable:changableInput
                             }
                         }
 
@@ -336,9 +320,7 @@ NetData {
                                     }
                                     dataNeuron.typeId: index+(indexX*hiddenNeuronY)
                                     dataNeuron.type:def.hiddenType
-                                    lastNeuron:{
-                                        //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
-                                        return lastId==dataNeuron.absId||!finishedLoading}
+                                    lastNeuron: lastId==dataNeuron.absId||!finishedLoading
                                 }
                             }
                         }
@@ -355,9 +337,7 @@ NetData {
                                 }
                                 dataNeuron.type:def.outputType
                                 dataNeuron.typeId: index
-                                lastNeuron:{
-                                    //console.debug(lastId,dataNeuron.absId,"||",!finishedLoading,lastId==dataNeuron.absId||!finishedLoading)
-                                    return lastId==dataNeuron.absId||!finishedLoading}
+                                lastNeuron:lastId==dataNeuron.absId||!finishedLoading
                             }
                         }
 
@@ -388,7 +368,16 @@ NetData {
             updateValue()
         }
     }
+    function updateNetStrucVisu(){
 
+            neuronLoader.active = false
+            connectionLoader.active = false
+            inputDockingPoint=[]
+            outputDockingPoint=[]
+            netItem.updateStructur()
+            neuronLoader.active = true
+            connectionLoader.active = true
+        }
     function loadLayout(){
         var x=[]
         var y=[]

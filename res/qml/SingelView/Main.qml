@@ -45,7 +45,7 @@ Item {
         showWidth: 350
         anchors.bottom: singelWorkArea.bottom
         visible: parent.visible
-        //clickedNeuronID: mainNet.clickedNeuronID
-        //clickedNeuronType: mainNet.clickedNeuronType
+        clickedNeuronID: mainNet.clickedNeuronID
+        clickedNeuronType: mainNet.clickedNeuronType
     }
 }

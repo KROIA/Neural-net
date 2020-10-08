@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "../../js/VisuFunction.js" as VisuFunction
+import QtQuick.Controls 2.15
 Rectangle {
     id:neuron
     property int d: 20
@@ -12,6 +13,7 @@ Rectangle {
     property variant input: Qt.point(0,0)
     property variant output: Qt.point(0,0)
     property int layoutId: 0
+    property bool inputEnable: false
     NeuronData{
         id:dataNeuron
     }
@@ -38,9 +40,10 @@ Rectangle {
         if(visuModus===def.functionVisu) return neuronColor
         else dataNeuron.neuronValue===0 ? VisuFunction.color(transparent,"f5f5f5"):Qt.lighter(neuronColor,(1-Math.abs(dataNeuron.neuronValue-0.1))*5)
 
-    Text {
-        visible: (parent.d>10)
 
+
+    Text {
+        visible: (parent.d>10)&&!inputEnable
 
         font.pixelSize: parent.d*0.15
         horizontalAlignment: Text.AlignHCenter
@@ -59,8 +62,9 @@ Rectangle {
         id:mouseArea
         anchors.fill: parent
         enabled: netItem.neuronClickEnable
-        onClicked: {clickedNeuron(dataNeuron.typeId,dataNeuron.type)
-
+        onClicked: {
+            clickedNeuron(dataNeuron.typeId,dataNeuron.type)
+            neuronInput.focus=true
         }
         drag {
                 target: if(movable) return parent
@@ -89,5 +93,43 @@ Rectangle {
 
         property bool dragActive: drag.active
     }
+    Text {
 
+        visible: (parent.d>10)&&inputEnable
+
+        font.pixelSize: parent.d*0.15
+        horizontalAlignment: Text.AlignHCenter
+        text: if(dataNeuron.type>def.noneType) return  "ID:"+dataNeuron.neuronID
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 8
+        anchors.bottom: neuronInput.top
+        color:Math.abs(dataNeuron.neuronValue)>0.75&&netItem.visuIndex!=def.functionVisu ? "white":"black"
+
+    }
+    TextField{
+        id:neuronInput
+        visible: (parent.d>10)&&inputEnable
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        width:neuron.width* 0.8
+        height:neuron.height*0.3
+        validator: DoubleValidator  {bottom: -10000; top: 10000}
+        font.pixelSize: parent.d*0.2
+        onTextChanged:{
+            netListVisu.changeInput(dataNeuron.netId,dataNeuron.neuronID,parseFloat(text))
+        }
+    }
+    Text {
+
+        visible: (parent.d>10)&&inputEnable
+
+        font.pixelSize: parent.d*0.15
+        horizontalAlignment: Text.AlignHCenter
+        text: if(dataNeuron.type>def.noneType) return  Math.round(dataNeuron.neuronValue*10000)/10000
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 8
+        anchors.top: neuronInput.bottom
+        color:Math.abs(dataNeuron.neuronValue)>0.75&&netItem.visuIndex!=def.functionVisu ? "white":"black"
+
+    }
 }

@@ -41,15 +41,11 @@ Shape {
                         else if(Math.abs(weight)*con.d*0.1>maxWidth) return maxWidth
                         else return Math.abs(weight)*con.d*0.1
 
-           startX:{
-               //console.debug("Start ",getTypeString(source.type),source.typeId )
-               con.start.x}
+           startX:con.start.x
            startY:con.start.y
            PathLine {
                id:path
-               x: {
-                   //console.debug("End ",getTypeString(destination.type),destination.typeId )
-                   con.end.x}
+               x: con.end.x
                y: con.end.y
            }
          }

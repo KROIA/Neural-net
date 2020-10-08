@@ -8,7 +8,6 @@
         <file>qml/SingelView/SideBar.qml</file>
         <file>qml/SingelView/TopBar.qml</file>
         <file>qml/NetCreater/Main.qml</file>
-        <file>qml/NetCreater/MainArea.qml</file>
         <file>qml/MultiView/Main.qml</file>
         <file>qml/MultiView/TopBar.qml</file>
         <file>qml/IntegratableNet/Main.qml</file>

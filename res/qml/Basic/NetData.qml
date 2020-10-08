@@ -19,6 +19,7 @@ Item {
     property int clickedNeuronType: 0
 
     property bool bias: false
+    property real biasValue:0
     signal updateStructurSignal()
     Component.onCompleted: {
         updateStructur()
@@ -31,6 +32,7 @@ Item {
         hiddenNeuronY=netListVisu.getHiddenY(netId)
         totalHidden=hiddenNeuronX*hiddenNeuronY
         bias=netListVisu.getBias(netId)
+        biasValue=netListVisu.getBiasValue(netId)
         totalConns= netListVisu.getConns(netId)
         updateStructurSignal()
     }

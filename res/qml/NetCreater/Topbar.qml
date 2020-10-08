@@ -11,39 +11,104 @@ Template.TopBar{
     Row {
         anchors.fill:parent
         anchors.margins: 10
-        spacing: 10
+        spacing: 15
         Switch{id:moveSwitch
             text: "moveable"
-            anchors.verticalCenter: parent.verticalCenter
+
         }
-        Button{
+        Column{
+            spacing: 10
             anchors.verticalCenter: parent.verticalCenter
-            text: "add Input"
-            onClicked: {
-                netListVisu.addInput(netId)
+            Button{
+                text: "remove Input"
+                onClicked: {
+                    netListVisu.removeInput(netId)
+                }
+            }
+            Button{
+                text: "add Input"
+                onClicked: {
+                    netListVisu.addInput(netId)
+                }
             }
         }
-        Button{
+        Column{
+            spacing: 10
             anchors.verticalCenter: parent.verticalCenter
-            text: "add HiddenX"
-            onClicked: {
-                netListVisu.addHiddenX(netId)
+            Button{
+                text: "remove HiddenX"
+                onClicked: {
+                    netListVisu.removeHiddenX(netId)
+                }
+            }
+            Button{
+                text: "add HiddenX"
+                onClicked: {
+                    netListVisu.addHiddenX(netId)
+                }
             }
         }
-        Button{
+        Column{
+            spacing: 10
             anchors.verticalCenter: parent.verticalCenter
-            text: "add HiddenY"
-            onClicked: {
-                netListVisu.addHiddenY(netId)
+            Button{
+                text: "remove HiddenY"
+                onClicked: {
+                    netListVisu.removeHiddenY(netId)
+                }
+            }
+            Button{
+                text: "add HiddenY"
+                onClicked: {
+                    netListVisu.addHiddenY(netId)
+                }
             }
         }
-        Button{
+        Column{
+            spacing: 10
             anchors.verticalCenter: parent.verticalCenter
-            text: "add Output"
-            onClicked: {
-                netListVisu.addOutput(netId)
+            Button{
+                text: "remove Output"
+                onClicked: {
+                    netListVisu.removeOutput(netId)
+                }
+            }
+            Button{
+                text: "add Output"
+                onClicked: {
+                    netListVisu.addOutput(netId)
+                }
             }
         }
+        Column{
+            spacing: 10
+            anchors.verticalCenter: parent.verticalCenter
+            Switch{
+                id:biasEnable
+                text: "Bias"
+                onCheckedChanged: {
+                    if(checked){
+                       netListVisu.addBias(topbar.netId)
+                    }
+                    else{
+                       netListVisu.removeBias(topbar.netId)
+
+                    }
+                }
+            }
+            TextField{
+                id:biasValue
+                enabled: biasEnable.checked
+                width: 80
+                text: "1 "
+                validator: DoubleValidator  {bottom: -10000; top: 10000}
+                onTextChanged:{
+                    netListVisu.changeBias(topbar.netId,parseFloat(text))
+                }
+            }
+
+        }
+
     }
 }
 

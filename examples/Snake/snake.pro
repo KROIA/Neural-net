@@ -23,7 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 #DLL_buildPath = bin/64bit/build-Release
-DLL_buildPath = bin/release
+DLL_buildPath = bin/Release/release
 
 
 #-------------------------------------------------------

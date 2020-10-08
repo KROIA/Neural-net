@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
+import "../Basic"
 Item {
     id: element
     Topbar{
@@ -11,13 +12,23 @@ Item {
         netId: net.netId
     }
 
-    MainArea{
+    Net{
         id:net
         anchors.top: topbarCreator.bottom
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         moveable:topbarCreator.moveable
+        onNetIdChanged: {
+            topbarCreator.netId=net.netId
+        }
+        Component.onCompleted: {
+            var a=netListVisu.addNewNet()
+            netId=a
+            net.updateNetStrucVisu(netId)
+            net.updateNetData(netId)
+        }
+        changableInput: true
     }
 }
 

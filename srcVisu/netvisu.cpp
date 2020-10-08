@@ -62,7 +62,7 @@ void NetVisu::setupNetVisu(){
     /*for(int i=0;i<100;i++){
         saveVec.push_back(saveVec[0]);
     }*/
-    db.saveNet((*saveVec));
+    //db.saveNet((*saveVec));
     access  = vector<bool>          (netList->size(),true);
 }
 
@@ -104,7 +104,11 @@ int NetVisu::getHiddenX(const int &netId) {
     if(unsigned(netId)<netList->size()&&access[netId]){
         return int((*netList)[unsigned(netId)]->get_hiddenNeuronsX());
     }
-    return 0;
+    else{
+        if(!access[netId])
+            qDebug()<<"No Access to Net Configuration";
+        return 0;
+    }
 }
 int NetVisu::getHiddenY(const int &netId) {
     if((*netList)[unsigned(netId)]->needsUpdate()){
@@ -114,6 +118,8 @@ int NetVisu::getHiddenY(const int &netId) {
         return int((*netList)[unsigned(netId)]->get_hiddenNeuronsY());
     }
     else{
+        if(!access[netId])
+            qDebug()<<"No Access to Net Configuration";
         return 0;
     }
 }
@@ -125,7 +131,8 @@ int NetVisu::getInputs(const int &netId) {
         return int((*netList)[unsigned(netId)]->get_inputNeurons());
     }
     else{
-
+        if(!access[netId])
+            qDebug()<<"No Access to Net Configuration";
         return 0;
     }
 }
@@ -284,6 +291,7 @@ qreal NetVisu::getBiasValue(const int &netId) {
 int NetVisu::getNetCount(){
     return int(netList->size());
 }
+
 void NetVisu::stopUpdateSlot(Net *p_net){
     for(unsigned i=0;i<netList->size();++i){
         if(p_net==(*netList)[i]){
@@ -392,47 +400,125 @@ void NetVisu::saveRelPos(QVector<qreal> relX, QVector<qreal> relY,int netId){
 }
 
 int NetVisu::addNewNet(){
-    qDebug()<<"new Net Id";
+
     Net* newNet;
     newNet= new Net();
-    newNet->set_hiddenNeuronsX(0);
-    newNet->set_hiddenNeuronsY(0);
+    newNet->set_hiddenNeuronsX(1);
+    newNet->set_hiddenNeuronsY(1);
     newNet->set_bias(false);
     newNet->set_inputNeurons(1);
     newNet->updateNetConfiguration();
-    access.push_back(false);
+    inputCreatorNetValueList= vector<double>(1,0);
+    access.push_back(true);
     if(newNet->get_ptr_allNeurons()->size()>1){
     }
 
     newNet->updateNetConfiguration();
     netList->push_back(newNet);
-    connect((*netList)[netList->size()-1],SIGNAL(accessLock(Net *)),this,SLOT(stopUpdateSlot(Net *)));
-    connect((*netList)[netList->size()-1],SIGNAL(accessUnlock(Net *)),this,SLOT(startUpdateSlot(Net *)));
-    emit updateNetStruc(netList->size()-1);
-    emit newValues(netList->size()-1);
+    connect(newNet,SIGNAL(accessLock(Net *)),this,SLOT(stopUpdateSlot(Net *)));
+    connect(newNet,SIGNAL(accessUnlock(Net *)),this,SLOT(startUpdateSlot(Net *)));
+    //newNet->updateNetConfiguration();
     return int(netList->size()-1);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 void NetVisu::addInput(const int &netId){
     (*netList)[unsigned(netId)]->set_inputNeurons((*netList)[unsigned(netId)]->get_inputNeurons()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
+    inputCreatorNetValueList.push_back(0);
     emit updateNetStruc(netId);
 }
+void NetVisu::removeInput(const int &netId){
+    if((*netList)[unsigned(netId)]->get_inputNeurons()>0){
+        (*netList)[unsigned(netId)]->set_inputNeurons((*netList)[unsigned(netId)]->get_inputNeurons()-1);
+    (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
+    inputCreatorNetValueList.push_back(0);
+    emit updateNetStruc(netId);}
+}
+
 void NetVisu::addHiddenX(const int &netId){
     (*netList)[unsigned(netId)]->set_hiddenNeuronsX((*netList)[unsigned(netId)]->get_hiddenNeuronsX()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
     emit updateNetStruc(netId);
 }
+void NetVisu::removeHiddenX(const int &netId){
+    if((*netList)[unsigned(netId)]->get_hiddenNeuronsX()>0){
+        (*netList)[unsigned(netId)]->set_hiddenNeuronsX((*netList)[unsigned(netId)]->get_hiddenNeuronsX()-1);
+        (*netList)[unsigned(netId)]->updateNetConfiguration();
+        vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+        (*netList)[unsigned(netId)]->set_input(inputVec);
+        emit updateNetStruc(netId);}
+}
+
 void NetVisu::addHiddenY(const int &netId){
     (*netList)[unsigned(netId)]->set_hiddenNeuronsY((*netList)[unsigned(netId)]->get_hiddenNeuronsY()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
     emit updateNetStruc(netId);
 }
+void NetVisu::removeHiddenY(const int &netId){
+    if((*netList)[unsigned(netId)]->get_hiddenNeuronsY()>0){
+        (*netList)[unsigned(netId)]->set_hiddenNeuronsY((*netList)[unsigned(netId)]->get_hiddenNeuronsY()-1);
+        (*netList)[unsigned(netId)]->updateNetConfiguration();
+        vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+        (*netList)[unsigned(netId)]->set_input(inputVec);
+        emit updateNetStruc(netId);}
+}
+
 void NetVisu::addOutput(const int &netId){
     (*netList)[unsigned(netId)]->set_outputNeurons((*netList)[unsigned(netId)]->get_outputNeurons()+1);
     (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
     emit updateNetStruc(netId);
 }
+void NetVisu::removeOutput(const int &netId){
+    if((*netList)[unsigned(netId)]->get_outputNeurons()>0){
+        (*netList)[unsigned(netId)]->set_outputNeurons((*netList)[unsigned(netId)]->get_outputNeurons()-1);
+        (*netList)[unsigned(netId)]->updateNetConfiguration();
+        vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+        (*netList)[unsigned(netId)]->set_input(inputVec);
+        emit updateNetStruc(netId);}
+}
+
+void NetVisu::addBias(const int &netId){
+    (*netList)[unsigned(netId)]->set_bias(true);
+    (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
+    emit updateNetStruc(netId);
+}
+
+void NetVisu::removeBias(const int &netId){
+    (*netList)[unsigned(netId)]->set_bias(false);
+    (*netList)[unsigned(netId)]->updateNetConfiguration();
+    vector<double> inputVec(&inputCreatorNetValueList[0],&inputCreatorNetValueList[(*netList)[unsigned(netId)]->get_inputNeurons()]);
+    (*netList)[unsigned(netId)]->set_input(inputVec);
+        emit updateNetStruc(netId);
+}
+
+void NetVisu::changeBias(const int &netId, double signal){
+    (*netList)[unsigned(netId)]->set_biasValue(signal);
+    (*netList)[unsigned(netId)]->run();
+    emit updateNetStruc(netId);
+}
+void NetVisu::changeInput(const int &netId,int input, double signal){
+    if(input>=0){
+        (*netList)[unsigned(netId)]->set_input(input,signal);
+        inputCreatorNetValueList[input]=signal;
+        (*netList)[unsigned(netId)]->run();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 unsigned NetVisu::getX(int netId ,int id){
     return unsigned(id-int(getY(netId,id)))/(*netList)[unsigned(netId)]->get_hiddenNeuronsY();

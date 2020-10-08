@@ -55,7 +55,7 @@ SaveNetSql::SaveNetSql(string _path ): Sql(SqlType::slqite)
     connOpen();
 
     createDb();
-    qDebug()<<"finished Create";
+    //qDebug()<<"finished Create";
     ////connOpen();
     ////dontClose=false;
 
