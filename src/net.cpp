@@ -94,7 +94,7 @@ unsigned int        Net::get_ID()
 {
     return _ID;
 }
-void                Net::set_lael(const std::string &label)
+void                Net::set_label(const std::string &label)
 {
     _label   = label;
 }
