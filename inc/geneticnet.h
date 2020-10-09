@@ -113,9 +113,9 @@ class GeneticNet
                                     Activation func);
 
         void                    set_netFileName(std::string filename);
-        std::string                 get_netFileName();
+        std::string             get_netFileName();
         void                    set_netFileEnding(std::string fileEnding);
-        std::string                 get_netFileEnding();
+        std::string             get_netFileEnding();
         void                    loadFromNetFile();
         void                    loadFromNetFile(std::string filename);
         void                    loadFromNetFile(std::string filename,std::string fileEnding);
@@ -133,10 +133,7 @@ class GeneticNet
         unsigned int            get_hiddenNeuronsY();
         void                    set_outputNeurons(unsigned int outputs);
         unsigned int            get_outputNeurons();
-        //void                    set_costumNeurons(unsigned int costum);
         unsigned int            get_costumNeurons();
-        //void                    set_costumConnections(unsigned int connections);
-        //void                    set_neurons(unsigned int neurons,unsigned int hiddenNeurons,unsigned int outputNeurons,unsigned int costumNeurons);
 
 
         void                    set_bias(bool enableBias);
@@ -144,7 +141,7 @@ class GeneticNet
         void                    set_enableAverage(bool enableAverage);
         bool                    get_enableAverage();
         void                    set_biasValue(double value);
-        double                   get_biasValue();
+        double                  get_biasValue();
         void                    set_activationFunction(Activation func);
         Activation              get_activationFunction();
         bool                    hasHiddenLayer();
