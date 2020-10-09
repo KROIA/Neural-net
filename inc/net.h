@@ -128,7 +128,7 @@ class Net
 
         void                    set_ID(unsigned int ID);
         unsigned int            get_ID();
-        void                    set_lael(const std::string &label);
+        void                    set_label(const std::string &label);
         const std::string      &get_label() const;
 
         void                    set_inputNeurons(unsigned int inputs);      //update
