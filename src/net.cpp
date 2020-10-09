@@ -1,5 +1,6 @@
 #include "net.h"
 
+const std::string Net::_emptyString = "";
 #ifdef QT_APP
 Net::Net(unsigned int ID,
          QObject *parent)
@@ -78,6 +79,7 @@ Net::~Net()
         }
     }*/
     _inputSignalList.clear();
+    _inputSignalLabelList.clear();
     _hiddenNeuronList.clear();
     _outputNeuronList.clear();
     _costumNeuronList.clear();
@@ -92,6 +94,15 @@ unsigned int        Net::get_ID()
 {
     return _ID;
 }
+void                Net::set_lael(const std::string &label)
+{
+    _label   = label;
+}
+const std::string  &Net::get_label() const
+{
+    return _label;
+}
+
 
 void                Net::set_inputNeurons(unsigned int inputs)
 {
@@ -119,9 +130,61 @@ void                Net::set_inputNeurons(unsigned int inputs)
         _inputs                     = inputs;
     }
 }
+void                Net::set_inputNeuronLabel(const unsigned int &input,const std::string &label)
+{
+    if(_needsConfigurationUpdate)
+    {
+        this->addError(Error("set_inputNeuronLabel(const unsigned int &["+std::to_string(input)+"] , const std::string & \""+label+"\" )",
+                       ErrorMessage::updateNetFirst()));
+        return;
+    }else if(input > _inputs-1)
+    {
+        this->addError(Error("set_inputNeuronLabel(const unsigned int &["+std::to_string(input)+"] , const std::string & \""+label+"\" )",
+                       ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),input,static_cast<unsigned int>(_inputs-1),']')));
+        return;
+    }
+    _inputSignalLabelList[input] = label;
+}
+void                Net::set_inputNeuronLabel(const std::vector<std::string> &labelList)
+{
+    if(_needsConfigurationUpdate)
+    {
+        this->addError(Error("set_inputNeuronLabel(const std::vector<std::string> &labelList)",
+                       ErrorMessage::updateNetFirst()));
+        return;
+    }else if(labelList.size() != _inputs)
+    {
+        this->addError(Error("set_inputNeuronLabel(const std::vector<std::string> &labelList)",
+                       ErrorMessage::outOfRange('[',static_cast<unsigned int>(_inputs-1),
+                                                    static_cast<unsigned int>(labelList.size()),
+                                                    static_cast<unsigned int>(_inputs-1),']')));
+        return;
+    }
+    _inputSignalLabelList = labelList;
+}
+
 unsigned int        Net::get_inputNeurons()
 {
     return _inputs;
+}
+const std::string  &Net::get_inputNeuronLabel(const unsigned int &input)
+{
+    if(_needsConfigurationUpdate)
+    {
+        this->addError(Error("get_inputNeuronLabel(const unsigned int &["+std::to_string(input)+"])",
+                       ErrorMessage::updateNetFirst()));
+        return _emptyString;
+    }else if(input > _inputs-1)
+    {
+        this->addError(Error("get_inputNeuronLabel(const unsigned int &["+std::to_string(input)+"])",
+                       ErrorMessage::outOfRange('[',static_cast<unsigned int>(0),input,static_cast<unsigned int>(_inputs-1),']')));
+        return _emptyString;
+    }
+    return _inputSignalLabelList[input];
+}
+const std::vector<std::string>  &Net::get_inputNeuronLabel() const
+{
+    return _inputSignalLabelList;
 }
 void                Net::set_hiddenNeuronsX(unsigned int hiddenX)
 {
@@ -1177,6 +1240,7 @@ void                Net::updateNetConfiguration()
     _connections        = _connectionList.size() + _costumConnectionList.size();
 
     _inputSignalList.clear();
+    _inputSignalLabelList.clear();
     _hiddenNeuronList.clear();
     _outputNeuronList.clear();
     _costumNeuronList.clear();
@@ -1194,6 +1258,9 @@ void                Net::updateNetConfiguration()
 #endif
 
     _inputSignalList = std::vector<double>(_inputs,0);
+    _inputSignalLabelList = std::vector<std::string> (_inputs,"");
+    for(size_t i=0; i<_inputs; i++)
+        _inputSignalLabelList[i] = "I"+std::to_string(i);
     _hiddenNeuronList = std::vector<Neuron*>(_hiddenNeurons);
     _outputNeuronList = std::vector<Neuron*>(_outputs);
     _costumNeuronList = std::vector<Neuron*>(_costumNeurons);
@@ -1576,6 +1643,8 @@ void Net::init(unsigned int inputs,
     time_t now                  = time(nullptr);
     struct tm *currentTime      = localtime(&now);
     this->set_seed(unsigned(currentTime->tm_min+currentTime->tm_sec+currentTime->tm_sec+clock())+rand()%100);
+
+    _label                      = "";
 
     _activationFunction         = Activation::Sigmoid;
     _inputs                     = NET_MIN_INPUTNEURONS;

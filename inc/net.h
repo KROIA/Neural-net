@@ -1,8 +1,8 @@
 #ifndef NET_H
 #define NET_H
 //              Autor   Alex Krieg
-#define    NET_VERSION "02.06.03"
-//              Datum   04.10.2020
+#define    NET_VERSION "02.06.04"
+//              Datum   09.10.2020
 
 /*
  Some functions may throw errors.
@@ -128,9 +128,15 @@ class Net
 
         void                    set_ID(unsigned int ID);
         unsigned int            get_ID();
+        void                    set_lael(const std::string &label);
+        const std::string      &get_label() const;
 
         void                    set_inputNeurons(unsigned int inputs);      //update
+        void                    set_inputNeuronLabel(const unsigned int &input,const std::string &label);
+        void                    set_inputNeuronLabel(const std::vector<std::string> &labelList);
         unsigned int            get_inputNeurons();
+        const std::string      &get_inputNeuronLabel(const unsigned int &input);
+        const std::vector<std::string> &get_inputNeuronLabel() const;
         void                    set_hiddenNeuronsX(unsigned int hiddenX);   //update
         unsigned int            get_hiddenNeuronsX();
         void                    set_hiddenNeuronsY(unsigned int hiddenY);   //update
@@ -301,6 +307,7 @@ class Net
 
       //  std::vector<double*>                 _ptr_inputSignalList;     // Input of Net
         std::vector<double>                  _inputSignalList;
+        std::vector<std::string>             _inputSignalLabelList;
         //std::vector< std::vector<double> >   _hiddenSignalList;    // Output of hidden neuron x y
         bool                                _hasHiddenLayer;
 
@@ -323,7 +330,8 @@ class Net
         std::vector<Connection>             _costumConnectionList;  //special connections
 
         unsigned int _ID;
-
+        std::string _label;
+        static const std::string _emptyString;
 
 
 #ifdef _DEBUG_NET_TIMING

@@ -1,8 +1,8 @@
 #ifndef NEURON_H
 #define NEURON_H
 //              Autor   Alex Krieg
-#define NEURON_VERSION "02.06.01"
-//              Datum   25.09.2020
+#define NEURON_VERSION "02.06.02"
+//              Datum   09.10.2020
 
 /*
  Some functions may throw errors.
@@ -240,6 +240,21 @@ struct Connection
          */
         NeuronID get_ID();
         /* Returns the NeuronID
+
+          ERROR:
+           | none
+         */
+
+        void set_label(const std::string &label);
+        /* Set a name for the Neuron
+          Parameter:
+           | label: Text to describe this Neuron
+
+          ERROR:
+           | none
+         */
+        const std::string &get_label() const;
+        /* Returns the description text for this Neuron
 
           ERROR:
            | none
@@ -746,7 +761,7 @@ struct Connection
         std::vector<ConnectionDirection>           _inputConnectionDirection_List;
 
         ErrorList _errorList;
-
+        std::string _label;
 
 #if defined(_DEBUG_NEURON_TIMING)
         std::chrono::high_resolution_clock::time_point __debug_timer1;

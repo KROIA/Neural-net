@@ -76,6 +76,14 @@ NeuronID Neuron::get_ID()
 {
     return _ID;
 }
+void Neuron::set_label(const std::string &label)
+{
+    _label = label;
+}
+const std::string &Neuron::get_label() const
+{
+    return _label;
+}
 
 
 void Neuron::set_inputs(unsigned int inputs)
@@ -759,7 +767,7 @@ std::vector<std::string> Neuron::toStringList()
     const std::string newline = "\n";
 
     stringList.push_back("+-----------------------------------------------------+"+newline);
-    stringList.push_back("| "+toIDString(this->_ID)+newline);
+    stringList.push_back("| "+toIDString(this->_ID)+"\tLabel: "+_label+newline);
 
     char buff[50];
     line  = "+-----------------------------------------------------+"+newline;
@@ -958,6 +966,7 @@ void Neuron::init(unsigned int inputs, Activation activationFunction, bool enabl
     this->set_inputs(inputs);
     this->set_activationFunction(activationFunction);
     this->set_enableAverage(enableAverage);
+    this->set_label("N"+std::to_string(_globalNeurons));
    /* } catch (std::runtime_error &e) {
         //error_general("init(unsigned int ["+std::to_string(inputs)+"] , Activation ["+
         //              toActivationString(activationFunction)+"] , bool ["+std::to_string(enableAverage)+"])",e);
